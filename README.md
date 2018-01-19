@@ -1,6 +1,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/spectre-team/spectre-divik/badge)](https://www.codefactor.io/repository/github/spectre-team/spectre-divik)
 [![BCH compliance](https://bettercodehub.com/edge/badge/spectre-team/spectre-divik?branch=master)](https://bettercodehub.com/)
 [![Windows build status](https://ci.appveyor.com/api/projects/status/962q796vgnve968u/branch/master?svg=true)](https://ci.appveyor.com/project/gmrukwa/spectre-divik/branch/master)
+[![Linux build Status](https://travis-ci.org/spectre-team/spectre-divik.svg?branch=master)](https://travis-ci.org/spectre-team/spectre-divik)
 
 ![Spectre](https://user-images.githubusercontent.com/1897842/31115297-0fe2c3aa-a822-11e7-90e6-92ceccf76137.jpg)
 
