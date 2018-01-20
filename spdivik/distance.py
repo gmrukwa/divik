@@ -18,6 +18,7 @@ limitations under the License.
 """
 
 from abc import ABCMeta, abstractmethod
+from enum import Enum
 import numpy as np
 
 
@@ -69,3 +70,26 @@ class DistanceMetric(object, metaclass=ABCMeta):
         assert distances.shape[0] == first.shape[0], message
         assert distances.shape[1] == second.shape[0], message
         return distances
+
+
+class KnownMetric(Enum):
+    braycurtis = "braycurtis"
+    canberra = "canberra"
+    chebyshev = "chebyshev"
+    cityblock = "cityblock"
+    correlation = "correlation"
+    cosine = "cosine"
+    dice = "dice"
+    euclidean = "euclidean"
+    hamming = "hamming"
+    jaccard = "jaccard"
+    kulsinski = "kulsinski"
+    mahalanobis = "mahalanobis"
+    atching = "atching"
+    minkowski = "minkowski"
+    rogerstanimoto = "rogerstanimoto"
+    russellrao = "russellrao"
+    sokalmichener = "sokalmichener"
+    sokalsneath = "sokalsneath"
+    sqeuclidean = "sqeuclidean"
+    yule = "yule"
