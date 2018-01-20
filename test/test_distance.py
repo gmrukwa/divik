@@ -91,3 +91,31 @@ class DistanceMetricTest(unittest.TestCase):
                 self.metric(self.first, self.second)
             mock_distance.return_value = np.array([[0, 0], [0, 0], [0, 0]])
             self.metric(self.first, self.second)
+
+
+class ScipyDistanceTest(unittest.TestCase):
+    def setUp(self):
+        self.metric = dist.ScipyDistance(dist.KnownMetric.euclidean)
+        self.first = np.array([[1], [2], [3]])
+        self.second = np.array([[4], [5]])
+
+    def test_returns_2d_intradistances(self):
+        distances = self.metric._intradistance(self.first)
+        self.assertEqual(2, len(distances.shape))
+
+    def test_returns_intradistances_for_all_pairs(self):
+        distances = self.metric._intradistance(self.first)
+        self.assertEqual(self.first.size**2, distances.size)
+
+    def test_returns_square_shaped_intradistances(self):
+        distances = self.metric._intradistance(self.first)
+        self.assertEqual(distances.shape[0], distances.shape[1])
+
+    def test_returns_2d_interdistances(self):
+        distances = self.metric._interdistance(self.first, self.second)
+        self.assertEqual(2, len(distances.shape))
+
+    def test_returns_result_shaped_by_input_sizes(self):
+        distances = self.metric._interdistance(self.first, self.second)
+        self.assertEqual(self.first.shape[0], distances.shape[0])
+        self.assertEqual(self.second.shape[0], distances.shape[1])

@@ -20,6 +20,7 @@ limitations under the License.
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 import numpy as np
+import scipy.spatial.distance as dist
 
 
 class DistanceMetric(object, metaclass=ABCMeta):
@@ -93,3 +94,34 @@ class KnownMetric(Enum):
     sokalsneath = "sokalsneath"
     sqeuclidean = "sqeuclidean"
     yule = "yule"
+
+
+class ScipyDistance(DistanceMetric):
+    """DistanceMetric based on scipy distances"""
+    def __init__(self, name: KnownMetric, **kwargs):
+        """
+        @param name: name of the metric used
+        @param kwargs: optional arguments specified in scipy for that
+        specific metric
+        """
+        self._name = name.value
+        self._optionals = kwargs
+
+    def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
+        """Compute distances between all pairs (pdist)
+
+        @param matrix2d: 2D matrix with points in rows
+        @return: 2D matrix of pairwise distances
+        """
+        vector = dist.pdist(matrix2d, metric=self._name, **self._optionals)
+        return dist.squareform(vector)
+
+    def _interdistance(self, first: np.ndarray, second: np.ndarray) -> \
+            np.ndarray:
+        """Compute distances between all pairs of points between arrays (cdist)
+
+        @param first: 2D matrix with points in rows
+        @param second: 2D matrix with points in rows
+        @return: 2D matrix of pairwise distances
+        """
+        return dist.cdist(first, second, metric=self._name, **self._optionals)
