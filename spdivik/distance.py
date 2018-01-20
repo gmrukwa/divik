@@ -17,4 +17,55 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+from abc import ABCMeta, abstractmethod
 import numpy as np
+
+
+class DistanceMetric(object, metaclass=ABCMeta):
+    """Measures distance between points in multidimensional space"""
+    @abstractmethod
+    def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
+        """Compute distances between all pairs of points in the matrix
+
+        @param matrix2d: 2D matrix with points in rows
+        @return: 2D matrix with distances between points.
+        result[i, j] describes distance from matrix2d[i] to matrix2d[j]
+        """
+        pass
+
+    @abstractmethod
+    def _interdistance(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
+        """Compute distances between all pairs of points between matrices
+
+        @param first: 2D matrix with points in rows
+        @param second: 2D matrix with points in rows
+        @return: 2D matrix with distances between points.
+        result[i, j] describes distance from first[i] to second[j]
+        """
+        pass
+
+    def __call__(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
+        """Compute distances between points
+
+        Distances between points in all pairs between both matrices.
+
+        result[i, j] describes distance from first[i] to second[j]
+
+        @param first: 2D matrix with points in rows
+        @param second: 2D matrix with points in rows
+        @return: 2D matrix with distances between points
+        """
+        if not isinstance(first, np.ndarray) or len(first.shape) != 2:
+            raise ValueError("first matrix must be 2D np.ndarray")
+        if not isinstance(second, np.ndarray) or len(second.shape) != 2:
+            raise ValueError("second matrix must be 2D np.ndarray")
+        if second is first:
+            distances = self._intradistance(first)
+        else:
+            distances = self._interdistance(first, second)
+        message = self.__class__.__name__ + "breaks distance metric contract"
+        assert isinstance(distances, np.ndarray), message
+        assert len(distances.shape) == 2, message
+        assert distances.shape[0] == first.shape[0], message
+        assert distances.shape[1] == second.shape[0], message
+        return distances
