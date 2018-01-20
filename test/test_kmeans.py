@@ -76,3 +76,27 @@ class LabelingTest(unittest.TestCase):
         smaller = data[:, :-1]
         with self.assertRaises(ValueError):
             self.label(smaller, self.centroids)
+
+
+class CentroidRedefinitionTest(unittest.TestCase):
+    def setUp(self):
+        self.labeling = np.array([0, 0, 0, 1, 1])
+        self.simple_data = np.array([
+            [1, 2, 3],
+            [3, 2, 1],
+            [2, 2, 2],
+            [10, 10, 10],
+            [40, 40, 40]
+        ])
+        self.expected_centroids = np.array([
+            [2, 2, 2],
+            [25, 25, 25]
+        ])
+
+    def test_new_centroids_are_means_of_observations_in_cluster(self):
+        centroids = km.redefine_centroids(self.simple_data, self.labeling)
+        np.testing.assert_equal(centroids, self.expected_centroids)
+
+    def test_throws_on_labels_and_data_length_mismatch(self):
+        with self.assertRaises(ValueError):
+            km.redefine_centroids(self.simple_data[:-1], self.labeling)

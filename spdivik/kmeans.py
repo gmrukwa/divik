@@ -82,3 +82,21 @@ class Labeling(object):
                              % (data.shape[1], centroids.shape[1]))
         distances = self.distance_metric(data, centroids)
         return np.argmin(distances, axis=1)
+
+
+def redefine_centroids(data: Data, labeling: Labels) -> Centroids:
+    """Recompute centroids in data for given labeling
+
+    @param data: observations
+    @param labeling: partition of dataset into groups
+    @return: centroids
+    """
+    if data.shape[0] != labeling.size:
+        raise ValueError("Each observation must have label specified. Number "
+                         "of labels: %i, number of observations: %i."
+                         % (labeling.size, data.shape[0]))
+    labels = np.unique(labeling)
+    centroids = np.nan * np.zeros((len(labels), data.shape[1]))
+    for label in labels:
+        centroids[label] = np.mean(data[labeling == label], axis=0)
+    return centroids
