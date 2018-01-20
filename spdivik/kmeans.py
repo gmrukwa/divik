@@ -1,5 +1,6 @@
 """Numpy-based implementation of k-means algorithm"""
 from abc import ABCMeta, abstractmethod
+from typing import Tuple
 
 import numpy as np
 
@@ -100,3 +101,32 @@ def redefine_centroids(data: Data, labeling: Labels) -> Centroids:
     for label in labels:
         centroids[label] = np.mean(data[labeling == label], axis=0)
     return centroids
+
+
+class KMeans(object):
+    """K-means clustering"""
+    def __init__(self, labeling: Labeling, initialize: Initialization,
+                 number_of_iterations: int=100):
+        """
+        @param labeling: labeling method
+        @param initialize: initialization method
+        @param number_of_iterations: number of iterations
+        """
+        self.labeling = labeling
+        self.initialize = initialize
+        self.number_of_iterations = number_of_iterations
+
+    def __call__(self, data: Data, number_of_clusters: int) \
+            -> Tuple[Labels, Centroids]:
+        if not isinstance(data, np.ndarray) or len(data.shape) != 2:
+            raise ValueError("data is expected to be 2D np.array")
+        centroids = self.initialize(data, number_of_clusters)
+        old_labels = np.nan * np.zeros((data.shape[0],))
+        labels = self.labeling(data, centroids)
+        for _ in range(self.number_of_iterations):
+            if np.all(labels == old_labels):
+                break
+            old_labels = labels
+            centroids = redefine_centroids(data, old_labels)
+            labels = self.labeling(data, centroids)
+        return labels, centroids
