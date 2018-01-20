@@ -59,3 +59,26 @@ class ExtremeInitialization(Initialization):
             centroids[i] = data[np.argmax(distances)]
 
         return centroids
+
+
+class Labeling(object):
+    """Labels observations by closest centroids"""
+    def __init__(self, distance_metric: dist.DistanceMetric):
+        """
+        @param distance_metric: distance metric for estimation of closest
+        """
+        self.distance_metric = distance_metric
+
+    def __call__(self, data: Data, centroids: Centroids) -> Labels:
+        """Find closest centroids
+
+        @param data: observations in rows
+        @param centroids: centroids in rows
+        @return: vector of labels of centroids closest to points
+        """
+        if data.shape[1] != centroids.shape[1]:
+            raise ValueError("Dimensionality of data and centroids must be "
+                             "equal. Was %i and %i"
+                             % (data.shape[1], centroids.shape[1]))
+        distances = self.distance_metric(data, centroids)
+        return np.argmin(distances, axis=1)

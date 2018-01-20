@@ -53,3 +53,26 @@ class ExtremeInitializationTest(unittest.TestCase):
         centroids = self.initialize(data, 3)
         np.testing.assert_equal(centroids[1], data[4])
         np.testing.assert_equal(centroids[2], data[2])
+
+
+class LabelingTest(unittest.TestCase):
+    def setUp(self):
+        self.label = km.Labeling(dist.ScipyDistance(dist.KnownMetric.euclidean))
+        self.centroids = np.array([
+            [1, 1, 1, 1],
+            [1000, 500000, -400000, -7000]
+        ])
+
+    def test_assigns_observations_to_closest_centroid(self):
+        labels = self.label(data, self.centroids)
+        np.testing.assert_equal(labels[:-1], 0)
+        self.assertEqual(labels[-1], 1)
+
+    def test_throws_with_no_centroids(self):
+        with self.assertRaises(ValueError):
+            self.label(data, np.empty((0, data.shape[1])))
+
+    def test_throws_on_centroids_and_data_dimensionality_mismatch(self):
+        smaller = data[:, :-1]
+        with self.assertRaises(ValueError):
+            self.label(smaller, self.centroids)
