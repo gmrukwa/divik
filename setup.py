@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='spectre-divik',
-    version='0.0.0',
+    version='0.1.0',
     description='Divisive iK-means algorithm implementation',
     url='https://github.com/spectre-team/spectre-divik',
     author='Grzegorz Mrukwa',
@@ -29,6 +29,7 @@ setup(
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
         'numpy>=1.12.1',
+        'scipy>=0.19.1',
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
