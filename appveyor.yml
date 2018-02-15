@@ -1,4 +1,4 @@
-version: 0.1.0.{build}
+version: 0.2.0.{build}
 skip_tags: true
 skip_branch_with_pr: true
 environment:
@@ -50,6 +50,8 @@ install:
     pip --version
 
     pip install -r requirements.txt
+
+    pip freeze
 build_script:
 - cmd: python setup.py build
 test_script:
