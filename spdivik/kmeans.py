@@ -5,11 +5,11 @@ from typing import Tuple
 import numpy as np
 
 import spdivik.distance as dist
-
-
-Labels = np.ndarray
-Data = np.ndarray
-Centroids = np.ndarray
+from spdivik.types import \
+    IntLabels, \
+    Data, \
+    Centroids, \
+    SegmentationMethod
 
 
 class Initialization(object, metaclass=ABCMeta):
@@ -70,7 +70,7 @@ class Labeling(object):
         """
         self.distance_metric = distance_metric
 
-    def __call__(self, data: Data, centroids: Centroids) -> Labels:
+    def __call__(self, data: Data, centroids: Centroids) -> IntLabels:
         """Find closest centroids
 
         @param data: observations in rows
@@ -85,7 +85,7 @@ class Labeling(object):
         return np.argmin(distances, axis=1)
 
 
-def redefine_centroids(data: Data, labeling: Labels) -> Centroids:
+def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
     """Recompute centroids in data for given labeling
 
     @param data: observations
@@ -103,7 +103,7 @@ def redefine_centroids(data: Data, labeling: Labels) -> Centroids:
     return centroids
 
 
-class KMeans(object):
+class KMeans(SegmentationMethod):
     """K-means clustering"""
     def __init__(self, labeling: Labeling, initialize: Initialization,
                  number_of_iterations: int=100):
@@ -117,7 +117,7 @@ class KMeans(object):
         self.number_of_iterations = number_of_iterations
 
     def __call__(self, data: Data, number_of_clusters: int) \
-            -> Tuple[Labels, Centroids]:
+            -> Tuple[IntLabels, Centroids]:
         if not isinstance(data, np.ndarray) or len(data.shape) != 2:
             raise ValueError("data is expected to be 2D np.array")
         centroids = self.initialize(data, number_of_clusters)
