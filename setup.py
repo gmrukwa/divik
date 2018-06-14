@@ -29,6 +29,7 @@ setup(
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
         'numpy>=1.12.1',
+        'pandas>=0.23.1',
         'scipy>=0.19.1',
         'tqdm>=4.11.2',
         'typing>=3.6.2'
