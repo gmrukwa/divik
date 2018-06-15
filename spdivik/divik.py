@@ -70,7 +70,9 @@ def divik(split: SegmentationMethod, feature_selectors: List[FilteringMethod],
     filters, thresholds = _make_filters_and_thresholds(feature_selectors, data)
     filtered_data = _select_features(filters, data)
     partition, centroids = split(filtered_data)
-    recurse = partial(divik, split, feature_selectors, stop_condition)
+    recurse = partial(divik, split=split,
+                      feature_selectors=feature_selectors,
+                      stop_condition=stop_condition)
     subregions = [
         recurse(data[partition == cluster])
         for cluster in np.unique(partition)
