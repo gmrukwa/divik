@@ -37,8 +37,8 @@ class FilteringMethod:
         return self.strategy(data)
 
 
-def make_filters_and_thresholds(feature_selectors: List[FilteringMethod], data: Data) \
-        -> Tuple[Filters, Thresholds]:
+def _make_filters_and_thresholds(feature_selectors: List[FilteringMethod],
+                                 data: Data) -> Tuple[Filters, Thresholds]:
     """Estimate filters and thresholds with strategies for given data"""
     filters, thresholds = {}, {}
     for selector in feature_selectors:
@@ -47,7 +47,7 @@ def make_filters_and_thresholds(feature_selectors: List[FilteringMethod], data: 
     return filters, thresholds
 
 
-def select_features(filters: Filters, data: Data) -> Data:
+def _select_features(filters: Filters, data: Data) -> Data:
     """Select estimated features for given data"""
     selection = np.ones((1, data.shape[1]), dtype=bool)
     for selector in filters.values():
@@ -67,8 +67,8 @@ def divik(split: SegmentationMethod, feature_selectors: List[FilteringMethod],
     """
     if stop_condition(data):
         return None
-    filters, thresholds = make_filters_and_thresholds(feature_selectors, data)
-    filtered_data = select_features(filters, data)
+    filters, thresholds = _make_filters_and_thresholds(feature_selectors, data)
+    filtered_data = _select_features(filters, data)
     partition, centroids = split(filtered_data)
     recurse = partial(divik, split, feature_selectors, stop_condition)
     subregions = [
