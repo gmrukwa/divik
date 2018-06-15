@@ -17,6 +17,8 @@ Score = Callable[[Data, IntLabels, Centroids], float]
 
 def dunn(data: Data, labels: IntLabels, centroids: Centroids,
          distance: DistanceMetric) -> float:
+    if centroids.shape[0] == 1:
+        raise ValueError('At least 2 clusters are required.')
     clusters = pd.DataFrame(data).groupby(labels).apply(lambda cluster: cluster.values)
     intercluster = distance(centroids, centroids)
     intercluster = np.min(intercluster[intercluster != 0])
