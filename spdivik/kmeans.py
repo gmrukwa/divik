@@ -42,6 +42,8 @@ class ExtremeInitialization(Initialization):
             raise ValueError("Number of centroids (%i) greater than number of "
                              "observations (%i)."
                              % (number_of_centroids, data.shape[0]))
+        if number_of_centroids < 1:
+            raise ValueError('number_of_centroids({0}) < 1'.format(number_of_centroids))
         features = data.T
         assumed_ys = features[0]
         modelled_xs = np.hstack([np.ones((data.shape[0], 1)),
@@ -120,6 +122,8 @@ class KMeans(SegmentationMethod):
             -> Tuple[IntLabels, Centroids]:
         if not isinstance(data, np.ndarray) or len(data.shape) != 2:
             raise ValueError("data is expected to be 2D np.array")
+        if number_of_clusters < 1:
+            raise ValueError("number_of_clusters({0}) < 1".format(number_of_clusters))
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
