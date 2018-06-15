@@ -55,14 +55,15 @@ def _select_features(filters: Filters, data: Data) -> Data:
     return data[:, selection]
 
 
-def divik(split: SegmentationMethod, feature_selectors: List[FilteringMethod],
-          stop_condition: StopCondition, data: Data) -> Optional[DivikResult]:
+def divik(data: Data, split: SegmentationMethod,
+          feature_selectors: List[FilteringMethod],
+          stop_condition: StopCondition) -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework
 
+    @param data: dataset to segment
     @param split: unsupervised method of segmentation into some clusters
     @param feature_selectors: list of methods for feature selection
     @param stop_condition: criterion stating whether it is reasonable to split
-    @param data: dataset to segment
     @return: result of segmentation if not stopped
     """
     if stop_condition(data):
