@@ -1,8 +1,6 @@
 from functools import partial
 from typing import Callable, Optional
 
-from functional import pipe
-
 import spdivik.distance as dst
 import spdivik.divik as dv
 import spdivik.feature_selection as fs
