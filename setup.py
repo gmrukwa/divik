@@ -28,8 +28,10 @@ setup(
     packages=find_packages(exclude=['test']),
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
+        '-e git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers',
+        'matlabruntimeforpython===R2016b',
         'numpy>=1.12.1',
-        'pandas>=0.23.1',
+        'pandas<=0.21.0',
         'scipy>=0.19.1',
         'tqdm>=4.11.2',
         'typing>=3.6.2'
