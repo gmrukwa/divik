@@ -49,7 +49,7 @@ def _make_filters_and_thresholds(feature_selectors: List[FilteringMethod],
 
 def _select_features(filters: Filters, data: Data) -> Data:
     """Select estimated features for given data"""
-    selection = np.ones((1, data.shape[1]), dtype=bool)
+    selection = np.ones((data.shape[1],), dtype=bool)
     for selector in filters.values():
         selection = np.logical_and(selection, selector)
     return data[:, selection]
