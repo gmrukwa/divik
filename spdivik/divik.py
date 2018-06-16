@@ -9,7 +9,7 @@ from spdivik.types import \
     IntLabels, \
     BoolFilter, \
     Data, \
-    SegmentationMethod, \
+    SelfScoringSegmentation, \
     StopCondition, \
     Filter
 
@@ -55,7 +55,7 @@ def _select_features(filters: Filters, data: Data) -> Data:
     return data[:, selection]
 
 
-def divik(data: Data, split: SegmentationMethod,
+def divik(data: Data, split: SelfScoringSegmentation,
           feature_selectors: List[FilteringMethod],
           stop_condition: StopCondition) -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework
@@ -70,7 +70,7 @@ def divik(data: Data, split: SegmentationMethod,
         return None
     filters, thresholds = _make_filters_and_thresholds(feature_selectors, data)
     filtered_data = _select_features(filters, data)
-    partition, centroids = split(filtered_data)
+    partition, centroids, quality = split(filtered_data)
     recurse = partial(divik, split=split,
                       feature_selectors=feature_selectors,
                       stop_condition=stop_condition)
@@ -80,7 +80,7 @@ def divik(data: Data, split: SegmentationMethod,
     ]
     return DivikResult(
         centroids=centroids,
-        quality=float('nan'),
+        quality=quality,
         partition=partition,
         filters=filters,
         thresholds=thresholds,

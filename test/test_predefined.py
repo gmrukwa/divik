@@ -35,3 +35,8 @@ class TestProteomic(unittest.TestCase):
         self.assertIn('amplitude', some_result.thresholds)
         self.assertIn('amplitude', some_result.filters)
         self.assertNotIn('amplitude', some_result.subregions[0].thresholds)
+
+    def test_scores_segmentation(self):
+        divik = pre.proteomic(minimal_split_segment=10)
+        some_result = divik(self.data)
+        self.assertFalse(np.isnan(some_result.quality))

@@ -9,6 +9,7 @@ from spdivik.types import \
     Centroids, \
     Data, \
     IntLabels, \
+    Quality, \
     SegmentationMethod
 
 
@@ -44,7 +45,7 @@ class Optimizer:
         self.parameter_names, self.parameter_sets = zip(*parameters)
         assert all(len(col) > 0 for col in self.parameter_sets)
 
-    def __call__(self, data: Data) -> Tuple[IntLabels, Centroids]:
+    def __call__(self, data: Data) -> Tuple[IntLabels, Centroids, Quality]:
         best_score = -np.inf
         best_result = None
         for parameter_set in product(*self.parameter_sets):
@@ -56,4 +57,4 @@ class Optimizer:
             score = self.score(data, *result)
             if score > best_score:
                 best_score, best_result = score, result
-        return best_result
+        return best_result + (best_score,)

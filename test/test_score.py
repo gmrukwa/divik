@@ -52,7 +52,7 @@ class TestOptimizer(unittest.TestCase):
         result = self.optimizer(self.data)
         expected = self.segmentation_method(self.data,
                                             k=self.best_parameter_value)
-        self.assertSequenceEqual(result, expected)
+        self.assertSequenceEqual(result[:2], expected)
         unexpected = self.segmentation_method(self.data,
                                               k=self.best_parameter_value - 1)
         assert any(left is right for left, right in zip(expected, unexpected))
