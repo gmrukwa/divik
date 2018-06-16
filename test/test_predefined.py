@@ -5,7 +5,7 @@ import numpy as np
 import spdivik.predefined as pre
 
 
-class TestProteomic(unittest.TestCase):
+class DataBoundTestCase(unittest.TestCase):
     def setUp(self):
         np.random.seed(0)
         self.data = np.random.randn(300, 100)
@@ -19,6 +19,8 @@ class TestProteomic(unittest.TestCase):
         idx = np.random.randint(0, 300, 100)
         self.data[tuple(idx), :] += 100
 
+
+class TestProteomic(DataBoundTestCase):
     def test_constructs_runnable_pipeline(self):
         divik = pre.proteomic(minimal_split_segment=10)
         some_result = divik(self.data)
