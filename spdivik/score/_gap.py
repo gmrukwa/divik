@@ -34,7 +34,7 @@ def _dispersion_of_random_sample(seed: int,
 @seeded(wrapped_requires_seed=True)
 def gap(data: Data, labels: IntLabels, centroids: Centroids,
         distance: DistanceMetric, split: SegmentationMethod,
-        seed: int=0, n_trials: int = 100) -> float:
+        seed: int=0, n_trials: int = 100, pool: Pool=None) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
     compute_dispersion = partial(_dispersion_of_random_sample,
@@ -43,7 +43,9 @@ def gap(data: Data, labels: IntLabels, centroids: Centroids,
                                  ranges=ranges,
                                  split=split,
                                  distance=distance)
-    with Pool() as pool:
+    if pool is None:
+        dispersions = list(map(compute_dispersion, range(seed, seed + n_trials)))
+    else:
         dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
     reference = _dispersion(data, labels, centroids, distance)
     gap_value = np.log(np.mean(dispersions)) - np.log(reference)
