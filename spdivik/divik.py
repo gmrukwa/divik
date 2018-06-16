@@ -66,10 +66,10 @@ def divik(data: Data, split: SelfScoringSegmentation,
     @param stop_condition: criterion stating whether it is reasonable to split
     @return: result of segmentation if not stopped
     """
-    if stop_condition(data):
-        return None
     filters, thresholds = _make_filters_and_thresholds(feature_selectors, data)
     filtered_data = _select_features(filters, data)
+    if stop_condition(filtered_data):
+        return None
     partition, centroids, quality = split(filtered_data)
     recurse = partial(divik, split=split,
                       feature_selectors=feature_selectors,
