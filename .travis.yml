@@ -1,13 +1,18 @@
 language: python
 python:
 - '3.4'
-- '3.5'
-- '3.6'
+#- '3.5'
+#- '3.6'
+services:
+- docker
+#install:
+#- pip install -r requirements.txt
+#- pip freeze
 install:
-- pip install -r requirements.txt
-- pip freeze
+- echo Disabled install scripts!
 script:
-- python -m unittest discover
+#- python -m unittest discover
+- docker build -t spdivik-test-image .
 notifications:
   webhooks:
     urls:
