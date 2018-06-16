@@ -17,10 +17,22 @@ def _ensure_engine():
     return _engine
 
 
-def find_thresholds(values: np.ndarray, max_components: int=10) -> np.ndarray:
+class MatlabError(Exception):
+    pass
+
+
+def find_thresholds(values: np.ndarray, max_components: int=10,
+                    throw_on_engine_error: bool=True) -> np.ndarray:
     engine = _ensure_engine()
     values = matlab.double([[element] for element in values.ravel()])
-    thresholds = engine.fetch_thresholds(values,
-                                         'MaxComponents', float(max_components),
-                                         nargout=1)
+    try:
+        thresholds = engine.fetch_thresholds(values,
+                                             'MaxComponents',
+                                             float(max_components),
+                                             nargout=1)
+    except Exception as ex:
+        if throw_on_engine_error:
+            raise MatlabError() from ex
+        else:
+            return np.array([])
     return np.array(thresholds).ravel()

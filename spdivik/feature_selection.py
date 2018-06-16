@@ -24,7 +24,7 @@ def select_by(data: ty.Data, statistic: Statistic, discard_up_to: int = -1,
     scores = statistic(data)
     if not preserve_topmost:
         scores = -scores
-    thresholds = ml.find_thresholds(scores)
+    thresholds = ml.find_thresholds(scores, throw_on_engine_error=False)
     desired_thresholds = thresholds[:discard_up_to]
     for threshold in reversed(desired_thresholds):
         selected = scores >= threshold
