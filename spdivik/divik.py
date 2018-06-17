@@ -34,31 +34,31 @@ class FilteringMethod:
         self.name = name
         self.strategy = strategy
 
-    def __call__(self, data: Data):
-        return self.strategy(data)
+    def __call__(self, data: Data, *args, **kwargs):
+        return self.strategy(data, *args, **kwargs)
 
 
-def _make_filters_and_thresholds(feature_selectors: List[FilteringMethod],
-                                 data: Data) -> Tuple[Filters, Thresholds]:
-    """Estimate filters and thresholds with strategies for given data"""
+def _select_sequentially(feature_selectors: List[FilteringMethod], data: Data,
+                         min_features_percentage: float=.05) \
+                         -> Tuple[Filters, Thresholds, Data]:
     filters, thresholds = {}, {}
+    data_dimensionality = data.shape[1]
+    minimal_dimensionality = int(min_features_percentage * data_dimensionality)
+    current_selection = np.ones((data.shape[1],), dtype=bool)
     for selector in feature_selectors:
         key = selector.name
-        filters[key], thresholds[key] = selector(data)
-    return filters, thresholds
-
-
-def _select_features(filters: Filters, data: Data) -> Data:
-    """Select estimated features for given data"""
-    selection = np.ones((data.shape[1],), dtype=bool)
-    for selector in filters.values():
-        selection = np.logical_and(selection, selector)
-    return data[:, selection]
+        filters[key], thresholds[key] = selector(
+            data, min_features=minimal_dimensionality)
+        current_selection[current_selection] = filters[key]
+        filters[key] = current_selection
+        data = data[:, filters[key]]
+    return filters, thresholds, data
 
 
 def divik(data: Data, split: SelfScoringSegmentation,
           feature_selectors: List[FilteringMethod],
           stop_condition: StopCondition,
+          min_features_percentage: float=.05,
           progress_reporter: tqdm=None) -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework
 
@@ -66,11 +66,12 @@ def divik(data: Data, split: SelfScoringSegmentation,
     @param split: unsupervised method of segmentation into some clusters
     @param feature_selectors: list of methods for feature selection
     @param stop_condition: criterion stating whether it is reasonable to split
+    @param min_features_percentage: minimal percentage of preserved features
     @param progress_reporter: optional tqdm instance to report progress
     @return: result of segmentation if not stopped
     """
-    filters, thresholds = _make_filters_and_thresholds(feature_selectors, data)
-    filtered_data = _select_features(filters, data)
+    filters, thresholds, filtered_data = _select_sequentially(
+        feature_selectors, data, min_features_percentage)
     if stop_condition(filtered_data):
         if progress_reporter is not None:
             progress_reporter.update(data.shape[0])

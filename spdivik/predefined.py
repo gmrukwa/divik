@@ -44,16 +44,14 @@ _AMPLITUDE_FILTER = dv.FilteringMethod(
             statistic=fs.amplitude,
             discard_up_to=1,
             # discarding only lowest component, if possible
-            preserve_topmost=True,
-            min_features_percentage=.05))
+            preserve_topmost=True))
 _VARIANCE_FILTER = dv.FilteringMethod(
     'variance',
     partial(fs.select_by,
             statistic=fs.variance,
             # selecting only most varying component, if possible
             discard_up_to=-1,
-            preserve_topmost=True,
-            min_features_percentage=.05))
+            preserve_topmost=True))
 
 
 class _PrefilteringWrapper:
@@ -78,7 +76,8 @@ def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
                     split=best_kmeans_with_dunn,
                     feature_selectors=[_VARIANCE_FILTER],
                     stop_condition=stop_for_small_size,
-                    progress_reporter=progress_reporter)
+                    progress_reporter=progress_reporter,
+                    min_features_percentage=.05)
     prefiltered_divik = _PrefilteringWrapper(prefilter=_AMPLITUDE_FILTER,
                                              divik=divik)
     return prefiltered_divik
@@ -98,5 +97,6 @@ def master(gap_trials: int=100, iters_limit: int = 100, pool: Pool=None,
                     split=best_kmeans_with_dunn,
                     feature_selectors=[_AMPLITUDE_FILTER, _VARIANCE_FILTER],
                     stop_condition=stop_if_split_makes_no_sense,
-                    progress_reporter=progress_reporter)
+                    progress_reporter=progress_reporter,
+                    min_features_percentage=.05)
     return divik
