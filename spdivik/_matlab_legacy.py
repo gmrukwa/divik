@@ -1,10 +1,40 @@
+from contextlib import contextmanager
 import os
+import platform
 
 import numpy as np
 
-os.environ['PATH'] = os.environ['PATH'].lower()
-import MatlabAlgorithms.MsiAlgorithms as msi
-import matlab
+
+_MATLAB_SEARCH_PATHS = \
+    ":/usr/local/MATLAB/MATLAB_Runtime/v91/runtime/glnxa64" + \
+    ":/usr/local/MATLAB/MATLAB_Runtime/v91/bin/glnxa64" + \
+    ":/usr/local/MATLAB/MATLAB_Runtime/v91/sys/os/glnxa64" + \
+    ":/usr/local/MATLAB/MATLAB_Runtime/v91/sys/opengl/lib/glnxa64"
+
+
+@contextmanager
+def _matlab_paths():
+    local_system = platform.system()
+    if local_system == 'Linux':
+        old_env = os.environ.get('LD_LIBRARY_PATH', '')
+        os.environ['LD_LIBRARY_PATH'] = old_env + _MATLAB_SEARCH_PATHS
+    elif local_system == 'Darwin':
+        raise NotImplementedError('OSX hosts are not supported.')
+    else:
+        old_path = os.environ['PATH']
+        os.environ['PATH'] = os.environ['PATH'].lower()
+    try:
+        yield
+    finally:
+        if local_system == 'Linux':
+            os.environ['LD_LIBRARY_PATH'] = old_env
+        elif local_system != 'Darwin':
+            os.environ['PATH'] = old_path
+
+
+with _matlab_paths():
+    import MatlabAlgorithms.MsiAlgorithms as msi
+    import matlab
 
 
 _engine = None
