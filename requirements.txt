@@ -1,7 +1,6 @@
 matlabruntimeforpython===R2016b
-numpy>=1.12.1
-pandas==0.21.0
+numpy>=0.12.1
+pandas<0.21
 scipy>=0.19.1
-setuptools>=27.2.0
 tqdm>=4.11.2
 typing>=3.6.2; python_version=='3.4'

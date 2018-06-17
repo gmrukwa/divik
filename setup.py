@@ -17,9 +17,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Topic :: Scientific/Engineering :: Information Analysis',
@@ -30,13 +27,13 @@ setup(
     install_requires=[
         '-e git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers',
         'matlabruntimeforpython===R2016b',
-        'numpy>=1.12.1',
-        'pandas<=0.21.0',
+        'numpy>=0.12.1',
+        'pandas<0.21',
         'scipy>=0.19.1',
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
-    python_requires='>=3.4',
+    python_requires='==3.4',
     package_data={
     }
 )
