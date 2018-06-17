@@ -3,6 +3,7 @@ from functools import partial
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
+from tqdm import tqdm
 
 from spdivik.types import \
     Centroids, \
@@ -57,18 +58,22 @@ def _select_features(filters: Filters, data: Data) -> Data:
 
 def divik(data: Data, split: SelfScoringSegmentation,
           feature_selectors: List[FilteringMethod],
-          stop_condition: StopCondition) -> Optional[DivikResult]:
+          stop_condition: StopCondition,
+          progress_reporter: tqdm=None) -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework
 
     @param data: dataset to segment
     @param split: unsupervised method of segmentation into some clusters
     @param feature_selectors: list of methods for feature selection
     @param stop_condition: criterion stating whether it is reasonable to split
+    @param progress_reporter: optional tqdm instance to report progress
     @return: result of segmentation if not stopped
     """
     filters, thresholds = _make_filters_and_thresholds(feature_selectors, data)
     filtered_data = _select_features(filters, data)
     if stop_condition(filtered_data):
+        if progress_reporter is not None:
+            progress_reporter.update(data.shape[0])
         return None
     partition, centroids, quality = split(filtered_data)
     recurse = partial(divik, split=split,

@@ -2,9 +2,9 @@ import unittest
 from multiprocessing import Pool
 
 import numpy as np
+from tqdm import tqdm
 
 import spdivik.predefined as pre
-
 
 N_OBSERVATIONS = 200
 N_FEATURES = 40
@@ -36,24 +36,32 @@ class DataBoundTestCase(unittest.TestCase):
 
 class TestProteomic(DataBoundTestCase):
     def test_constructs_runnable_pipeline(self):
-        divik = pre.proteomic(minimal_split_segment=10)
+        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
+        divik = pre.proteomic(minimal_split_segment=10,
+                              progress_reporter=progress_bar)
         some_result = divik(self.data)
         self.assertIsNotNone(some_result)
 
     def test_splits_test_data_into_two_topmost_groups(self):
-        divik = pre.proteomic(minimal_split_segment=10)
+        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
+        divik = pre.proteomic(minimal_split_segment=10,
+                              progress_reporter=progress_bar)
         some_result = divik(self.data)
         self.assertEqual(len(some_result.subregions), 2)
 
     def test_preserves_information_about_noise_filter(self):
-        divik = pre.proteomic(minimal_split_segment=10)
+        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
+        divik = pre.proteomic(minimal_split_segment=10,
+                              progress_reporter=progress_bar)
         some_result = divik(self.data)
         self.assertIn('amplitude', some_result.thresholds)
         self.assertIn('amplitude', some_result.filters)
         self.assertNotIn('amplitude', some_result.subregions[0].thresholds)
 
     def test_scores_segmentation(self):
-        divik = pre.proteomic(minimal_split_segment=10)
+        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
+        divik = pre.proteomic(minimal_split_segment=10,
+                              progress_reporter=progress_bar)
         some_result = divik(self.data)
         self.assertFalse(np.isnan(some_result.quality))
 
@@ -65,7 +73,9 @@ class TestMaster(DataBoundTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestMaster, cls).setUpClass()
-        divik = pre.master(gap_trials=1000, pool=pool)
+        progress_bar = tqdm(desc='divik', total=cls.data.shape[0])
+        divik = pre.master(gap_trials=1000, pool=pool,
+                           progress_reporter=progress_bar)
         cls.result = divik(cls.data)
 
     def test_constructs_runnable_pipeline(self):

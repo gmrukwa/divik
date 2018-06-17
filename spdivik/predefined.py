@@ -2,6 +2,8 @@ from functools import partial
 from multiprocessing import Pool
 from typing import Callable, Optional
 
+from tqdm import tqdm
+
 import spdivik.distance as dst
 import spdivik.divik as dv
 import spdivik.feature_selection as fs
@@ -67,20 +69,23 @@ class _PrefilteringWrapper:
         return result
 
 
-def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100) -> Divik:
+def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
+              progress_reporter: tqdm=None) -> Divik:
     best_kmeans_with_dunn = _dunn_optimized_kmeans(
         dst.KnownMetric.correlation, iters_limit)
     stop_for_small_size = partial(st.minimal_size, size=minimal_split_segment)
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,
                     feature_selectors=[_VARIANCE_FILTER],
-                    stop_condition=stop_for_small_size)
+                    stop_condition=stop_for_small_size,
+                    progress_reporter=progress_reporter)
     prefiltered_divik = _PrefilteringWrapper(prefilter=_AMPLITUDE_FILTER,
                                              divik=divik)
     return prefiltered_divik
 
 
-def master(gap_trials: int=100, iters_limit: int = 100, pool: Pool=None) -> Divik:
+def master(gap_trials: int=100, iters_limit: int = 100, pool: Pool=None,
+           progress_reporter: tqdm=None) -> Divik:
     metric = dst.KnownMetric.correlation
     best_kmeans_with_dunn = _dunn_optimized_kmeans(metric, iters_limit)
     fast_kmeans = partial(_extreme_kmeans(metric, iters_limit=10),
@@ -92,5 +97,6 @@ def master(gap_trials: int=100, iters_limit: int = 100, pool: Pool=None) -> Divi
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,
                     feature_selectors=[_AMPLITUDE_FILTER, _VARIANCE_FILTER],
-                    stop_condition=stop_if_split_makes_no_sense)
+                    stop_condition=stop_if_split_makes_no_sense,
+                    progress_reporter=progress_reporter)
     return divik
