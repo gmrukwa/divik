@@ -1,9 +1,9 @@
 """DiviK algorithm implementation"""
 from functools import partial
+import gc
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
-import pandas as pd
 from tqdm import tqdm
 
 from spdivik.types import \
@@ -40,8 +40,8 @@ class FilteringMethod:
 
 
 def _select_sequentially(feature_selectors: List[FilteringMethod], data: Data,
-                         min_features_percentage: float=.05) \
-                         -> Tuple[Filters, Thresholds, Data]:
+                         min_features_percentage: float = .05) \
+        -> Tuple[Filters, Thresholds, Data]:
     filters, thresholds = {}, {}
     data_dimensionality = data.shape[1]
     minimal_dimensionality = int(min_features_percentage * data_dimensionality)
@@ -56,34 +56,41 @@ def _select_sequentially(feature_selectors: List[FilteringMethod], data: Data,
     return filters, thresholds, data
 
 
-def divik(data: Data, split: SelfScoringSegmentation,
-          feature_selectors: List[FilteringMethod],
-          stop_condition: StopCondition,
-          min_features_percentage: float=.05,
-          progress_reporter: tqdm=None) -> Optional[DivikResult]:
-    """Deglomerative intelligent segmentation framework
+def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
+                         cluster_number: int) -> np.ndarray:
+    selection = np.zeros(shape=current_selection.shape, dtype=bool)
+    idx = 0
+    for element_idx, element_selected in enumerate(current_selection):
+        if element_selected:
+            selection[element_idx] = partition[idx] == cluster_number
+            idx += 1
+    return selection
 
-    @param data: dataset to segment
-    @param split: unsupervised method of segmentation into some clusters
-    @param feature_selectors: list of methods for feature selection
-    @param stop_condition: criterion stating whether it is reasonable to split
-    @param min_features_percentage: minimal percentage of preserved features
-    @param progress_reporter: optional tqdm instance to report progress
-    @return: result of segmentation if not stopped
-    """
+
+# TODO: ELIMINATE RECURSION ASAP!!!
+def _divik_backend(data: Data, selection: np.ndarray,
+                   split: SelfScoringSegmentation,
+                   feature_selectors: List[FilteringMethod],
+                   stop_condition: StopCondition,
+                   min_features_percentage: float = .05,
+                   progress_reporter: tqdm = None) -> Optional[DivikResult]:
+    subset = data[selection]
     filters, thresholds, filtered_data = _select_sequentially(
-        feature_selectors, data, min_features_percentage)
+        feature_selectors, subset, min_features_percentage)
     if stop_condition(filtered_data):
         if progress_reporter is not None:
-            progress_reporter.update(data.shape[0])
+            progress_reporter.update(subset.shape[0])
         return None
     partition, centroids, quality = split(filtered_data)
-    recurse = partial(divik, split=split,
+    recurse = partial(_divik_backend, split=split,
                       feature_selectors=feature_selectors,
                       stop_condition=stop_condition)
+    del subset
+    del filtered_data
+    gc.collect()
     subregions = [
-        recurse(cluster.values)
-        for _, cluster in pd.DataFrame(data).groupby(partition)
+        recurse(data, _recursive_selection(selection, partition, cluster))
+        for cluster in np.unique(partition)
     ]
     return DivikResult(
         centroids=centroids,
@@ -94,3 +101,25 @@ def divik(data: Data, split: SelfScoringSegmentation,
         merged=partition,
         subregions=subregions
     )
+
+
+def divik(data: Data, split: SelfScoringSegmentation,
+          feature_selectors: List[FilteringMethod],
+          stop_condition: StopCondition,
+          min_features_percentage: float = .05,
+          progress_reporter: tqdm = None) -> Optional[DivikResult]:
+    """Deglomerative intelligent segmentation framework
+
+    @param data: dataset to segment
+    @param split: unsupervised method of segmentation into some clusters
+    @param feature_selectors: list of methods for feature selection
+    @param stop_condition: criterion stating whether it is reasonable to split
+    @param min_features_percentage: minimal percentage of preserved features
+    @param progress_reporter: optional tqdm instance to report progress
+    @return: result of segmentation if not stopped
+    """
+    return _divik_backend(data, np.ones(shape=(data.shape[0],), dtype=bool),
+                          split=split, feature_selectors=feature_selectors,
+                          stop_condition=stop_condition,
+                          min_features_percentage=min_features_percentage,
+                          progress_reporter=progress_reporter)
