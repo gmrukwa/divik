@@ -3,6 +3,7 @@ from functools import partial
 from typing import Dict, List, NamedTuple, Optional, Tuple
 
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 from spdivik.types import \
@@ -81,8 +82,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
                       feature_selectors=feature_selectors,
                       stop_condition=stop_condition)
     subregions = [
-        recurse(data[partition == cluster])
-        for cluster in np.unique(partition)
+        recurse(cluster.values)
+        for _, cluster in pd.DataFrame(data).groupby(partition)
     ]
     return DivikResult(
         centroids=centroids,
