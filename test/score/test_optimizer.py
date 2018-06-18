@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import MagicMock
 
-import numpy as np
 from typing import List
+
+import numpy as np
 
 import spdivik.score
 
