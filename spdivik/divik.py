@@ -49,9 +49,9 @@ def _select_sequentially(feature_selectors: List[FilteringMethod], data: Data,
         key = selector.name
         filters[key], thresholds[key] = selector(
             data, min_features=minimal_dimensionality)
+        data = data[:, filters[key]]
         current_selection[current_selection] = filters[key]
         filters[key] = current_selection
-        data = data[:, filters[key]]
     return filters, thresholds, data
 
 
