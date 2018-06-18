@@ -25,7 +25,8 @@ def _extreme_kmeans(metric: dst.KnownMetric,
 
 
 def _dunn_optimized_kmeans(metric: dst.KnownMetric,
-                           iters_limit: int = 100) -> sc.Optimizer:
+                           iters_limit: int = 100,
+                           pool: Pool=None) -> sc.Optimizer:
     distance = dst.ScipyDistance(metric)
     dunn = partial(sc.dunn, distance=distance)
     kmeans = _extreme_kmeans(metric, iters_limit)
@@ -34,7 +35,8 @@ def _dunn_optimized_kmeans(metric: dst.KnownMetric,
     ]
     best_kmeans_with_dunn = sc.Optimizer(score=dunn,
                                          segmentation_method=kmeans,
-                                         parameters=sweep_clusters_number)
+                                         parameters=sweep_clusters_number,
+                                         pool=pool)
     return best_kmeans_with_dunn
 
 
@@ -68,9 +70,9 @@ class _PrefilteringWrapper:
 
 
 def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
-              progress_reporter: tqdm=None) -> Divik:
+              progress_reporter: tqdm=None, pool: Pool=None) -> Divik:
     best_kmeans_with_dunn = _dunn_optimized_kmeans(
-        dst.KnownMetric.correlation, iters_limit)
+        dst.KnownMetric.correlation, iters_limit, pool=pool)
     stop_for_small_size = partial(st.minimal_size, size=minimal_split_segment)
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,
@@ -86,7 +88,7 @@ def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
 def master(gap_trials: int=100, iters_limit: int = 100, pool: Pool=None,
            progress_reporter: tqdm=None) -> Divik:
     metric = dst.KnownMetric.correlation
-    best_kmeans_with_dunn = _dunn_optimized_kmeans(metric, iters_limit)
+    best_kmeans_with_dunn = _dunn_optimized_kmeans(metric, iters_limit, pool)
     fast_kmeans = partial(_extreme_kmeans(metric, iters_limit=10),
                           number_of_clusters=2)
     distance = dst.ScipyDistance(metric)
