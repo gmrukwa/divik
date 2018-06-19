@@ -67,6 +67,9 @@ def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
     return selection
 
 
+_PATHS_OPEN = 1
+
+
 # TODO: ELIMINATE RECURSION ASAP!!!
 def _divik_backend(data: Data, selection: np.ndarray,
                    split: SelfScoringSegmentation,
@@ -74,14 +77,23 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    stop_condition: StopCondition,
                    min_features_percentage: float = .05,
                    progress_reporter: tqdm = None) -> Optional[DivikResult]:
+    global _PATHS_OPEN
     subset = data[selection]
+    print('Filtering features...')
     filters, thresholds, filtered_data = _select_sequentially(
         feature_selectors, subset, min_features_percentage)
+    print('Checking if split makes sense...')
     if stop_condition(filtered_data):
+        _PATHS_OPEN -= 1
+        print('Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
         if progress_reporter is not None:
             progress_reporter.update(subset.shape[0])
         return None
+    print('Processing subset with {0} observations and {1} features.'.format(*filtered_data.shape))
     partition, centroids, quality = split(filtered_data)
+    print('Recurring into {0} subregions.'.format(centroids.shape[0]))
+    _PATHS_OPEN += centroids.shape[0]
+    print('{0} paths open.'.format(_PATHS_OPEN))
     recurse = partial(_divik_backend, split=split,
                       feature_selectors=feature_selectors,
                       stop_condition=stop_condition)
@@ -92,6 +104,8 @@ def _divik_backend(data: Data, selection: np.ndarray,
         recurse(data, _recursive_selection(selection, partition, cluster))
         for cluster in np.unique(partition)
     ]
+    _PATHS_OPEN -= 1
+    print('Finito! {0} paths open.'.format(_PATHS_OPEN))
     return DivikResult(
         centroids=centroids,
         quality=quality,
@@ -118,6 +132,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
     @param progress_reporter: optional tqdm instance to report progress
     @return: result of segmentation if not stopped
     """
+    global _PATHS_OPEN
+    _PATHS_OPEN = 1
     return _divik_backend(data, np.ones(shape=(data.shape[0],), dtype=bool),
                           split=split, feature_selectors=feature_selectors,
                           stop_condition=stop_condition,
