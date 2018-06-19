@@ -59,9 +59,10 @@ class ExtremeInitialization(Initialization):
         centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
         centroids[0] = data[np.argmax(residuals)]
 
+        distances = np.inf * np.ones((data.shape[0], ))
         for i in range(1, number_of_centroids):
-            distances = self.distance(data, centroids[0:i])
-            distances = np.min(distances, axis=1)
+            current_distance = self.distance(data, centroids[np.newaxis, i - 1])
+            distances[:] = np.minimum(current_distance.ravel(), distances)
             centroids[i] = data[np.argmax(distances)]
 
         return centroids

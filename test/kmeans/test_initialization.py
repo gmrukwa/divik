@@ -1,10 +1,14 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import create_autospec, patch
 
 import numpy as np
 
 from spdivik import distance as dist, kmeans as km
 from test.kmeans import data
+
+
+def measure(func):
+    return create_autospec(func, side_effect=func)
 
 
 class ExtremeInitializationTest(unittest.TestCase):
@@ -14,7 +18,8 @@ class ExtremeInitializationTest(unittest.TestCase):
         self.initialize = km.ExtremeInitialization(self.distance)
 
     def test_uses_given_distance(self):
-        with patch.object(dist.ScipyDistance, '__call__') as mock:
+        with patch.object(dist.ScipyDistance, '__call__',
+                          new=measure(dist.ScipyDistance.__call__)) as mock:
             self.initialize(data, self.number_of_clusters)
             self.assertGreater(mock.call_count, 0)
 
