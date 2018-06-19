@@ -59,6 +59,8 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
             thresholds = engine.fetch_thresholds(values,
                                                  'MaxComponents',
                                                  float(max_components),
+                                                 'DisableWarnings',
+                                                 True,
                                                  nargout=1)
         except Exception as ex:
             if throw_on_engine_error:
