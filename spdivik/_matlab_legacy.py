@@ -36,15 +36,14 @@ with _matlab_paths():
     import MatlabAlgorithms.MsiAlgorithms as msi
     import matlab
 
-    
-@contextmanager
-def _engine():
-    with _matlab_paths():
-        engine = msi.initialize()
-        try:
-            yield engine
-        finally:
-            engine.terminate()
+_engine = None
+
+
+def _ensure_engine():
+    global _engine
+    if _engine is None:
+        _engine = msi.initialize()
+    return _engine
 
 
 class MatlabError(Exception):
@@ -53,7 +52,8 @@ class MatlabError(Exception):
 
 def find_thresholds(values: np.ndarray, max_components: int = 10,
                     throw_on_engine_error: bool = True) -> np.ndarray:
-    with _engine() as engine:
+    with _matlab_paths():
+        engine = _ensure_engine()
         values = matlab.double([[element] for element in values.ravel()])
         try:
             thresholds = engine.fetch_thresholds(values,
