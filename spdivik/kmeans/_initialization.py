@@ -66,4 +66,31 @@ class ExtremeInitialization(Initialization):
             centroids[i] = data[np.argmax(distances)]
 
         return centroids
-    
+
+
+class PercentileInitialization(Initialization):
+    def __init__(self, distance: dist.DistanceMetric, percentile: float=99.):
+        assert 0 <= percentile <= 100, percentile
+        self.distance = distance
+        self.percentile = percentile
+
+    def _get_percentile_element(self, values: np.ndarray) -> int:
+        value = np.percentile(values, q=self.percentile,
+                              interpolation='nearest')
+        return int(np.flatnonzero(values == value)[0])
+
+    def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
+        _validate(data, number_of_centroids)
+        residuals = _find_residuals(data)
+        selected = self._get_percentile_element(residuals)
+        centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
+        centroids[0] = data[selected]
+
+        distances = np.inf * np.ones((data.shape[0],))
+        for i in range(1, number_of_centroids):
+            current_distance = self.distance(data, centroids[np.newaxis, i - 1])
+            distances[:] = np.minimum(current_distance.ravel(), distances)
+            selected = self._get_percentile_element(distances)
+            centroids[i] = data[selected]
+
+        return centroids

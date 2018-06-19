@@ -47,3 +47,11 @@ class ExtremeInitializationTest(unittest.TestCase):
         centroids = self.initialize(data, 3)
         np.testing.assert_equal(centroids[1], data[4])
         np.testing.assert_equal(centroids[2], data[2])
+
+
+# 99-th percentile should be approximated to max
+class PercentileInitializationTest(ExtremeInitializationTest):
+    def setUp(self):
+        self.number_of_clusters = 2
+        self.distance = dist.ScipyDistance(dist.KnownMetric.euclidean)
+        self.initialize = km.PercentileInitialization(self.distance)
