@@ -15,21 +15,10 @@ import spdivik.types as ty
 Divik = Callable[[ty.Data], Optional[dv.DivikResult]]
 
 
-def _extreme_kmeans(metric: dst.KnownMetric,
-                    iters_limit: int = 100) -> km.KMeans:
-    distance = dst.ScipyDistance(metric)
-    kmeans = km.KMeans(labeling=km.Labeling(distance),
-                       initialize=km.ExtremeInitialization(distance),
-                       number_of_iterations=iters_limit)
-    return kmeans
-
-
-def _dunn_optimized_kmeans(metric: dst.KnownMetric,
-                           iters_limit: int = 100,
+def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
+                           kmeans: km.KMeans,
                            pool: Pool=None) -> sc.Optimizer:
-    distance = dst.ScipyDistance(metric)
     dunn = partial(sc.dunn, distance=distance)
-    kmeans = _extreme_kmeans(metric, iters_limit)
     sweep_clusters_number = [
         sc.ParameterValues('number_of_clusters', list(range(2, 11)))
     ]
@@ -71,8 +60,12 @@ class _PrefilteringWrapper:
 
 def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
               progress_reporter: tqdm=None, pool: Pool=None) -> Divik:
+    distance = dst.ScipyDistance(dst.KnownMetric.correlation)
+    kmeans = km.KMeans(labeling=km.Labeling(distance),
+                       initialize=km.ExtremeInitialization(distance),
+                       number_of_iterations=iters_limit)
     best_kmeans_with_dunn = _dunn_optimized_kmeans(
-        dst.KnownMetric.correlation, iters_limit, pool=pool)
+        distance, kmeans, pool=pool)
     stop_for_small_size = partial(st.minimal_size, size=minimal_split_segment)
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,
@@ -85,13 +78,21 @@ def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
     return prefiltered_divik
 
 
-def master(gap_trials: int=100, iters_limit: int = 100, pool: Pool=None,
+def master(gap_trials: int=100, distance_percentile: float=99.,
+           iters_limit: int = 100, pool: Pool=None,
            progress_reporter: tqdm=None) -> Divik:
-    metric = dst.KnownMetric.correlation
-    best_kmeans_with_dunn = _dunn_optimized_kmeans(metric, iters_limit, pool)
-    fast_kmeans = partial(_extreme_kmeans(metric, iters_limit=10),
+    assert 0 <= distance_percentile <= 100, distance_percentile
+    distance = dst.ScipyDistance(dst.KnownMetric.correlation)
+    labeling = km.Labeling(distance)
+    initialize = km.PercentileInitialization(distance, distance_percentile)
+    kmeans = km.KMeans(labeling=km.Labeling(distance),
+                       initialize=initialize,
+                       number_of_iterations=iters_limit)
+    best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool)
+    fast_kmeans = partial(km.KMeans(labeling=labeling,
+                                    initialize=initialize,
+                                    number_of_iterations=10),
                           number_of_clusters=2)
-    distance = dst.ScipyDistance(metric)
     stop_if_split_makes_no_sense = st.combine(
         partial(st.minimal_size, size=20),
         st.Gap(distance, fast_kmeans, gap_trials, pool=pool))
