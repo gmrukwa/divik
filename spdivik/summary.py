@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
+import pandas as pd
+
+import spdivik.divik as dv
+import spdivik.types as ty
 
 
 def depth(tree, children_collection_name='subregions'):
@@ -13,6 +17,21 @@ def total_number_of_clusters(tree) -> int:
     if tree is None:
         return 1
     return sum(total_number_of_clusters(subtree) for subtree in tree.subregions)
+
+
+def merged_partition(tree: dv.DivikResult) -> ty.IntLabels:
+    partition = tree.partition * 0 - 1
+    known_clusters = 0
+    for cluster_number, subregion in enumerate(tree.subregions):
+        current_cluster = tree.partition == cluster_number
+        if subregion is None:
+            partition[current_cluster] = known_clusters
+            known_clusters += 1
+        else:
+            local_partition = merged_partition(subregion)
+            partition[current_cluster] = local_partition + known_clusters
+            known_clusters += np.max(local_partition) + 1
+    return partition
 
 
 def _update_graph(tree, size: int, graph: nx.Graph = None, parent=None):
@@ -70,3 +89,33 @@ def plot(tree, with_size=False):
         arguments['labels'] = _make_labels(graph)
     nx.draw_networkx(**arguments)
     plt.axis('off')
+
+
+def dice(first, second):
+    numerator = 2. * np.sum(np.logical_and(first, second))
+    denominator = np.sum(first) + np.sum(second)
+    return numerator / denominator
+
+
+def positive_predictive_value(first, second):
+    true_positive = np.logical_and(first, second).sum()
+    false_positive = np.logical_and(first, ~second).sum()
+    return float(true_positive) / (true_positive + false_positive)
+
+
+def true_positive_rate(first, second):
+    true_positive = np.logical_and(first, second).sum()
+    false_negative = np.logical_and(~first, second).sum()
+    return float(true_positive) / (true_positive + false_negative)
+
+
+def statistic(merged, diagnoses, func):
+    clusters = np.unique(merged)
+    diagnosis_types = np.unique(diagnoses)
+    return pd.DataFrame({
+        diagnosis: [
+            func(merged == cluster, diagnoses == diagnosis)
+            for cluster in clusters
+        ]
+        for diagnosis in diagnosis_types
+    })
