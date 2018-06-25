@@ -132,17 +132,21 @@ class SpearmanDistance(DistanceMetric):
     def __init__(self):
         self._last = None
         self._last_ranks = None
-
-    def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
+        
+    def _recompute_if_needed(self, matrix2d: np.ndarray):
         if matrix2d is not self._last:
             self._last_ranks = np.apply_along_axis(st.rankdata, 0, matrix2d)
             self._last = matrix2d
+            assert not np.any(np.isnan(self._last_ranks))
+
+    def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
+        self._recompute_if_needed(matrix2d)
         return dist.pdist(self._last_ranks, metric='correlation')
 
     def _interdistance(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
-        if first is not self._last:
-            self._last = first
-            self._last_ranks = np.apply_along_axis(st.rankdata, 0, first)
+        self._recompute_if_needed(first)
         second_ranks = np.apply_along_axis(st.rankdata, 0, second)
+        assert not np.any(np.isnan(second_ranks))
+        assert np.sum(second_ranks - second_ranks.min()) > 0, second_ranks
         return dist.cdist(self._last_ranks, second_ranks, metric='correlation')
 

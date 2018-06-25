@@ -77,7 +77,11 @@ class PercentileInitialization(Initialization):
     def _get_percentile_element(self, values: np.ndarray) -> int:
         value = np.percentile(values, q=self.percentile,
                               interpolation='nearest')
-        return int(np.flatnonzero(values == value)[0])
+        assert values.size > 0
+        assert not np.isnan(values).any()
+        matches = values == value
+        assert np.any(matches), (value, values)
+        return int(np.flatnonzero(matches)[0])
 
     def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
         _validate(data, number_of_centroids)
@@ -85,10 +89,13 @@ class PercentileInitialization(Initialization):
         selected = self._get_percentile_element(residuals)
         centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
         centroids[0] = data[selected]
+        assert not np.any(np.isnan(centroids[0]))
 
         distances = np.inf * np.ones((data.shape[0],))
         for i in range(1, number_of_centroids):
+            assert not np.any(np.isnan(centroids[np.newaxis, i - 1]))
             current_distance = self.distance(data, centroids[np.newaxis, i - 1])
+            assert not np.any(np.isnan(current_distance)), current_distance
             distances[:] = np.minimum(current_distance.ravel(), distances)
             selected = self._get_percentile_element(distances)
             centroids[i] = data[selected]
