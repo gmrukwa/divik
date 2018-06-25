@@ -80,9 +80,11 @@ def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
 
 def master(gap_trials: int=100, distance_percentile: float=99.,
            iters_limit: int = 100, pool: Pool=None,
-           progress_reporter: tqdm=None) -> Divik:
+           progress_reporter: tqdm=None,
+           distance: dst.DistanceMetric=None) -> Divik:
     assert 0 <= distance_percentile <= 100, distance_percentile
-    distance = dst.ScipyDistance(dst.KnownMetric.correlation)
+    if distance is None:
+        distance = dst.SpearmanDistance()
     labeling = km.Labeling(distance)
     initialize = km.PercentileInitialization(distance, distance_percentile)
     kmeans = km.KMeans(labeling=km.Labeling(distance),
