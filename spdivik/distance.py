@@ -98,13 +98,13 @@ class KnownMetric(Enum):
 
 class ScipyDistance(DistanceMetric):
     """DistanceMetric based on scipy distances"""
-    def __init__(self, name: KnownMetric, **kwargs):
+    def __init__(self, metric: KnownMetric, **kwargs):
         """
-        @param name: name of the metric used
+        @param metric: Union[KnownMetric, Callable] the metric used
         @param kwargs: optional arguments specified in scipy for that
         specific metric
         """
-        self._name = name.value
+        self._metric = metric.value if isinstance(metric, KnownMetric) else metric
         self._optionals = kwargs
 
     def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
@@ -113,7 +113,7 @@ class ScipyDistance(DistanceMetric):
         @param matrix2d: 2D matrix with points in rows
         @return: 2D matrix of pairwise distances
         """
-        vector = dist.pdist(matrix2d, metric=self._name, **self._optionals)
+        vector = dist.pdist(matrix2d, metric=self._metric, **self._optionals)
         return dist.squareform(vector)
 
     def _interdistance(self, first: np.ndarray, second: np.ndarray) -> \
@@ -124,4 +124,4 @@ class ScipyDistance(DistanceMetric):
         @param second: 2D matrix with points in rows
         @return: 2D matrix of pairwise distances
         """
-        return dist.cdist(first, second, metric=self._name, **self._optionals)
+        return dist.cdist(first, second, metric=self._metric, **self._optionals)
