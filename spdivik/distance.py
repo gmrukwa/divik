@@ -143,6 +143,6 @@ class SpearmanDistance(DistanceMetric):
         if first is not self._last:
             self._last = first
             self._last_ranks = np.apply_along_axis(st.rankdata, 0, first)
-        second_ranks = np.apply_along_axis(st.rankdata, 0, first)
+        second_ranks = np.apply_along_axis(st.rankdata, 0, second)
         return dist.cdist(self._last_ranks, second_ranks, metric='correlation')
 
