@@ -21,6 +21,7 @@ from abc import ABCMeta, abstractmethod
 from enum import Enum
 import numpy as np
 import scipy.spatial.distance as dist
+import scipy.stats as st
 
 
 class DistanceMetric(object, metaclass=ABCMeta):
@@ -125,3 +126,23 @@ class ScipyDistance(DistanceMetric):
         @return: 2D matrix of pairwise distances
         """
         return dist.cdist(first, second, metric=self._metric, **self._optionals)
+
+
+class SpearmanDistance(DistanceMetric):
+    def __init__(self):
+        self._last = None
+        self._last_ranks = None
+
+    def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
+        if matrix2d is not self._last:
+            self._last_ranks = np.apply_along_axis(st.rankdata, 0, matrix2d)
+            self._last = matrix2d
+        return dist.pdist(self._last_ranks, metric='correlation')
+
+    def _interdistance(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
+        if first is not self._last:
+            self._last = first
+            self._last_ranks = np.apply_along_axis(st.rankdata, 0, first)
+        second_ranks = np.apply_along_axis(st.rankdata, 0, first)
+        return dist.cdist(self._last_ranks, second_ranks, metric='correlation')
+
