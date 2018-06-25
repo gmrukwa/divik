@@ -137,5 +137,5 @@ class SpearmanDistance(DistanceMetric):
         ranked = np.apply_along_axis(st.rankdata, 0, np.vstack((first, second)))
         assert not np.any(np.isnan(ranked))
         first_ranks, second_ranks = ranked[:first.shape[0]], ranked[first.shape[0]:]
-        return dist.cdist(self._last_ranks, second_ranks, metric='correlation')
+        return dist.cdist(first_ranks, second_ranks, metric='correlation')
 
