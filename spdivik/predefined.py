@@ -17,10 +17,11 @@ Divik = Callable[[ty.Data], Optional[dv.DivikResult]]
 
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
                            kmeans: km.KMeans,
-                           pool: Pool=None) -> sc.Optimizer:
+                           pool: Pool=None,
+                           k_max: int=10) -> sc.Optimizer:
     dunn = partial(sc.dunn, distance=distance)
     sweep_clusters_number = [
-        sc.ParameterValues('number_of_clusters', list(range(2, 11)))
+        sc.ParameterValues('number_of_clusters', list(range(2, k_max + 1)))
     ]
     best_kmeans_with_dunn = sc.Optimizer(score=dunn,
                                          segmentation_method=kmeans,
