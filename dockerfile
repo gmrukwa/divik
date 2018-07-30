@@ -1,4 +1,4 @@
-FROM spectreteam/python_msi:v4.0.8
+FROM spectreteam/python_msi:v4.0.9
 
 COPY . /app
 
