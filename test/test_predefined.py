@@ -4,6 +4,7 @@ from multiprocessing import Pool
 import numpy as np
 from tqdm import tqdm
 
+import spdivik.distance as dst
 import spdivik.predefined as pre
 
 N_OBSERVATIONS = 200
@@ -74,8 +75,11 @@ class TestMaster(DataBoundTestCase):
     def setUpClass(cls):
         super(TestMaster, cls).setUpClass()
         progress_bar = tqdm(desc='divik', total=cls.data.shape[0])
-        divik = pre.master(gap_trials=1000, pool=pool,
-                           progress_reporter=progress_bar)
+        distance = dst.ScipyDistance(dst.KnownMetric.euclidean)
+        divik = pre.master(gap_trials=100, pool=pool,
+                           progress_reporter=progress_bar,
+                           distance=distance)
+        # TODO: K-means must inform about non-convergent metric.
         cls.result = divik(cls.data)
 
     def test_constructs_runnable_pipeline(self):
