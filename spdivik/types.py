@@ -1,5 +1,5 @@
 """Reusable typings used across modules"""
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Dict, NamedTuple, List, Optional
 
 import numpy as np
 
@@ -10,6 +10,19 @@ BoolFilter = np.ndarray
 Data = Table
 Quality = float
 SegmentationMethod = Callable[[Data], Tuple[IntLabels, Centroids]]
-SelfScoringSegmentation = Callable[[Data], Tuple[IntLabels, Centroids, Quality]]
+ScoredSegmentation = Tuple[IntLabels, Centroids, Quality]
+SelfScoringSegmentation = Callable[[Data], ScoredSegmentation]
 StopCondition = Callable[[Data], bool]
 Filter = Callable[[Data], Tuple[BoolFilter, float]]
+FilterName = str
+Filters = Dict[FilterName, BoolFilter]
+Thresholds = Dict[FilterName, float]
+DivikResult = NamedTuple('DivikResult', [
+    ('centroids', Centroids),
+    ('quality', float),
+    ('partition', IntLabels),
+    ('filters', Filters),
+    ('thresholds', Thresholds),
+    ('merged', IntLabels),
+    ('subregions', List[Optional['DivikResult']]),
+])

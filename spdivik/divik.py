@@ -1,32 +1,19 @@
 """DiviK algorithm implementation"""
 from functools import partial
 import gc
-from typing import Dict, List, NamedTuple, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 from tqdm import tqdm
 
 from spdivik.types import \
-    Centroids, \
-    IntLabels, \
-    BoolFilter, \
     Data, \
     SelfScoringSegmentation, \
     StopCondition, \
-    Filter
-
-FilterName = str
-Filters = Dict[FilterName, BoolFilter]
-Thresholds = Dict[FilterName, float]
-DivikResult = NamedTuple('DivikResult', [
-    ('centroids', Centroids),
-    ('quality', float),
-    ('partition', IntLabels),
-    ('filters', Filters),
-    ('thresholds', Thresholds),
-    ('merged', IntLabels),
-    ('subregions', List[Optional['DivikResult']]),
-])
+    Filter, \
+    Filters, \
+    Thresholds, \
+    DivikResult
 
 
 class FilteringMethod:
@@ -122,7 +109,7 @@ def divik(data: Data, split: SelfScoringSegmentation,
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
           progress_reporter: tqdm = None) -> Optional[DivikResult]:
-    """Deglomerative intelligent segmentation framework
+    """Deglomerative intelligent segmentation framework.
 
     @param data: dataset to segment
     @param split: unsupervised method of segmentation into some clusters

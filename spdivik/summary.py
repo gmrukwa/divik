@@ -3,7 +3,6 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 
-import spdivik.divik as dv
 import spdivik.types as ty
 
 
@@ -19,7 +18,7 @@ def total_number_of_clusters(tree) -> int:
     return sum(total_number_of_clusters(subtree) for subtree in tree.subregions)
 
 
-def merged_partition(tree: dv.DivikResult) -> ty.IntLabels:
+def merged_partition(tree: ty.DivikResult) -> ty.IntLabels:
     partition = tree.partition * 0 - 1
     known_clusters = 0
     for cluster_number, subregion in enumerate(tree.subregions):

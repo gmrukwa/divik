@@ -12,7 +12,7 @@ import spdivik.score as sc
 import spdivik.stop as st
 import spdivik.types as ty
 
-Divik = Callable[[ty.Data], Optional[dv.DivikResult]]
+Divik = Callable[[ty.Data], Optional[ty.DivikResult]]
 
 
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
@@ -51,7 +51,7 @@ class _PrefilteringWrapper:
         self._prefilter = prefilter
         self._divik = divik
 
-    def __call__(self, data: ty.Data) -> dv.DivikResult:
+    def __call__(self, data: ty.Data) -> ty.DivikResult:
         preselection, threshold = self._prefilter(data)
         result = self._divik(data[:, preselection])
         result.thresholds[self._prefilter.name] = threshold
