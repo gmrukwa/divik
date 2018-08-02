@@ -13,4 +13,7 @@ RUN apt-get -qq update &&\
   apt-get autoremove -y &&\
   rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /root/.config/matplotlib &&\
+  echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
+
 RUN python -m unittest discover
