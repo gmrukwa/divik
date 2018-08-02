@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
@@ -137,15 +138,18 @@ def reject_split(tree: Optional[ty.DivikResult],
                  rejection_conditions: List[rj.RejectionCondition]) \
         -> Optional[ty.DivikResult]:
     if tree is None:
+        logging.debug("Rejecting empty.")
         return None
     segmentation = (tree.partition, tree.centroids, tree.quality)
     if any(reject(segmentation) for reject in rejection_conditions):
+        logging.debug("Rejecting by condition.")
         return None
     allowed_subregions = [
         reject_split(subregion, rejection_conditions)
         for subregion in tree.subregions
     ]
     merged = _merged_partition(tree.partition, allowed_subregions)
+    logging.debug("Returning pruned tree.")
     return ty.DivikResult(
         centroids=tree.centroids,
         quality=tree.quality,
