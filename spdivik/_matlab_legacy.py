@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+import logging
 import os
 import platform
 
@@ -9,6 +10,7 @@ _MATLAB_SEARCH_PATHS = \
     "/usr/local/MATLAB/MATLAB_Runtime/v91/bin/glnxa64:" + \
     "/usr/local/MATLAB/MATLAB_Runtime/v91/sys/os/glnxa64:" + \
     "/usr/local/MATLAB/MATLAB_Runtime/v91/sys/opengl/lib/glnxa64:"
+
 
 _local_system = platform.system()
 
@@ -21,15 +23,19 @@ if _local_system == 'Windows':
 @contextmanager
 def _matlab_paths():
     if _local_system == 'Linux':
+        logging.log(logging.DEBUG, 'Modifying LD_LIBRARY_PATH.')
         old_env = os.environ.get('LD_LIBRARY_PATH', '')
         os.environ['LD_LIBRARY_PATH'] = _MATLAB_SEARCH_PATHS + old_env
+        logging.log(logging.DEBUG, os.environ['LD_LIBRARY_PATH'])
     elif _local_system == 'Darwin':
         raise NotImplementedError('OSX hosts are not supported.')
     try:
         yield
     finally:
         if _local_system == 'Linux':
+            logging.log(logging.DEBUG, 'Restoring LD_LIBRARY_PATH.')
             os.environ['LD_LIBRARY_PATH'] = old_env
+            logging.log(logging.DEBUG, os.environ['LD_LIBRARY_PATH'])
 
 
 with _matlab_paths():
