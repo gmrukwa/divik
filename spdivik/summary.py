@@ -2,7 +2,6 @@ import logging
 from typing import List, Optional
 
 import matplotlib.pyplot as plt
-import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -47,7 +46,7 @@ def _merged_partition(partition: ty.IntLabels,
     return result
 
 
-def _update_graph(tree, size: int, graph: nx.Graph = None, parent=None):
+def _update_graph(tree, size: int, graph: 'networkx.Graph'=None, parent=None):
     tree_node = len(graph)
     graph.add_node(tree_node, size=size)
     if parent is not None:
@@ -59,13 +58,15 @@ def _update_graph(tree, size: int, graph: nx.Graph = None, parent=None):
                       parent=tree_node)
 
 
-def _as_graph(tree) -> nx.DiGraph:
+def _as_graph(tree) -> 'networkx.DiGraph':
+    import networkx as nx
     graph = nx.DiGraph()
     _update_graph(tree, size=tree.partition.size, graph=graph, parent=None)
     return graph
 
 
 def _make_labels(graph):
+    import networkx as nx
     attributes = nx.get_node_attributes(graph, 'size')
     return {
         idx: "{0} (size={1})".format(idx, attributes[idx])
@@ -74,6 +75,7 @@ def _make_labels(graph):
 
 
 def _make_sizes(graph):
+    import networkx as nx
     values = np.array(list(nx.get_node_attributes(graph, 'size').values()))
     return list(np.sqrt(values))
 
@@ -85,6 +87,7 @@ def scale_plot_size(factor=1.5):
 
 
 def _make_positions(graph):
+    import networkx as nx
     intermediate = nx.spectral_layout(graph)
     return nx.spring_layout(graph, pos=intermediate, iterations=20)
 
@@ -100,6 +103,7 @@ def plot(tree, with_size=False):
     }
     if with_size:
         arguments['labels'] = _make_labels(graph)
+    import networkx as nx
     nx.draw_networkx(**arguments)
     plt.axis('off')
 
