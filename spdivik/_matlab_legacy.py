@@ -5,10 +5,10 @@ import platform
 import numpy as np
 
 _MATLAB_SEARCH_PATHS = \
-    ":/usr/local/MATLAB/MATLAB_Runtime/v91/runtime/glnxa64" + \
-    ":/usr/local/MATLAB/MATLAB_Runtime/v91/bin/glnxa64" + \
-    ":/usr/local/MATLAB/MATLAB_Runtime/v91/sys/os/glnxa64" + \
-    ":/usr/local/MATLAB/MATLAB_Runtime/v91/sys/opengl/lib/glnxa64"
+    "/usr/local/MATLAB/MATLAB_Runtime/v91/runtime/glnxa64:" + \
+    "/usr/local/MATLAB/MATLAB_Runtime/v91/bin/glnxa64:" + \
+    "/usr/local/MATLAB/MATLAB_Runtime/v91/sys/os/glnxa64:" + \
+    "/usr/local/MATLAB/MATLAB_Runtime/v91/sys/opengl/lib/glnxa64:"
 
 _local_system = platform.system()
 
@@ -22,7 +22,7 @@ if _local_system == 'Windows':
 def _matlab_paths():
     if _local_system == 'Linux':
         old_env = os.environ.get('LD_LIBRARY_PATH', '')
-        os.environ['LD_LIBRARY_PATH'] = old_env + _MATLAB_SEARCH_PATHS
+        os.environ['LD_LIBRARY_PATH'] = _MATLAB_SEARCH_PATHS + old_env
     elif _local_system == 'Darwin':
         raise NotImplementedError('OSX hosts are not supported.')
     try:
