@@ -15,6 +15,7 @@ from spdivik.types import \
     Filters, \
     Thresholds, \
     DivikResult
+import spdivik.rejection as rj
 
 
 log = partial(lg.log, lg.INFO)
@@ -66,6 +67,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    split: SelfScoringSegmentation,
                    feature_selectors: List[FilteringMethod],
                    stop_condition: StopCondition,
+                   rejection_conditions: List[rj.RejectionCondition],
                    min_features_percentage: float = .05,
                    progress_reporter: tqdm = None) -> Optional[DivikResult]:
     global _PATHS_OPEN
@@ -82,12 +84,19 @@ def _divik_backend(data: Data, selection: np.ndarray,
         return None
     log('Processing subset with {0} observations and {1} features.'.format(*filtered_data.shape))
     partition, centroids, quality = split(filtered_data)
+    if any(reject((partition, centroids, quality)) for reject in rejection_conditions):
+        _PATHS_OPEN -= 1
+        log('Rejected segmentation. Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
+        if progress_reporter is not None:
+            progress_reporter.update(subset.shape[0])
+        return None
     log('Recurring into {0} subregions.'.format(centroids.shape[0]))
     _PATHS_OPEN += centroids.shape[0]
     log('{0} paths open.'.format(_PATHS_OPEN))
     recurse = partial(_divik_backend, split=split,
                       feature_selectors=feature_selectors,
-                      stop_condition=stop_condition)
+                      stop_condition=stop_condition,
+                      rejection_conditions=rejection_conditions)
     del subset
     del filtered_data
     gc.collect()
@@ -112,7 +121,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
           feature_selectors: List[FilteringMethod],
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
-          progress_reporter: tqdm = None) -> Optional[DivikResult]:
+          progress_reporter: tqdm = None,
+          rejection_conditions: List[rj.RejectionCondition] = None) -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework.
 
     @param data: dataset to segment
@@ -121,12 +131,16 @@ def divik(data: Data, split: SelfScoringSegmentation,
     @param stop_condition: criterion stating whether it is reasonable to split
     @param min_features_percentage: minimal percentage of preserved features
     @param progress_reporter: optional tqdm instance to report progress
+    @param rejection_conditions: optional list of conditions that reject clustering result
     @return: result of segmentation if not stopped
     """
+    if rejection_conditions is None:
+        rejection_conditions = []
     global _PATHS_OPEN
     _PATHS_OPEN = 1
     return _divik_backend(data, np.ones(shape=(data.shape[0],), dtype=bool),
                           split=split, feature_selectors=feature_selectors,
                           stop_condition=stop_condition,
+                          rejection_conditions=rejection_conditions,
                           min_features_percentage=min_features_percentage,
                           progress_reporter=progress_reporter)
