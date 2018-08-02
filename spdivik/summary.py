@@ -1,8 +1,11 @@
+from typing import List, Optional
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
 
+import spdivik.rejection as rj
 import spdivik.types as ty
 
 
@@ -19,18 +22,25 @@ def total_number_of_clusters(tree) -> int:
 
 
 def merged_partition(tree: ty.DivikResult) -> ty.IntLabels:
-    partition = tree.partition * 0 - 1
+    return _merged_partition(tree.partition, tree.subregions)
+
+
+def _merged_partition(partition: ty.IntLabels,
+                      subregions: List[Optional[ty.DivikResult]]) \
+        -> ty.IntLabels:
+    result = partition * 0 - 1
     known_clusters = 0
-    for cluster_number, subregion in enumerate(tree.subregions):
-        current_cluster = tree.partition == cluster_number
+    for cluster_number, subregion in enumerate(subregions):
+        current_cluster = partition == cluster_number
         if subregion is None:
-            partition[current_cluster] = known_clusters
+            result[current_cluster] = known_clusters
             known_clusters += 1
         else:
-            local_partition = merged_partition(subregion)
-            partition[current_cluster] = local_partition + known_clusters
+            local_partition = _merged_partition(subregion.partition,
+                                                subregion.subregions)
+            result[current_cluster] = local_partition + known_clusters
             known_clusters += np.max(local_partition) + 1
-    return partition
+    return result
 
 
 def _update_graph(tree, size: int, graph: nx.Graph = None, parent=None):
@@ -118,3 +128,27 @@ def statistic(merged, diagnoses, func):
         ]
         for diagnosis in diagnosis_types
     })
+
+
+def reject_split(tree: Optional[ty.DivikResult],
+                 rejection_conditions: List[rj.RejectionCondition]) \
+        -> Optional[ty.DivikResult]:
+    if tree is None:
+        return None
+    segmentation = (tree.partition, tree.centroids, tree.quality)
+    if any(reject(segmentation) for reject in rejection_conditions):
+        return None
+    allowed_subregions = [
+        reject_split(subregion, rejection_conditions)
+        for subregion in tree.subregions
+    ]
+    merged = _merged_partition(tree.partition, allowed_subregions)
+    return ty.DivikResult(
+        centroids=tree.centroids,
+        quality=tree.quality,
+        partition=tree.partition,
+        filters=tree.filters,
+        thresholds=tree.thresholds,
+        merged=merged,
+        subregions=allowed_subregions
+    )
