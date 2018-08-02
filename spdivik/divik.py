@@ -1,6 +1,7 @@
 """DiviK algorithm implementation"""
 from functools import partial
 import gc
+import logging as lg
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -14,6 +15,9 @@ from spdivik.types import \
     Filters, \
     Thresholds, \
     DivikResult
+
+
+log = partial(lg.log, lg.INFO)
 
 
 class FilteringMethod:
@@ -66,21 +70,21 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    progress_reporter: tqdm = None) -> Optional[DivikResult]:
     global _PATHS_OPEN
     subset = data[selection]
-    print('Filtering features...')
+    log('Filtering features...')
     filters, thresholds, filtered_data = _select_sequentially(
         feature_selectors, subset, min_features_percentage)
-    print('Checking if split makes sense...')
+    log('Checking if split makes sense...')
     if stop_condition(filtered_data):
         _PATHS_OPEN -= 1
-        print('Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
+        log('Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
         if progress_reporter is not None:
             progress_reporter.update(subset.shape[0])
         return None
-    print('Processing subset with {0} observations and {1} features.'.format(*filtered_data.shape))
+    log('Processing subset with {0} observations and {1} features.'.format(*filtered_data.shape))
     partition, centroids, quality = split(filtered_data)
-    print('Recurring into {0} subregions.'.format(centroids.shape[0]))
+    log('Recurring into {0} subregions.'.format(centroids.shape[0]))
     _PATHS_OPEN += centroids.shape[0]
-    print('{0} paths open.'.format(_PATHS_OPEN))
+    log('{0} paths open.'.format(_PATHS_OPEN))
     recurse = partial(_divik_backend, split=split,
                       feature_selectors=feature_selectors,
                       stop_condition=stop_condition)
@@ -92,7 +96,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
         for cluster in np.unique(partition)
     ]
     _PATHS_OPEN -= 1
-    print('Finito! {0} paths open.'.format(_PATHS_OPEN))
+    log('Finito! {0} paths open.'.format(_PATHS_OPEN))
     return DivikResult(
         centroids=centroids,
         quality=quality,
