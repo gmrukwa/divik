@@ -21,23 +21,26 @@ def total_number_of_clusters(tree) -> int:
     return sum(total_number_of_clusters(subtree) for subtree in tree.subregions)
 
 
-def merged_partition(tree: ty.DivikResult) -> ty.IntLabels:
-    return _merged_partition(tree.partition, tree.subregions)
+def merged_partition(tree: ty.DivikResult, levels_limit: int=np.inf) \
+        -> ty.IntLabels:
+    return _merged_partition(tree.partition, tree.subregions, levels_limit)
 
 
 def _merged_partition(partition: ty.IntLabels,
-                      subregions: List[Optional[ty.DivikResult]]) \
+                      subregions: List[Optional[ty.DivikResult]],
+                      levels_limit: int=np.inf) \
         -> ty.IntLabels:
     result = partition * 0 - 1
     known_clusters = 0
     for cluster_number, subregion in enumerate(subregions):
         current_cluster = partition == cluster_number
-        if subregion is None:
+        if subregion is None or levels_limit <= 1:
             result[current_cluster] = known_clusters
             known_clusters += 1
         else:
             local_partition = _merged_partition(subregion.partition,
-                                                subregion.subregions)
+                                                subregion.subregions,
+                                                levels_limit-1)
             result[current_cluster] = local_partition + known_clusters
             known_clusters += np.max(local_partition) + 1
     return result
