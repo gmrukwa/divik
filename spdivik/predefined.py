@@ -1,3 +1,22 @@
+"""Predefined scenarios for DiviK segmentation.
+
+predefined.py
+
+Copyright 2018 Spectre Team
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from functools import partial
 from multiprocessing import Pool
 from typing import Callable, Optional
@@ -17,8 +36,8 @@ Divik = Callable[[ty.Data], Optional[ty.DivikResult]]
 
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
                            kmeans: km.KMeans,
-                           pool: Pool=None,
-                           k_max: int=10) -> sc.Optimizer:
+                           pool: Pool = None,
+                           k_max: int = 10) -> sc.Optimizer:
     dunn = partial(sc.dunn, distance=distance)
     sweep_clusters_number = [
         sc.ParameterValues('number_of_clusters', list(range(2, k_max + 1)))
@@ -60,7 +79,23 @@ class _PrefilteringWrapper:
 
 
 def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
-              progress_reporter: tqdm=None, pool: Pool=None) -> Divik:
+              progress_reporter: tqdm = None, pool: Pool = None) -> Divik:
+    """Size limited DiviK with extreme initialization and correlation.
+
+    DiviK preset as in: P. Widlak, G. Mrukwa, M. Kalinowska, M. Pietrowska,
+    M. Chekan, J. Wierzgon, M. Gawin, G. Drazek and J. Polanska, "Detection of
+    molecular signatures of oral squamous cell carcinoma and normal epithelium
+    - application of a novel methodology for unsupervised segmentation of
+    imaging mass spectrometry data," Proteomics, vol. 16, no. 11-12,
+    pp. 1613-21, 2016
+
+    @param minimal_split_segment: lowest size of region to split
+    @param iters_limit: limit of k-means iterations
+    @param progress_reporter: tqdm-alike progress reporting object
+    @param pool: pool for parallel processing. Recommended maxtasksperchild
+    equal to number of cores.
+    @return: adjusted DiviK pipeline
+    """
     distance = dst.ScipyDistance(dst.KnownMetric.correlation)
     kmeans = km.KMeans(labeling=km.Labeling(distance),
                        initialize=km.ExtremeInitialization(distance),
@@ -79,10 +114,26 @@ def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
     return prefiltered_divik
 
 
-def master(gap_trials: int=100, distance_percentile: float=99.,
-           iters_limit: int = 100, pool: Pool=None,
-           progress_reporter: tqdm=None,
-           distance: dst.DistanceMetric=None) -> Divik:
+def master(gap_trials: int = 100, distance_percentile: float = 99.,
+           iters_limit: int = 100, pool: Pool = None,
+           progress_reporter: tqdm = None,
+           distance: dst.DistanceMetric = None) -> Divik:
+    """GAP limited DiviK with percentile initialization.
+
+    Used in Master Thesis of Grzegorz Mrukwa.
+
+    @param gap_trials: number of random datasets used in GAP statistic
+    computation. Increases precision and computational overhead.
+    @param distance_percentile: percentile of distance used for selection of
+    initial representatives. Must be contained in range [0, 100] inclusive.
+    Higher may reveal more nuances, but reduce robustness.
+    @param iters_limit: limit of k-means iterations
+    @param pool: pool for parallel processing. Recommended maxtasksperchild
+    equal to number of cores.
+    @param progress_reporter: tqdm-alike progress reporting object
+    @param distance: distance metric
+    @return: adjusted DiviK pipeline
+    """
     assert 0 <= distance_percentile <= 100, distance_percentile
     if distance is None:
         distance = dst.SpearmanDistance()

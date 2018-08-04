@@ -1,3 +1,5 @@
+"""Access to MATLAB legacy functionalities."""
+
 from contextlib import contextmanager
 import logging
 import os
@@ -53,11 +55,22 @@ def _ensure_engine():
 
 
 class MatlabError(Exception):
+    """Thrown when legacy computations failed."""
+
     pass
 
 
 def find_thresholds(values: np.ndarray, max_components: int = 10,
                     throw_on_engine_error: bool = True) -> np.ndarray:
+    """Find candidate thresholds for decomposition of values by GMM.
+
+    @param values: vector of values to decompose
+    @param max_components: maximal number of components to decompose into
+    @param throw_on_engine_error: if true, an exception will be raised if
+    legacy code fails. Returns empty thresholds array otherwise.
+    @return: array of candidate thresholds from crossings between GMM
+    components
+    """
     with _matlab_paths():
         engine = _ensure_engine()
         values = matlab.double([[element] for element in values.ravel()])

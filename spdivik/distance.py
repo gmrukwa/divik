@@ -1,6 +1,6 @@
-"""
+"""Common interface for distance metric.
+
 distance.py
-Common interface for distance metric
 
 Copyright 2018 Spectre Team
 
@@ -25,10 +25,11 @@ import scipy.stats as st
 
 
 class DistanceMetric(object, metaclass=ABCMeta):
-    """Measures distance between points in multidimensional space"""
+    """Measures distance between points in multidimensional space."""
+
     @abstractmethod
     def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
-        """Compute distances between all pairs of points in the matrix
+        """Compute distances between all pairs of points in the matrix.
 
         @param matrix2d: 2D matrix with points in rows
         @return: 2D matrix with distances between points.
@@ -37,8 +38,9 @@ class DistanceMetric(object, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _interdistance(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
-        """Compute distances between all pairs of points between matrices
+    def _interdistance(self, first: np.ndarray, second: np.ndarray) \
+            -> np.ndarray:
+        """Compute distances between all pairs of points between matrices.
 
         @param first: 2D matrix with points in rows
         @param second: 2D matrix with points in rows
@@ -48,7 +50,7 @@ class DistanceMetric(object, metaclass=ABCMeta):
         pass
 
     def __call__(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
-        """Compute distances between points
+        """Compute distances between points.
 
         Distances between points in all pairs between both matrices.
 
@@ -75,6 +77,8 @@ class DistanceMetric(object, metaclass=ABCMeta):
 
 
 class KnownMetric(Enum):
+    """Predefined distance functions."""
+
     braycurtis = "braycurtis"
     canberra = "canberra"
     chebyshev = "chebyshev"
@@ -98,9 +102,11 @@ class KnownMetric(Enum):
 
 
 class ScipyDistance(DistanceMetric):
-    """DistanceMetric based on scipy distances"""
+    """DistanceMetric based on scipy distances."""
+
     def __init__(self, metric: KnownMetric, **kwargs):
-        """
+        """Initialize new instance of ScipyDistance.
+
         @param metric: Union[KnownMetric, Callable] the metric used
         @param kwargs: optional arguments specified in scipy for that
         specific metric
@@ -109,7 +115,7 @@ class ScipyDistance(DistanceMetric):
         self._optionals = kwargs
 
     def _intradistance(self, matrix2d: np.ndarray) -> np.ndarray:
-        """Compute distances between all pairs (pdist)
+        """Compute distances between all pairs (pdist).
 
         @param matrix2d: 2D matrix with points in rows
         @return: 2D matrix of pairwise distances
@@ -119,7 +125,7 @@ class ScipyDistance(DistanceMetric):
 
     def _interdistance(self, first: np.ndarray, second: np.ndarray) -> \
             np.ndarray:
-        """Compute distances between all pairs of points between arrays (cdist)
+        """Compute distances between pairs of points between arrays (cdist).
 
         @param first: 2D matrix with points in rows
         @param second: 2D matrix with points in rows
@@ -129,6 +135,8 @@ class ScipyDistance(DistanceMetric):
 
 
 class SpearmanDistance(DistanceMetric):
+    """Correlation distance based on Spearman rank correlation."""
+
     def __init__(self):
         self._last = None
         self._last_ranks = None
@@ -143,10 +151,10 @@ class SpearmanDistance(DistanceMetric):
         self._recompute_if_needed(matrix2d)
         return dist.pdist(self._last_ranks, metric='correlation')
 
-    def _interdistance(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
+    def _interdistance(self, first: np.ndarray, second: np.ndarray) \
+            -> np.ndarray:
         self._recompute_if_needed(first)
         second_ranks = np.apply_along_axis(st.rankdata, 0, second)
         assert not np.any(np.isnan(second_ranks))
         assert np.sum(second_ranks - second_ranks.min()) > 0, second_ranks
         return dist.cdist(self._last_ranks, second_ranks, metric='correlation')
-

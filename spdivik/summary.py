@@ -1,3 +1,22 @@
+"""Summarizing functions for DiviK result.
+
+summary.py
+
+Copyright 2018 Spectre Team
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 import logging
 from typing import List, Optional
 
@@ -10,26 +29,32 @@ import spdivik.types as ty
 
 
 def depth(tree, children_collection_name='subregions'):
+    """Get treee depth."""
     if tree is None:
         return 1
-    return max(depth(subtree) for subtree in getattr(tree, children_collection_name)) + 1
+    return max(depth(subtree) for subtree
+               in getattr(tree, children_collection_name)) + 1
 
 
 def total_number_of_clusters(tree) -> int:
+    """Get the number of leaves in the tree."""
     if tree is None:
         return 1
-    return sum(total_number_of_clusters(subtree) for subtree in tree.subregions)
+    return sum(total_number_of_clusters(subtree)
+               for subtree in tree.subregions)
 
 
-def merged_partition(tree: ty.DivikResult, levels_limit: int=np.inf) \
+def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf) \
         -> ty.IntLabels:
+    """Compute merged segmentation labels."""
     return _merged_partition(tree.partition, tree.subregions, levels_limit)
 
 
 def _merged_partition(partition: ty.IntLabels,
                       subregions: List[Optional[ty.DivikResult]],
-                      levels_limit: int=np.inf) \
+                      levels_limit: int = np.inf) \
         -> ty.IntLabels:
+    """Compute merged segmentation labels."""
     result = partition * 0 - 1
     known_clusters = 0
     for cluster_number, subregion in enumerate(subregions):
@@ -46,7 +71,8 @@ def _merged_partition(partition: ty.IntLabels,
     return result
 
 
-def _update_graph(tree, size: int, graph: 'networkx.Graph'=None, parent=None):
+def _update_graph(tree, size: int, graph: 'networkx.Graph' = None,
+                  parent=None):
     tree_node = len(graph)
     graph.add_node(tree_node, size=size)
     if parent is not None:
@@ -81,6 +107,7 @@ def _make_sizes(graph):
 
 
 def scale_plot_size(factor=1.5):
+    """Scale plot size in jupyter notebook."""
     import matplotlib as mpl
     default_dpi = mpl.rcParamsDefault['figure.dpi']
     mpl.rcParams['figure.dpi'] = default_dpi * factor
@@ -93,6 +120,7 @@ def _make_positions(graph):
 
 
 def plot(tree, with_size=False):
+    """Plot visualization of splits."""
     graph = _as_graph(tree)
     arguments = {
         'G': graph,
@@ -109,24 +137,28 @@ def plot(tree, with_size=False):
 
 
 def dice(first, second):
+    """Dice coefficient of similarity."""
     numerator = 2. * np.sum(np.logical_and(first, second))
     denominator = np.sum(first) + np.sum(second)
     return numerator / denominator
 
 
 def positive_predictive_value(first, second):
+    """PPV coefficient."""
     true_positive = np.logical_and(first, second).sum()
     false_positive = np.logical_and(first, ~second).sum()
     return float(true_positive) / (true_positive + false_positive)
 
 
 def true_positive_rate(first, second):
+    """TPR coefficient."""
     true_positive = np.logical_and(first, second).sum()
     false_negative = np.logical_and(~first, second).sum()
     return float(true_positive) / (true_positive + false_negative)
 
 
 def statistic(merged, diagnoses, func):
+    """Compute statistic w.r.t. known classes."""
     clusters = np.unique(merged)
     diagnosis_types = np.unique(diagnoses)
     return pd.DataFrame({
@@ -141,6 +173,7 @@ def statistic(merged, diagnoses, func):
 def reject_split(tree: Optional[ty.DivikResult],
                  rejection_conditions: List[rj.RejectionCondition]) \
         -> Optional[ty.DivikResult]:
+    """Re-apply rejection condition on known result tree."""
     if tree is None:
         logging.debug("Rejecting empty.")
         return None

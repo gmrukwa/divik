@@ -1,4 +1,22 @@
-"""DiviK algorithm implementation"""
+"""DiviK algorithm implementation.
+
+divik.py
+
+Copyright 2018 Spectre Team
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from functools import partial
 import gc
 import logging as lg
@@ -22,12 +40,14 @@ log = partial(lg.log, lg.INFO)
 
 
 class FilteringMethod:
-    """Named filtering strategy"""
+    """Named filtering strategy."""
+
     def __init__(self, name: str, strategy: Filter):
         self.name = name
         self.strategy = strategy
 
     def __call__(self, data: Data, *args, **kwargs):
+        """Filter data using embedded strategy."""
         return self.strategy(data, *args, **kwargs)
 
 
@@ -122,7 +142,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
           progress_reporter: tqdm = None,
-          rejection_conditions: List[rj.RejectionCondition] = None) -> Optional[DivikResult]:
+          rejection_conditions: List[rj.RejectionCondition] = None) \
+        -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework.
 
     @param data: dataset to segment
@@ -131,7 +152,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
     @param stop_condition: criterion stating whether it is reasonable to split
     @param min_features_percentage: minimal percentage of preserved features
     @param progress_reporter: optional tqdm instance to report progress
-    @param rejection_conditions: optional list of conditions that reject clustering result
+    @param rejection_conditions: optional list of conditions that reject
+    clustering result
     @return: result of segmentation if not stopped
     """
     if rejection_conditions is None:
