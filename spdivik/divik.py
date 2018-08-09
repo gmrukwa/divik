@@ -184,8 +184,11 @@ def divik(data: Data, split: SelfScoringSegmentation,
     if rejection_conditions is None:
         rejection_conditions = []
     report = _Reporter(progress_reporter)
-    return _divik_backend(data, np.ones(shape=(data.shape[0],), dtype=bool),
-                          split=split, feature_selectors=feature_selectors,
+    select_all = np.ones(shape=(data.shape[0],), dtype=bool)
+    return _divik_backend(data,
+                          selection=select_all,
+                          split=split,
+                          feature_selectors=feature_selectors,
                           stop_condition=stop_condition,
                           rejection_conditions=rejection_conditions,
                           report=report,
