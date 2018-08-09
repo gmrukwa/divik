@@ -76,53 +76,53 @@ def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
     return selection
 
 
-_PATHS_OPEN = 1
-
-
-# TODO: ELIMINATE RECURSION ASAP!!!
+# @gmrukwa: I could not find more readable solution than recursion for now.
 def _divik_backend(data: Data, selection: np.ndarray,
                    split: SelfScoringSegmentation,
                    feature_selectors: List[FilteringMethod],
                    stop_condition: StopCondition,
                    rejection_conditions: List[rj.RejectionCondition],
+                   paths_open,
                    min_features_percentage: float = .05,
                    progress_reporter: tqdm = None) -> Optional[DivikResult]:
-    global _PATHS_OPEN
     subset = data[selection]
     lg.info('Filtering features...')
     filters, thresholds, filtered_data = _select_sequentially(
         feature_selectors, subset, min_features_percentage)
     lg.info('Checking if split makes sense...')
     if stop_condition(filtered_data):
-        _PATHS_OPEN -= 1
-        lg.info('Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
+        paths_open[0] -= 1
+        lg.info('Finito for {0}! {1} paths open.'.format(subset.shape[0], paths_open[0]))
         if progress_reporter is not None:
             progress_reporter.update(subset.shape[0])
         return None
     lg.info('Processing subset with {0} observations and {1} features.'.format(*filtered_data.shape))
     partition, centroids, quality = split(filtered_data)
     if any(reject((partition, centroids, quality)) for reject in rejection_conditions):
-        _PATHS_OPEN -= 1
-        lg.info('Rejected segmentation. Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
+        paths_open[0] -= 1
+        lg.info('Rejected segmentation. Finito for {0}! {1} paths open.'.format(subset.shape[0], paths_open[0]))
         if progress_reporter is not None:
             progress_reporter.update(subset.shape[0])
         return None
     lg.info('Recurring into {0} subregions.'.format(centroids.shape[0]))
-    _PATHS_OPEN += centroids.shape[0]
-    lg.info('{0} paths open.'.format(_PATHS_OPEN))
-    recurse = partial(_divik_backend, split=split,
+    paths_open[0] += centroids.shape[0]
+    lg.info('{0} paths open.'.format(paths_open[0]))
+    recurse = partial(_divik_backend, data=data, split=split,
                       feature_selectors=feature_selectors,
                       stop_condition=stop_condition,
-                      rejection_conditions=rejection_conditions)
+                      rejection_conditions=rejection_conditions,
+                      paths_open=paths_open,
+                      min_features_percentage=min_features_percentage,
+                      progress_reporter=progress_reporter)
     del subset
     del filtered_data
     gc.collect()
     subregions = [
-        recurse(data, _recursive_selection(selection, partition, cluster))
+        recurse(selection=_recursive_selection(selection, partition, cluster))
         for cluster in np.unique(partition)
     ]
-    _PATHS_OPEN -= 1
-    lg.info('Finito! {0} paths open.'.format(_PATHS_OPEN))
+    paths_open[0] -= 1
+    lg.info('Finito! {0} paths open.'.format(paths_open[0]))
     return DivikResult(
         centroids=centroids,
         quality=quality,
@@ -155,11 +155,10 @@ def divik(data: Data, split: SelfScoringSegmentation,
     """
     if rejection_conditions is None:
         rejection_conditions = []
-    global _PATHS_OPEN
-    _PATHS_OPEN = 1
     return _divik_backend(data, np.ones(shape=(data.shape[0],), dtype=bool),
                           split=split, feature_selectors=feature_selectors,
                           stop_condition=stop_condition,
                           rejection_conditions=rejection_conditions,
+                          paths_open=[1],
                           min_features_percentage=min_features_percentage,
                           progress_reporter=progress_reporter)
