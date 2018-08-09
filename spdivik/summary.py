@@ -29,7 +29,7 @@ import spdivik.types as ty
 
 
 def depth(tree, children_collection_name='subregions'):
-    """Get treee depth."""
+    """Get tree depth."""
     if tree is None:
         return 1
     return max(depth(subtree) for subtree
