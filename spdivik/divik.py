@@ -36,9 +36,6 @@ from spdivik.types import \
 import spdivik.rejection as rj
 
 
-log = partial(lg.log, lg.INFO)
-
-
 class FilteringMethod:
     """Named filtering strategy."""
 
@@ -92,27 +89,27 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    progress_reporter: tqdm = None) -> Optional[DivikResult]:
     global _PATHS_OPEN
     subset = data[selection]
-    log('Filtering features...')
+    lg.info('Filtering features...')
     filters, thresholds, filtered_data = _select_sequentially(
         feature_selectors, subset, min_features_percentage)
-    log('Checking if split makes sense...')
+    lg.info('Checking if split makes sense...')
     if stop_condition(filtered_data):
         _PATHS_OPEN -= 1
-        log('Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
+        lg.info('Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
         if progress_reporter is not None:
             progress_reporter.update(subset.shape[0])
         return None
-    log('Processing subset with {0} observations and {1} features.'.format(*filtered_data.shape))
+    lg.info('Processing subset with {0} observations and {1} features.'.format(*filtered_data.shape))
     partition, centroids, quality = split(filtered_data)
     if any(reject((partition, centroids, quality)) for reject in rejection_conditions):
         _PATHS_OPEN -= 1
-        log('Rejected segmentation. Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
+        lg.info('Rejected segmentation. Finito for {0}! {1} paths open.'.format(subset.shape[0], _PATHS_OPEN))
         if progress_reporter is not None:
             progress_reporter.update(subset.shape[0])
         return None
-    log('Recurring into {0} subregions.'.format(centroids.shape[0]))
+    lg.info('Recurring into {0} subregions.'.format(centroids.shape[0]))
     _PATHS_OPEN += centroids.shape[0]
-    log('{0} paths open.'.format(_PATHS_OPEN))
+    lg.info('{0} paths open.'.format(_PATHS_OPEN))
     recurse = partial(_divik_backend, split=split,
                       feature_selectors=feature_selectors,
                       stop_condition=stop_condition,
@@ -125,7 +122,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
         for cluster in np.unique(partition)
     ]
     _PATHS_OPEN -= 1
-    log('Finito! {0} paths open.'.format(_PATHS_OPEN))
+    lg.info('Finito! {0} paths open.'.format(_PATHS_OPEN))
     return DivikResult(
         centroids=centroids,
         quality=quality,
