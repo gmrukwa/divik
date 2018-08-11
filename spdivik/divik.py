@@ -68,11 +68,7 @@ def _select_sequentially(feature_selectors: List[FilteringMethod], data: Data,
 def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
                          cluster_number: int) -> np.ndarray:
     selection = np.zeros(shape=current_selection.shape, dtype=bool)
-    idx = 0
-    for element_idx, element_selected in enumerate(current_selection):
-        if element_selected:
-            selection[element_idx] = partition[idx] == cluster_number
-            idx += 1
+    selection[current_selection] = partition == cluster_number
     return selection
 
 
@@ -127,15 +123,18 @@ def _divik_backend(data: Data, selection: np.ndarray,
     report.filter()
     filters, thresholds, filtered_data = _select_sequentially(
         feature_selectors, subset, min_features_percentage)
+
     report.stop_check()
     if stop_condition(filtered_data):
         report.finished_for(subset.shape[0])
         return None
+
     report.processing(filtered_data)
     partition, centroids, quality = split(filtered_data)
     if any(reject((partition, centroids, quality)) for reject in rejection_conditions):
         report.rejected(subset.shape[0])
         return None
+
     report.recurring(centroids.shape[0])
     recurse = partial(_divik_backend, data=data, split=split,
                       feature_selectors=feature_selectors,
@@ -150,6 +149,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
         recurse(selection=_recursive_selection(selection, partition, cluster))
         for cluster in np.unique(partition)
     ]
+
     report.assemble()
     return DivikResult(
         centroids=centroids,
