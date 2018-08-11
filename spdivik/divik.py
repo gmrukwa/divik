@@ -20,49 +20,18 @@ limitations under the License.
 from functools import partial
 import gc
 import logging as lg
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import numpy as np
 from tqdm import tqdm
 
+import spdivik.feature_selection as fs
 from spdivik.types import \
     Data, \
     SelfScoringSegmentation, \
     StopCondition, \
-    Filter, \
-    Filters, \
-    Thresholds, \
     DivikResult
 import spdivik.rejection as rj
-
-
-class FilteringMethod:
-    """Named filtering strategy."""
-
-    def __init__(self, name: str, strategy: Filter):
-        self.name = name
-        self.strategy = strategy
-
-    def __call__(self, data: Data, *args, **kwargs):
-        """Filter data using embedded strategy."""
-        return self.strategy(data, *args, **kwargs)
-
-
-def _select_sequentially(feature_selectors: List[FilteringMethod], data: Data,
-                         min_features_percentage: float = .05) \
-        -> Tuple[Filters, Thresholds, Data]:
-    filters, thresholds = {}, {}
-    data_dimensionality = data.shape[1]
-    minimal_dimensionality = int(min_features_percentage * data_dimensionality)
-    current_selection = np.ones((data.shape[1],), dtype=bool)
-    for selector in feature_selectors:
-        key = selector.name
-        filters[key], thresholds[key] = selector(
-            data, min_features=minimal_dimensionality)
-        data = data[:, filters[key]]
-        current_selection[current_selection] = filters[key]
-        filters[key] = current_selection
-    return filters, thresholds, data
 
 
 def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
@@ -114,14 +83,14 @@ class _Reporter:
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def _divik_backend(data: Data, selection: np.ndarray,
                    split: SelfScoringSegmentation,
-                   feature_selectors: List[FilteringMethod],
+                   feature_selectors: List[fs.FilteringMethod],
                    stop_condition: StopCondition,
                    rejection_conditions: List[rj.RejectionCondition],
                    report: _Reporter,
                    min_features_percentage: float = .05) -> Optional[DivikResult]:
     subset = data[selection]
     report.filter()
-    filters, thresholds, filtered_data = _select_sequentially(
+    filters, thresholds, filtered_data = fs.select_sequentially(
         feature_selectors, subset, min_features_percentage)
 
     report.stop_check()
@@ -163,7 +132,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
 
 def divik(data: Data, split: SelfScoringSegmentation,
-          feature_selectors: List[FilteringMethod],
+          feature_selectors: List[fs.FilteringMethod],
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
           progress_reporter: tqdm = None,

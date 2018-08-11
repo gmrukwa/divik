@@ -5,6 +5,7 @@ import numpy as np
 import numpy.testing as npt
 
 import spdivik.divik as dv
+import spdivik.feature_selection as fs
 
 
 def returns(value):
@@ -25,22 +26,6 @@ def allow_almost_all_features(dataset: np.ndarray):
 
 DUMMY_DATA = np.arange(100).reshape(10, 10)
 SELECT_ALL = np.ones((10,), dtype=bool)
-
-
-class SelectSequentiallyTest(unittest.TestCase):
-    def test_applies_filters_on_smaller_and_smaller_data(self):
-        pass
-
-    def test_keeps_minimal_number_of_features(self):
-        pass
-
-
-class SelectSimultaneouslyTest(unittest.TestCase):
-    def test_applies_filters_on_whole_data(self):
-        pass
-
-    def test_keeps_minimal_number_of_features(self):
-        pass
 
 
 class RecursiveSelectionTest(unittest.TestCase):
@@ -65,7 +50,7 @@ class RecursiveSelectionTest(unittest.TestCase):
 
 class DivikBackendTest(unittest.TestCase):
     def test_calls_selection(self):
-        with patch.object(dv, dv._select_sequentially.__name__,
+        with patch.object(fs, fs.select_sequentially.__name__,
                           new=returns((MagicMock,) * 3)) as selector:
             dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
                               split=MagicMock(),
