@@ -63,6 +63,6 @@ class RejectionTest(unittest.TestCase):
 
     def test_rejects_splits(self):
         rejection_conditions = [
-            partial(rj.reject_if_clusters_smaller_than, 2)]
+            partial(rj.reject_if_clusters_smaller_than, size=2)]
         filtered = sm.reject_split(DUMMY_RESULT, rejection_conditions)
         self.assertIsNone(filtered.subregions[1])

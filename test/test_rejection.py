@@ -12,10 +12,10 @@ def make_segmentation(partition: np.ndarray):
 class SizeTest(unittest.TestCase):
     def test_rejects_clusters_with_small_size(self):
         segmentation = make_segmentation([1, 2, 2])
-        self.assertTrue(rj.reject_if_clusters_smaller_than(2, segmentation))
+        self.assertTrue(rj.reject_if_clusters_smaller_than(segmentation, 2))
 
     def test_allows_clusters_with_sufficient_size(self):
         segmentation = make_segmentation([1, 2, 2])
-        self.assertFalse(rj.reject_if_clusters_smaller_than(1, segmentation))
+        self.assertFalse(rj.reject_if_clusters_smaller_than(segmentation, 1))
         segmentation = make_segmentation([1, 1, 2, 2, 3, 3, 3])
-        self.assertFalse(rj.reject_if_clusters_smaller_than(2, segmentation))
+        self.assertFalse(rj.reject_if_clusters_smaller_than(segmentation, 2))
