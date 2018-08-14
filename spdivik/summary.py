@@ -47,6 +47,7 @@ def total_number_of_clusters(tree) -> int:
 def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf) \
         -> ty.IntLabels:
     """Compute merged segmentation labels."""
+    assert tree is not None
     return _merged_partition(tree.partition, tree.subregions, levels_limit)
 
 
