@@ -176,7 +176,7 @@ def hatzis(gap_trials: int = 100,
            distance_percentile: float = 99.,
            iters_limit: int = 100,
            distance: str = None,
-           minimal_size_percentage: float = 0.001,
+           minimal_size: int = 20,
            minimal_features_percentage: float = .01,
            fast_kmeans_iters: int = 10,
            pool: Pool = None,
@@ -192,7 +192,7 @@ def hatzis(gap_trials: int = 100,
     Higher may reveal more nuances, but reduce robustness.
     @param iters_limit: limit of k-means iterations
     @param distance: distance metric
-    @param minimal_size_percentage: minimal size of accepted cluster
+    @param minimal_size: minimal size of accepted cluster
     @param minimal_features_percentage: minimal percent of features preserved
     @param fast_kmeans_iters: limit of iterations for stop condition check
     @param pool: pool for parallel processing. Recommended maxtasksperchild
@@ -208,7 +208,7 @@ def hatzis(gap_trials: int = 100,
     known_metrics = {metric.value: metric for metric in dst.KnownMetric}
     assert distance in known_metrics, \
         "Distance {0} unknown. Known distances: {1}".format(distance, known_metrics)
-    assert 0 <= minimal_size_percentage <= 1, minimal_size_percentage
+    assert 0 <= minimal_size, minimal_size
     assert 0 <= minimal_features_percentage <= 1, minimal_features_percentage
     assert fast_kmeans_iters > 0, fast_kmeans_iters
     distance = dst.ScipyDistance(known_metrics[distance])
@@ -224,7 +224,7 @@ def hatzis(gap_trials: int = 100,
                           number_of_clusters=2)
     stop_if_split_makes_no_sense = st.Gap(distance, fast_kmeans, gap_trials, pool=pool)
     rejections = [
-        partial(rj.reject_if_clusters_smaller_than, percentage=minimal_size_percentage)
+        partial(rj.reject_if_clusters_smaller_than, size=minimal_size)
     ]
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,

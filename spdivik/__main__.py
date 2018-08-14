@@ -58,7 +58,7 @@ def load_config(config_path, destination: str):
     return config
 
 
-def build_experiment(config) -> typing.Tuple[pred.Divik, tqdm]:
+def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm]:
     scenario = config.pop('scenario', None)
     available = pred.scenarios.keys()
     assert scenario in available, \
@@ -66,6 +66,8 @@ def build_experiment(config) -> typing.Tuple[pred.Divik, tqdm]:
     pool = multiprocessing.Pool(**config.pop('pool', {
         'maxtasksperchild': 4
     }))
+    if 'minimal_size_percentage' in config:
+        config['minimal_size'] = int(data.shape[0] * config.pop('minimal_size_percentage', 0.01))
     progress_reporter = tqdm()
     logging.info('Scenario configuration: {0}'.format(config))
     return pred.scenarios[scenario](pool=pool,
@@ -139,8 +141,8 @@ def main():
     destination = prepare_destination(arguments.destination)
     setup_logger(destination)
     config = load_config(arguments.config, destination)
-    experiment, progress = build_experiment(config)
     data = load_data(arguments.source)
+    experiment, progress = build_experiment(config, data)
     progress.total = data.shape[0]
     progress.update(0)
     logging.info("Launching experiment.")
