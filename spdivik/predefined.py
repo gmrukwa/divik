@@ -35,6 +35,14 @@ import spdivik.types as ty
 Divik = Callable[[ty.Data], Optional[ty.DivikResult]]
 
 
+scenarios = {}
+
+
+def _scenario(f):
+    scenarios[f.__name__] = f
+    return f
+
+
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
                            kmeans: km.KMeans,
                            pool: Pool = None,
@@ -79,6 +87,7 @@ class _PrefilteringWrapper:
         return result
 
 
+@_scenario
 def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
               progress_reporter: tqdm = None, pool: Pool = None) -> Divik:
     """Size limited DiviK with extreme initialization and correlation.
@@ -115,6 +124,7 @@ def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
     return prefiltered_divik
 
 
+@_scenario
 def master(gap_trials: int = 100, distance_percentile: float = 99.,
            iters_limit: int = 100, pool: Pool = None,
            progress_reporter: tqdm = None,
