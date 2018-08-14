@@ -100,9 +100,3 @@ def select_sequentially(feature_selectors: List[FilteringMethod], data: Data,
         current_selection[current_selection] = filters[key]
         filters[key] = current_selection
     return filters, thresholds, data
-
-
-def select_simultaneously(feature_selectors: List[FilteringMethod], data: Data,
-                          min_features_percentage: float = .05) \
-        -> Tuple[Filters, Thresholds, Data]:
-    pass
