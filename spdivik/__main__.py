@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse as _agp
 import json
 import logging
@@ -12,9 +13,7 @@ from tqdm import tqdm
 import spdivik.predefined as pred
 import spdivik.summary as _smr
 import spdivik.types as ty
-
-
-__version__ = "1.0.0"
+from spdivik import __version__
 
 
 def parse_args():
