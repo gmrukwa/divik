@@ -1,0 +1,6 @@
+{
+  "scenario": "master",
+  "gap_trials": 100,
+  "distance_percentile": 95.0,
+  "iters_limit": 100
+}
