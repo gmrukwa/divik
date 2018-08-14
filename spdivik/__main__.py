@@ -63,7 +63,9 @@ def build_experiment(config) -> typing.Tuple[pred.Divik, tqdm]:
     available = pred.scenarios.keys()
     assert scenario in available, \
         "Unknown scenario {0}, available: {1}".format(scenario, available)
-    pool = multiprocessing.Pool(maxtasksperchild=4)
+    pool = multiprocessing.Pool(**config.pop('pool', {
+        'maxtasksperchild': 4
+    }))
     progress_reporter = tqdm()
     return pred.scenarios[scenario](pool=pool,
                                     progress_reporter=progress_reporter,
@@ -139,6 +141,7 @@ def main():
     experiment, progress = build_experiment(config)
     data = load_data(arguments.source)
     progress.total = data.shape[0]
+    progress.update(0)
     logging.info("Launching experiment.")
     try:
         result = experiment(data)
