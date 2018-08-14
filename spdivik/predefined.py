@@ -28,6 +28,7 @@ import spdivik.divik as dv
 import spdivik.feature_selection
 import spdivik.feature_selection as fs
 import spdivik.kmeans as km
+import spdivik.rejection as rj
 import spdivik.score as sc
 import spdivik.stop as st
 import spdivik.types as ty
@@ -167,4 +168,69 @@ def master(gap_trials: int = 100, distance_percentile: float = 99.,
                     stop_condition=stop_if_split_makes_no_sense,
                     progress_reporter=progress_reporter,
                     min_features_percentage=.05)
+    return divik
+
+
+@_scenario
+def hatzis(gap_trials: int = 100,
+           distance_percentile: float = 99.,
+           iters_limit: int = 100,
+           distance: str = None,
+           minimal_size_percentage: float = 0.001,
+           minimal_features_percentage: float = .01,
+           fast_kmeans_iters: int = 10,
+           pool: Pool = None,
+           progress_reporter: tqdm = None) -> Divik:
+    """GAP limited DiviK with percentile initialization.
+
+    Used in Hatzis experimentation.
+
+    @param gap_trials: number of random datasets used in GAP statistic
+    computation. Increases precision and computational overhead.
+    @param distance_percentile: percentile of distance used for selection of
+    initial representatives. Must be contained in range [0, 100] inclusive.
+    Higher may reveal more nuances, but reduce robustness.
+    @param iters_limit: limit of k-means iterations
+    @param distance: distance metric
+    @param minimal_size_percentage: minimal size of accepted cluster
+    @param minimal_features_percentage: minimal percent of features preserved
+    @param fast_kmeans_iters: limit of iterations for stop condition check
+    @param pool: pool for parallel processing. Recommended maxtasksperchild
+    equal to number of cores.
+    @param progress_reporter: tqdm-alike progress reporting object
+    @return: adjusted DiviK pipeline
+    """
+    assert gap_trials > 0, gap_trials
+    assert 0 <= distance_percentile <= 100, distance_percentile
+    assert iters_limit > 0, iters_limit
+    if distance is None:
+        distance = dst.KnownMetric.correlation.value
+    known_metrics = {metric.value: metric for metric in dst.KnownMetric}
+    assert distance in known_metrics, \
+        "Distance {0} unknown. Known distances: {1}".format(distance, known_metrics)
+    assert 0 <= minimal_size_percentage <= 1, minimal_size_percentage
+    assert 0 <= minimal_features_percentage <= 1, minimal_features_percentage
+    assert fast_kmeans_iters > 0, fast_kmeans_iters
+    distance = dst.ScipyDistance(known_metrics[distance])
+    labeling = km.Labeling(distance)
+    initialize = km.PercentileInitialization(distance, distance_percentile)
+    kmeans = km.KMeans(labeling=km.Labeling(distance),
+                       initialize=initialize,
+                       number_of_iterations=iters_limit)
+    best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool)
+    fast_kmeans = partial(km.KMeans(labeling=labeling,
+                                    initialize=initialize,
+                                    number_of_iterations=fast_kmeans_iters),
+                          number_of_clusters=2)
+    stop_if_split_makes_no_sense = st.Gap(distance, fast_kmeans, gap_trials, pool=pool)
+    rejections = [
+        partial(rj.reject_if_clusters_smaller_than, percentage=minimal_size_percentage)
+    ]
+    divik = partial(dv.divik,
+                    split=best_kmeans_with_dunn,
+                    feature_selectors=[_AMPLITUDE_FILTER, _VARIANCE_FILTER],
+                    stop_condition=stop_if_split_makes_no_sense,
+                    rejection_conditions=rejections,
+                    progress_reporter=progress_reporter,
+                    min_features_percentage=minimal_features_percentage)
     return divik

@@ -94,3 +94,28 @@ class TestMaster(DataBoundTestCase):
 
     def test_scores_segmentation(self):
         self.assertFalse(np.isnan(self.result.quality))
+
+
+class TestHatzis(DataBoundTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(TestHatzis, cls).setUpClass()
+        progress_bar = tqdm(desc='hatzis', total=cls.data.shape[0])
+        distance = dst.KnownMetric.euclidean.value
+        divik = pre.hatzis(gap_trials=100, pool=pool,
+                           progress_reporter=progress_bar,
+                           distance=distance)
+        cls.result = divik(cls.data)
+
+    def test_constructs_runnable_pipeline(self):
+        self.assertIsNotNone(self.result)
+
+    def test_splits_test_data_into_two_topmost_groups(self):
+        self.assertEqual(len(self.result.subregions), 2)
+
+    def test_makes_only_topmost_split(self):
+        self.assertIsNone(self.result.subregions[0])
+        self.assertIsNone(self.result.subregions[1])
+
+    def test_scores_segmentation(self):
+        self.assertFalse(np.isnan(self.result.quality))
