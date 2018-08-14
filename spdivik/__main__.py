@@ -144,7 +144,7 @@ def main():
         result = experiment(data)
     except Exception as ex:
         logging.error("Failed with exception.")
-        logging.error(str(ex))
+        logging.error(repr(ex))
         raise
     finally:
         progress.close()
