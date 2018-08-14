@@ -1,17 +1,18 @@
 """A setuptools based setup module for DiviK algorithm."""
 
 from setuptools import setup, find_packages
+from spdivik import __version__
 
 setup(
     name='spectre-divik',
-    version='0.3.0',
+    version=__version__,
     description='Divisive iK-means algorithm implementation',
     url='https://github.com/spectre-team/spectre-divik',
     author='Grzegorz Mrukwa',
     author_email='Grzegorz.Mrukwa@polsl.pl',
     classifiers=[
         # based on https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 1 - Planning',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
@@ -22,6 +23,9 @@ setup(
         'Topic :: Scientific/Engineering :: Information Analysis',
         'Topic :: Scientific/Engineering :: Medical Science Apps.'
     ],
+    entry_points={
+        'console_scripts': ['divik=spdivik.__main__:main'],
+    },
     packages=find_packages(exclude=['test']),
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
