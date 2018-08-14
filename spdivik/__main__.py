@@ -67,6 +67,7 @@ def build_experiment(config) -> typing.Tuple[pred.Divik, tqdm]:
         'maxtasksperchild': 4
     }))
     progress_reporter = tqdm()
+    logging.info('Scenario configuration: {0}'.format(config))
     return pred.scenarios[scenario](pool=pool,
                                     progress_reporter=progress_reporter,
                                     **config), progress_reporter
