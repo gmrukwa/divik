@@ -44,9 +44,9 @@ def gap(data: Data, labels: IntLabels, centroids: Centroids,
                                  split=split,
                                  distance=distance)
     if pool is None:
-        dispersions = list(map(compute_dispersion, range(seed, seed + n_trials)))
+        dispersions = [compute_dispersion(i) for i in range(seed, seed + n_trials)]
     else:
         dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
     reference = _dispersion(data, labels, centroids, distance)
-    gap_value = np.log(np.mean(dispersions)) - np.log(reference)
+    gap_value = np.mean(np.log(dispersions)) - np.log(reference)
     return gap_value
