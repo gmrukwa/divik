@@ -1,0 +1,7 @@
+{
+  "distance": "correlation",
+  "initialization_percentile": 99,
+  "number_of_iterations": 5,
+  "gap_trials": 2,
+  "maximal_number_of_clusters": 2
+}

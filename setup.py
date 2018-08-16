@@ -24,7 +24,10 @@ setup(
         'Topic :: Scientific/Engineering :: Medical Science Apps.'
     ],
     entry_points={
-        'console_scripts': ['divik=spdivik.__main__:main'],
+        'console_scripts': [
+            'divik=spdivik.__main__:main',
+            'kmeans=spdivik.kmeans.__main__:main'
+        ],
     },
     packages=find_packages(exclude=['test']),
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
