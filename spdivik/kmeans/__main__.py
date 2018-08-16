@@ -7,6 +7,7 @@ import pickle
 from typing import Tuple
 import numpy as np
 import pandas as pd
+from tqdm import trange
 import spdivik.distance as dst
 import spdivik.kmeans as km
 import spdivik.types as ty
@@ -68,14 +69,15 @@ class DataBoundKmeans:
 def split(data: ty.Data, kmeans: km.KMeans, pool: Pool,
           maximal_number_of_clusters: int):
     data_bound_kmeans = DataBoundKmeans(kmeans=kmeans, data=data)
-    logging.info('Segmenting data in parallel.')
     if pool is not None:
+        logging.info('Segmenting data in parallel.')
         segmentations = pool.map(data_bound_kmeans,
                                  range(2, maximal_number_of_clusters+1))
     else:
+        logging.info('Segmenting data in sequential.')
         segmentations = [
             data_bound_kmeans(number_of_clusters) for number_of_clusters
-            in range(2, maximal_number_of_clusters+1)
+            in trange(2, maximal_number_of_clusters+1)
         ]
     logging.info('Data segmented.')
     return [split_into_one(data)] + segmentations
@@ -95,7 +97,7 @@ def score_splits(segmentations, data: ty.Data, kmeans: km.KMeans, gap,
         gap(data=data, labels=labels, centroids=centroids,
             split=build_splitter(kmeans, number_of_clusters))
         for number_of_clusters, (labels, centroids)
-        in zip(range(1, maximal_number_of_clusters+1), segmentations)
+        in zip(trange(1, maximal_number_of_clusters+1), segmentations)
     ]
     logging.info('Scoring completed.')
     return scores
