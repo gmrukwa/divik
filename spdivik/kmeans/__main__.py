@@ -45,9 +45,11 @@ def build_experiment(config):
     pool_max_tasks = int(config.get('pool_max_tasks', 4))
     assert 0 <= pool_max_tasks
     pool = Pool(maxtasksperchild=pool_max_tasks)
+    use_pool_for_grouping = bool(config.get('use_pool_for_grouping', False))
     gap = partial(sc.gap, distance=distance, n_trials=gap_trials, pool=pool,
                   return_deviation=True)
-    return kmeans, gap, maximal_number_of_clusters, pool
+    return kmeans, gap, maximal_number_of_clusters, pool, \
+           pool if use_pool_for_grouping else None
 
 
 def split_into_one(data: ty.Data) -> Tuple[ty.IntLabels, ty.Centroids]:
@@ -67,8 +69,14 @@ def split(data: ty.Data, kmeans: km.KMeans, pool: Pool,
           maximal_number_of_clusters: int):
     data_bound_kmeans = DataBoundKmeans(kmeans=kmeans, data=data)
     logging.info('Segmenting data in parallel.')
-    segmentations = pool.map(data_bound_kmeans,
-                             range(2, maximal_number_of_clusters+1))
+    if pool is not None:
+        segmentations = pool.map(data_bound_kmeans,
+                                 range(2, maximal_number_of_clusters+1))
+    else:
+        segmentations = [
+            data_bound_kmeans(number_of_clusters) for number_of_clusters
+            in range(2, maximal_number_of_clusters+1)
+        ]
     logging.info('Data segmented.')
     return [split_into_one(data)] + segmentations
 
@@ -123,10 +131,10 @@ def main():
     destination = scr.prepare_destination(arguments.destination)
     scr.setup_logger(destination)
     config = scr.load_config(arguments.config, destination)
-    kmeans, gap, maximal_number_of_clusters, pool = build_experiment(config)
+    kmeans, gap, maximal_number_of_clusters, pool, kmeans_pool = build_experiment(config)
     data = scr.load_data(arguments.source)
     try:
-        segmentations = split(data, kmeans, pool, maximal_number_of_clusters)
+        segmentations = split(data, kmeans, kmeans_pool, maximal_number_of_clusters)
         scores = score_splits(segmentations, data, kmeans, gap, maximal_number_of_clusters)
     except Exception as ex:
         logging.error("Failed with exception.")
