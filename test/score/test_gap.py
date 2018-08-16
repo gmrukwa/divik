@@ -48,3 +48,9 @@ class TestGap(unittest.TestCase):
         better = self.gap(self.data, self.labels, self.centroids)
         worse = self.gap(self.data, self.worse_labels, self.worse_centroids)
         self.assertGreater(better, worse)
+
+    def test_returns_std_if_requested(self):
+        gap, std = self.gap(self.data, self.labels, self.centroids,
+                            return_deviation=True)
+        self.assertIsNotNone(gap)
+        self.assertIsNotNone(std)

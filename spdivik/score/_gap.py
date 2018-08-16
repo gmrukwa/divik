@@ -1,3 +1,4 @@
+from __future__ import division
 from functools import partial
 from multiprocessing import Pool
 from typing import Tuple
@@ -34,7 +35,8 @@ def _dispersion_of_random_sample(seed: int,
 @seeded(wrapped_requires_seed=True)
 def gap(data: Data, labels: IntLabels, centroids: Centroids,
         distance: DistanceMetric, split: SegmentationMethod,
-        seed: int=0, n_trials: int = 100, pool: Pool=None) -> float:
+        seed: int=0, n_trials: int = 100, pool: Pool=None,
+        return_deviation: bool = False) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
     compute_dispersion = partial(_dispersion_of_random_sample,
@@ -48,5 +50,10 @@ def gap(data: Data, labels: IntLabels, centroids: Centroids,
     else:
         dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
     reference = _dispersion(data, labels, centroids, distance)
-    gap_value = np.mean(np.log(dispersions)) - np.log(reference)
-    return gap_value
+    log_dispersions = np.log(dispersions)
+    gap_value = np.mean(log_dispersions) - np.log(reference)
+    result = (gap_value, )
+    if return_deviation:
+        standard_deviation = np.sqrt(1 + 1 / n_trials) * np.std(log_dispersions)
+        result += (standard_deviation,)
+    return result
