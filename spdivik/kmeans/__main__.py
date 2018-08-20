@@ -4,7 +4,7 @@ import logging
 from multiprocessing import Pool
 import os
 import pickle
-from typing import Tuple
+from typing import Callable, NamedTuple, Optional, Tuple
 import numpy as np
 import pandas as pd
 from tqdm import trange
@@ -19,7 +19,21 @@ def assert_configured(config, name):
     assert name in config, 'Missing "' + name + '" field in config.'
 
 
-def build_experiment(config):
+Gap = Callable[
+    [ty.Data, ty.IntLabels, ty.Centroids, ty.SegmentationMethod],
+    float
+]
+Experiment = NamedTuple('Experiment', [
+    ('kmeans', km.KMeans),
+    ('gap', Gap),
+    ('maximal_number_of_clusters', int),
+    ('minimal_number_of_clusters', int),
+    ('gap_pool', Pool),
+    ('grouping_pool', Optional[Pool])
+])
+
+
+def build_experiment(config) -> Experiment:
     assert_configured(config, 'distance')
     known_distances = {metric.value: metric for metric in dst.KnownMetric}
     assert config['distance'] in known_distances, \
@@ -42,15 +56,21 @@ def build_experiment(config):
     assert 0 <= gap_trials
     assert_configured(config, 'maximal_number_of_clusters')
     maximal_number_of_clusters = int(config['maximal_number_of_clusters'])
-    assert 0 <= maximal_number_of_clusters
+    assert 1 < maximal_number_of_clusters
+    minimal_number_of_clusters = int(config.get('minimal_number_of_clusters', 1))
+    assert 0 < minimal_number_of_clusters < maximal_number_of_clusters
     pool_max_tasks = int(config.get('pool_max_tasks', 4))
     assert 0 <= pool_max_tasks
     pool = Pool(maxtasksperchild=pool_max_tasks)
     use_pool_for_grouping = bool(config.get('use_pool_for_grouping', False))
     gap = partial(sc.gap, distance=distance, n_trials=gap_trials, pool=pool,
                   return_deviation=True)
-    return kmeans, gap, maximal_number_of_clusters, pool, \
-           pool if use_pool_for_grouping else None
+    return Experiment(kmeans=kmeans,
+                      gap=gap,
+                      maximal_number_of_clusters=maximal_number_of_clusters,
+                      minimal_number_of_clusters=minimal_number_of_clusters,
+                      gap_pool=pool,
+                      grouping_pool=pool if use_pool_for_grouping else None)
 
 
 def split_into_one(data: ty.Data) -> Tuple[ty.IntLabels, ty.Centroids]:
@@ -67,20 +87,26 @@ class DataBoundKmeans:
 
 
 def split(data: ty.Data, kmeans: km.KMeans, pool: Pool,
+          minimal_number_of_clusters: int,
           maximal_number_of_clusters: int):
     data_bound_kmeans = DataBoundKmeans(kmeans=kmeans, data=data)
+    clustering_start = max(minimal_number_of_clusters, 2)
+    clustering_end = maximal_number_of_clusters + 1
     if pool is not None:
         logging.info('Segmenting data in parallel.')
         segmentations = pool.map(data_bound_kmeans,
-                                 range(2, maximal_number_of_clusters+1))
+                                 range(clustering_start, clustering_end))
     else:
         logging.info('Segmenting data in sequential.')
+        clusters_counts = trange(clustering_start, clustering_end)
         segmentations = [
             data_bound_kmeans(number_of_clusters) for number_of_clusters
-            in trange(2, maximal_number_of_clusters+1)
+            in clusters_counts
         ]
     logging.info('Data segmented.')
-    return [split_into_one(data)] + segmentations
+    if minimal_number_of_clusters == 1:
+        segmentations = [split_into_one(data)] + segmentations
+    return segmentations
 
 
 def build_splitter(kmeans, number_of_clusters):
@@ -91,13 +117,15 @@ def build_splitter(kmeans, number_of_clusters):
 
 
 def score_splits(segmentations, data: ty.Data, kmeans: km.KMeans, gap,
+                 minimal_number_of_clusters: int,
                  maximal_number_of_clusters: int):
     logging.info('Scoring splits with GAP statistic.')
+    clusters_counts = trange(minimal_number_of_clusters, maximal_number_of_clusters+1)
     scores = [
         gap(data=data, labels=labels, centroids=centroids,
             split=build_splitter(kmeans, number_of_clusters))
         for number_of_clusters, (labels, centroids)
-        in zip(trange(1, maximal_number_of_clusters+1), segmentations)
+        in zip(clusters_counts, segmentations)
     ]
     logging.info('Scoring completed.')
     return scores
@@ -133,17 +161,22 @@ def main():
     destination = scr.prepare_destination(arguments.destination)
     scr.setup_logger(destination)
     config = scr.load_config(arguments.config, destination)
-    kmeans, gap, maximal_number_of_clusters, pool, kmeans_pool = build_experiment(config)
+    experiment = build_experiment(config)
     data = scr.load_data(arguments.source)
     try:
-        segmentations = split(data, kmeans, kmeans_pool, maximal_number_of_clusters)
-        scores = score_splits(segmentations, data, kmeans, gap, maximal_number_of_clusters)
+        segmentations = split(data, experiment.kmeans, experiment.grouping_pool,
+                              experiment.minimal_number_of_clusters,
+                              experiment.maximal_number_of_clusters)
+        scores = score_splits(segmentations, data, experiment.kmeans,
+                              experiment.gap,
+                              experiment.minimal_number_of_clusters,
+                              experiment.maximal_number_of_clusters)
     except Exception as ex:
         logging.error("Failed with exception.")
         logging.error(repr(ex))
         raise
     finally:
-        pool.close()
+        experiment.gap_pool.close()
     save(segmentations, scores, destination)
 
 
