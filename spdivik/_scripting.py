@@ -4,11 +4,13 @@ import logging
 import os
 import sys
 import time
+from typing import Dict, Tuple
 
 import numpy as np
 from scipy import io as scio
 
 from spdivik import __version__
+import spdivik.types as ty
 
 
 def parse_args():
@@ -63,7 +65,7 @@ def _load_mat(path: str) -> np.ndarray:
     return np.array(data[key])
 
 
-def load_data(path: str) -> np.ndarray:
+def load_data(path: str) -> ty.Data:
     logging.info("Loading data: " + path)
     path = path.lower()
     if path.endswith('.csv') or path.endswith('.txt'):
@@ -77,3 +79,16 @@ def load_data(path: str) -> np.ndarray:
         logging.error(message)
         raise IOError(message)
     return loader(path)
+
+
+Config = Dict
+DestinationPath = str
+
+
+def initialize() -> Tuple[ty.Data, Config, DestinationPath]:
+    arguments = parse_args()
+    destination = prepare_destination(arguments.destination)
+    setup_logger(destination)
+    config = load_config(arguments.config, destination)
+    data = load_data(arguments.source)
+    return data, config, destination

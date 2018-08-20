@@ -135,12 +135,8 @@ def save(segmentations, scores, destination: str):
 
 
 def main():
-    arguments = scr.parse_args()
-    destination = scr.prepare_destination(arguments.destination)
-    scr.setup_logger(destination)
-    config = scr.load_config(arguments.config, destination)
+    data, config, destination = scr.initialize()
     experiment = build_experiment(config)
-    data = scr.load_data(arguments.source)
     try:
         segmentations = split(data, experiment.kmeans, experiment.grouping_pool,
                               experiment.minimal_number_of_clusters,
