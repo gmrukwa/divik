@@ -113,15 +113,18 @@ def make_segmentations_matrix(segmentations) -> np.ndarray:
     return np.hstack([s[0].reshape(-1, 1) for s in segmentations])
 
 
-def make_scores_report(scores) -> pd.DataFrame:
+def make_scores_report(scores,
+                       minimal_number_of_clusters: int,
+                       maximal_number_of_clusters: int) -> pd.DataFrame:
     report = pd.DataFrame(scores, columns=['GAP', 's_k'])
-    report['number_of_clusters'] = range(1, len(scores) + 1)
+    report['number_of_clusters'] = range(minimal_number_of_clusters,
+                                         maximal_number_of_clusters + 1)
     is_suggested = report.GAP[:-1].values > (report.GAP[1:] + report.s_k[1:])
     report['suggested_number_of_clusters'] = list(is_suggested) + [False]
     return report
 
 
-def save(segmentations, scores, destination: str):
+def save(segmentations, scores, destination: str, experiment: Experiment):
     logging.info("Saving result.")
     logging.info("Saving segmentations.")
     with open(os.path.join(destination, 'segmentations.pkl'), 'wb') as pkl:
@@ -130,7 +133,8 @@ def save(segmentations, scores, destination: str):
     np.savetxt(os.path.join(destination, 'partitions.csv'), partitions,
                delimiter=', ', fmt='%i')
     logging.info("Saving scores.")
-    report = make_scores_report(scores)
+    report = make_scores_report(scores, experiment.minimal_number_of_clusters,
+                                experiment.maximal_number_of_clusters)
     report.to_csv(os.path.join(destination, 'scores.csv'))
 
 
@@ -151,7 +155,7 @@ def main():
         raise
     finally:
         experiment.gap_pool.close()
-    save(segmentations, scores, destination)
+    save(segmentations, scores, destination, experiment)
 
 
 if __name__ == '__main__':
