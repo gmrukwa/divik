@@ -1,4 +1,4 @@
--e git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers
+git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers
 matlabruntimeforpython===R2016b
 matplotlib==2.2.2
 networkx==2.1
