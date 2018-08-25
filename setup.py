@@ -26,7 +26,8 @@ setup(
     entry_points={
         'console_scripts': [
             'divik=spdivik.__main__:main',
-            'kmeans=spdivik.kmeans.__main__:main'
+            'kmeans=spdivik.kmeans.__main__:main',
+            'linkage=spdivik.linkage:main'
         ],
     },
     packages=find_packages(exclude=['test']),
