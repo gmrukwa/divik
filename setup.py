@@ -27,7 +27,7 @@ setup(
         'console_scripts': [
             'divik=spdivik.__main__:main',
             'kmeans=spdivik.kmeans.__main__:main',
-            'linkage=spdivik.linkage:main'
+            'linkage=spdivik._linkage:main'
         ],
     },
     packages=find_packages(exclude=['test']),
