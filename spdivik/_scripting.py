@@ -67,12 +67,12 @@ def _load_mat(path: str) -> np.ndarray:
 
 def load_data(path: str) -> ty.Data:
     logging.info("Loading data: " + path)
-    path = path.lower()
-    if path.endswith('.csv') or path.endswith('.txt'):
+    normalized = path.lower()
+    if normalized.endswith('.csv') or normalized.endswith('.txt'):
         loader = np.loadtxt
-    elif path.endswith('.npy'):
+    elif normalized.endswith('.npy'):
         loader = np.load
-    elif path.endswith('.mat'):
+    elif normalized.endswith('.mat'):
         loader = _load_mat
     else:
         message = 'Unsupported data format: ' + os.path.splitext(path)[1]
