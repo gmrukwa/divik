@@ -7,6 +7,7 @@ import sys
 import time
 from typing import Dict, Tuple
 
+import h5py
 import numpy as np
 from scipy import io as scio
 
@@ -58,13 +59,20 @@ def load_config(config_path, destination: str):
     return config
 
 
-def _load_mat(path: str) -> np.ndarray:
-    data = scio.loadmat(path)
-    key = [key for key in data.keys() if not key.startswith('__')]
+def _load_mat_with(path: str, backend=scio.loadmat, ignore='__') -> np.ndarray:
+    data = backend(path)
+    key = [key for key in data.keys() if not key.startswith(ignore)]
     assert len(key) == 1, \
         'There should be a single variable inside MAT-file: ' + path \
         + '\nWere: ' + str(key)
     return np.array(data[key[0]])
+
+
+def _load_mat(path: str) -> np.ndarray:
+    try:
+        return _load_mat_with(path, backend=scio.loadmat, ignore='__')
+    except NotImplementedError:  # v7.3 MATLAB HDF5 MAT-File
+        return _load_mat_with(path, backend=h5py.File, ignore='#')
 
 
 def load_data(path: str) -> ty.Data:
