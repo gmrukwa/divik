@@ -79,11 +79,7 @@ def save(data: ty.Data, result: typing.Optional[ty.DivikResult], destination: st
 
 
 def main():
-    arguments = sc.parse_args()
-    destination = sc.prepare_destination(arguments.destination)
-    sc.setup_logger(destination)
-    config = sc.load_config(arguments.config, destination)
-    data = sc.load_data(arguments.source)
+    data, config, destination = sc.initialize()
     experiment, progress = build_experiment(config, data)
     progress.total = data.shape[0]
     progress.update(0)
