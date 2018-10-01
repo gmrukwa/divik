@@ -60,10 +60,11 @@ def load_config(config_path, destination: str):
 
 def _load_mat(path: str) -> np.ndarray:
     data = scio.loadmat(path)
-    assert len(data) == 2, \
-        'There should be a single variable inside MAT-file: ' + path
     key = [key for key in data.keys() if not key.startswith('__')]
-    return np.array(data[key])
+    assert len(key) == 1, \
+        'There should be a single variable inside MAT-file: ' + path \
+        + '\nWere: ' + str(key)
+    return np.array(data[key[0]])
 
 
 def load_data(path: str) -> ty.Data:
