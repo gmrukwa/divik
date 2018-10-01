@@ -10,6 +10,7 @@ from typing import Dict, Tuple
 import h5py
 import numpy as np
 from scipy import io as scio
+from tqdm import tqdm
 
 from spdivik import __version__
 import spdivik.types as ty
@@ -40,10 +41,14 @@ def prepare_destination(destination: str) -> str:
 
 def setup_logger(destination: str):
     log_destination = os.path.join(destination, 'logs.txt')
-    log_format = '%(asctime)s [%(levelname)s] %(filename)40s:%(lineno)3s' \
-                 + ' - %(funcName)40s\t%(message)s'
-    logging.basicConfig(format=log_format, level=logging.DEBUG, filemode='w',
-                        filename=log_destination)
+    log_format = '%(asctime)s [%(levelname)s]\t%(message)s'
+    handlers = [
+        logging.StreamHandler(tqdm),
+        logging.FileHandler(filename=log_destination,
+                            mode='a')
+    ]
+    del logging.root.handlers[:]
+    logging.basicConfig(format=log_format, level=logging.INFO, handlers=handlers)
     version_notice = "Using " + sys.argv[0] + \
                      " (spdivik, version " + __version__ + ")"
     logging.info(version_notice)
