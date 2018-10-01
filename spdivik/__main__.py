@@ -47,7 +47,7 @@ def _make_summary(result: typing.Optional[ty.DivikResult]):
 def _make_merged(result: typing.Optional[ty.DivikResult]) -> np.ndarray:
     depth = _smr.depth(result)
     return np.hstack(
-        _smr.merged_partition(result, limit + 1)
+        _smr.merged_partition(result, limit + 1).reshape(-1, 1)
         for limit in range(depth)
     )
 
