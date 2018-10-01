@@ -61,9 +61,13 @@ def save(result: typing.Optional[ty.DivikResult], destination: str):
         json.dump(_make_summary(result), smr)
     if result is not None:
         logging.info("Saving partitions.")
+        merged = _make_merged(result)
         np.savetxt(os.path.join(destination, 'partitions.csv'),
-                   _make_merged(result),
-                   delimiter=', ')
+                   merged, delimiter=', ')
+        final_partition = merged[:, -1]
+        np.save(os.path.join(destination, 'final_partition.npy'), final_partition)
+        np.savetxt(os.path.join(destination, 'final_partition.csv'), final_partition,
+                   delimiter=', ', fmt='%i')
     else:
         logging.info("Skipping partition save. Cause: result is None")
 
