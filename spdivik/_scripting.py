@@ -1,4 +1,5 @@
 import argparse as _agp
+from functools import partial
 import json
 import logging
 import os
@@ -68,7 +69,9 @@ def _load_mat(path: str) -> np.ndarray:
 def load_data(path: str) -> ty.Data:
     logging.info("Loading data: " + path)
     normalized = path.lower()
-    if normalized.endswith('.csv') or normalized.endswith('.txt'):
+    if normalized.endswith('.csv'):
+        loader = partial(np.loadtxt, delimiter=',')
+    elif normalized.endswith('.txt'):
         loader = np.loadtxt
     elif normalized.endswith('.npy'):
         loader = np.load
