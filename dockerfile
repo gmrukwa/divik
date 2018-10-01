@@ -17,3 +17,11 @@ RUN mkdir -p /root/.config/matplotlib &&\
   echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
 RUN python -m unittest discover
+
+RUN python setup.py install
+
+VOLUME /data
+
+WORKDIR /data
+
+RUN rm -rf /app
