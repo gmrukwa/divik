@@ -6,6 +6,7 @@ import os
 import pickle
 import typing
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 import spdivik.predefined as pred
 import spdivik.summary as _smr
@@ -51,7 +52,7 @@ def _make_merged(result: typing.Optional[ty.DivikResult]) -> np.ndarray:
     )
 
 
-def save(result: typing.Optional[ty.DivikResult], destination: str):
+def save(data: ty.Data, result: typing.Optional[ty.DivikResult], destination: str):
     logging.info("Saving result.")
     logging.info("Saving pickle.")
     with open(os.path.join(destination, 'result.pkl'), 'wb') as pkl:
@@ -68,6 +69,11 @@ def save(result: typing.Optional[ty.DivikResult], destination: str):
         np.save(os.path.join(destination, 'final_partition.npy'), final_partition)
         np.savetxt(os.path.join(destination, 'final_partition.csv'), final_partition,
                    delimiter=', ', fmt='%i')
+        logging.info("Saving centroids.")
+        centroids = pd.DataFrame(data).groupby(final_partition).mean().values
+        np.save(os.path.join(destination, 'centroids.npy'), centroids)
+        np.savetxt(os.path.join(destination, 'centroids.csv'), centroids,
+                   delimiter=', ')
     else:
         logging.info("Skipping partition save. Cause: result is None")
 
@@ -90,7 +96,7 @@ def main():
         raise
     finally:
         progress.close()
-    save(result, destination)
+    save(data, result, destination)
 
 
 if __name__ == '__main__':
