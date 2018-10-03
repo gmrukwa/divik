@@ -29,6 +29,7 @@ def parse_args():
     parser.add_argument('--config', '-c',
                         help='Configuration file for the experiment.',
                         action='store', dest='config', required=True)
+    parser.add_argument('--verbose', '-v', action='store_true')
     return parser.parse_args()
 
 
@@ -39,16 +40,22 @@ def prepare_destination(destination: str) -> str:
     return destination
 
 
-def setup_logger(destination: str):
+def setup_logger(destination: str, verbose: bool=False):
     log_destination = os.path.join(destination, 'logs.txt')
-    log_format = '%(asctime)s [%(levelname)s]\t%(message)s'
+    if verbose:
+        log_format = '%(asctime)s [%(levelname)s] %(filename)40s:%(lineno)3s' \
+                     + ' - %(funcName)40s\t%(message)s'
+        log_level = logging.DEBUG
+    else:
+        log_format = '%(asctime)s [%(levelname)s]\t%(message)s'
+        log_level = logging.INFO
     handlers = [
         logging.StreamHandler(tqdm),
         logging.FileHandler(filename=log_destination,
                             mode='a')
     ]
     del logging.root.handlers[:]
-    logging.basicConfig(format=log_format, level=logging.DEBUG, handlers=handlers)
+    logging.basicConfig(format=log_format, level=log_level, handlers=handlers)
     version_notice = "Using " + sys.argv[0] + \
                      " (spdivik, version " + __version__ + ")"
     logging.info(version_notice)
@@ -115,7 +122,7 @@ DestinationPath = str
 def initialize() -> Tuple[ty.Data, Config, DestinationPath]:
     arguments = parse_args()
     destination = prepare_destination(arguments.destination)
-    setup_logger(destination)
+    setup_logger(destination, arguments.verbose)
     config = load_config(arguments.config, destination)
     try:
         data = load_data(arguments.source)
