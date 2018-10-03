@@ -17,8 +17,9 @@ import spdivik._scripting as sc
 def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm]:
     scenario = config.pop('scenario', None)
     available = pred.scenarios.keys()
-    assert scenario in available, \
-        "Unknown scenario {0}, available: {1}".format(scenario, available)
+    if scenario not in available:
+        raise ValueError("Unknown scenario {0}, available: {1}"
+                         .format(scenario, available))
     pool = multiprocessing.Pool(**config.pop('pool', {
         'maxtasksperchild': 4
     }))
@@ -80,6 +81,7 @@ def save(data: ty.Data, result: typing.Optional[ty.DivikResult], destination: st
 
 def main():
     data, config, destination = sc.initialize()
+    logging.info('Workspace initialized.')
     experiment, progress = build_experiment(config, data)
     progress.total = data.shape[0]
     progress.update(0)
