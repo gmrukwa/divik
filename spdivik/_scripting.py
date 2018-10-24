@@ -104,7 +104,7 @@ def load_data(path: str) -> ty.Data:
         loader = partial(np.loadtxt, delimiter=',')
     elif normalized.endswith('.txt'):
         loader = np.loadtxt
-    elif normalized.endswith('.npy'):
+    elif normalized.endswith('.npy') or normalized.endswith('.npz'):
         loader = np.load
     elif normalized.endswith('.mat'):
         loader = _load_mat
