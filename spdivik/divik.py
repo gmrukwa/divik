@@ -41,13 +41,27 @@ def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
     return selection
 
 
+def _has_constant_rows(matrix: np.ndarray) -> bool:
+    mins, maxes = matrix.min(axis=1), matrix.max(axis=1)
+    return (mins == maxes).any()
+
+
 class _Reporter:
     def __init__(self, progress_reporter: tqdm = None):
         self.progress_reporter = progress_reporter
         self.paths_open = 1
 
-    def filter(self):
+    def filter(self, subset):
         lg.info('Feature filtering.')
+        if lg.getLogger().getEffectiveLevel() <= lg.DEBUG:
+            lg.debug('Subset shape: {0}'.format(subset.shape))
+            lg.debug('Has NaNs: {0}'.format(np.isnan(subset).any()))
+            lg.debug('Limits: min={0}; max={1}'.format(subset.min(), subset.max()))
+            lg.debug('Has constant rows: {0}'.format(_has_constant_rows(subset)))
+
+    def filtered(self, data, thresholds):
+        lg.debug('Shape after filtering: {0}'.format(data.shape))
+        lg.debug('Thresholds for filtering: {0}'.format(thresholds))
 
     def stop_check(self):
         lg.info('Stop condition check.')
@@ -89,9 +103,10 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    report: _Reporter,
                    min_features_percentage: float = .05) -> Optional[DivikResult]:
     subset = data[selection]
-    report.filter()
+    report.filter(subset)
     filters, thresholds, filtered_data = fs.select_sequentially(
         feature_selectors, subset, min_features_percentage)
+    report.filtered(filtered_data, thresholds)
 
     report.stop_check()
     if stop_condition(filtered_data):
