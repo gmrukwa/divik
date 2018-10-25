@@ -179,6 +179,7 @@ def hatzis(gap_trials: int = 100,
            minimal_size: int = 20,
            minimal_features_percentage: float = .01,
            fast_kmeans_iters: int = 10,
+           k_max: int = 10,
            pool: Pool = None,
            progress_reporter: tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
@@ -197,6 +198,7 @@ def hatzis(gap_trials: int = 100,
     @param fast_kmeans_iters: limit of iterations for stop condition check
     @param pool: pool for parallel processing. Recommended maxtasksperchild
     equal to number of cores.
+    @param k_max: maximal number of clusters considered by k-means algorithm
     @param progress_reporter: tqdm-alike progress reporting object
     @return: adjusted DiviK pipeline
     """
@@ -217,7 +219,7 @@ def hatzis(gap_trials: int = 100,
     kmeans = km.KMeans(labeling=km.Labeling(distance),
                        initialize=initialize,
                        number_of_iterations=iters_limit)
-    best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool)
+    best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool, k_max)
     fast_kmeans = partial(km.KMeans(labeling=labeling,
                                     initialize=initialize,
                                     number_of_iterations=fast_kmeans_iters),
