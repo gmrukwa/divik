@@ -6,7 +6,8 @@ WORKDIR /app
 
 RUN pip install --upgrade pip
 
-RUN apt-get -qq update &&\
+RUN sed 's#http://deb.debian.org/debian#http://deb.debian.org/debian/#' -i /etc/apt/sources.list &&\
+  apt-get -qq update &&\
   apt-get -qq install git &&\
   pip install -r requirements.txt &&\
   apt-get -qq remove git &&\
