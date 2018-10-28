@@ -165,6 +165,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
     clustering result
     @return: result of segmentation if not stopped
     """
+    if np.isnan(data).any():
+        raise ValueError("NaN values are not supported.")
     if rejection_conditions is None:
         rejection_conditions = []
     report = _Reporter(progress_reporter)
