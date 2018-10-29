@@ -9,10 +9,7 @@ RUN pip install --upgrade pip
 RUN sed 's#http://deb.debian.org/debian#http://deb.debian.org/debian/#' -i /etc/apt/sources.list &&\
   apt-get -qq update &&\
   apt-get -qq install git &&\
-  pip install -r requirements.txt &&\
-  apt-get -qq remove git &&\
-  apt-get autoremove -y &&\
-  rm -rf /var/lib/apt/lists/*
+  pip install -r requirements.txt
 
 RUN mkdir -p /root/.config/matplotlib &&\
   echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
