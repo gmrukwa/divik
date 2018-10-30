@@ -55,8 +55,10 @@ class Gap:
 
     def __init__(self, distance: dst.DistanceMetric,
                  split_into_two: ty.SegmentationMethod,
-                 n_trials: int = 100, seed: int = 0, pool: Pool = None):
+                 n_trials: int = 100, seed: int = 0, correction: bool=True,
+                 pool: Pool = None):
         self._split_into_two = split_into_two
+        self.correction = correction
         adjusted_gap = partial(sc.gap, distance=distance, seed=seed,
                                n_trials=n_trials, pool=pool)
         self._gap_of_two = partial(adjusted_gap, split=split_into_two)
@@ -65,7 +67,11 @@ class Gap:
     def __call__(self, data: ty.Data) -> bool:
         """Check if segmentation is significantly justified."""
         labels, centroids = self._split_into_two(data)
-        split_likelihood = self._gap_of_two(data, labels, centroids)
+        split_likelihood, split_deviation = self._gap_of_two(
+            data, labels, centroids, return_deviation=True)
         labels, centroids = _split_into_one(data)
         dont_split_likelihood = self._gap_of_one(data, labels, centroids)
-        return split_likelihood < dont_split_likelihood
+        if self.correction:
+            return split_likelihood + split_deviation < dont_split_likelihood
+        else:
+            return split_likelihood < dont_split_likelihood

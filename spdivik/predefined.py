@@ -182,6 +182,7 @@ def hatzis(gap_trials: int = 100,
            minimal_features_percentage: float = .01,
            fast_kmeans_iters: int = 10,
            k_max: int = 10,
+           correction_of_gap: bool = True,
            pool: Pool = None,
            progress_reporter: tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
@@ -200,6 +201,7 @@ def hatzis(gap_trials: int = 100,
     @rejection_percentage: percentage of size under which split will be rejected
     @param minimal_features_percentage: minimal percent of features preserved
     @param fast_kmeans_iters: limit of iterations for stop condition check
+    @param correction_of_gap: whether to compute GAP with correction
     @param pool: pool for parallel processing. Recommended maxtasksperchild
     equal to number of cores.
     @param k_max: maximal number of clusters considered by k-means algorithm
@@ -230,7 +232,11 @@ def hatzis(gap_trials: int = 100,
                                     initialize=initialize,
                                     number_of_iterations=fast_kmeans_iters),
                           number_of_clusters=2)
-    stop_if_split_makes_no_sense = st.Gap(distance, fast_kmeans, gap_trials, pool=pool)
+    stop_if_split_makes_no_sense = st.Gap(distance=distance,
+                                          split_into_two=fast_kmeans,
+                                          n_trials=gap_trials,
+                                          correction=correction_of_gap,
+                                          pool=pool)
     rejections = [
         partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
                 percentage=rejection_percentage)
