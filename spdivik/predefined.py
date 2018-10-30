@@ -177,6 +177,8 @@ def hatzis(gap_trials: int = 100,
            iters_limit: int = 100,
            distance: str = None,
            minimal_size: int = 20,
+           rejection_size: int = None,
+           rejection_percentage: float = None,
            minimal_features_percentage: float = .01,
            fast_kmeans_iters: int = 10,
            k_max: int = 10,
@@ -194,6 +196,8 @@ def hatzis(gap_trials: int = 100,
     @param iters_limit: limit of k-means iterations
     @param distance: distance metric
     @param minimal_size: minimal size of accepted cluster
+    @rejection_size: size under which split will be rejected
+    @rejection_percentage: percentage of size under which split will be rejected
     @param minimal_features_percentage: minimal percent of features preserved
     @param fast_kmeans_iters: limit of iterations for stop condition check
     @param pool: pool for parallel processing. Recommended maxtasksperchild
@@ -226,7 +230,8 @@ def hatzis(gap_trials: int = 100,
                           number_of_clusters=2)
     stop_if_split_makes_no_sense = st.Gap(distance, fast_kmeans, gap_trials, pool=pool)
     rejections = [
-        partial(rj.reject_if_clusters_smaller_than, size=minimal_size)
+        partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
+                percentage=rejection_percentage)
     ]
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,
