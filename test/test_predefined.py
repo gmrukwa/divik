@@ -7,7 +7,7 @@ from tqdm import tqdm
 import spdivik.distance as dst
 import spdivik.predefined as pre
 
-N_OBSERVATIONS = 200
+N_OBSERVATIONS = 1000
 N_FEATURES = 40
 N_VARYING = 10
 N_UPREGULATED = 20
@@ -102,7 +102,8 @@ class TestHatzis(DataBoundTestCase):
         super(TestHatzis, cls).setUpClass()
         progress_bar = tqdm(desc='hatzis', total=cls.data.shape[0])
         distance = dst.KnownMetric.euclidean.value
-        divik = pre.hatzis(gap_trials=100, pool=pool,
+        divik = pre.hatzis(gap_trials=10, pool=pool,
+                           correction_of_gap=False,
                            progress_reporter=progress_bar,
                            distance=distance)
         cls.result = divik(cls.data)
