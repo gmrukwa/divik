@@ -217,6 +217,8 @@ def hatzis(gap_trials: int = 100,
     assert 0 <= minimal_size, minimal_size
     assert 0 <= minimal_features_percentage <= 1, minimal_features_percentage
     assert fast_kmeans_iters > 0, fast_kmeans_iters
+    if rejection_percentage is None and rejection_size is None:
+        rejection_size = 0
     distance = dst.ScipyDistance(known_metrics[distance])
     labeling = km.Labeling(distance)
     initialize = km.PercentileInitialization(distance, distance_percentile)
