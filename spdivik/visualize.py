@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('--destination', required=True,
                         help='Path to destination file')
 
-    return parser.parse_args
+    return parser.parse_args()
 
 
 def visualize(label, x, y, shape):
