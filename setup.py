@@ -34,10 +34,13 @@ setup(
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
         'functional-helpers',
+        'h5py>=2.8.0',
         'matlabruntimeforpython===R2016b',
         'numpy>=0.12.1',
         'pandas<0.21',
         'scipy>=0.19.1',
+        'scikit-image>=0.14.1',
+        'scikit-learn>=0.19.1',
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
