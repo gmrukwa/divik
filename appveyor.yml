@@ -1,5 +1,5 @@
 image: Ubuntu
-version: 1.4.2.{build}
+version: 1.5.0.{build}
 skip_tags: true
 skip_branch_with_pr: true
 environment:
