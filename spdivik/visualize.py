@@ -31,8 +31,8 @@ def visualize(label, x, y, shape):
 
 def main():
     args = parse_args()
-    xy = load_data(args.xy)
-    labels = load_data(args.labels)
+    xy = load_data(args.xy).astype(int)
+    labels = load_data(args.labels).astype(int)
     x, y = xy.T
     shape = np.max(y) + 1, np.max(x) + 1
     visualization = visualize(labels, x=x, y=y, shape=shape)
