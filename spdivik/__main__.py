@@ -64,6 +64,7 @@ def save(data: ty.Data, result: typing.Optional[ty.DivikResult], destination: st
     if result is not None:
         logging.info("Saving partitions.")
         merged = _make_merged(result)
+        assert merged.shape[0] == result.partition.size
         np.savetxt(os.path.join(destination, 'partitions.csv'),
                    merged, delimiter=', ', fmt='%i')
         final_partition = merged[:, -1]
