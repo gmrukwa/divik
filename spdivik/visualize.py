@@ -31,6 +31,9 @@ def visualize(label, x, y, shape):
 
 def main():
     args = parse_args()
+    print("Loading {0} as labels.".format(args.labels))
+    print("Loading {0} as coordinates.".format(args.xy))
+    print("Labels will be saved to {0}.".format(args.destination))
     xy = load_data(args.xy).astype(int)
     labels = load_data(args.labels).astype(int)
     x, y = xy.T
