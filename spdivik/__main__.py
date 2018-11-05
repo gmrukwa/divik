@@ -4,17 +4,18 @@ import logging
 import multiprocessing
 import os
 import pickle
+import sys
 import typing
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
+import tqdm
 import spdivik.predefined as pred
 import spdivik.summary as _smr
 import spdivik.types as ty
 import spdivik._scripting as sc
 
 
-def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm]:
+def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm.tqdm]:
     scenario = config.pop('scenario', None)
     available = pred.scenarios.keys()
     if scenario not in available:
@@ -25,7 +26,7 @@ def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm]
     }))
     if 'minimal_size_percentage' in config:
         config['minimal_size'] = int(data.shape[0] * config.pop('minimal_size_percentage', 0.01))
-    progress_reporter = tqdm()
+    progress_reporter = tqdm.tqdm(file=sys.stdout)
     logging.info('Scenario configuration: {0}'.format(config))
     return pred.scenarios[scenario](pool=pool,
                                     progress_reporter=progress_reporter,

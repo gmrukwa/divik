@@ -10,7 +10,7 @@ from typing import Dict, Tuple
 import h5py
 import numpy as np
 from scipy import io as scio
-from tqdm import tqdm
+import tqdm
 
 from spdivik import __version__
 import spdivik.types as ty
@@ -50,7 +50,7 @@ def setup_logger(destination: str, verbose: bool=False):
         log_format = '%(asctime)s [%(levelname)s]\t%(message)s'
         log_level = logging.INFO
     handlers = [
-        logging.StreamHandler(tqdm),
+        logging.StreamHandler(tqdm.tqdm),
         logging.FileHandler(filename=log_destination,
                             mode='a')
     ]

@@ -23,7 +23,7 @@ import logging as lg
 from typing import List, Optional
 
 import numpy as np
-from tqdm import tqdm
+import tqdm
 
 import spdivik.feature_selection as fs
 from spdivik.types import \
@@ -47,7 +47,7 @@ def _has_constant_rows(matrix: np.ndarray) -> bool:
 
 
 class _Reporter:
-    def __init__(self, progress_reporter: tqdm = None):
+    def __init__(self, progress_reporter: tqdm.tqdm = None):
         self.progress_reporter = progress_reporter
         self.paths_open = 1
 
@@ -157,7 +157,7 @@ def divik(data: Data, split: SelfScoringSegmentation,
           feature_selectors: List[fs.FilteringMethod],
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
-          progress_reporter: tqdm = None,
+          progress_reporter: tqdm.tqdm = None,
           rejection_conditions: List[rj.RejectionCondition] = None,
           prefiltering_stop_condition: StopCondition = None) \
         -> Optional[DivikResult]:
