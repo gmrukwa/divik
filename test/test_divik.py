@@ -58,7 +58,8 @@ class DivikBackendTest(unittest.TestCase):
                               stop_condition=returns(True),
                               rejection_conditions=[],
                               report=MagicMock(),
-                              min_features_percentage=.05)
+                              min_features_percentage=.05,
+                              prefiltering_stop_condition=lambda x: False)
         self.assertEqual(1, selector.call_count)
         self.assertSequenceEqual([], selector.call_args[0][0])
         self.assertEqual(.05, selector.call_args[0][2])
@@ -71,7 +72,8 @@ class DivikBackendTest(unittest.TestCase):
                           stop_condition=stop_condition,
                           rejection_conditions=[],
                           report=MagicMock(),
-                          min_features_percentage=.05)
+                          min_features_percentage=.05,
+                          prefiltering_stop_condition=lambda x: False)
         self.assertEqual(1, stop_condition.call_count)
 
     def test_ends_when_stop_condition(self):
@@ -83,7 +85,8 @@ class DivikBackendTest(unittest.TestCase):
                                  stop_condition=stop_condition,
                                  rejection_conditions=[],
                                  report=MagicMock(),
-                                 min_features_percentage=.05)
+                                 min_features_percentage=.05,
+                                 prefiltering_stop_condition=lambda x: False)
         self.assertEqual(0, split.call_count)
         self.assertIsNone(tree)
 
@@ -98,7 +101,8 @@ class DivikBackendTest(unittest.TestCase):
                                      stop_condition=stop_condition,
                                      rejection_conditions=[],
                                      report=reporter,
-                                     min_features_percentage=.05)
+                                     min_features_percentage=.05,
+                                     prefiltering_stop_condition=lambda x: False)
         self.assertIsNotNone(tree)
         self.assertEqual(1, reporter.recurring.call_count)
         self.assertEqual(3, stop_condition.call_count)
@@ -113,7 +117,8 @@ class DivikBackendTest(unittest.TestCase):
                                  stop_condition=stop_condition,
                                  rejection_conditions=[returns(True)],
                                  report=MagicMock(),
-                                 min_features_percentage=.05)
+                                 min_features_percentage=.05,
+                                 prefiltering_stop_condition=lambda x: False)
         self.assertIsNone(tree)
         self.assertEqual(1, stop_condition.call_count)
         self.assertEqual(1, split.call_count)
@@ -124,6 +129,8 @@ class DivikBackendTest(unittest.TestCase):
         split = returns((MagicMock(),) * 3)
         rejection_conditions = [returns(False)]
         report = MagicMock()
+        def prefiltering(data):
+            return False
         with patch.object(dv, dv._divik_backend.__name__) as mock, \
                 patch.object(np, np.unique.__name__, new=returns([1, 2])), \
                 patch.object(dv, dv._recursive_selection.__name__, new=returns(SELECT_ALL)):
@@ -133,7 +140,8 @@ class DivikBackendTest(unittest.TestCase):
                        stop_condition=stop_condition,
                        rejection_conditions=rejection_conditions,
                        report=report,
-                       min_features_percentage=.15)
+                       min_features_percentage=.15,
+                       prefiltering_stop_condition=prefiltering)
         self.assertIsNotNone(tree)
         mock.assert_called_with(data=DUMMY_DATA, selection=SELECT_ALL,
                                 split=split,
@@ -141,7 +149,8 @@ class DivikBackendTest(unittest.TestCase):
                                 stop_condition=stop_condition,
                                 rejection_conditions=rejection_conditions,
                                 report=report,
-                                min_features_percentage=.15)
+                                min_features_percentage=.15,
+                                prefiltering_stop_condition=prefiltering)
 
     def test_constructs_result(self):
         old = dv._divik_backend
@@ -158,7 +167,8 @@ class DivikBackendTest(unittest.TestCase):
                        stop_condition=stop_condition,
                        rejection_conditions=rejection_conditions,
                        report=report,
-                       min_features_percentage=.15)
+                       min_features_percentage=.15,
+                       prefiltering_stop_condition=lambda x: False)
         self.assertIsNotNone(tree)
         self.assertSequenceEqual([None, None], tree.subregions)
         self.assertSequenceEqual({}, tree.thresholds)

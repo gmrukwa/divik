@@ -101,8 +101,14 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    stop_condition: StopCondition,
                    rejection_conditions: List[rj.RejectionCondition],
                    report: _Reporter,
+                   prefiltering_stop_condition: StopCondition,
                    min_features_percentage: float = .05) -> Optional[DivikResult]:
     subset = data[selection]
+
+    if prefiltering_stop_condition(subset):
+        report.finished_for(subset.shape[0])
+        return None
+
     report.filter(subset)
     filters, thresholds, filtered_data = fs.select_sequentially(
         feature_selectors, subset, min_features_percentage)
@@ -125,7 +131,8 @@ def _divik_backend(data: Data, selection: np.ndarray,
                       stop_condition=stop_condition,
                       rejection_conditions=rejection_conditions,
                       report=report,
-                      min_features_percentage=min_features_percentage)
+                      min_features_percentage=min_features_percentage,
+                      prefiltering_stop_condition=prefiltering_stop_condition)
     del subset
     del filtered_data
     gc.collect()
@@ -151,7 +158,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
           progress_reporter: tqdm = None,
-          rejection_conditions: List[rj.RejectionCondition] = None) \
+          rejection_conditions: List[rj.RejectionCondition] = None,
+          prefiltering_stop_condition: StopCondition = None) \
         -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework.
 
@@ -163,6 +171,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
     @param progress_reporter: optional tqdm instance to report progress
     @param rejection_conditions: optional list of conditions that reject
     clustering result
+    @param prefiltering_stop_condition: stop condition that could be applied
+    without feature filtering
     @return: result of segmentation if not stopped
     """
     if np.isnan(data).any():
@@ -171,6 +181,9 @@ def divik(data: Data, split: SelfScoringSegmentation,
         rejection_conditions = []
     report = _Reporter(progress_reporter)
     select_all = np.ones(shape=(data.shape[0],), dtype=bool)
+    if prefiltering_stop_condition is None:
+        def prefiltering_stop_condition(data: Data) -> bool:
+            return False
     return _divik_backend(data,
                           selection=select_all,
                           split=split,
@@ -178,4 +191,5 @@ def divik(data: Data, split: SelfScoringSegmentation,
                           stop_condition=stop_condition,
                           rejection_conditions=rejection_conditions,
                           report=report,
-                          min_features_percentage=min_features_percentage)
+                          min_features_percentage=min_features_percentage,
+                          prefiltering_stop_condition=prefiltering_stop_condition)

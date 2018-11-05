@@ -232,13 +232,11 @@ def hatzis(gap_trials: int = 100,
                                     initialize=initialize,
                                     number_of_iterations=fast_kmeans_iters),
                           number_of_clusters=2)
-    stop_if_split_makes_no_sense = st.combine(
-        partial(st.minimal_size, size=k_max),
-        st.Gap(distance=distance,
-               split_into_two=fast_kmeans,
-               n_trials=gap_trials,
-               correction=correction_of_gap,
-               pool=pool))
+    stop_if_split_makes_no_sense = st.Gap(distance=distance,
+                                          split_into_two=fast_kmeans,
+                                          n_trials=gap_trials,
+                                          correction=correction_of_gap,
+                                          pool=pool)
     rejections = [
         partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
                 percentage=rejection_percentage)
@@ -249,5 +247,6 @@ def hatzis(gap_trials: int = 100,
                     stop_condition=stop_if_split_makes_no_sense,
                     rejection_conditions=rejections,
                     progress_reporter=progress_reporter,
-                    min_features_percentage=minimal_features_percentage)
+                    min_features_percentage=minimal_features_percentage,
+                    prefiltering_stop_condition=partial(st.minimal_size, size=k_max))
     return divik
