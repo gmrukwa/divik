@@ -21,7 +21,7 @@ from functools import partial
 from multiprocessing import Pool
 from typing import Callable, Optional
 
-from tqdm import tqdm
+import tqdm
 
 import spdivik.distance as dst
 import spdivik.divik as dv
@@ -90,7 +90,7 @@ class _PrefilteringWrapper:
 
 @_scenario
 def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
-              progress_reporter: tqdm = None, pool: Pool = None) -> Divik:
+              progress_reporter: tqdm.tqdm = None, pool: Pool = None) -> Divik:
     """Size limited DiviK with extreme initialization and correlation.
 
     DiviK preset as in: P. Widlak, G. Mrukwa, M. Kalinowska, M. Pietrowska,
@@ -128,7 +128,7 @@ def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
 @_scenario
 def master(gap_trials: int = 100, distance_percentile: float = 99.,
            iters_limit: int = 100, pool: Pool = None,
-           progress_reporter: tqdm = None,
+           progress_reporter: tqdm.tqdm = None,
            distance: dst.DistanceMetric = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
 
@@ -184,7 +184,7 @@ def hatzis(gap_trials: int = 100,
            k_max: int = 10,
            correction_of_gap: bool = True,
            pool: Pool = None,
-           progress_reporter: tqdm = None) -> Divik:
+           progress_reporter: tqdm.tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
 
     Used in Hatzis experimentation.
