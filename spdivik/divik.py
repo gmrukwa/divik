@@ -63,9 +63,6 @@ class _Reporter:
         lg.debug('Shape after filtering: {0}'.format(data.shape))
         lg.debug('Thresholds for filtering: {0}'.format(thresholds))
 
-    def row_normalization(self):
-        lg.debug('Normalizing rows.')
-
     def stop_check(self):
         lg.info('Stop condition check.')
 
@@ -97,13 +94,6 @@ class _Reporter:
         lg.info('Assembled. {0} paths open.'.format(self.paths_open))
 
 
-def _normalize_rows(data: Data) -> Data:
-    data -= data.mean(axis=1)[:, np.newaxis]
-    norms = np.sum(np.abs(data) ** 2, axis=-1, keepdims=True)**(1./2)
-    data /= norms
-    return data
-
-
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def _divik_backend(data: Data, selection: np.ndarray,
                    split: SelfScoringSegmentation,
@@ -123,10 +113,6 @@ def _divik_backend(data: Data, selection: np.ndarray,
     filters, thresholds, filtered_data = fs.select_sequentially(
         feature_selectors, subset, min_features_percentage)
     report.filtered(filtered_data, thresholds)
-
-    if normalize_rows:
-        report.row_normalization()
-        filtered_data = _normalize_rows(filtered_data)
 
     report.stop_check()
     if stop_condition(filtered_data):
