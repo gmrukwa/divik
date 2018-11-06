@@ -112,7 +112,6 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    rejection_conditions: List[rj.RejectionCondition],
                    report: _Reporter,
                    prefiltering_stop_condition: StopCondition,
-                   normalize_rows: bool=False,
                    min_features_percentage: float = .05) -> Optional[DivikResult]:
     subset = data[selection]
 
@@ -147,8 +146,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
                       rejection_conditions=rejection_conditions,
                       report=report,
                       min_features_percentage=min_features_percentage,
-                      prefiltering_stop_condition=prefiltering_stop_condition,
-                      normalize_rows=normalize_rows)
+                      prefiltering_stop_condition=prefiltering_stop_condition)
     del subset
     del filtered_data
     gc.collect()
@@ -175,8 +173,7 @@ def divik(data: Data, split: SelfScoringSegmentation,
           min_features_percentage: float = .05,
           progress_reporter: tqdm.tqdm = None,
           rejection_conditions: List[rj.RejectionCondition] = None,
-          prefiltering_stop_condition: StopCondition = None,
-          normalize_rows: bool=False) \
+          prefiltering_stop_condition: StopCondition = None) \
         -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework.
 
@@ -209,5 +206,4 @@ def divik(data: Data, split: SelfScoringSegmentation,
                           rejection_conditions=rejection_conditions,
                           report=report,
                           min_features_percentage=min_features_percentage,
-                          prefiltering_stop_condition=prefiltering_stop_condition,
-                          normalize_rows=normalize_rows)
+                          prefiltering_stop_condition=prefiltering_stop_condition)
