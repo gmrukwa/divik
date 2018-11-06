@@ -229,11 +229,13 @@ def hatzis(gap_trials: int = 100,
     initialize = km.PercentileInitialization(distance, distance_percentile)
     kmeans = km.KMeans(labeling=km.Labeling(distance),
                        initialize=initialize,
-                       number_of_iterations=iters_limit)
+                       number_of_iterations=iters_limit,
+                       normalize_rows=normalize_rows)
     best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool, k_max)
     fast_kmeans = partial(km.KMeans(labeling=labeling,
                                     initialize=initialize,
-                                    number_of_iterations=fast_kmeans_iters),
+                                    number_of_iterations=fast_kmeans_iters,
+                                    normalize_rows=normalize_rows),
                           number_of_clusters=2)
     stop_if_split_makes_no_sense = st.Gap(distance=distance,
                                           split_into_two=fast_kmeans,
@@ -251,6 +253,5 @@ def hatzis(gap_trials: int = 100,
                     rejection_conditions=rejections,
                     progress_reporter=progress_reporter,
                     min_features_percentage=minimal_features_percentage,
-                    prefiltering_stop_condition=partial(st.minimal_size, size=k_max),
-                    normalize_rows=normalize_rows)
+                    prefiltering_stop_condition=partial(st.minimal_size, size=k_max))
     return divik

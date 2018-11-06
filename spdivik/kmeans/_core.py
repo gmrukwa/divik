@@ -48,18 +48,27 @@ def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
     return centroids
 
 
+def _normalize_rows(data: Data) -> Data:
+    data -= data.mean(axis=1)[:, np.newaxis]
+    norms = np.sum(np.abs(data) ** 2, axis=-1, keepdims=True)**(1./2)
+    data /= norms
+    return data
+
+
 class KMeans(SegmentationMethod):
     """K-means clustering"""
     def __init__(self, labeling: Labeling, initialize: Initialization,
-                 number_of_iterations: int=100):
+                 number_of_iterations: int=100, normalize_rows: bool=False):
         """
         @param labeling: labeling method
         @param initialize: initialization method
         @param number_of_iterations: number of iterations
+        @param normalize_rows: sets mean of row to 0 and norm to 1
         """
         self.labeling = labeling
         self.initialize = initialize
         self.number_of_iterations = number_of_iterations
+        self.normalize_rows = normalize_rows
 
     def __call__(self, data: Data, number_of_clusters: int) \
             -> Tuple[IntLabels, Centroids]:
@@ -67,6 +76,8 @@ class KMeans(SegmentationMethod):
             raise ValueError("data is expected to be 2D np.array")
         if number_of_clusters < 1:
             raise ValueError("number_of_clusters({0}) < 1".format(number_of_clusters))
+        if self.normalize_rows:
+            data = _normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
