@@ -183,6 +183,7 @@ def hatzis(gap_trials: int = 100,
            fast_kmeans_iters: int = 10,
            k_max: int = 10,
            correction_of_gap: bool = True,
+           normalize_rows: bool = False,
            pool: Pool = None,
            progress_reporter: tqdm.tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
@@ -201,10 +202,12 @@ def hatzis(gap_trials: int = 100,
     @rejection_percentage: percentage of size under which split will be rejected
     @param minimal_features_percentage: minimal percent of features preserved
     @param fast_kmeans_iters: limit of iterations for stop condition check
+    @param k_max: maximal number of clusters considered by k-means algorithm
     @param correction_of_gap: whether to compute GAP with correction
+    @param normalize_rows: should be specified for correlation metric, sets
+    row mean to 0 and norm to 1
     @param pool: pool for parallel processing. Recommended maxtasksperchild
     equal to number of cores.
-    @param k_max: maximal number of clusters considered by k-means algorithm
     @param progress_reporter: tqdm-alike progress reporting object
     @return: adjusted DiviK pipeline
     """
@@ -248,5 +251,6 @@ def hatzis(gap_trials: int = 100,
                     rejection_conditions=rejections,
                     progress_reporter=progress_reporter,
                     min_features_percentage=minimal_features_percentage,
-                    prefiltering_stop_condition=partial(st.minimal_size, size=k_max))
+                    prefiltering_stop_condition=partial(st.minimal_size, size=k_max),
+                    normalize_rows=normalize_rows)
     return divik
