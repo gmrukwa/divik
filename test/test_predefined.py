@@ -96,16 +96,16 @@ class TestMaster(DataBoundTestCase):
         self.assertFalse(np.isnan(self.result.quality))
 
 
-class TestHatzis(DataBoundTestCase):
+class TestBasic(DataBoundTestCase):
     @classmethod
     def setUpClass(cls):
-        super(TestHatzis, cls).setUpClass()
+        super(TestBasic, cls).setUpClass()
         progress_bar = tqdm(desc='hatzis', total=cls.data.shape[0])
         distance = dst.KnownMetric.euclidean.value
-        divik = pre.hatzis(gap_trials=10, pool=pool,
-                           correction_of_gap=False,
-                           progress_reporter=progress_bar,
-                           distance=distance)
+        divik = pre.basic(gap_trials=10, pool=pool,
+                          correction_of_gap=False,
+                          progress_reporter=progress_bar,
+                          distance=distance)
         cls.result = divik(cls.data)
 
     def test_constructs_runnable_pipeline(self):

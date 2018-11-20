@@ -174,23 +174,21 @@ def master(gap_trials: int = 100, distance_percentile: float = 99.,
 
 
 @_scenario
-def hatzis(gap_trials: int = 100,
-           distance_percentile: float = 99.,
-           iters_limit: int = 100,
-           distance: str = None,
-           minimal_size: int = 20,
-           rejection_size: int = None,
-           rejection_percentage: float = None,
-           minimal_features_percentage: float = .01,
-           fast_kmeans_iters: int = 10,
-           k_max: int = 10,
-           correction_of_gap: bool = True,
-           normalize_rows: bool = False,
-           pool: Pool = None,
-           progress_reporter: tqdm.tqdm = None) -> Divik:
+def basic(gap_trials: int = 100,
+          distance_percentile: float = 99.,
+          iters_limit: int = 100,
+          distance: str = None,
+          minimal_size: int = 20,
+          rejection_size: int = None,
+          rejection_percentage: float = None,
+          minimal_features_percentage: float = .01,
+          fast_kmeans_iters: int = 10,
+          k_max: int = 10,
+          correction_of_gap: bool = True,
+          normalize_rows: bool = False,
+          pool: Pool = None,
+          progress_reporter: tqdm.tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
-
-    Used in Hatzis experimentation.
 
     @param gap_trials: number of random datasets used in GAP statistic
     computation. Increases precision and computational overhead.
