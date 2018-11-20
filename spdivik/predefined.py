@@ -89,9 +89,11 @@ class _PrefilteringWrapper:
 
 
 @_scenario
-def proteomic(minimal_split_segment: int = 20, iters_limit: int = 100,
-              progress_reporter: tqdm.tqdm = None, pool: Pool = None) -> Divik:
+def prefiltered_correlative(minimal_split_segment: int = 20, iters_limit: int = 100,
+                            progress_reporter: tqdm.tqdm = None, pool: Pool = None) -> Divik:
     """Size limited DiviK with extreme initialization and correlation.
+
+    Uses feature abundance pre-filtering before segmentation.
 
     DiviK preset as in: P. Widlak, G. Mrukwa, M. Kalinowska, M. Pietrowska,
     M. Chekan, J. Wierzgon, M. Gawin, G. Drazek and J. Polanska, "Detection of
