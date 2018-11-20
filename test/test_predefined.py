@@ -100,7 +100,7 @@ class TestBasic(DataBoundTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestBasic, cls).setUpClass()
-        progress_bar = tqdm(desc='hatzis', total=cls.data.shape[0])
+        progress_bar = tqdm(desc='divik', total=cls.data.shape[0])
         distance = dst.KnownMetric.euclidean.value
         divik = pre.basic(gap_trials=10, pool=pool,
                           correction_of_gap=False,
