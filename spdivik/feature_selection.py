@@ -20,6 +20,7 @@ limitations under the License.
 from functools import partial
 from typing import Callable, Tuple, List
 
+from functional import pipe
 import numpy as np
 
 import spdivik._matlab_legacy as ml
@@ -33,6 +34,8 @@ Selection = Tuple[ty.BoolFilter, float]
 
 amplitude = partial(np.mean, axis=0)
 variance = partial(np.var, axis=0)
+log_amplitude = pipe(amplitude, np.log)
+log_variance = pipe(variance, np.log)
 
 
 def _allow_all(data: ty.Data, topmost: bool = True) -> Selection:

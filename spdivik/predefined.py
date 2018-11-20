@@ -73,6 +73,20 @@ _VARIANCE_FILTER = spdivik.feature_selection.FilteringMethod(
             # selecting only most varying component, if possible
             discard_up_to=-1,
             preserve_topmost=True))
+_LOG_AMPLITUDE_FILTER = spdivik.feature_selection.FilteringMethod(
+    'log_amplitude',
+    partial(fs.select_by,
+            statistic=fs.log_amplitude,
+            discard_up_to=1,
+            # discarding only lowest component, if possible
+            preserve_topmost=True))
+_LOG_VARIANCE_FILTER = spdivik.feature_selection.FilteringMethod(
+    'log_variance',
+    partial(fs.select_by,
+            statistic=fs.log_variance,
+            # selecting only most varying component, if possible
+            discard_up_to=-1,
+            preserve_topmost=True))
 
 
 class _PrefilteringWrapper:
@@ -186,6 +200,7 @@ def basic(gap_trials: int = 100,
           k_max: int = 10,
           correction_of_gap: bool = True,
           normalize_rows: bool = False,
+          use_logfilters: bool = False,
           pool: Pool = None,
           progress_reporter: tqdm.tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
@@ -206,6 +221,8 @@ def basic(gap_trials: int = 100,
     @param correction_of_gap: whether to compute GAP with correction
     @param normalize_rows: should be specified for correlation metric, sets
     row mean to 0 and norm to 1
+    @param use_logfilters: filters based on logarithm of feature characteristic
+    when True
     @param pool: pool for parallel processing. Recommended maxtasksperchild
     equal to number of cores.
     @param progress_reporter: tqdm-alike progress reporting object
@@ -246,9 +263,13 @@ def basic(gap_trials: int = 100,
         partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
                 percentage=rejection_percentage)
     ]
+    if use_logfilters:
+        filters = [_LOG_AMPLITUDE_FILTER, _LOG_VARIANCE_FILTER]
+    else:
+        filters = [_AMPLITUDE_FILTER, _VARIANCE_FILTER]
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,
-                    feature_selectors=[_AMPLITUDE_FILTER, _VARIANCE_FILTER],
+                    feature_selectors=filters,
                     stop_condition=stop_if_split_makes_no_sense,
                     rejection_conditions=rejections,
                     progress_reporter=progress_reporter,
