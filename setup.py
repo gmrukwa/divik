@@ -18,6 +18,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Topic :: Scientific/Engineering :: Information Analysis',
@@ -45,7 +46,7 @@ setup(
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
-    python_requires='==3.4.*',
+    python_requires='>=3.4,<3.6',
     package_data={
     }
 )
