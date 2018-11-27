@@ -35,7 +35,6 @@ import spdivik.types as ty
 
 Divik = Callable[[ty.Data], Optional[ty.DivikResult]]
 
-
 scenarios = {}
 
 
@@ -254,11 +253,13 @@ def basic(gap_trials: int = 100,
                                     number_of_iterations=fast_kmeans_iters,
                                     normalize_rows=normalize_rows),
                           number_of_clusters=2)
-    stop_if_split_makes_no_sense = st.Gap(distance=distance,
-                                          split_into_two=fast_kmeans,
-                                          n_trials=gap_trials,
-                                          correction=correction_of_gap,
-                                          pool=pool)
+    stop_if_split_makes_no_sense = st.combine(
+        partial(st.minimal_size, size=minimal_size),
+        st.Gap(distance=distance,
+               split_into_two=fast_kmeans,
+               n_trials=gap_trials,
+               correction=correction_of_gap,
+               pool=pool))
     rejections = [
         partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
                 percentage=rejection_percentage)
