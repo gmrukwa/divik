@@ -12,7 +12,7 @@ setup(
     author_email='Grzegorz.Mrukwa@polsl.pl',
     classifiers=[
         # based on https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
