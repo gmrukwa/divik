@@ -61,10 +61,8 @@ def _save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
                merged, delimiter=', ', fmt='%i')
     np.save(os.path.join(destination, 'partitions.npy'), merged)
     if xy is not None:
-        x, y = xy.T
-        shape = np.max(y) + 1, np.max(x) + 1
         for level in range(merged.shape[1]):
-            visualization = vis.visualize(merged[:, level], x, y, shape)
+            visualization = vis.visualize(merged[:, level], xy=xy)
             image_name = os.path.join(destination, 'partition-{0}.png'.format(level))
             sio.imsave(image_name, visualization)
     final_partition = merged[:, -1]
