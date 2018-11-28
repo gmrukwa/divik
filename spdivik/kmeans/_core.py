@@ -1,65 +1,10 @@
-"""Numpy-based implementation of k-means algorithm"""
-from abc import ABCMeta, abstractmethod
 from typing import Tuple
 
 import numpy as np
 
-import spdivik.distance as dist
-
-
-Labels = np.ndarray
-Data = np.ndarray
-Centroids = np.ndarray
-
-
-class Initialization(object, metaclass=ABCMeta):
-    """Initializes k-means algorithm"""
-    @abstractmethod
-    def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
-        """Generate initial centroids for k-means algorithm
-
-        @param data: 2D matrix with observations in rows, features in columns
-        @param number_of_centroids: number of centroids to be generated
-        @return: centroids, in rows
-        """
-        raise NotImplementedError(self.__class__.__name__
-                                  + " must implement __call__.")
-
-
-class ExtremeInitialization(Initialization):
-    """Initializes k-means by picking extreme points"""
-    def __init__(self, distance: dist.DistanceMetric):
-        self.distance = distance
-
-    def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
-        """Generate initial centroids for k-means algorithm
-
-        @param data: 2D matrix with observations in rows, features in columns
-        @param number_of_centroids: number of centroids to be generated
-        @return: centroids, in rows
-        """
-        if number_of_centroids > data.shape[0]:
-            raise ValueError("Number of centroids (%i) greater than number of "
-                             "observations (%i)."
-                             % (number_of_centroids, data.shape[0]))
-        features = data.T
-        assumed_ys = features[0]
-        modelled_xs = np.hstack([np.ones((data.shape[0], 1)),
-                                 features[1:].T])
-        default_singular_value_threshold = -1
-        coefficients, _, _, _ = np.linalg.lstsq(
-            modelled_xs, assumed_ys, rcond=default_singular_value_threshold)
-        residuals = np.abs(np.dot(modelled_xs, coefficients) - assumed_ys)
-
-        centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
-        centroids[0] = data[np.argmax(residuals)]
-
-        for i in range(1, number_of_centroids):
-            distances = self.distance(data, centroids[0:i])
-            distances = np.min(distances, axis=1)
-            centroids[i] = data[np.argmax(distances)]
-
-        return centroids
+from spdivik import distance as dist
+from spdivik.kmeans import Initialization
+from spdivik.types import Data, Centroids, IntLabels, SegmentationMethod
 
 
 class Labeling(object):
@@ -70,7 +15,7 @@ class Labeling(object):
         """
         self.distance_metric = distance_metric
 
-    def __call__(self, data: Data, centroids: Centroids) -> Labels:
+    def __call__(self, data: Data, centroids: Centroids) -> IntLabels:
         """Find closest centroids
 
         @param data: observations in rows
@@ -85,7 +30,7 @@ class Labeling(object):
         return np.argmin(distances, axis=1)
 
 
-def redefine_centroids(data: Data, labeling: Labels) -> Centroids:
+def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
     """Recompute centroids in data for given labeling
 
     @param data: observations
@@ -103,23 +48,36 @@ def redefine_centroids(data: Data, labeling: Labels) -> Centroids:
     return centroids
 
 
-class KMeans(object):
+def _normalize_rows(data: Data) -> Data:
+    data -= data.mean(axis=1)[:, np.newaxis]
+    norms = np.sum(np.abs(data) ** 2, axis=-1, keepdims=True)**(1./2)
+    data /= norms
+    return data
+
+
+class KMeans(SegmentationMethod):
     """K-means clustering"""
     def __init__(self, labeling: Labeling, initialize: Initialization,
-                 number_of_iterations: int=100):
+                 number_of_iterations: int=100, normalize_rows: bool=False):
         """
         @param labeling: labeling method
         @param initialize: initialization method
         @param number_of_iterations: number of iterations
+        @param normalize_rows: sets mean of row to 0 and norm to 1
         """
         self.labeling = labeling
         self.initialize = initialize
         self.number_of_iterations = number_of_iterations
+        self.normalize_rows = normalize_rows
 
     def __call__(self, data: Data, number_of_clusters: int) \
-            -> Tuple[Labels, Centroids]:
+            -> Tuple[IntLabels, Centroids]:
         if not isinstance(data, np.ndarray) or len(data.shape) != 2:
             raise ValueError("data is expected to be 2D np.array")
+        if number_of_clusters < 1:
+            raise ValueError("number_of_clusters({0}) < 1".format(number_of_clusters))
+        if self.normalize_rows:
+            data = _normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)

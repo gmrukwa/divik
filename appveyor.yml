@@ -1,4 +1,5 @@
-version: 0.2.0.{build}
+image: Ubuntu
+version: 1.8.0.{build}
 skip_tags: true
 skip_branch_with_pr: true
 environment:
@@ -6,59 +7,72 @@ environment:
   - PYTHON_VERSION: 3.4
     PYTHON: C:\Python34
     PYTHON_ARCH: x86
-  - PYTHON_VERSION: 3.5
-    PYTHON: C:\Python35
-    PYTHON_ARCH: x86
-  - PYTHON_VERSION: 3.6
-    PYTHON: C:\Python36
-    PYTHON_ARCH: x86
-  - PYTHON_VERSION: 3.4
-    PYTHON: C:\Python34-x64
-    PYTHON_ARCH: x64
-  - PYTHON_VERSION: 3.5
-    PYTHON: C:\Python35-x64
-    PYTHON_ARCH: x64
-  - PYTHON_VERSION: 3.6
-    PYTHON: C:\Python36-x64
-    PYTHON_ARCH: x64
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: 3.5
+#    PYTHON: C:\Python35
+#    PYTHON_ARCH: x86
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: 3.6
+#    PYTHON: C:\Python36
+#    PYTHON_ARCH: x86
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: 3.4
+#    PYTHON: C:\Python34-x64
+#    PYTHON_ARCH: x64
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: 3.5
+#    PYTHON: C:\Python35-x64
+#    PYTHON_ARCH: x64
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: 3.6
+#    PYTHON: C:\Python36-x64
+#    PYTHON_ARCH: x64
 # disabled due to broken AppVeyor config - wrong pip resolved
   # - PYTHON_VERSION: Miniconda-3.4
   #   PYTHON: C:\Miniconda34
   #   PYTHON_ARCH: x86
-  - PYTHON_VERSION: Miniconda-3.5
-    PYTHON: C:\Miniconda35
-    PYTHON_ARCH: x86
-  - PYTHON_VERSION: Miniconda-3.6
-    PYTHON: C:\Miniconda36
-    PYTHON_ARCH: x86
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: Miniconda-3.5
+#    PYTHON: C:\Miniconda35
+#    PYTHON_ARCH: x86
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: Miniconda-3.6
+#    PYTHON: C:\Miniconda36
+#    PYTHON_ARCH: x86
 # disabled due to broken AppVeyor config - wrong pip resolved
   # - PYTHON_VERSION: Miniconda-3.4
   #   PYTHON: C:\Miniconda34-x64
   #   PYTHON_ARCH: x64
-  - PYTHON_VERSION: Miniconda-3.5
-    PYTHON: C:\Miniconda35-x64
-    PYTHON_ARCH: x64
-  - PYTHON_VERSION: Miniconda-3.6
-    PYTHON: C:\Miniconda36-x64
-    PYTHON_ARCH: x64
-install:
-- cmd: >-
-    SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
-
-    python --version
-
-    pip --version
-
-    pip install -r requirements.txt
-
-    pip freeze
-build_script:
-- cmd: python setup.py build
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: Miniconda-3.5
+#    PYTHON: C:\Miniconda35-x64
+#    PYTHON_ARCH: x64
+# disabled due to MATLAB dependency
+#  - PYTHON_VERSION: Miniconda-3.6
+#    PYTHON: C:\Miniconda36-x64
+#    PYTHON_ARCH: x64
+services:
+- docker
+#install:
+#- cmd: >-
+#    SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+#
+#    python --version
+#
+#    pip --version
+#
+#    pip install -r requirements.txt
+#
+#    pip freeze
+#build_script:
+#- cmd: python setup.py build
+build: off
 test_script:
-- cmd: python -m unittest discover
-artifacts:
-- path: build/*
-  name: python_packages
+#- cmd: python -m unittest discover
+- ps: docker build -t spdivik-test-image .
+#artifacts:
+#- path: build/*
+#  name: python_packages
 notifications:
 # this publishes to Continuous Integration channel in Glip
 - provider: Webhook

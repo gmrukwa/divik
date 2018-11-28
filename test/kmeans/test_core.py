@@ -1,59 +1,12 @@
 import unittest
-from unittest.mock import MagicMock, patch
 from itertools import cycle
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-import spdivik.kmeans as km
-
-import spdivik.distance as dist
-
-
-data = np.array([
-    [1, 1, 1, 1],
-    [2, 4, 2, 2],
-    [1.9, 4.2, 1.9, 1.9],
-    [2, 2, 2, 2],
-    [1.1, 0.8, 1.1, 1.1],
-    [1000, 490231, -412342, -7012]
-])
-
-
-class ExtremeInitializationTest(unittest.TestCase):
-    def setUp(self):
-        self.number_of_clusters = 2
-        self.distance = dist.ScipyDistance(dist.KnownMetric.euclidean)
-        self.initialize = km.ExtremeInitialization(self.distance)
-
-    def test_uses_given_distance(self):
-        with patch.object(dist.ScipyDistance, '__call__') as mock:
-            self.initialize(data, self.number_of_clusters)
-            self.assertGreater(mock.call_count, 0)
-
-    def test_centroids_have_the_same_number_of_features_as_data(self):
-        centroids = self.initialize(data, self.number_of_clusters)
-        self.assertEqual(centroids.shape[1], data.shape[1])
-
-    def test_number_of_centroids_is_preserved(self):
-        centroids = self.initialize(data, self.number_of_clusters)
-        self.assertEqual(centroids.shape[0], self.number_of_clusters)
-
-    def test_works_without_error_for_ill_conditioned_problems(self):
-        self.initialize(data[0:3], self.number_of_clusters)
-
-    def test_throws_when_required_more_centroids_than_data(self):
-        with self.assertRaises(ValueError):
-            self.initialize(data[0:self.number_of_clusters-1],
-                            self.number_of_clusters)
-
-    def test_first_centroid_is_furthest_from_all(self):
-        centroid = self.initialize(data, 1)
-        np.testing.assert_equal(centroid, data[-1].reshape(1, -1))
-
-    def test_next_centroid_is_furthest_from_already_found(self):
-        centroids = self.initialize(data, 3)
-        np.testing.assert_equal(centroids[1], data[4])
-        np.testing.assert_equal(centroids[2], data[2])
+from spdivik import kmeans as km, distance as dist
+from spdivik.kmeans._core import redefine_centroids
+from test.kmeans import data
 
 
 class LabelingTest(unittest.TestCase):
@@ -95,16 +48,16 @@ class CentroidRedefinitionTest(unittest.TestCase):
         ])
 
     def test_new_centroids_are_means_of_observations_in_cluster(self):
-        centroids = km.redefine_centroids(self.simple_data, self.labeling)
+        centroids = redefine_centroids(self.simple_data, self.labeling)
         np.testing.assert_equal(centroids, self.expected_centroids)
 
     def test_throws_on_labels_and_data_length_mismatch(self):
         with self.assertRaises(ValueError):
-            km.redefine_centroids(self.simple_data[:-1], self.labeling)
+            redefine_centroids(self.simple_data[:-1], self.labeling)
 
 
-# noinspection PyTypeChecker
 class KMeansTest(unittest.TestCase):
+    # noinspection PyTypeChecker
     def setUp(self):
         self.mocked_initial_centroids = data[[0, -1]]
         self.mock_initialization = MagicMock(
@@ -123,7 +76,7 @@ class KMeansTest(unittest.TestCase):
 
     def test_only_initializes_for_no_iterations(self):
         self.kmeans.number_of_iterations = 0
-        with patch.object(km, "redefine_centroids") as mock_redefine:
+        with patch.object(km._core, "redefine_centroids") as mock_redefine:
             labeling, centroids = self.kmeans(data, 2)
         self.assertEqual(0, mock_redefine.call_count)
         self.assertEqual(1, self.mock_initialization.call_count)
@@ -132,24 +85,24 @@ class KMeansTest(unittest.TestCase):
         np.testing.assert_equal(self.mocked_initial_centroids, centroids)
 
     def test_initializes_once(self):
-        with patch.object(km, "redefine_centroids"):
+        with patch.object(km._core, "redefine_centroids"):
             self.kmeans(data, 2)
         self.assertEqual(1, self.mock_initialization.call_count)
 
     def test_redefines_centroids_each_iteration(self):
-        with patch.object(km, "redefine_centroids") as mock_redefine:
+        with patch.object(km._core, "redefine_centroids") as mock_redefine:
             self.kmeans(data, 2)
         self.assertEqual(self.kmeans.number_of_iterations,
                          mock_redefine.call_count)
 
     def test_recalculates_labels_on_init_and_each_iteration(self):
-        with patch.object(km, "redefine_centroids"):
+        with patch.object(km._core, "redefine_centroids"):
             self.kmeans(data, 2)
         self.assertEqual(self.kmeans.number_of_iterations + 1,
                          self.mock_labeling.call_count)
 
     def test_returns_final_labels_and_centroids(self):
-        with patch.object(km, "redefine_centroids") as mock_redefine:
+        with patch.object(km._core, "redefine_centroids") as mock_redefine:
             mock_redefine.return_value = self.mocked_initial_centroids + 3
             labeling, centroids = self.kmeans(data, 2)
         np.testing.assert_equal(centroids, self.mocked_initial_centroids + 3)
@@ -159,7 +112,7 @@ class KMeansTest(unittest.TestCase):
         constant_labels = self.mocked_labels
         self.mock_labeling.side_effect = None
         self.mock_labeling.return_value = constant_labels
-        with patch.object(km, "redefine_centroids") as mock_redefine:
+        with patch.object(km._core, "redefine_centroids") as mock_redefine:
             self.kmeans(data, 2)
         self.assertEqual(1, mock_redefine.call_count)
 
@@ -167,6 +120,7 @@ class KMeansTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.kmeans(data.ravel(), 2)
         with self.assertRaises(ValueError):
+            # noinspection PyTypeChecker
             self.kmeans([[1, 2, 3], [4, 5, 6]], 2)
 
 

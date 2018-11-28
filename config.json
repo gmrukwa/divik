@@ -1,0 +1,17 @@
+{
+  "pool": {
+    "maxtasksperchild": 4
+  },
+  "scenario": "basic",
+  "gap_trials": 10,
+  "distance_percentile": 99.0,
+  "iters_limit": 100,
+  "distance": "correlation",
+  "minimal_size": 16,
+  "rejection_size": 2,
+  "correction_of_gap": true,
+  "minimal_features_percentage": 0.01,
+  "fast_kmeans_iters": 10,
+  "k_max": 10,
+  "normalize_rows": false
+}
