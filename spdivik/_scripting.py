@@ -125,21 +125,21 @@ DestinationPath = str
 Coordinates = np.ndarray
 
 
-def initialize() -> Tuple[ty.Data, Config, DestinationPath, Coordinates]:
-    arguments = parse_args()
-    destination = prepare_destination(arguments.destination)
-    setup_logger(destination, arguments.verbose)
-    config = load_config(arguments.config, destination)
+def try_load_data(path):
     try:
-        data = load_data(arguments.source)
+        data = load_data(path)
         logging.debug('Data loaded successfully.')
     except Exception as ex:
         logging.error("Data loading failed with an exception.")
         logging.error(repr(ex))
         raise
-    if arguments.xy is not None:
+    return data
+
+
+def try_load_xy(path):
+    if path is not None:
         try:
-            xy = load_data(arguments.xy).astype(int)
+            xy = load_data(path).astype(int)
             logging.debug('Coordinates loaded successfully.')
         except Exception as ex:
             logging.error('Coordinates loading failed with an exception.')
@@ -147,4 +147,14 @@ def initialize() -> Tuple[ty.Data, Config, DestinationPath, Coordinates]:
             raise
     else:
         xy = None
+    return xy
+
+
+def initialize() -> Tuple[ty.Data, Config, DestinationPath, Coordinates]:
+    arguments = parse_args()
+    destination = prepare_destination(arguments.destination)
+    setup_logger(destination, arguments.verbose)
+    config = load_config(arguments.config, destination)
+    data = try_load_data(arguments.source)
+    xy = try_load_xy(arguments.xy)
     return data, config, destination, xy
