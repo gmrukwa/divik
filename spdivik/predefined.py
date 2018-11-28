@@ -25,7 +25,6 @@ import tqdm
 
 import spdivik.distance as dst
 import spdivik.divik as dv
-import spdivik.feature_selection
 import spdivik.feature_selection as fs
 import spdivik.kmeans as km
 import spdivik.rejection as rj
@@ -58,28 +57,28 @@ def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
     return best_kmeans_with_dunn
 
 
-_AMPLITUDE_FILTER = spdivik.feature_selection.FilteringMethod(
+_AMPLITUDE_FILTER = fs.FilteringMethod(
     'amplitude',
     partial(fs.select_by,
             statistic=fs.amplitude,
             discard_up_to=1,
             # discarding only lowest component, if possible
             preserve_topmost=True))
-_VARIANCE_FILTER = spdivik.feature_selection.FilteringMethod(
+_VARIANCE_FILTER = fs.FilteringMethod(
     'variance',
     partial(fs.select_by,
             statistic=fs.variance,
             # selecting only most varying component, if possible
             discard_up_to=-1,
             preserve_topmost=True))
-_LOG_AMPLITUDE_FILTER = spdivik.feature_selection.FilteringMethod(
+_LOG_AMPLITUDE_FILTER = fs.FilteringMethod(
     'log_amplitude',
     partial(fs.select_by,
             statistic=fs.log_amplitude,
             discard_up_to=1,
             # discarding only lowest component, if possible
             preserve_topmost=True))
-_LOG_VARIANCE_FILTER = spdivik.feature_selection.FilteringMethod(
+_LOG_VARIANCE_FILTER = fs.FilteringMethod(
     'log_variance',
     partial(fs.select_by,
             statistic=fs.log_variance,
@@ -89,7 +88,7 @@ _LOG_VARIANCE_FILTER = spdivik.feature_selection.FilteringMethod(
 
 
 class _PrefilteringWrapper:
-    def __init__(self, prefilter: spdivik.feature_selection.FilteringMethod, divik: Divik):
+    def __init__(self, prefilter: fs.FilteringMethod, divik: Divik):
         self._prefilter = prefilter
         self._divik = divik
 
