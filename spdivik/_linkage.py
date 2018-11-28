@@ -10,9 +10,11 @@ import numpy as np
 import pandas as pd
 import scipy.cluster.hierarchy as hcl
 import scipy.io as sio
+from skimage.io import imsave
 import spdivik._scripting as scr
 from spdivik.kmeans._scripting.parsers import assert_configured
 import spdivik.types as ty
+import spdivik.visualize as vis
 
 
 LinkageMatrix = NewType('LinkageMatrix', np.ndarray)
@@ -82,23 +84,32 @@ def build_experiment(config) -> Experiment:
     return experiment
 
 
-def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
-         partition: ty.IntLabels, centroids: ty.Data,
-         save_figure: SaveFigureBackend, destination: str):
-    """Save results of experiment into dedicated location"""
-    fname = partial(os.path.join, destination)
+def save_linkage(fname, linkage: LinkageMatrix):
     logging.info('Saving linkage in numpy format.')
     np.save(fname('linkage.npy'), linkage)
     logging.info('Converting linkage to MATLAB format.')
     matlab_linkage = hcl.to_mlab_linkage(linkage)
     logging.info('Saving linkage in MATLAB format.')
     sio.savemat(fname('linkage.mat'), {'linkage': matlab_linkage})
+
+
+def save_partition(fname, partition: ty.IntLabels, xy: np.ndarray=None):
     logging.info('Saving flat partition.')
     np.save(fname('partition.npy'), partition)
     np.savetxt(fname('partition.csv'), partition, fmt='%i', delimiter=', ')
+    if xy is not None:
+        logging.info('Generating visulization.')
+        visualization = vis.visualize(partition, xy)
+        imsave(fname('partition.png'), visualization)
+
+
+def save_centroids(fname, centroids: np.ndarray):
     logging.info('Saving centroids.')
     np.save(fname('centroids.npy'), centroids)
     np.savetxt(fname('centroids.csv'), centroids, delimiter=', ')
+
+
+def save_dendrogram(fname, save_figure: SaveFigureBackend, dendrogram: Dendrogram):
     logging.info('Pickling dendrogram data.')
     with open(fname('dendrogram.pkl'), 'wb') as file:
         pickle.dump(dendrogram, file)
@@ -111,15 +122,18 @@ def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
 
 def main():
     """Entry point of the script"""
-    data, config, destination = scr.initialize()
+    data, config, destination, xy = scr.initialize()
     experiment = build_experiment(config)
+    fname = partial(os.path.join, destination)
     try:
         linkage = experiment.linkage(data)
+        save_linkage(fname, linkage)
         dendrogram = experiment.dendrogram(linkage)
+        save_dendrogram(fname, experiment.save_figure, dendrogram)
         partition = flatten_linkage(linkage)
+        save_partition(fname, partition, xy)
         centroids = compute_centroids(data, partition)
-        save(linkage, dendrogram, partition, centroids,
-             experiment.save_figure, destination)
+        save_centroids(fname, centroids)
     except Exception as ex:
         logging.error("Failed with exception.")
         logging.error(repr(ex))

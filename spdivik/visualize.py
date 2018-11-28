@@ -20,7 +20,10 @@ def parse_args():
     return parser.parse_args()
 
 
-def visualize(label, x, y, shape):
+def visualize(label, xy, shape=None):
+    x, y = xy.T
+    if shape is None:
+        shape = np.max(y) + 1, np.max(x) + 1
     y = y.max() - y
     label = label - label.min() + 1
     label_map = np.zeros(shape, dtype=int)
@@ -36,9 +39,7 @@ def main():
     print("Labels will be saved to {0}.".format(args.destination))
     xy = load_data(args.xy).astype(int)
     labels = load_data(args.labels).astype(int)
-    x, y = xy.T
-    shape = np.max(y) + 1, np.max(x) + 1
-    visualization = visualize(labels, x=x, y=y, shape=shape)
+    visualization = visualize(labels=labels, xy=xy)
     imsave(args.destination, visualization)
 
 

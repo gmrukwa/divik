@@ -29,6 +29,11 @@ def parse_args():
     parser.add_argument('--config', '-c',
                         help='Configuration file for the experiment.',
                         action='store', dest='config', required=True)
+    parser.add_argument('--xy',
+                        help='File with spatial coordinates X and Y. Should '
+                             'contain X in first column, Y in second. The '
+                             'number of rows should be equal to the data.',
+                        action='store', dest='xy', required=False, default=None)
     parser.add_argument('--verbose', '-v', action='store_true')
     return parser.parse_args()
 
@@ -117,18 +122,39 @@ def load_data(path: str) -> ty.Data:
 
 Config = Dict
 DestinationPath = str
+Coordinates = np.ndarray
 
 
-def initialize() -> Tuple[ty.Data, Config, DestinationPath]:
+def try_load_data(path):
+    try:
+        data = load_data(path)
+        logging.debug('Data loaded successfully.')
+    except Exception as ex:
+        logging.error("Data loading failed with an exception.")
+        logging.error(repr(ex))
+        raise
+    return data
+
+
+def try_load_xy(path):
+    if path is not None:
+        try:
+            xy = load_data(path).astype(int)
+            logging.debug('Coordinates loaded successfully.')
+        except Exception as ex:
+            logging.error('Coordinates loading failed with an exception.')
+            logging.error(repr(ex))
+            raise
+    else:
+        xy = None
+    return xy
+
+
+def initialize() -> Tuple[ty.Data, Config, DestinationPath, Coordinates]:
     arguments = parse_args()
     destination = prepare_destination(arguments.destination)
     setup_logger(destination, arguments.verbose)
     config = load_config(arguments.config, destination)
-    try:
-        data = load_data(arguments.source)
-        logging.debug('Data loaded successfully.')
-        return data, config, destination
-    except Exception as ex:
-        logging.error("Data loading failed with exception.")
-        logging.error(repr(ex))
-        raise
+    data = try_load_data(arguments.source)
+    xy = try_load_xy(arguments.xy)
+    return data, config, destination, xy
