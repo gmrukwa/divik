@@ -97,7 +97,7 @@ def save(data: ty.Data, result: typing.Optional[ty.DivikResult],
 
 
 def main():
-    data, config, destination = sc.initialize()
+    data, config, destination, xy = sc.initialize()
     logging.info('Workspace initialized.')
     experiment, progress = build_experiment(config, data)
     progress.total = data.shape[0]
@@ -111,7 +111,7 @@ def main():
         raise
     finally:
         progress.close()
-    save(data, result, destination)
+    save(data, result, destination, xy)
 
 
 if __name__ == '__main__':

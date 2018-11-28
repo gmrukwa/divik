@@ -139,7 +139,7 @@ def save(segmentations, scores, destination: str, experiment: Experiment):
 
 
 def main():
-    data, config, destination = scr.initialize()
+    data, config, destination, xy = scr.initialize()
     experiment = build_experiment(config)
     try:
         segmentations = split(data, experiment.kmeans, experiment.grouping_pool,

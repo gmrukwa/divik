@@ -111,7 +111,7 @@ def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
 
 def main():
     """Entry point of the script"""
-    data, config, destination = scr.initialize()
+    data, config, destination, xy = scr.initialize()
     experiment = build_experiment(config)
     try:
         linkage = experiment.linkage(data)
