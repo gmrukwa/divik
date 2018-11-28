@@ -10,9 +10,11 @@ import numpy as np
 import pandas as pd
 import scipy.cluster.hierarchy as hcl
 import scipy.io as sio
+from skimage.io import imsave
 import spdivik._scripting as scr
 from spdivik.kmeans._scripting.parsers import assert_configured
 import spdivik.types as ty
+import spdivik.visualize as vis
 
 
 LinkageMatrix = NewType('LinkageMatrix', np.ndarray)
@@ -84,7 +86,7 @@ def build_experiment(config) -> Experiment:
 
 def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
          partition: ty.IntLabels, centroids: ty.Data,
-         save_figure: SaveFigureBackend, destination: str):
+         save_figure: SaveFigureBackend, destination: str, xy: np.ndarray=None):
     """Save results of experiment into dedicated location"""
     fname = partial(os.path.join, destination)
     logging.info('Saving linkage in numpy format.')
@@ -96,6 +98,10 @@ def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
     logging.info('Saving flat partition.')
     np.save(fname('partition.npy'), partition)
     np.savetxt(fname('partition.csv'), partition, fmt='%i', delimiter=', ')
+    if xy is not None:
+        logging.info('Generating visulization.')
+        visualization = vis.visualize(partition, xy)
+        imsave(fname('partition.png'), visualization)
     logging.info('Saving centroids.')
     np.save(fname('centroids.npy'), centroids)
     np.savetxt(fname('centroids.csv'), centroids, delimiter=', ')
@@ -119,7 +125,7 @@ def main():
         partition = flatten_linkage(linkage)
         centroids = compute_centroids(data, partition)
         save(linkage, dendrogram, partition, centroids,
-             experiment.save_figure, destination)
+             experiment.save_figure, destination, xy)
     except Exception as ex:
         logging.error("Failed with exception.")
         logging.error(repr(ex))
