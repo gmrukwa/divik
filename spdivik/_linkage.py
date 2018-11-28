@@ -84,17 +84,16 @@ def build_experiment(config) -> Experiment:
     return experiment
 
 
-def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
-         partition: ty.IntLabels, centroids: ty.Data,
-         save_figure: SaveFigureBackend, destination: str, xy: np.ndarray=None):
-    """Save results of experiment into dedicated location"""
-    fname = partial(os.path.join, destination)
+def _save_linkage(fname, linkage: LinkageMatrix):
     logging.info('Saving linkage in numpy format.')
     np.save(fname('linkage.npy'), linkage)
     logging.info('Converting linkage to MATLAB format.')
     matlab_linkage = hcl.to_mlab_linkage(linkage)
     logging.info('Saving linkage in MATLAB format.')
     sio.savemat(fname('linkage.mat'), {'linkage': matlab_linkage})
+
+
+def _save_partition(fname, partition: ty.IntLabels, xy: np.ndarray=None):
     logging.info('Saving flat partition.')
     np.save(fname('partition.npy'), partition)
     np.savetxt(fname('partition.csv'), partition, fmt='%i', delimiter=', ')
@@ -102,9 +101,15 @@ def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
         logging.info('Generating visulization.')
         visualization = vis.visualize(partition, xy)
         imsave(fname('partition.png'), visualization)
+
+
+def _save_centroids(fname, centroids: np.ndarray):
     logging.info('Saving centroids.')
     np.save(fname('centroids.npy'), centroids)
     np.savetxt(fname('centroids.csv'), centroids, delimiter=', ')
+
+
+def _save_dendrogram(fname, save_figure: SaveFigureBackend, dendrogram: Dendrogram):
     logging.info('Pickling dendrogram data.')
     with open(fname('dendrogram.pkl'), 'wb') as file:
         pickle.dump(dendrogram, file)
@@ -113,6 +118,17 @@ def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
     logging.info('Saving dendrogram plot as PNG.')
     save_figure(fname('dendrogram.png'))
     plt.close('all')
+
+
+def save(linkage: LinkageMatrix, dendrogram: Dendrogram,
+         partition: ty.IntLabels, centroids: ty.Data,
+         save_figure: SaveFigureBackend, destination: str, xy: np.ndarray=None):
+    """Save results of experiment into dedicated location"""
+    fname = partial(os.path.join, destination)
+    _save_linkage(fname, linkage)
+    _save_partition(fname, partition, xy)
+    _save_centroids(fname, centroids)
+    _save_dendrogram(fname, save_figure, dendrogram)
 
 
 def main():
