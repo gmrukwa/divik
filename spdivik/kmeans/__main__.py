@@ -35,8 +35,10 @@ def build_experiment(config) -> Experiment:
     labeling = km.Labeling(distance)
     initialization = prs.parse_initialization(config, distance)
     number_of_iterations = prs.parse_number_of_iterations(config)
+    normalize_rows = prs.parse_row_normalization(config)
     kmeans = km.KMeans(labeling=labeling, initialize=initialization,
-                       number_of_iterations=number_of_iterations)
+                       number_of_iterations=number_of_iterations,
+                       normalize_rows=normalize_rows)
 
     gap_pool, grouping_pool = prs.spawn_pool(config)
 

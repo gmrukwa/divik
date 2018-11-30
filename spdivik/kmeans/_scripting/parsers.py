@@ -36,6 +36,11 @@ def parse_number_of_iterations(config) -> int:
     return number_of_iterations
 
 
+def parse_row_normalization(config) -> int:
+    assert_configured(config, 'normalize_rows')
+    return bool(config['normalize_rows'])
+
+
 Min, Max = int, int
 
 
