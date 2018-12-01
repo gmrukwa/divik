@@ -39,7 +39,7 @@ setup(
         'h5py>=2.8.0',
         'matlabruntimeforpython===R2016b',
         'numpy>=0.12.1',
-        'pandas<0.21',
+        'pandas>=0.20.3',
         'scipy>=0.19.1',
         'scikit-image>=0.14.1',
         'scikit-learn>=0.19.1',
