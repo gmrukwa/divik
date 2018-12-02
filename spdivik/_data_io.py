@@ -8,6 +8,41 @@ from scipy import io as scio
 from spdivik import types as ty
 
 
+def _has_quilt() -> bool:
+    try:
+        import quilt
+        return True
+    except ImportError:
+        return False
+
+
+def _is_variable_in_quilt_package(name: str) -> bool:
+    return (not os.path.exists(name)) \
+           and (not os.path.splitext(name)[1]) \
+           and (name.find('/') != -1) \
+           and (name.find('/') != name.rfind('/'))
+
+
+def _try_load_quilt(name: str) -> ty.Data:
+    import quilt
+    logging.info("Loading data %s", name)
+    quilt.log(name)
+    data = np.array(quilt.load(name)())
+    logging.info("Data loaded")
+    return data
+
+
+def _load_quilt(name: str) -> ty.Data:
+    import quilt
+    try:
+        return _try_load_quilt(name)
+    except quilt.tools.command.CommandException:
+        logging.info("Dataset missing locally")
+        logging.info("Installing dataset %s", name)
+        quilt.install(name)
+        return _try_load_quilt(name)
+
+
 def _load_mat_with(path: str, backend=scio.loadmat, ignore='__') -> np.ndarray:
     data = backend(path)
     logging.debug('Data file opened successfully.')
@@ -34,8 +69,7 @@ def _load_mat(path: str) -> np.ndarray:
         return _load_mat_with(path, backend=h5py.File, ignore='#')
 
 
-def load_data(path: str) -> ty.Data:
-    logging.info("Loading data: " + path)
+def _load_disk_file(path: str) -> ty.Data:
     normalized = path.lower()
     if normalized.endswith('.csv'):
         loader = partial(np.loadtxt, delimiter=',')
@@ -50,3 +84,14 @@ def load_data(path: str) -> ty.Data:
         logging.error(message)
         raise IOError(message)
     return loader(path)
+
+
+def load_data(path: str) -> ty.Data:
+    logging.info("Loading data: " + path)
+    if _has_quilt() and _is_variable_in_quilt_package(path):
+        try:
+            return _load_quilt(path)
+        except Exception as ex:
+            logging.info("Quilt failed to load %s", path)
+            logging.debug(repr(ex))
+    return _load_disk_file(path)
