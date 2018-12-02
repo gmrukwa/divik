@@ -4,7 +4,7 @@ import numpy as np
 from skimage.color import label2rgb
 from skimage.io import imsave
 
-from spdivik._scripting import load_data
+from spdivik._data_io import load_data
 
 
 def parse_args():
