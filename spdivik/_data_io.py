@@ -36,7 +36,8 @@ def _load_quilt(name: str) -> ty.Data:
     import quilt
     try:
         return _try_load_quilt(name)
-    except quilt.tools.command.CommandException:
+    except quilt.tools.command.CommandException as ex:
+        logging.debug(repr(ex))
         logging.info("Dataset missing locally")
         logging.info("Installing dataset %s", name)
         quilt.install(name)
