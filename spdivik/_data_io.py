@@ -48,6 +48,11 @@ def _load_quilt(name: str) -> ty.Data:
         logging.info("Installing dataset %s", name)
         quilt.install(_quilt_package_name(name))
         return _try_load_quilt(name)
+    except KeyError as ex:
+        logging.debug(repr(ex))
+        logging.info("Variable was not found, updating dataset")
+        quilt.install(_quilt_package_name(name), force=True)
+        return _try_load_quilt(name)
 
 
 def _load_mat_with(path: str, backend=scio.loadmat, ignore='__') -> np.ndarray:
