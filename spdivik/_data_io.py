@@ -23,10 +23,16 @@ def _is_variable_in_quilt_package(name: str) -> bool:
            and (name.find('/') != name.rfind('/'))
 
 
+def _quilt_package_name(name: str) -> str:
+    first = name.find('/')
+    second = 1 + first + name[first + 1:].find('/')
+    return name[:second]
+
+
 def _try_load_quilt(name: str) -> ty.Data:
     import quilt
     logging.info("Loading data %s", name)
-    quilt.log(name)
+    quilt.log(_quilt_package_name(name))
     data = np.array(quilt.load(name)())
     logging.info("Data loaded")
     return data
@@ -40,7 +46,7 @@ def _load_quilt(name: str) -> ty.Data:
         logging.debug(repr(ex))
         logging.info("Dataset missing locally")
         logging.info("Installing dataset %s", name)
-        quilt.install(name)
+        quilt.install(_quilt_package_name(name))
         return _try_load_quilt(name)
 
 
