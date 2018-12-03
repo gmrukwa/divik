@@ -39,7 +39,7 @@ def main():
     print("Labels will be saved to {0}.".format(args.destination))
     xy = load_data(args.xy).astype(int)
     labels = load_data(args.labels).astype(int)
-    visualization = visualize(labels=labels, xy=xy)
+    visualization = visualize(label=labels, xy=xy)
     imsave(args.destination, visualization)
 
 
