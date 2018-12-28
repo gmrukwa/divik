@@ -1,27 +1,15 @@
-FROM spectreteam/python_msi:v5.0.0 as base
+FROM spectreteam/python_msi:v5.0.0
 
-
-FROM base as builder
-
-RUN mkdir /install
-
-WORKDIR /install
-
-COPY requirements.txt /requirements.txt
-
-RUN pip install --install-option="--prefix=/install" -r /requirements.txt
-
-
-FROM base
-
-COPY --from=builder /install /usr/local
-
-COPY . /app
+COPY requirements.txt /app/requirements.txt
 
 WORKDIR /app
 
+RUN pip install -r requirements.txt
+
 RUN mkdir -p /root/.config/matplotlib &&\
   echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
+
+COPY . /app
 
 RUN python -m unittest discover
 
