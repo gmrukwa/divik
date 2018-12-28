@@ -27,6 +27,7 @@ setup(
     entry_points={
         'console_scripts': [
             'divik=spdivik.__main__:main',
+            'inspect=spdivik.inspect.__main__:main',
             'kmeans=spdivik.kmeans.__main__:main',
             'linkage=spdivik._linkage:main',
             'visualize=spdivik.visualize:main'
