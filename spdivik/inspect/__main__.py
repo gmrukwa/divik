@@ -1,10 +1,9 @@
-import dash_html_components as html
 
 from spdivik.inspect.app import app
 from spdivik.inspect.layout import LAYOUT
 
 
-app.layout = html.Div(LAYOUT)
+app.layout = LAYOUT
 
 
 def main():
