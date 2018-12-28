@@ -78,7 +78,7 @@ def _load_mat(path: str) -> np.ndarray:
         return _load_mat_with(path, backend=scio.loadmat, ignore='__')
     except NotImplementedError:  # v7.3 MATLAB HDF5 MAT-File
         logging.debug('Legacy MAT-file loader failed, restarting with HDF5 loader.')
-        return _load_mat_with(path, backend=h5py.File, ignore='#')
+        return _load_mat_with(path, backend=h5py.File, ignore='#').T
 
 
 def _load_disk_file(path: str) -> ty.Data:
