@@ -15,6 +15,8 @@ RUN python -m unittest discover
 
 RUN python setup.py install
 
+EXPOSE 8050
+
 VOLUME /data
 
 WORKDIR /data
