@@ -53,20 +53,20 @@ def default_clusters_figure():
 def get_enabled_ids(figure=None, enabled_flag=None, partition=None):
     if partition is None:
         assert figure is not None
-        partition = figure['data'][0]['z']
+        partition = np.array(figure['data'][0]['z'], dtype=int)
     if enabled_flag is None:
         assert figure is not None
-        enabled_flag = figure['data'][0]['customdata']
+        enabled_flag = np.array(figure['data'][0]['customdata'], dtype=bool)
     return np.unique(partition[enabled_flag])
 
 
 def get_disabled_ids(figure=None, enabled_flag=None, partition=None):
     if partition is None:
         assert figure is not None
-        partition = figure['data'][0]['z']
+        partition = np.array(figure['data'][0]['z'], dtype=int)
     if enabled_flag is None:
         assert figure is not None
-        enabled_flag = figure['data'][0]['customdata']
+        enabled_flag = np.array(figure['data'][0]['customdata'], dtype=bool)
     enabled_ids = get_enabled_ids(enabled_flag=enabled_flag,
                                   partition=partition)
     return np.setdiff1d(partition, enabled_ids)
