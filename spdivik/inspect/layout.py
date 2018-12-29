@@ -46,7 +46,6 @@ def make_layout():
         ], className='eight columns'),
 
         html.Div(children=[
-            html.P('Color picker placeholder', style={'background-color': 'red'}),
             html.Div([
                 html.H4('Disabled clusters'),
                 dcc.Dropdown(id=Fields.DISABLED_CLUSTERS_PICKER,
