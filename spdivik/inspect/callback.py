@@ -3,6 +3,7 @@ import json
 from dash.dependencies import Input, Output, State
 
 from spdivik.inspect.app import app
+import spdivik.inspect.recolor as recolor
 import spdivik.inspect.exclusion as ex
 import spdivik.inspect.figure as fig
 from spdivik.inspect.layout import Fields
@@ -78,3 +79,30 @@ def update_color_sample(r, g, b):
         'background-color': 'rgb({0}, {1}, {2})'.format(r, g, b),
         'height': '1em'
     }
+
+
+@app.callback(
+    Output(Fields.CLUSTER_COLOR_R, 'value'),
+    [Input(Fields.SELECTED_POINT, 'children')],
+    [State(Fields.CLUSTERS_GRAPH, 'figure')]
+)
+def set_r_from_point(selected_point, figure):
+    return recolor.as_rgb(selected_point, figure)[0]
+
+
+@app.callback(
+    Output(Fields.CLUSTER_COLOR_G, 'value'),
+    [Input(Fields.SELECTED_POINT, 'children')],
+    [State(Fields.CLUSTERS_GRAPH, 'figure')]
+)
+def set_r_from_point(selected_point, figure):
+    return recolor.as_rgb(selected_point, figure)[1]
+
+
+@app.callback(
+    Output(Fields.CLUSTER_COLOR_B, 'value'),
+    [Input(Fields.SELECTED_POINT, 'children')],
+    [State(Fields.CLUSTERS_GRAPH, 'figure')]
+)
+def set_r_from_point(selected_point, figure):
+    return recolor.as_rgb(selected_point, figure)[2]

@@ -51,6 +51,7 @@ _DISABLED_COLOR = 'rgb(128, 128, 128)'
 def make_colormap(values, disabled=None):
     if disabled is None:
         disabled = []
+    values = np.array(values)
     return [
         [
             value / values.max(),
