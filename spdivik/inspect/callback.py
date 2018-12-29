@@ -121,16 +121,4 @@ def set_r_from_point(selected_point, figure):
     ]
 )
 def store_color_override(_, overrides, r, g, b, level, selected_point):
-    if not overrides:
-        overrides = '{}'
-
-    try:
-        cluster = int(json.loads(selected_point)['cluster'])
-    except json.JSONDecodeError:
-        return overrides
-
-    overrides = json.loads(overrides)
-    if level not in overrides:
-        overrides[level] = {}
-    overrides[level][cluster] = 'rgb({0},{1},{2})'.format(r, g, b)
-    return json.dumps(overrides)
+    return recolor.update_color_overrides(overrides, r, g, b, level, selected_point)
