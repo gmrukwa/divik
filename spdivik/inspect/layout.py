@@ -17,7 +17,6 @@ _FIELDS = [
     'CLUSTERS_CONTAINER',
     'CLUSTERS_GRAPH',
     'LEVEL',
-    'ENABLED_CLUSTERS_PICKER',
     'DISABLED_CLUSTERS_PICKER'
 ]
 
@@ -48,9 +47,6 @@ def make_layout():
         html.Div(children=[
             html.P('Color picker placeholder', style={'background-color': 'red'}),
             html.Div([
-                html.H4('Enabled clusters'),
-                dcc.Dropdown(id=Fields.ENABLED_CLUSTERS_PICKER,
-                             multi=True),
                 html.H4('Disabled clusters'),
                 dcc.Dropdown(id=Fields.DISABLED_CLUSTERS_PICKER,
                              multi=True)
