@@ -4,7 +4,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from spdivik.summary import depth
-from spdivik.inspect.app import divik_result
+from spdivik.inspect.app import divik_result, divik_result_path
 from spdivik.inspect.figure import default_clusters_figure
 
 
@@ -30,7 +30,7 @@ Fields = unique(Enum(
 def make_layout():
     result_depth = depth(divik_result())
     return html.Div([
-        html.H1(id=Fields.TITLE, children='Visualization'),
+        html.H4(id=Fields.TITLE, children=divik_result_path(), style={'text-align': 'center'}),
 
         html.Div(id=Fields.CLUSTERS_CONTAINER, children=[
             dcc.Graph(id=Fields.CLUSTERS_GRAPH,

@@ -15,6 +15,7 @@ server = app.server
 app.config.suppress_callback_exceptions = True
 
 _divik_result = None
+_divik_result_path = None
 _xy = None
 
 
@@ -26,8 +27,15 @@ def unpickle(path: str) -> Optional[DivikResult]:
 def divik_result(path: str=None) -> Optional[DivikResult]:
     global _divik_result
     if _divik_result is None and path is not None:
+        global _divik_result_path
+        _divik_result_path = path
         _divik_result = unpickle(path)
     return _divik_result
+
+
+def divik_result_path() -> str:
+    global _divik_result_path
+    return _divik_result_path
 
 
 def xy(path: str=None) -> np.ndarray:
