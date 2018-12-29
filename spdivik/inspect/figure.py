@@ -50,20 +50,51 @@ def default_clusters_figure():
     return current
 
 
-def set_visualization_levels(level: int, current):
-    partition = merged_partition(divik_result(), level)
+def get_enabled_ids(figure=None, enabled_flag=None, partition=None):
+    if partition is None:
+        assert figure is not None
+        partition = figure['data'][0]['z']
+    if enabled_flag is None:
+        assert figure is not None
+        enabled_flag = figure['data'][0]['customdata']
+    return np.unique(partition[enabled_flag])
 
+
+def get_disabled_ids(figure=None, enabled_flag=None, partition=None):
+    if partition is None:
+        assert figure is not None
+        partition = figure['data'][0]['z']
+    if enabled_flag is None:
+        assert figure is not None
+        enabled_flag = figure['data'][0]['customdata']
+    enabled_ids = get_enabled_ids(enabled_flag=enabled_flag,
+                                  partition=partition)
+    return np.setdiff1d(partition, enabled_ids)
+
+
+def vec_in(v1, v2):
+    return np.max(v1.reshape(-1, 1) == v2.reshape(1, -1), axis=1)
+
+
+def recompute_disabled(partition, old_enabled_flag):
     # if any subcluster is enabled, parent cluster will be enabled
     # if parent is disabled, children will be disabled
-    old_enabled_flag = current['data'][0]['customdata'] != 0
-    new_enabled_id = np.unique(partition[old_enabled_flag])
-    new_disabled_id = np.setdiff1d(partition, new_enabled_id)
-    new_enabled_flag = np.max(
-        partition.reshape(-1, 1) == new_enabled_id.reshape(1, -1), axis=1)
+    new_enabled_id = get_enabled_ids(enabled_flag=old_enabled_flag,
+                                     partition=partition)
+    new_disabled_id = get_disabled_ids(enabled_flag=old_enabled_flag,
+                                       partition=partition)
+    new_enabled_flag = vec_in(partition, new_enabled_id)
+    return new_enabled_flag, new_disabled_id
+
+
+def set_visualization_levels(level: int, current):
+    partition = merged_partition(divik_result(), level)
+    enabled_flag, disabled_id = recompute_disabled(
+        partition, current['data'][0]['customdata'] != 0)
 
     current['data'][0]['z'] = partition
     current['data'][0]['colorscale'] = make_colormap(partition,
-                                                     disabled=new_disabled_id)
-    current['data'][0]['customdata'] = new_enabled_flag
+                                                     disabled=disabled_id)
+    current['data'][0]['customdata'] = enabled_flag
 
     return current
