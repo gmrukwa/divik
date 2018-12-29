@@ -47,7 +47,7 @@ colormap = pipe(
 
 def make_colormap(values):
     return [
-        [value, color]
+        [value / values.max(), color]
         for value, color
         in zip(np.unique(values), colormap())
     ]
