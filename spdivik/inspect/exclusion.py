@@ -15,7 +15,7 @@ def initialize_storage(level):
 
 def vec_in(v1, v2):
     if np.size(v2) == 0:
-        return np.zeros((np.size(v1), 1), dtype=bool)
+        return np.zeros((np.size(v1),), dtype=bool)
     return np.max(np.reshape(v1, (-1, 1)) == np.reshape(v2, (1, -1)), axis=1)
 
 
