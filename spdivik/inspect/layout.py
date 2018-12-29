@@ -31,7 +31,8 @@ def make_layout():
         html.H1(id=Fields.TITLE, children='Visualization'),
         html.Div(id=Fields.CLUSTERS_CONTAINER, children=[
             dcc.Graph(id=Fields.CLUSTERS_GRAPH,
-                      figure=clusters_figure(1, 'Clusters')),
+                      figure=clusters_figure(1, 'Clusters'),
+                      style={'min-height': 600}),
             dcc.Slider(id=Fields.LEVEL,
                        value=1,
                        min=1,

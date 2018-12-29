@@ -15,6 +15,9 @@ _DEFAULT_CLUSTERS_FIGURE = {
         }
     ],
     'layout': {
+        'margin': {'l': 0, 'b': 0, 'r': 0, 't': 40, 'pad': 0},
+        # 'paper_bgcolor': '#7f7f7f',  # useful for debugging margins
+        'autosize': True,
         'xaxis': {
             'showgrid': False,
             'showticklabels': False,
