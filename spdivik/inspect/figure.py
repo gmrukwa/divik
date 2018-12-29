@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+import numpy as np
+
 from spdivik.inspect.app import divik_result, xy
 from spdivik.inspect.color import make_colormap
 from spdivik.summary import merged_partition
@@ -37,28 +39,31 @@ _DEFAULT_CLUSTERS_FIGURE = {
 }
 
 
-def _make_default_clusters_figure():
+def default_clusters_figure():
     current = deepcopy(_DEFAULT_CLUSTERS_FIGURE)
     current['data'][0]['x'] = xy().T[0]
     current['data'][0]['y'] = xy().T[1].max() - xy().T[1]
+    # customdata is used for filtering disabled clusters
+    # True <=> cluster enabled, False <=> cluster disabled
+    current['data'][0]['customdata'] = np.ones_like(xy().T[0])
+    set_visualization_levels(1, current)
     return current
 
 
-def _set_levels(level: int, current, disabled_clusters=None):
+def set_visualization_levels(level: int, current):
     partition = merged_partition(divik_result(), level)
+
+    # if any subcluster is enabled, parent cluster will be enabled
+    # if parent is disabled, children will be disabled
+    old_enabled_flag = current['data'][0]['customdata'] != 0
+    new_enabled_id = np.unique(partition[old_enabled_flag])
+    new_disabled_id = np.setdiff1d(partition, new_enabled_id)
+    new_enabled_flag = np.max(
+        partition.reshape(-1, 1) == new_enabled_id.reshape(1, -1), axis=1)
+
     current['data'][0]['z'] = partition
     current['data'][0]['colorscale'] = make_colormap(partition,
-                                                     disabled=disabled_clusters)
-
-
-def clusters_figure(level: int, title: str=None, current=None,
-                    disabled_clusters=None):
-    if current is None:
-        current = _make_default_clusters_figure()
-
-    _set_levels(level, current, disabled_clusters=disabled_clusters)
-
-    if title is not None:
-        current['layout']['title'] = title
+                                                     disabled=new_disabled_id)
+    current['data'][0]['customdata'] = new_enabled_flag
 
     return current

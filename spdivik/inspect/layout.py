@@ -5,7 +5,7 @@ import dash_html_components as html
 
 from spdivik.summary import depth
 from spdivik.inspect.app import divik_result
-from spdivik.inspect.figure import clusters_figure
+from spdivik.inspect.figure import default_clusters_figure
 
 
 def _as_id(name: str) -> str:
@@ -31,7 +31,7 @@ def make_layout():
         html.H1(id=Fields.TITLE, children='Visualization'),
         html.Div(id=Fields.CLUSTERS_CONTAINER, children=[
             dcc.Graph(id=Fields.CLUSTERS_GRAPH,
-                      figure=clusters_figure(1),
+                      figure=default_clusters_figure(),
                       style={'min-height': 600}),
             html.H4('Level'),
             dcc.Slider(id=Fields.LEVEL,

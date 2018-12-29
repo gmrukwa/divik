@@ -1,7 +1,7 @@
 from dash.dependencies import Input, Output, State
 
 from spdivik.inspect.app import app
-from spdivik.inspect.figure import clusters_figure
+from spdivik.inspect.figure import set_visualization_levels
 from spdivik.inspect.layout import Fields
 
 
@@ -10,5 +10,5 @@ from spdivik.inspect.layout import Fields
     [Input(Fields.LEVEL, 'value')],
     [State(Fields.CLUSTERS_GRAPH, 'figure')]
 )
-def update_depth(depth, current_figure):
-    return clusters_figure(depth, current=current_figure)
+def update_visualization_depth(depth, current_figure):
+    return set_visualization_levels(depth, current_figure)
