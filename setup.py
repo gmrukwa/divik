@@ -27,6 +27,7 @@ setup(
     entry_points={
         'console_scripts': [
             'divik=spdivik.__main__:main',
+            'inspect=spdivik.inspect.__main__:main',
             'kmeans=spdivik.kmeans.__main__:main',
             'linkage=spdivik._linkage:main',
             'visualize=spdivik.visualize:main'
@@ -35,6 +36,10 @@ setup(
     packages=find_packages(exclude=['test']),
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
+        'dash==0.34.0',
+        'dash-html-components==0.13.4',
+        'dash-core-components==0.42.0',
+        'dash-table==3.1.11',
         'functional-helpers',
         'h5py>=2.8.0',
         'matlabruntimeforpython===R2016b',
