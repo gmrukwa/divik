@@ -20,6 +20,7 @@ _FIELDS = [
     'DISABLED_CLUSTERS_PICKER',
     'DISABLED_CLUSTERS_STORAGE',
     'SELECTED_POINT',
+    'COLOR_OVERRIDES_STORAGE'
 ]
 
 
@@ -58,5 +59,6 @@ def make_layout():
             ])
         ], className='three columns'),
 
-        html.Div(id=Fields.DISABLED_CLUSTERS_STORAGE, style={'display': 'none'})
+        html.Div(id=Fields.DISABLED_CLUSTERS_STORAGE, style={'display': 'none'}),
+        html.Div(id=Fields.COLOR_OVERRIDES_STORAGE, style={'display': 'none'})
     ])
