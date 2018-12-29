@@ -31,3 +31,21 @@ def update_possible_enabled_clusters(_, current_figure):
 )
 def update_possible_enabled_clusters(_, current_figure):
     return ex.as_dropdown_options(fig.get_all_labels(current_figure))
+
+
+@app.callback(
+    Output(Fields.ENABLED_CLUSTERS_PICKER, 'value'),
+    [Input(Fields.LEVEL, 'value')],
+    [State(Fields.CLUSTERS_GRAPH, 'figure')]
+)
+def update_actually_enabled_clusters(_, current_figure):
+    return fig.get_enabled_ids(current_figure)
+
+
+@app.callback(
+    Output(Fields.DISABLED_CLUSTERS_PICKER, 'value'),
+    [Input(Fields.LEVEL, 'value')],
+    [State(Fields.CLUSTERS_GRAPH, 'figure')]
+)
+def update_actually_disabled_clusters(_, current_figure):
+    return fig.get_disabled_ids(current_figure)
