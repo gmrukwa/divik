@@ -1,6 +1,7 @@
 import argparse as agp
 
 from spdivik.inspect.app import app, divik_result, xy
+import spdivik.inspect.callback
 from spdivik.inspect.layout import make_layout
 
 
