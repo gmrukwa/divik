@@ -44,17 +44,19 @@ def _make_default_clusters_figure():
     return current
 
 
-def _set_levels(level: int, current):
+def _set_levels(level: int, current, disabled_clusters=None):
     partition = merged_partition(divik_result(), level)
     current['data'][0]['z'] = partition
-    current['data'][0]['colorscale'] = make_colormap(partition)
+    current['data'][0]['colorscale'] = make_colormap(partition,
+                                                     disabled=disabled_clusters)
 
 
-def clusters_figure(level: int, title: str=None, current=None):
+def clusters_figure(level: int, title: str=None, current=None,
+                    disabled_clusters=None):
     if current is None:
         current = _make_default_clusters_figure()
 
-    _set_levels(level, current)
+    _set_levels(level, current, disabled_clusters=disabled_clusters)
 
     if title is not None:
         current['layout']['title'] = title
