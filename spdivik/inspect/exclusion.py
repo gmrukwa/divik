@@ -29,18 +29,13 @@ def update_excluded(old_level, new_level, old_excluded):
     new_enabled_ids = np.unique(new_partition[old_enabled_flag])
     new_disabled_ids = np.setdiff1d(new_partition, new_enabled_ids)
 
-    return list(map(int, new_disabled_ids))
+    return sorted(list(map(int, new_disabled_ids)))
 
 
 def update_storage(level, disabled_clusters, old_state):
     state = json.loads(old_state)
-    if level == state['level']:  # user choice changed
-        state['excluded'] = disabled_clusters
-    else:                        # level changed
-        state['level'] = level
-        state['excluded'] = update_excluded(state['level'], level,
-                                            state['excluded'])
-
+    state['excluded'] = disabled_clusters
+    state['level'] = level
     return json.dumps(state)
 
 
