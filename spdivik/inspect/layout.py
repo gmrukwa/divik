@@ -18,7 +18,8 @@ _FIELDS = [
     'CLUSTERS_GRAPH',
     'LEVEL',
     'DISABLED_CLUSTERS_PICKER',
-    'DISABLED_CLUSTERS_STORAGE'
+    'DISABLED_CLUSTERS_STORAGE',
+    'SELECTED_POINT',
 ]
 
 
@@ -46,6 +47,10 @@ def make_layout():
         ], className='eight columns'),
 
         html.Div(children=[
+            html.Div([
+                html.H4('Selected point'),
+                html.Code(id=Fields.SELECTED_POINT)
+            ]),
             html.Div([
                 html.H4('Disabled clusters'),
                 dcc.Dropdown(id=Fields.DISABLED_CLUSTERS_PICKER,

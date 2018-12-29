@@ -47,3 +47,19 @@ def update_possible_enabled_clusters(level):
 )
 def update_actually_disabled_clusters(level, storage):
     return ex.update_actual_clusters(level, storage)
+
+
+@app.callback(
+    Output(Fields.SELECTED_POINT, 'children'),
+    [Input(Fields.CLUSTERS_GRAPH, 'clickData')]
+)
+def update_click_data(click_data):
+    if click_data:
+        point = click_data['points'][0]
+        return json.dumps({
+            'cluster': point['z'] if 'z' in point else 'outside the sample',
+            'x': point['x'],
+            'y': point['y']
+        }, indent=4, sort_keys=True)
+    else:
+        return 'no point selected'
