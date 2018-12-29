@@ -37,26 +37,18 @@ _DEFAULT_CLUSTERS_FIGURE = {
 }
 
 
-def _make_default_clusters_figure():
+def default_clusters_figure():
     current = deepcopy(_DEFAULT_CLUSTERS_FIGURE)
     current['data'][0]['x'] = xy().T[0]
     current['data'][0]['y'] = xy().T[1].max() - xy().T[1]
+    update_clusters_figure(1, [], current)
     return current
 
 
-def _set_levels(level: int, current):
+def update_clusters_figure(level: int, disabled, current):
     partition = merged_partition(divik_result(), level)
+
     current['data'][0]['z'] = partition
-    current['data'][0]['colorscale'] = make_colormap(partition)
-
-
-def clusters_figure(level: int, title: str=None, current=None):
-    if current is None:
-        current = _make_default_clusters_figure()
-
-    _set_levels(level, current)
-
-    if title is not None:
-        current['layout']['title'] = title
+    current['data'][0]['colorscale'] = make_colormap(partition, disabled=disabled)
 
     return current

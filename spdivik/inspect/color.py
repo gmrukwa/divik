@@ -45,9 +45,17 @@ colormap = pipe(
 )
 
 
-def make_colormap(values):
+_DISABLED_COLOR = 'rgb(128, 128, 128)'
+
+
+def make_colormap(values, disabled=None):
+    if disabled is None:
+        disabled = []
     return [
-        [value / values.max(), color]
+        [
+            value / values.max(),
+            color if value not in disabled else _DISABLED_COLOR
+        ]
         for value, color
         in zip(np.unique(values), colormap())
     ]
