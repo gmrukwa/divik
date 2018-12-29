@@ -16,7 +16,9 @@ _FIELDS = [
     'TITLE',
     'CLUSTERS_CONTAINER',
     'CLUSTERS_GRAPH',
-    'LEVEL'
+    'LEVEL',
+    'ENABLED_CLUSTERS_PICKER',
+    'DISABLED_CLUSTERS_PICKER'
 ]
 
 
@@ -29,6 +31,7 @@ def make_layout():
     result_depth = depth(divik_result())
     return html.Div([
         html.H1(id=Fields.TITLE, children='Visualization'),
+
         html.Div(id=Fields.CLUSTERS_CONTAINER, children=[
             dcc.Graph(id=Fields.CLUSTERS_GRAPH,
                       figure=default_clusters_figure(),
@@ -41,7 +44,16 @@ def make_layout():
                        step=1,
                        marks={i: i for i in range(1, result_depth + 1)})
         ], className='eight columns'),
+
         html.Div(children=[
-            html.P('Color picker placeholder')
-        ], className='three columns', style={'background-color': 'red'})
+            html.P('Color picker placeholder', style={'background-color': 'red'}),
+            html.Div([
+                html.H4('Enabled clusters'),
+                dcc.Dropdown(id=Fields.ENABLED_CLUSTERS_PICKER,
+                             multi=True),
+                html.H4('Disabled clusters'),
+                dcc.Dropdown(id=Fields.DISABLED_CLUSTERS_PICKER,
+                             multi=True)
+            ])
+        ], className='three columns')
     ])

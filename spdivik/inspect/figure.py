@@ -72,6 +72,10 @@ def get_disabled_ids(figure=None, enabled_flag=None, partition=None):
     return np.setdiff1d(partition, enabled_ids)
 
 
+def get_all_labels(figure):
+    return np.unique(figure['data'][0]['z'])
+
+
 def vec_in(v1, v2):
     return np.max(v1.reshape(-1, 1) == v2.reshape(1, -1), axis=1)
 
