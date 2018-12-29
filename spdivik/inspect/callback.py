@@ -63,3 +63,18 @@ def update_click_data(click_data):
         }, indent=4, sort_keys=True)
     else:
         return 'no point selected'
+
+
+@app.callback(
+    Output(Fields.CLUSTER_COLOR_SAMPLE, 'style'),
+    [
+        Input(Fields.CLUSTER_COLOR_R, 'value'),
+        Input(Fields.CLUSTER_COLOR_G, 'value'),
+        Input(Fields.CLUSTER_COLOR_B, 'value'),
+    ]
+)
+def update_color_sample(r, g, b):
+    return {
+        'background-color': 'rgb({0}, {1}, {2})'.format(r, g, b),
+        'height': '1em'
+    }

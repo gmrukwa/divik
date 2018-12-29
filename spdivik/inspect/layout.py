@@ -20,7 +20,11 @@ _FIELDS = [
     'DISABLED_CLUSTERS_PICKER',
     'DISABLED_CLUSTERS_STORAGE',
     'SELECTED_POINT',
-    'COLOR_OVERRIDES_STORAGE'
+    'COLOR_OVERRIDES_STORAGE',
+    'CLUSTER_COLOR_R',
+    'CLUSTER_COLOR_G',
+    'CLUSTER_COLOR_B',
+    'CLUSTER_COLOR_SAMPLE'
 ]
 
 
@@ -52,6 +56,15 @@ def make_layout():
                 html.H4('Selected point'),
                 html.Code(id=Fields.SELECTED_POINT)
             ]),
+
+            html.Div([
+                html.H4('Assign cluster color'),
+                html.Div(id=Fields.CLUSTER_COLOR_SAMPLE),
+                dcc.Slider(id=Fields.CLUSTER_COLOR_R, min=0, max=255, value=128),
+                dcc.Slider(id=Fields.CLUSTER_COLOR_G, min=0, max=255, value=128),
+                dcc.Slider(id=Fields.CLUSTER_COLOR_B, min=0, max=255, value=128),
+            ]),
+
             html.Div([
                 html.H4('Disabled clusters'),
                 dcc.Dropdown(id=Fields.DISABLED_CLUSTERS_PICKER,
