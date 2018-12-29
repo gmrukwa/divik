@@ -33,6 +33,7 @@ def make_layout():
             dcc.Graph(id=Fields.CLUSTERS_GRAPH,
                       figure=clusters_figure(1, 'Clusters'),
                       style={'min-height': 600}),
+            html.H4('Level'),
             dcc.Slider(id=Fields.LEVEL,
                        value=1,
                        min=1,
