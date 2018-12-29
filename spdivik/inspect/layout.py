@@ -24,7 +24,8 @@ _FIELDS = [
     'CLUSTER_COLOR_R',
     'CLUSTER_COLOR_G',
     'CLUSTER_COLOR_B',
-    'CLUSTER_COLOR_SAMPLE'
+    'CLUSTER_COLOR_SAMPLE',
+    'CLUSTER_COLOR_APPLY',
 ]
 
 
@@ -63,6 +64,7 @@ def make_layout():
                 dcc.Slider(id=Fields.CLUSTER_COLOR_R, min=0, max=255, value=128),
                 dcc.Slider(id=Fields.CLUSTER_COLOR_G, min=0, max=255, value=128),
                 dcc.Slider(id=Fields.CLUSTER_COLOR_B, min=0, max=255, value=128),
+                html.Button('Apply', id=Fields.CLUSTER_COLOR_APPLY),
             ]),
 
             html.Div([

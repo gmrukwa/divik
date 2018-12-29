@@ -106,3 +106,31 @@ def set_r_from_point(selected_point, figure):
 )
 def set_r_from_point(selected_point, figure):
     return recolor.as_rgb(selected_point, figure)[2]
+
+
+@app.callback(
+    Output(Fields.COLOR_OVERRIDES_STORAGE, 'children'),
+    [Input(Fields.CLUSTER_COLOR_APPLY, 'n_clicks')],
+    [
+        State(Fields.COLOR_OVERRIDES_STORAGE, 'children'),
+        State(Fields.CLUSTER_COLOR_R, 'value'),
+        State(Fields.CLUSTER_COLOR_G, 'value'),
+        State(Fields.CLUSTER_COLOR_B, 'value'),
+        State(Fields.LEVEL, 'value'),
+        State(Fields.SELECTED_POINT, 'children'),
+    ]
+)
+def store_color_override(_, overrides, r, g, b, level, selected_point):
+    if not overrides:
+        overrides = '{}'
+
+    try:
+        cluster = int(json.loads(selected_point)['cluster'])
+    except json.JSONDecodeError:
+        return overrides
+
+    overrides = json.loads(overrides)
+    if level not in overrides:
+        overrides[level] = {}
+    overrides[level][cluster] = 'rgb({0},{1},{2})'.format(r, g, b)
+    return json.dumps(overrides)
