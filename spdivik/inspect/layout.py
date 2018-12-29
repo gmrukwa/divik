@@ -26,6 +26,7 @@ _FIELDS = [
     'CLUSTER_COLOR_B',
     'CLUSTER_COLOR_SAMPLE',
     'CLUSTER_COLOR_APPLY',
+    'CLUSTER_COLOR_RESET',
 ]
 
 
@@ -59,12 +60,17 @@ def make_layout():
             ]),
 
             html.Div([
-                html.H4('Assign cluster color'),
+                html.H4('Assign new cluster color'),
                 html.Div(id=Fields.CLUSTER_COLOR_SAMPLE),
                 dcc.Slider(id=Fields.CLUSTER_COLOR_R, min=0, max=255, value=128),
                 dcc.Slider(id=Fields.CLUSTER_COLOR_G, min=0, max=255, value=128),
                 dcc.Slider(id=Fields.CLUSTER_COLOR_B, min=0, max=255, value=128),
                 html.Button('Apply', id=Fields.CLUSTER_COLOR_APPLY),
+            ]),
+
+            html.Div([
+                html.H4('Reset clusters colors'),
+                html.Button('Reset', id=Fields.CLUSTER_COLOR_RESET),
             ]),
 
             html.Div([

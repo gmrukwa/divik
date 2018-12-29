@@ -112,7 +112,10 @@ def set_r_from_point(selected_point, figure):
 
 @app.callback(
     Output(Fields.COLOR_OVERRIDES_STORAGE, 'children'),
-    [Input(Fields.CLUSTER_COLOR_APPLY, 'n_clicks')],
+    [
+        Input(Fields.CLUSTER_COLOR_APPLY, 'n_clicks_timestamp'),
+        Input(Fields.CLUSTER_COLOR_RESET, 'n_clicks_timestamp'),
+    ],
     [
         State(Fields.COLOR_OVERRIDES_STORAGE, 'children'),
         State(Fields.CLUSTER_COLOR_R, 'value'),
@@ -122,5 +125,7 @@ def set_r_from_point(selected_point, figure):
         State(Fields.SELECTED_POINT, 'children'),
     ]
 )
-def store_color_override(_, overrides, r, g, b, level, selected_point):
+def store_color_override(apply, reset, overrides, r, g, b, level, selected_point):
+    if apply and reset and apply < reset:
+        return '{}'
     return recolor.update_color_overrides(overrides, r, g, b, level, selected_point)
