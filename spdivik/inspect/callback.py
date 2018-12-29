@@ -64,8 +64,7 @@ def update_click_data(click_data):
             'x': point['x'],
             'y': point['y']
         }, indent=4, sort_keys=True)
-    else:
-        return 'no point selected'
+    return 'no point selected'
 
 
 @app.callback(
