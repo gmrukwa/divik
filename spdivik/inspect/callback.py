@@ -17,11 +17,10 @@ def update_visualization_depth(depth, current_figure):
 
 @app.callback(
     Output(Fields.DISABLED_CLUSTERS_PICKER, 'options'),
-    [Input(Fields.LEVEL, 'value')],
-    [State(Fields.CLUSTERS_GRAPH, 'figure')]
+    [Input(Fields.LEVEL, 'value')]
 )
-def update_possible_enabled_clusters(_, current_figure):
-    return ex.as_dropdown_options(fig.get_all_labels(current_figure))
+def update_possible_enabled_clusters(level):
+    return ex.get_options(level)
 
 
 @app.callback(
