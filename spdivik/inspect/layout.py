@@ -39,9 +39,9 @@ def make_layout():
             dcc.Slider(id=Fields.LEVEL,
                        value=1,
                        min=1,
-                       max=result_depth,
+                       max=result_depth - 1,
                        step=1,
-                       marks={i: i for i in range(1, result_depth + 1)})
+                       marks={i: i for i in range(1, result_depth)})
         ], className='eight columns'),
 
         html.Div(children=[
