@@ -18,7 +18,15 @@ _FIELDS = [
     'CLUSTERS_GRAPH',
     'LEVEL',
     'DISABLED_CLUSTERS_PICKER',
-    'DISABLED_CLUSTERS_STORAGE'
+    'DISABLED_CLUSTERS_STORAGE',
+    'SELECTED_POINT',
+    'COLOR_OVERRIDES_STORAGE',
+    'CLUSTER_COLOR_R',
+    'CLUSTER_COLOR_G',
+    'CLUSTER_COLOR_B',
+    'CLUSTER_COLOR_SAMPLE',
+    'CLUSTER_COLOR_APPLY',
+    'CLUSTER_COLOR_RESET',
 ]
 
 
@@ -47,11 +55,31 @@ def make_layout():
 
         html.Div(children=[
             html.Div([
+                html.H4('Selected point'),
+                html.Code(id=Fields.SELECTED_POINT)
+            ]),
+
+            html.Div([
+                html.H4('Assign new cluster color'),
+                html.Div(id=Fields.CLUSTER_COLOR_SAMPLE),
+                dcc.Slider(id=Fields.CLUSTER_COLOR_R, min=0, max=255, value=128),
+                dcc.Slider(id=Fields.CLUSTER_COLOR_G, min=0, max=255, value=128),
+                dcc.Slider(id=Fields.CLUSTER_COLOR_B, min=0, max=255, value=128),
+                html.Button('Apply', id=Fields.CLUSTER_COLOR_APPLY),
+            ]),
+
+            html.Div([
+                html.H4('Reset clusters colors'),
+                html.Button('Reset', id=Fields.CLUSTER_COLOR_RESET),
+            ]),
+
+            html.Div([
                 html.H4('Disabled clusters'),
                 dcc.Dropdown(id=Fields.DISABLED_CLUSTERS_PICKER,
                              multi=True)
             ])
         ], className='three columns'),
 
-        html.Div(id=Fields.DISABLED_CLUSTERS_STORAGE, style={'display': 'none'})
+        html.Div(id=Fields.DISABLED_CLUSTERS_STORAGE, style={'display': 'none'}),
+        html.Div(id=Fields.COLOR_OVERRIDES_STORAGE, style={'display': 'none'})
     ])
