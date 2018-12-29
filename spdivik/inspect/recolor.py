@@ -23,13 +23,14 @@ def update_color_overrides(overrides, r, g, b, level, selected_point):
         overrides = '{}'
 
     try:
-        cluster = int(json.loads(selected_point)['cluster'])
+        cluster = str(int(json.loads(selected_point)['cluster']))
     except json.JSONDecodeError:
         return overrides
     except TypeError:
         return overrides
 
     overrides = json.loads(overrides)
+    level = str(level)
     if level not in overrides:
         overrides[level] = {}
     overrides[level][cluster] = 'rgb({0},{1},{2})'.format(r, g, b)

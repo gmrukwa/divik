@@ -13,13 +13,15 @@ from spdivik.inspect.layout import Fields
     Output(Fields.CLUSTERS_GRAPH, 'figure'),
     [
         Input(Fields.LEVEL, 'value'),
-        Input(Fields.DISABLED_CLUSTERS_STORAGE, 'children')
+        Input(Fields.DISABLED_CLUSTERS_STORAGE, 'children'),
+        Input(Fields.COLOR_OVERRIDES_STORAGE, 'children'),
     ],
     [State(Fields.CLUSTERS_GRAPH, 'figure')]
 )
-def update_visualization(depth, disabled_state, current_figure):
+def update_visualization(depth, disabled_state, color_overrides, current_figure):
     disabled = json.loads(disabled_state)['excluded'] if disabled_state else []
-    return fig.update_clusters_figure(depth, disabled, current_figure)
+    overrides = json.loads(color_overrides).get(str(depth), {}) if color_overrides else {}
+    return fig.update_clusters_figure(depth, disabled, overrides, current_figure)
 
 
 @app.callback(

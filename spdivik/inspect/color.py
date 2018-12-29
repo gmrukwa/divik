@@ -48,14 +48,24 @@ colormap = pipe(
 _DISABLED_COLOR = 'rgb(128, 128, 128)'
 
 
-def make_colormap(values, disabled=None):
+def _pick_color(value, color, disabled, overrides):
+    if value in disabled:
+        return _DISABLED_COLOR
+    if str(value) in overrides:
+        return overrides[str(value)]
+    return color
+
+
+def make_colormap(values, disabled=None, overrides=None):
     if disabled is None:
         disabled = []
+    if overrides is None:
+        overrides = {}
     values = np.array(values)
     return [
         [
             value / values.max(),
-            color if value not in disabled else _DISABLED_COLOR
+            _pick_color(value, color, disabled, overrides)
         ]
         for value, color
         in zip(np.unique(values), colormap())
