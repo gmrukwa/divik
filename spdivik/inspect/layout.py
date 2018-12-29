@@ -17,7 +17,8 @@ _FIELDS = [
     'CLUSTERS_CONTAINER',
     'CLUSTERS_GRAPH',
     'LEVEL',
-    'DISABLED_CLUSTERS_PICKER'
+    'DISABLED_CLUSTERS_PICKER',
+    'DISABLED_CLUSTERS_STORAGE'
 ]
 
 
@@ -51,5 +52,7 @@ def make_layout():
                 dcc.Dropdown(id=Fields.DISABLED_CLUSTERS_PICKER,
                              multi=True)
             ])
-        ], className='three columns')
+        ], className='three columns'),
+
+        html.Div(id=Fields.DISABLED_CLUSTERS_STORAGE, style={'display': 'none'})
     ])
