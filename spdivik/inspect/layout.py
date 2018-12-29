@@ -39,7 +39,7 @@ def make_layout():
                        min=1,
                        max=result_depth,
                        step=1,
-                       marks={i: i for i in range(result_depth + 1)})
+                       marks={i: i for i in range(1, result_depth + 1)})
         ], className='eight columns'),
         html.Div(children=[
             html.P('Color picker placeholder')
