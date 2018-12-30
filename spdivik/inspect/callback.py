@@ -144,12 +144,10 @@ def store_color_override(apply, reset, load, overrides, sample_style, level,
         if name:
             return per.restore_color_overrides(name)
         return '{}'
-    if apply < reset and load < reset:
-        return '{}'
-    return recolor.update_color_overrides(overrides,
-                                          sample_style['background-color'],
-                                          level,
-                                          selected_point)
+    if load < apply and reset < apply:
+        return recolor.update_color_overrides(
+            overrides, sample_style['background-color'], level, selected_point)
+    return '{}'
 
 
 @app.callback(
