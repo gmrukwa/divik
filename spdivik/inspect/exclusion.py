@@ -9,7 +9,8 @@ from spdivik.inspect.app import divik_result
 def initialize_storage(level):
     return json.dumps({
         'excluded': [],
-        'level': level
+        'level': level,
+        'reloaded_at': 0,
     })
 
 
@@ -39,11 +40,9 @@ def update_storage(level, disabled_clusters, old_state):
     return json.dumps(state)
 
 
-def got_update(level, disabled_clusters, old_state):
+def got_update(stamp, old_state):
     state = json.loads(old_state)
-    levels_equal = state['level'] == level
-    exclusions_equal = np.sort(disabled_clusters) == np.sort(state['excluded'])
-    return not levels_equal or not exclusions_equal
+    return not stamp or stamp <= state.get('reloaded_at', 0)
 
 
 def get_options(level):

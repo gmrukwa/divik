@@ -29,7 +29,7 @@ def update_visualization(depth, disabled_state, color_overrides, current_figure)
     Output(Fields.DISABLED_CLUSTERS_STORAGE, 'children'),
     [
         Input(Fields.DISABLED_CLUSTERS_PICKER, 'value'),
-        Input(Fields.LOAD_PROFILE, 'n_clicks'),
+        Input(Fields.LOAD_PROFILE, 'n_clicks_timestamp'),
     ],
     [
         State(Fields.LEVEL, 'value'),
@@ -37,11 +37,11 @@ def update_visualization(depth, disabled_state, color_overrides, current_figure)
         State(Fields.SAVED_PROFILES, 'value'),
     ]
 )
-def update_disabled_clusters_to_new_level(disabled_clusters, _, level,
+def update_disabled_clusters_to_new_level(disabled_clusters, stamp, level,
                                           old_state, name):
     if not old_state:
         return ex.initialize_storage(level)
-    if ex.got_update(level, disabled_clusters, old_state):
+    if ex.got_update(stamp, old_state):
         return ex.update_storage(level, disabled_clusters, old_state)
     if name:
         return per.restore_disabled_clusters(name)
