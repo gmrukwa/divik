@@ -44,11 +44,12 @@ def restore_level(name):
     return load(name)['level']
 
 
-def restore_disabled_clusters(stamp, name):
+def restore_disabled_clusters(name):
+    if not name:
+        return []
     disabled_clusters = load(name)['disabled_clusters']
     storage = json.loads(disabled_clusters)
-    storage['reloaded_at'] = stamp
-    return json.dumps(storage)
+    return storage['excluded']
 
 
 def restore_color_overrides(name):
