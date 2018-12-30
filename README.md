@@ -10,6 +10,16 @@
 
 Python implementation of Divisive iK-means (DiviK) algorithm.
 
+# Tools within this package
+
+> This section will be further developed soon.
+
+1) `divik` - runs DiviK in one of many scenarios
+2) `kmeans` - runs K-means
+3) `linkage` - runs agglomerative clustering
+4) [`inspect`](./spdivik/inspect/README.md) - visualizes DiviK result
+5) `visualize` - generates `.png` file with visualization of clusters
+
 # References
 
 This software is part of contribution made by [Data Mining Group of Silesian
