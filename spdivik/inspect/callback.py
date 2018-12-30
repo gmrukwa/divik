@@ -179,11 +179,3 @@ def load_level_from_profile(_, name, self):
     if not name:
         return self
     return per.restore_level(name)
-#
-#
-# @app.callback(
-#     Output(Fields.SAVED_PROFILES, 'value'),
-#     [Input(Fields.LOAD_PROFILE, 'n_clicks')]
-# )
-# def erase_profile_selection_after_load(_):
-#     return None
