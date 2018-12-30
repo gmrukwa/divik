@@ -27,6 +27,10 @@ _FIELDS = [
     'CLUSTER_COLOR_SAMPLE',
     'CLUSTER_COLOR_APPLY',
     'CLUSTER_COLOR_RESET',
+    'SAVED_PROFILES',
+    'LOAD_PROFILE',
+    'NEW_PROFILE_NAME',
+    'SAVE_PROFILE',
 ]
 
 
@@ -85,12 +89,32 @@ def make_disabled_clusters_panel():
     ])
 
 
+def make_load_profile_panel():
+    return html.Div([
+        html.H4('Load profile'),
+        dcc.Dropdown(id=Fields.SAVED_PROFILES),
+        html.Br(),
+        html.Button('Load', id=Fields.LOAD_PROFILE)
+    ])
+
+
+def make_save_profile_panel():
+    return html.Div([
+        html.H4('Save profile'),
+        dcc.Input(id=Fields.NEW_PROFILE_NAME),
+        html.Br(),
+        html.Button('Save', id=Fields.SAVE_PROFILE)
+    ])
+
+
 def make_menu_panel():
     return html.Div(children=[
         make_selected_point_display(),
         make_new_color_assignment_panel(),
         make_colors_reset_panel(),
         make_disabled_clusters_panel(),
+        make_load_profile_panel(),
+        make_save_profile_panel(),
     ], className='three columns')
 
 
