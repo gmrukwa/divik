@@ -141,14 +141,17 @@ def store_color_override(apply, reset, load, overrides, sample_style, level,
     apply = apply or 0
     reset = reset or 0
     load = load or 0
-    if apply < load and reset < load:
+    last_click = max(apply, load, reset)
+    if not last_click or reset == last_click:
+        return '{}'
+    if load == last_click:
         if name:
             return per.restore_color_overrides(name)
         return '{}'
-    if load < apply and reset < apply:
+    if apply == last_click:
         return recolor.update_color_overrides(
             overrides, sample_style['background-color'], level, selected_point)
-    return '{}'
+    raise NotImplementedError('Unhandled case.')
 
 
 @app.callback(
