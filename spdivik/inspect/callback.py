@@ -41,9 +41,10 @@ def update_disabled_clusters_to_new_level(disabled_clusters, _, level,
                                           old_state, name):
     if not old_state:
         return ex.initialize_storage(level)
-    if name:
-        return per.restore_disabled_clusters(name)
-    return ex.update_storage(level, disabled_clusters, old_state)
+    if ex.got_update(level, disabled_clusters, old_state):
+        return ex.update_storage(level, disabled_clusters, old_state)
+    assert name, name
+    return per.restore_disabled_clusters(name)
 
 
 @app.callback(

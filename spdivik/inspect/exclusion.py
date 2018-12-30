@@ -39,6 +39,13 @@ def update_storage(level, disabled_clusters, old_state):
     return json.dumps(state)
 
 
+def got_update(level, disabled_clusters, old_state):
+    state = json.loads(old_state)
+    levels_equal = state['level'] == level
+    exclusions_equal = np.sort(disabled_clusters) == np.sort(state['excluded'])
+    return not levels_equal or not exclusions_equal
+
+
 def get_options(level):
     partition = merged_partition(divik_result(), level)
     return [{'label': e, 'value': e} for e in np.unique(partition)]
