@@ -31,6 +31,10 @@ _FIELDS = [
     'LOAD_PROFILE',
     'NEW_PROFILE_NAME',
     'SAVE_PROFILE',
+    'MENU_TABS',
+    'COLOR_MANIPULATION_TAB',
+    'EXCLUSION_TAB',
+    'PERSISTENCE_TAB',
 ]
 
 
@@ -108,14 +112,42 @@ def make_save_profile_panel():
     ])
 
 
-def make_menu_panel():
-    return html.Div(children=[
+def make_color_manipulation_tab():
+    return html.Div(id=Fields.COLOR_MANIPULATION_TAB, children=[
         make_selected_point_display(),
         make_new_color_assignment_panel(),
         make_colors_reset_panel(),
+    ])
+
+
+def make_exclusion_tab():
+    return html.Div(id=Fields.EXCLUSION_TAB, children=[
         make_disabled_clusters_panel(),
+    ])
+
+
+def make_persistence_tab():
+    return html.Div(id=Fields.PERSISTENCE_TAB, children=[
         make_load_profile_panel(),
         make_save_profile_panel(),
+    ])
+
+
+def make_menu_panel():
+    return html.Div(children=[
+        dcc.Tabs(id=Fields.MENU_TABS,
+                 value=Fields.COLOR_MANIPULATION_TAB,
+                 children=[
+                     dcc.Tab(label='COLOR',
+                             value=Fields.COLOR_MANIPULATION_TAB),
+                     dcc.Tab(label='SELECT',
+                             value=Fields.EXCLUSION_TAB),
+                     dcc.Tab(label='PROFILE',
+                             value=Fields.PERSISTENCE_TAB),
+                 ]),
+        make_color_manipulation_tab(),
+        make_exclusion_tab(),
+        make_persistence_tab(),
     ], className='three columns')
 
 
