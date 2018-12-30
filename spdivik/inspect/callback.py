@@ -44,7 +44,7 @@ def update_disabled_clusters_to_new_level(disabled_clusters, stamp, level,
     if ex.got_update(stamp, old_state):
         return ex.update_storage(level, disabled_clusters, old_state)
     if name:
-        return per.restore_disabled_clusters(name)
+        return per.restore_disabled_clusters(stamp, name)
     return ex.initialize_storage(level)
 
 
