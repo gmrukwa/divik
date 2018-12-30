@@ -101,7 +101,8 @@ def make_load_profile_panel():
 def make_save_profile_panel():
     return html.Div([
         html.H4('Save profile'),
-        dcc.Input(id=Fields.NEW_PROFILE_NAME),
+        dcc.Input(id=Fields.NEW_PROFILE_NAME, type='text',
+                  style={'display': 'block'}),
         html.Br(),
         html.Button('Save', id=Fields.SAVE_PROFILE)
     ])
