@@ -129,15 +129,13 @@ def set_r_from_point(selected_point, figure):
     ],
     [
         State(Fields.COLOR_OVERRIDES_STORAGE, 'children'),
-        State(Fields.CLUSTER_COLOR_R, 'value'),
-        State(Fields.CLUSTER_COLOR_G, 'value'),
-        State(Fields.CLUSTER_COLOR_B, 'value'),
+        State(Fields.CLUSTER_COLOR_SAMPLE, 'style'),
         State(Fields.LEVEL, 'value'),
         State(Fields.SELECTED_POINT, 'children'),
         State(Fields.SAVED_PROFILES, 'value')
     ]
 )
-def store_color_override(apply, reset, load, overrides, r, g, b, level,
+def store_color_override(apply, reset, load, overrides, sample_style, level,
                          selected_point, name):
     apply = apply or 0
     reset = reset or 0
@@ -148,7 +146,9 @@ def store_color_override(apply, reset, load, overrides, r, g, b, level,
         return '{}'
     if apply < reset and load < reset:
         return '{}'
-    return recolor.update_color_overrides(overrides, r, g, b, level,
+    return recolor.update_color_overrides(overrides,
+                                          sample_style['background-color'],
+                                          level,
                                           selected_point)
 
 
