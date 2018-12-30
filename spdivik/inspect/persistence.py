@@ -13,8 +13,13 @@ def initialize():
 
 
 def find_preserved():
+    initialize()
     return [
-        os.path.splitext(path)[0] for path
+        {
+            'label': os.path.splitext(path)[0],
+            'value': os.path.splitext(path)[0],
+        }
+        for path
         in os.listdir(store_path())
     ]
 
