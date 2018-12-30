@@ -18,7 +18,7 @@ def as_rgb(selected_point, figure):
     return json.loads(jsonified)
 
 
-def update_color_overrides(overrides, color, level, selected_point):
+def update_color_overrides(overrides, new_color, level, selected_point):
     if not overrides:
         overrides = '{}'
 
@@ -33,5 +33,5 @@ def update_color_overrides(overrides, color, level, selected_point):
     level = str(level)
     if level not in overrides:
         overrides[level] = {}
-    overrides[level][cluster] = color
+    overrides[level][cluster] = new_color
     return json.dumps(overrides)
