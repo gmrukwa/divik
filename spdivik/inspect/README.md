@@ -119,12 +119,12 @@ docker run \
 and for Windows:
 
 ```cmd
-docker run \
-    --volume %cd%:/data \
-    --port 8050:8050 \
-    gmrukwa/divik \
-    inspect \
-    --result results/my-divik-analysis/20181204-063622 \
+docker run^
+    --volume %cd%:/data^
+    --port 8050:8050^
+    gmrukwa/divik^
+    inspect^
+    --result results/my-divik-analysis/20181204-063622^
     --xy xy.npy
 ```
 
