@@ -1,8 +1,13 @@
+from functools import partial
+from multiprocessing.pool import Pool
+from typing import List, Optional
+
 import numpy as np
 import pandas as pd
 
 from spdivik.kmeans._core import KMeans, parse_distance
 from spdivik.distance import DistanceMetric
+from spdivik.score._picker import Picker
 from spdivik.types import Data, IntLabels, Centroids
 
 
@@ -24,3 +29,17 @@ def dunn_(data: Data, labels: IntLabels, centroids: Centroids,
 def dunn(data: Data, kmeans: KMeans) -> float:
     distance = parse_distance(kmeans.distance)
     return dunn_(data, kmeans.labels_, kmeans.cluster_centers_, distance)
+
+
+class DunnPicker(Picker):
+    def score(self, data: Data, estimators: List[KMeans], pool: Pool=None) \
+            -> np.ndarray:
+        score = partial(dunn, data=data)
+        if pool:
+            scores = pool.map(score, estimators)
+        else:
+            scores = [score(estimator) for estimator in estimators]
+        return np.array(scores)
+
+    def select(self, scores: np.ndarray) -> Optional[int]:
+        return int(np.argmax(scores))

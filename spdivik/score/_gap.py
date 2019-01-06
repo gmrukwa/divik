@@ -1,12 +1,17 @@
 from __future__ import division
 from functools import partial
 from multiprocessing import Pool
-from typing import Tuple
+from operator import attrgetter
+from typing import List, Optional, Tuple
 
+from functional import pipe
 import numpy as np
 import pandas as pd
+from sklearn.base import clone
 
 from spdivik.distance import DistanceMetric
+from spdivik.kmeans._core import KMeans, parse_distance
+from spdivik.score._picker import Picker
 from spdivik.types import Centroids, Data, IntLabels, SegmentationMethod
 from spdivik.seeding import seeded
 
@@ -57,3 +62,38 @@ def gap_(data: Data, labels: IntLabels, centroids: Centroids,
         standard_deviation = np.sqrt(1 + 1 / n_trials) * np.std(log_dispersions)
         result += (standard_deviation,)
     return result
+
+
+def _fast_kmeans(kmeans: KMeans, max_iter: int = 10) -> SegmentationMethod:
+    new = clone(kmeans)
+    new.max_iter = max_iter
+    get_meta = attrgetter('labels_', 'cluster_centers_')
+    return pipe(new.fit, get_meta)
+
+
+class GapPicker(Picker):
+    def __init__(self, max_iter: int = 10, seed: int = 0, n_trials: int = 10):
+        self.max_iter = max_iter
+        self.seed = seed
+        self.n_trials = n_trials
+
+    def score(self, data: Data, estimators: List[KMeans], pool: Pool=None) \
+            -> np.ndarray:
+        scores = [
+            gap_(data=data,
+                 labels=estimator.labels_,
+                 centroids=estimator.cluster_centers_,
+                 distance=parse_distance(estimator.distance),
+                 split=_fast_kmeans(estimator, self.max_iter),
+                 seed=self.seed,
+                 n_trials=self.n_trials,
+                 pool=pool,
+                 return_deviation=True)
+            for estimator in estimators
+        ]
+        return np.array(scores)
+
+    def select(self, scores: np.ndarray) -> Optional[int]:
+        is_suggested = scores[:-1, 0] > (scores[1:, 0] + scores[1:, 1])
+        suggested_locations = list(np.nonzero(is_suggested))
+        return suggested_locations[0] if suggested_locations else None
