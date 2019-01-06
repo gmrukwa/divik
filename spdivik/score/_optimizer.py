@@ -24,7 +24,7 @@ def _split(data, *args, score: Score, split: SegmentationMethod,
     return labels, centroids, quality
 
 
-class Optimizer:
+class _Optimizer:
     def __init__(self, score: Score, segmentation_method: SegmentationMethod,
                  parameters: List[ParameterValues], pool: Pool=None):
         parameter_names, self.parameter_sets = zip(*parameters)
