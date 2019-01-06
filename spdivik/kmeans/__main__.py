@@ -43,7 +43,7 @@ def build_experiment(config) -> Experiment:
     gap_pool, grouping_pool = prs.spawn_pool(config)
 
     gap_trials = prs.parse_gap_trials(config)
-    gap = partial(sc.gap, distance=distance, n_trials=gap_trials, pool=gap_pool,
+    gap = partial(sc.gap_, distance=distance, n_trials=gap_trials, pool=gap_pool,
                   return_deviation=True)
     return Experiment(kmeans=kmeans,
                       gap=gap,

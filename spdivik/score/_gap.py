@@ -33,10 +33,10 @@ def _dispersion_of_random_sample(seed: int,
 
 
 @seeded(wrapped_requires_seed=True)
-def gap(data: Data, labels: IntLabels, centroids: Centroids,
-        distance: DistanceMetric, split: SegmentationMethod,
-        seed: int=0, n_trials: int = 100, pool: Pool=None,
-        return_deviation: bool = False) -> float:
+def gap_(data: Data, labels: IntLabels, centroids: Centroids,
+         distance: DistanceMetric, split: SegmentationMethod,
+         seed: int=0, n_trials: int = 100, pool: Pool=None,
+         return_deviation: bool = False) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
     compute_dispersion = partial(_dispersion_of_random_sample,
