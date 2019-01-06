@@ -5,8 +5,8 @@ from spdivik.distance import DistanceMetric
 from spdivik.types import Data, IntLabels, Centroids
 
 
-def dunn(data: Data, labels: IntLabels, centroids: Centroids,
-         distance: DistanceMetric) -> float:
+def dunn_(data: Data, labels: IntLabels, centroids: Centroids,
+          distance: DistanceMetric) -> float:
     if centroids.shape[0] == 1:
         raise ValueError('At least 2 clusters are required.')
     clusters = pd.DataFrame(data).groupby(labels).apply(lambda cluster: cluster.values)
