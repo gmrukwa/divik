@@ -55,7 +55,7 @@ def _normalize_rows(data: Data) -> Data:
     return data
 
 
-class KMeans(SegmentationMethod):
+class _KMeans(SegmentationMethod):
     """K-means clustering"""
     def __init__(self, labeling: Labeling, initialize: Initialization,
                  number_of_iterations: int=100, normalize_rows: bool=False):

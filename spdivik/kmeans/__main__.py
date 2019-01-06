@@ -20,7 +20,7 @@ Gap = Callable[
 ]
 Min, Max = int, int
 Experiment = NamedTuple('Experiment', [
-    ('kmeans', km.KMeans),
+    ('kmeans', km._KMeans),
     ('gap', Gap),
     ('maximal_number_of_clusters', Max),
     ('minimal_number_of_clusters', Min),
@@ -36,9 +36,9 @@ def build_experiment(config) -> Experiment:
     initialization = prs.parse_initialization(config, distance)
     number_of_iterations = prs.parse_number_of_iterations(config)
     normalize_rows = prs.parse_row_normalization(config)
-    kmeans = km.KMeans(labeling=labeling, initialize=initialization,
-                       number_of_iterations=number_of_iterations,
-                       normalize_rows=normalize_rows)
+    kmeans = km._KMeans(labeling=labeling, initialize=initialization,
+                        number_of_iterations=number_of_iterations,
+                        normalize_rows=normalize_rows)
 
     gap_pool, grouping_pool = prs.spawn_pool(config)
 
@@ -66,7 +66,7 @@ class DataBoundKmeans:
                            number_of_clusters=number_of_clusters)
 
 
-def split(data: ty.Data, kmeans: km.KMeans, pool: Pool,
+def split(data: ty.Data, kmeans: km._KMeans, pool: Pool,
           minimal_number_of_clusters: int,
           maximal_number_of_clusters: int):
     data_bound_kmeans = DataBoundKmeans(kmeans=kmeans, data=data)
@@ -96,7 +96,7 @@ def build_splitter(kmeans, number_of_clusters):
         return partial(kmeans, number_of_clusters=number_of_clusters)
 
 
-def score_splits(segmentations, data: ty.Data, kmeans: km.KMeans, gap,
+def score_splits(segmentations, data: ty.Data, kmeans: km._KMeans, gap,
                  minimal_number_of_clusters: int,
                  maximal_number_of_clusters: int):
     logging.info('Scoring splits with GAP statistic.')
