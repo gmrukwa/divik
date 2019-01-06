@@ -3,6 +3,7 @@ from multiprocessing import Pool
 
 import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
+import tqdm
 
 from spdivik.kmeans._core import KMeans
 from spdivik.score import DunnPicker, GapPicker
@@ -24,7 +25,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
                  init: str = 'percentile', percentile: float = 95.,
                  max_iter: int = 100, normalize_rows: bool = False,
                  gap_max_iter: int = 10, gap_seed: int = 0,
-                 gap_trials: int = 10):
+                 gap_trials: int = 10, verbose: bool=False):
         super().__init__()
         assert method in {'dunn', 'gap'}
         assert min_clusters <= max_clusters
@@ -40,6 +41,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.gap_max_iter = gap_max_iter
         self.gap_seed = gap_seed
         self.gap_trials = gap_trials
+        self.verbose = verbose
 
     def fit(self, X, y=None):
         fit_kmeans = partial(_fit_kmeans, data=X, distance=self.distance,
@@ -47,6 +49,8 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
                              max_iter=self.max_iter,
                              normalize_rows=self.normalize_rows)
         n_clusters = range(self.min_clusters, self.max_clusters + 1)
+        if self.verbose:
+            n_clusters = tqdm.tqdm(n_clusters)
 
         if self.method == 'dunn':
             method = DunnPicker()
