@@ -114,6 +114,7 @@ def _parse_initialization(name: str, distance: dist.ScipyDistance,
 
 
 class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
+    # TODO: Add documentation
     def __init__(self, n_clusters: int, distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
                  max_iter: int = 100, normalize_rows: bool = False):
