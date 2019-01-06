@@ -1,9 +1,14 @@
 from typing import Tuple
 
 import numpy as np
+from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
 
 from spdivik import distance as dist
-from spdivik.kmeans import Initialization
+from spdivik.kmeans import \
+    Initialization, \
+    ExtremeInitialization, \
+    PercentileInitialization
 from spdivik.types import Data, Centroids, IntLabels, SegmentationMethod
 
 
@@ -88,3 +93,59 @@ class _KMeans(SegmentationMethod):
             centroids = redefine_centroids(data, old_labels)
             labels = self.labeling(data, centroids)
         return labels, centroids
+
+
+def _parse_distance(name: str) -> dist.ScipyDistance:
+    known_distances = {metric.value: metric for metric in dist.KnownMetric}
+    assert name in known_distances, \
+        'Unknown distance {0}. Known: {1}'.format(
+            name, list(known_distances.keys()))
+    distance = dist.ScipyDistance(known_distances[name])
+    return distance
+
+
+def _parse_initialization(name: str, distance: dist.ScipyDistance,
+                          percentile: float=None) -> Initialization:
+    if name == 'percentile':
+        return PercentileInitialization(distance, percentile)
+    if name == 'extreme':
+        return ExtremeInitialization(distance)
+    raise ValueError('Unknown initialization: {0}'.format(name))
+
+
+class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
+    def __init__(self, n_clusters: int, distance: str = 'euclidean',
+                 init: str = 'percentile', percentile: float = 95.,
+                 max_iter: int = 100, normalize_rows: bool = False):
+        super().__init__()
+        self.n_clusters = n_clusters
+        self.distance = distance
+        self.init = init
+        self.percentile = percentile
+        self.max_iter = max_iter
+        self.normalize_rows = normalize_rows
+
+    def fit(self, X, y=None):
+        distance = _parse_distance(self.distance)
+        initialize = _parse_initialization(self.init, distance, self.percentile)
+        kmeans = _KMeans(
+            labeling=Labeling(distance),
+            initialize=initialize,
+            number_of_iterations=self.max_iter,
+            normalize_rows=self.normalize_rows
+        )
+        self.labels_, self.cluster_centers_ = kmeans(
+            X, number_of_clusters=self.n_clusters)
+        return self
+
+    def predict(self, X):
+        check_is_fitted(self, 'cluster_centers_')
+        distance = _parse_distance(self.distance)
+        labels = distance(X, self.cluster_centers_).argmin(axis=1)
+        return labels
+
+    def transform(self, X):
+        check_is_fitted(self, 'cluster_centers_')
+        distance = _parse_distance(self.distance)
+        distances = distance(X, self.cluster_centers_).min(axis=1)
+        return distances
