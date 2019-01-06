@@ -4,4 +4,4 @@ from ._initialization import \
     ExtremeInitialization, \
     Initialization, \
     PercentileInitialization
-from ._core import _KMeans, Labeling
+from ._core import _KMeans, KMeans, Labeling
