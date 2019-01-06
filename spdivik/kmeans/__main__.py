@@ -134,6 +134,9 @@ def save(segmentations, scores, destination: str, experiment: Experiment):
     partitions = make_segmentations_matrix(segmentations)
     np.savetxt(os.path.join(destination, 'partitions.csv'), partitions,
                delimiter=', ', fmt='%i')
+    for i in range(partitions.shape[1]):
+        np.savetxt(os.path.join(destination, 'partitions.{0}.csv').format(i),
+                   partitions[:, i].reshape(-1, 1), delimiter=', ', fmt='%i')
     logging.info("Saving scores.")
     report = make_scores_report(scores, experiment.minimal_number_of_clusters,
                                 experiment.maximal_number_of_clusters)
