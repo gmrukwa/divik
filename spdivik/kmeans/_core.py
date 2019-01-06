@@ -95,7 +95,7 @@ class _KMeans(SegmentationMethod):
         return labels, centroids
 
 
-def _parse_distance(name: str) -> dist.ScipyDistance:
+def parse_distance(name: str) -> dist.ScipyDistance:
     known_distances = {metric.value: metric for metric in dist.KnownMetric}
     assert name in known_distances, \
         'Unknown distance {0}. Known: {1}'.format(
@@ -127,7 +127,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.normalize_rows = normalize_rows
 
     def fit(self, X, y=None):
-        distance = _parse_distance(self.distance)
+        distance = parse_distance(self.distance)
         initialize = _parse_initialization(self.init, distance, self.percentile)
         kmeans = _KMeans(
             labeling=Labeling(distance),
@@ -141,12 +141,12 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def predict(self, X):
         check_is_fitted(self, 'cluster_centers_')
-        distance = _parse_distance(self.distance)
+        distance = parse_distance(self.distance)
         labels = distance(X, self.cluster_centers_).argmin(axis=1)
         return labels
 
     def transform(self, X):
         check_is_fitted(self, 'cluster_centers_')
-        distance = _parse_distance(self.distance)
+        distance = parse_distance(self.distance)
         distances = distance(X, self.cluster_centers_).min(axis=1)
         return distances
