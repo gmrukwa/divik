@@ -24,7 +24,7 @@ class TestOptimizer(unittest.TestCase):
         self.parameters = [spdivik.score.ParameterValues(name='k',
                                                          values=[4, 5, 6])]
         self.best_parameter_value = 5
-        self.optimizer = spdivik.score._Optimizer(
+        self.optimizer = spdivik.score.Optimizer(
             self.score, self.segmentation_method, self.parameters)
         self.data = np.array([[1], [2], [3]])
 

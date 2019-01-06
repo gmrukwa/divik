@@ -45,15 +45,15 @@ def _scenario(f):
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
                            kmeans: km._KMeans,
                            pool: Pool = None,
-                           k_max: int = 10) -> sc._Optimizer:
+                           k_max: int = 10) -> sc.Optimizer:
     dunn = partial(sc.dunn_, distance=distance)
     sweep_clusters_number = [
         sc.ParameterValues('number_of_clusters', list(range(2, k_max + 1)))
     ]
-    best_kmeans_with_dunn = sc._Optimizer(score=dunn,
-                                          segmentation_method=kmeans,
-                                          parameters=sweep_clusters_number,
-                                          pool=pool)
+    best_kmeans_with_dunn = sc.Optimizer(score=dunn,
+                                         segmentation_method=kmeans,
+                                         parameters=sweep_clusters_number,
+                                         pool=pool)
     return best_kmeans_with_dunn
 
 
