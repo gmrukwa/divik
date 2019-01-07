@@ -80,9 +80,11 @@ class _KMeans(SegmentationMethod):
         if not isinstance(data, np.ndarray) or len(data.shape) != 2:
             raise ValueError("data is expected to be 2D np.array")
         if number_of_clusters < 1:
-            raise ValueError("number_of_clusters({0}) < 1".format(number_of_clusters))
+            raise ValueError("number_of_clusters({0}) < 1".format(
+                number_of_clusters))
         elif number_of_clusters == 1:
-            return np.zeros((data.shape[0], 1), dtype=int), np.mean(data, axis=0)
+            return np.zeros((data.shape[0], 1), dtype=int), \
+                   np.mean(data, axis=0)
         if self.normalize_rows:
             data = _normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
@@ -129,10 +131,10 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.normalize_rows = normalize_rows
 
     def fit(self, X, y=None):
-        distance = parse_distance(self.distance)
-        initialize = _parse_initialization(self.init, distance, self.percentile)
+        dist = parse_distance(self.distance)
+        initialize = _parse_initialization(self.init, dist, self.percentile)
         kmeans = _KMeans(
-            labeling=Labeling(distance),
+            labeling=Labeling(dist),
             initialize=initialize,
             number_of_iterations=self.max_iter,
             normalize_rows=self.normalize_rows

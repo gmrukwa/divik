@@ -23,7 +23,7 @@ def get_segmentations(kmeans: km.AutoKMeans) -> Segmentations:
 
 
 def make_segmentations_matrix(kmeans: km.AutoKMeans) -> np.ndarray:
-    return np.hstack([est.labels_.reshape(-1, 1) for est in kmeans.estimators_])
+    return np.hstack([e.labels_.reshape(-1, 1) for e in kmeans.estimators_])
 
 
 def make_scores_report(kmeans: km.AutoKMeans) -> pd.DataFrame:
