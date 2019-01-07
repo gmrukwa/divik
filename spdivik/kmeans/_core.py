@@ -139,6 +139,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         )
         self.labels_, self.cluster_centers_ = kmeans(
             X, number_of_clusters=self.n_clusters)
+        self.labels_ = self.labels_.ravel()
         return self
 
     def predict(self, X):
