@@ -36,7 +36,8 @@ def make_picker(method, gap=None):
         max_iter = gap.get('max_iter', 10)
         seed = gap.get('seed', 0)
         trials = gap.get('trials', 10)
-        picker = GapPicker(max_iter, seed, trials)
+        correction = gap.get('correction', True)
+        picker = GapPicker(max_iter, seed, trials, correction)
     else:
         raise ValueError('Unknown quality measure {0}'.format(method))
     return picker

@@ -72,10 +72,12 @@ def _fast_kmeans(kmeans: KMeans, max_iter: int = 10) -> SegmentationMethod:
 
 
 class GapPicker(Picker):
-    def __init__(self, max_iter: int = 10, seed: int = 0, n_trials: int = 10):
+    def __init__(self, max_iter: int = 10, seed: int = 0, n_trials: int = 10,
+                 correction: bool=True):
         self.max_iter = max_iter
         self.seed = seed
         self.n_trials = n_trials
+        self.correction = correction
 
     def score(self, data: Data, estimators: List[KMeans], pool: Pool=None) \
             -> np.ndarray:
@@ -96,8 +98,11 @@ class GapPicker(Picker):
     def select(self, scores: np.ndarray) -> Optional[int]:
         GAP = scores[:, 0]
         s_k = scores[:, 1]
-        is_suggested = GAP[:-1] > (GAP[1:] + s_k[1:])
-        suggested_locations = list(np.nonzero(is_suggested))
+        if self.correction:
+            is_suggested = GAP[:-1] > (GAP[1:] + s_k[1:])
+            suggested_locations = list(np.nonzero(is_suggested))
+        else:
+            suggested_locations = [np.argmax(GAP)]
         return suggested_locations[0] if suggested_locations else None
 
     def report(self, estimators: List[KMeans], scores: np.ndarray) \
