@@ -37,6 +37,7 @@ def _dispersion_of_random_sample(seed: int,
     return _dispersion(sample, labels, centroids, distance)
 
 
+# TODO: Reduce the number of parameters introducing single KMeans object
 @seeded(wrapped_requires_seed=True)
 def gap_(data: Data, labels: IntLabels, centroids: Centroids,
          distance: DistanceMetric, split: SegmentationMethod,
