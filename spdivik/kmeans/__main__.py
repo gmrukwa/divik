@@ -23,7 +23,7 @@ def make_segmentations_matrix(kmeans: km.AutoKMeans) -> np.ndarray:
 
 
 def make_scores_report(kmeans: km.AutoKMeans) -> pd.DataFrame:
-    n_clust = np.arange(kmeans.min_clusters, kmeans.max_clusters)
+    n_clust = np.arange(kmeans.min_clusters, kmeans.max_clusters + 1)
     if kmeans.method == 'dunn':
         return pd.DataFrame(
             data={
