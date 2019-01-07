@@ -43,3 +43,15 @@ class DunnPicker(Picker):
 
     def select(self, scores: np.ndarray) -> Optional[int]:
         return int(np.argmax(scores))
+
+    def report(self, estimators: List[KMeans], scores: np.ndarray) \
+            -> pd.DataFrame:
+        best = self.select(scores)
+        suggested = np.zeros((scores.size,), dtype=bool)
+        suggested[best] = True
+        return pd.DataFrame(
+            data={
+                'number_of_clusters': [e.n_clusters for e in estimators],
+                'Dunn': scores.ravel(),
+                'suggested_number_of_clusters': suggested
+            }, columns=['number_of_clusters', 'Dunn'])

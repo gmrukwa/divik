@@ -94,6 +94,33 @@ class GapPicker(Picker):
         return np.array(scores)
 
     def select(self, scores: np.ndarray) -> Optional[int]:
-        is_suggested = scores[:-1, 0] > (scores[1:, 0] + scores[1:, 1])
+        GAP = scores[:, 0]
+        s_k = scores[:, 1]
+        is_suggested = GAP[:-1] > (GAP[1:] + s_k[1:])
         suggested_locations = list(np.nonzero(is_suggested))
         return suggested_locations[0] if suggested_locations else None
+
+    def report(self, estimators: List[KMeans], scores: np.ndarray) \
+            -> pd.DataFrame:
+        GAP = scores[:, 0]
+        s_k = scores[:, 1]
+        best = self.select(scores)
+        suggested = np.zeros((len(estimators) - 1,), dtype=bool)
+        if best is not None:
+            suggested[best] = True
+        suggested = list(suggested)
+        suggested.append(None)
+        return pd.DataFrame(
+            data={
+                'number_of_clusters': [e.n_clusters for e in estimators],
+                'GAP': GAP,
+                's_k': s_k,
+                'suggested_number_of_clusters': suggested
+            },
+            columns=[
+                'number_of_clusters',
+                'GAP',
+                's_k',
+                'suggested_number_of_clusters'
+            ]
+        )

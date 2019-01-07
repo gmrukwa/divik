@@ -27,33 +27,8 @@ def make_segmentations_matrix(kmeans: km.AutoKMeans) -> np.ndarray:
 
 
 def make_scores_report(kmeans: km.AutoKMeans) -> pd.DataFrame:
-    n_clust = np.arange(kmeans.min_clusters, kmeans.max_clusters + 1)
-    if kmeans.method == 'dunn':
-        return pd.DataFrame(
-            data={
-                'number_of_clusters': n_clust,
-                'Dunn': kmeans.scores_.ravel()
-            }, columns=['number_of_clusters', 'Dunn'])
-    if kmeans.method == 'gap':
-        GAP = kmeans.scores_[:, 0]
-        s_k = kmeans.scores_[:, 1]
-        is_suggested = list(GAP[:-1] > (GAP[1:] + s_k[1:]))
-        is_suggested.append([None])
-        return pd.DataFrame(
-            data={
-                'number_of_clusters': n_clust,
-                'GAP': GAP,
-                's_k': s_k,
-                'suggested_number_of_clusters': is_suggested
-            },
-            columns=[
-                'number_of_clusters',
-                'GAP',
-                's_k',
-                'suggested_number_of_clusters'
-            ]
-        )
-    raise ValueError(kmeans.method)
+    picker = km.make_picker(kmeans.method, kmeans.gap)
+    return picker.report(kmeans.estimators_, kmeans.scores_)
 
 
 def save(kmeans: km.AutoKMeans, destination: str, xy: np.ndarray=None):
