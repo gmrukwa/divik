@@ -46,7 +46,7 @@ def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
                            kmeans: km._KMeans,
                            pool: Pool = None,
                            k_max: int = 10) -> sc.Optimizer:
-    dunn = partial(sc.dunn_, distance=distance)
+    dunn = partial(sc.dunn, distance=distance)
     sweep_clusters_number = [
         sc.ParameterValues('number_of_clusters', list(range(2, k_max + 1)))
     ]

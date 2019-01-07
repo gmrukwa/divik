@@ -12,5 +12,5 @@ class TestDunn(unittest.TestCase):
         centroids = np.array([[2], [5]])
         labels = np.array([1, 1, 2, 2], dtype=int)
         distance = ScipyDistance(KnownMetric.euclidean)
-        dunn = spdivik.score.dunn_(data, labels, centroids, distance)
+        dunn = spdivik.score.dunn(data, labels, centroids, distance)
         self.assertAlmostEqual(dunn, 3.)

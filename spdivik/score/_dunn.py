@@ -11,8 +11,8 @@ from spdivik.score._picker import Picker
 from spdivik.types import Data, IntLabels, Centroids
 
 
-def dunn_(data: Data, labels: IntLabels, centroids: Centroids,
-          distance: DistanceMetric) -> float:
+def dunn(data: Data, labels: IntLabels, centroids: Centroids,
+         distance: DistanceMetric) -> float:
     if centroids.shape[0] == 1:
         raise ValueError('At least 2 clusters are required.')
     clusters = pd.DataFrame(data).groupby(labels).apply(lambda cluster: cluster.values)
@@ -26,15 +26,15 @@ def dunn_(data: Data, labels: IntLabels, centroids: Centroids,
     return score
 
 
-def dunn(kmeans: KMeans, data: Data) -> float:
+def _dunn(kmeans: KMeans, data: Data) -> float:
     distance = parse_distance(kmeans.distance)
-    return dunn_(data, kmeans.labels_, kmeans.cluster_centers_, distance)
+    return dunn(data, kmeans.labels_, kmeans.cluster_centers_, distance)
 
 
 class DunnPicker(Picker):
     def score(self, data: Data, estimators: List[KMeans], pool: Pool=None) \
             -> np.ndarray:
-        score = partial(dunn, data=data)
+        score = partial(_dunn, data=data)
         if pool:
             scores = pool.map(score, estimators)
         else:
