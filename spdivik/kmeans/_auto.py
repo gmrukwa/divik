@@ -96,7 +96,8 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         Configuration of GAP statistic in a form of dict.
 
         max_iter : int, default: 10
-            Maximal number of iterations KMeans will do for computing statistic.
+            Maximal number of iterations KMeans will do for computing
+            statistic.
 
         seed : int, default: 0
             Random seed for generating uniform data sets.
@@ -142,7 +143,8 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
                  n_jobs: int = 1, method: str = 'dunn',
                  distance: str = 'euclidean', init: str = 'percentile',
                  percentile: float = 95., max_iter: int = 100,
-                 normalize_rows: bool = False, gap=None, verbose: bool = False):
+                 normalize_rows: bool = False, gap=None,
+                 verbose: bool = False):
         super().__init__()
         assert method in {'dunn', 'gap'}
         assert min_clusters <= max_clusters
