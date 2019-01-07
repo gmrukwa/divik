@@ -59,7 +59,7 @@ class Gap:
                  pool: Pool = None):
         self._split_into_two = split_into_two
         self.correction = correction
-        adjusted_gap = partial(sc.gap_, distance=distance, seed=seed,
+        adjusted_gap = partial(sc.gap, distance=distance, seed=seed,
                                n_trials=n_trials, pool=pool)
         self._gap_of_two = partial(adjusted_gap, split=split_into_two)
         self._gap_of_one = partial(adjusted_gap, split=_split_into_one)

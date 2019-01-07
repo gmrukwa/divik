@@ -38,7 +38,7 @@ class TestGap(unittest.TestCase):
                             km.ExtremeInitialization(self.distance),
                             number_of_iterations=10)
         self.split = partial(kmeans, number_of_clusters=2)
-        self.gap = partial(sc.gap_, distance=self.distance, split=self.split)
+        self.gap = partial(sc.gap, distance=self.distance, split=self.split)
 
     def test_computes_score(self):
         score = self.gap(self.data, self.labels, self.centroids)

@@ -39,10 +39,10 @@ def _dispersion_of_random_sample(seed: int,
 
 # TODO: Reduce the number of parameters introducing single KMeans object
 @seeded(wrapped_requires_seed=True)
-def gap_(data: Data, labels: IntLabels, centroids: Centroids,
-         distance: DistanceMetric, split: SegmentationMethod,
-         seed: int=0, n_trials: int = 100, pool: Pool=None,
-         return_deviation: bool = False) -> float:
+def gap(data: Data, labels: IntLabels, centroids: Centroids,
+        distance: DistanceMetric, split: SegmentationMethod,
+        seed: int=0, n_trials: int = 100, pool: Pool=None,
+        return_deviation: bool = False) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
     compute_dispersion = partial(_dispersion_of_random_sample,
@@ -83,15 +83,15 @@ class GapPicker(Picker):
     def score(self, data: Data, estimators: List[KMeans], pool: Pool=None) \
             -> np.ndarray:
         scores = [
-            gap_(data=data,
-                 labels=estimator.labels_,
-                 centroids=estimator.cluster_centers_,
-                 distance=parse_distance(estimator.distance),
-                 split=_fast_kmeans(estimator, self.max_iter),
-                 seed=self.seed,
-                 n_trials=self.n_trials,
-                 pool=pool,
-                 return_deviation=True)
+            gap(data=data,
+                labels=estimator.labels_,
+                centroids=estimator.cluster_centers_,
+                distance=parse_distance(estimator.distance),
+                split=_fast_kmeans(estimator, self.max_iter),
+                seed=self.seed,
+                n_trials=self.n_trials,
+                pool=pool,
+                return_deviation=True)
             for estimator in estimators
         ]
         return np.array(scores)
