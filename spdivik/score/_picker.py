@@ -13,13 +13,13 @@ class Picker(metaclass=ABCMeta):
     @abstractmethod
     def score(self, data: Data, estimators: List[KMeans], pool: Pool = None) \
             -> np.ndarray:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def select(self, scores: np.ndarray) -> Optional[int]:
-        raise NotImplemented
+        raise NotImplementedError
 
     @abstractmethod
     def report(self, estimators: List[KMeans], scores: np.ndarray) \
             -> pd.DataFrame:
-        raise NotImplemented
+        raise NotImplementedError
