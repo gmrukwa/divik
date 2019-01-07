@@ -5,7 +5,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 from spdivik import distance as dist
-from spdivik.kmeans import \
+from spdivik.kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
     PercentileInitialization
