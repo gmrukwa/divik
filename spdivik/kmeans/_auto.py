@@ -10,7 +10,7 @@ from spdivik.kmeans._core import KMeans
 from spdivik.score import DunnPicker, GapPicker
 
 
-def _fit_kmeans(data: np.ndarray, n_clusters: int, distance: str = 'euclidean',
+def _fit_kmeans(n_clusters: int, data: np.ndarray, distance: str = 'euclidean',
                 init: str = 'percentile', percentile: float = 95.,
                 max_iter: int = 100, normalize_rows: bool = False):
     kmeans = KMeans(n_clusters=n_clusters, distance=distance, init=init,
