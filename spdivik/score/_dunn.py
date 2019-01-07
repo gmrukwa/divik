@@ -14,7 +14,7 @@ from spdivik.types import Data, IntLabels, Centroids
 def dunn(data: Data, labels: IntLabels, centroids: Centroids,
          distance: DistanceMetric) -> float:
     if centroids.shape[0] == 1:
-        raise ValueError('At least 2 clusters are required.')
+        return -np.inf
     clusters = pd.DataFrame(data).groupby(labels).apply(lambda cluster: cluster.values)
     intercluster = distance(centroids, centroids)
     intercluster = np.min(intercluster[intercluster != 0])
