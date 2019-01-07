@@ -27,14 +27,28 @@ def _processes(n_jobs: int) -> int:
     return processes
 
 
+def make_picker(method, gap=None):
+    if method == 'dunn':
+        picker = DunnPicker()
+    elif method == 'gap':
+        if gap is None:
+            gap = {}
+        max_iter = gap.get('max_iter', 10)
+        seed = gap.get('seed', 0)
+        trials = gap.get('trials', 10)
+        picker = GapPicker(max_iter, seed, trials)
+    else:
+        raise ValueError('Unknown quality measure {0}'.format(method))
+    return picker
+
+
 class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
     # TODO: Add documentation
     def __init__(self, min_clusters: int, max_clusters: int, n_jobs: int = 1,
                  method: str = 'dunn', distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
                  max_iter: int = 100, normalize_rows: bool = False,
-                 gap_max_iter: int = 10, gap_seed: int = 0,
-                 gap_trials: int = 10, verbose: bool=False):
+                 gap=None, verbose: bool=False):
         super().__init__()
         assert method in {'dunn', 'gap'}
         assert min_clusters <= max_clusters
@@ -47,9 +61,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.percentile = percentile
         self.max_iter = max_iter
         self.normalize_rows = normalize_rows
-        self.gap_max_iter = gap_max_iter
-        self.gap_seed = gap_seed
-        self.gap_trials = gap_trials
+        self.gap = gap
         self.verbose = verbose
 
     def fit(self, X, y=None):
@@ -61,12 +73,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         if self.verbose:
             n_clusters = tqdm.tqdm(n_clusters)
 
-        if self.method == 'dunn':
-            method = DunnPicker()
-        elif self.method == 'gap':
-            method = GapPicker(self.gap_max_iter, self.gap_seed, self.gap_trials)
-        else:
-            raise ValueError('Unknown quality measure {0}'.format(self.method))
+        method = make_picker(self.method, self.gap)
 
         processes = _processes(self.n_jobs)
         if processes == 1:
