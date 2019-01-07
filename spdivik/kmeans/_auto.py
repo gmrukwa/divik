@@ -1,5 +1,6 @@
 from functools import partial
 from multiprocessing import Pool
+import os
 
 import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
@@ -17,6 +18,12 @@ def _fit_kmeans(data: np.ndarray, n_clusters: int, distance: str = 'euclidean',
                     normalize_rows=normalize_rows)
     kmeans.fit(data)
     return kmeans
+
+
+def _processes(n_jobs: int) -> int:
+    cpus = os.cpu_count() or 1
+    processes = ((n_jobs + int(n_jobs <= 0)) % cpus) or cpus
+    return processes
 
 
 class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -59,11 +66,12 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         else:
             raise ValueError('Unknown quality measure {0}'.format(self.method))
 
-        if self.n_jobs == 1:
+        processes = _processes(self.n_jobs)
+        if processes == 1:
             self.estimators_ = [fit_kmeans(n_clusters=k) for k in n_clusters]
             self.scores_ = method.score(X, self.estimators_)
         else:
-            with Pool(self.n_jobs) as pool:
+            with Pool(processes) as pool:
                 self.estimators_ = pool.map(fit_kmeans, n_clusters)
                 self.scores_ = method.score(X, self.estimators_, pool)
 
