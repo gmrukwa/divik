@@ -2,7 +2,6 @@ from functools import partial
 from multiprocessing import Pool
 import os
 
-import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import tqdm
@@ -11,14 +10,9 @@ from spdivik.kmeans._core import KMeans
 from spdivik.score import DunnPicker, GapPicker
 
 
-def _fit_kmeans(n_clusters: int, data: np.ndarray, distance: str = 'euclidean',
-                init: str = 'percentile', percentile: float = 95.,
-                max_iter: int = 100, normalize_rows: bool = False):
-    kmeans = KMeans(n_clusters=n_clusters, distance=distance, init=init,
-                    percentile=percentile, max_iter=max_iter,
-                    normalize_rows=normalize_rows)
-    kmeans.fit(data)
-    return kmeans
+def _fit_kmeans(**kwargs):
+    data = kwargs.pop('data')
+    return KMeans(**kwargs).fit(data)
 
 
 def _processes(n_jobs: int) -> int:
