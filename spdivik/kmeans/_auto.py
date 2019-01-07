@@ -4,6 +4,7 @@ import os
 
 import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
 import tqdm
 
 from spdivik.kmeans._core import KMeans
@@ -86,7 +87,9 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         return self
 
     def predict(self, X):
+        check_is_fitted(self, 'best_')
         return self.best_.predict(X)
 
     def transform(self, X):
+        check_is_fitted(self, 'best_')
         return self.best_.transform(X)
