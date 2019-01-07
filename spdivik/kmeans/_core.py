@@ -85,6 +85,7 @@ class _KMeans(SegmentationMethod):
         elif number_of_clusters == 1:
             return np.zeros((data.shape[0], 1), dtype=int), \
                    np.mean(data, axis=0)
+        data = data.reshape(data.shape, order='C')
         if self.normalize_rows:
             data = _normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
@@ -118,7 +119,55 @@ def _parse_initialization(name: str, distance: dist.ScipyDistance,
 
 
 class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
-    # TODO: Add documentation
+    """K-Means clustering
+
+    Parameters
+    ----------
+
+    n_clusters : int
+        The number of clusters to form as well as the number of
+        centroids to generate.
+
+    distance : {'braycurtis', 'canberra', 'chebyshev', 'cityblock',
+    'correlation', 'cosine', 'dice', 'euclidean', 'hamming', 'jaccard',
+    'kulsinski', 'mahalanobis', 'atching', 'minkowski', 'rogerstanimoto',
+    'russellrao', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'}
+        Distance measure, defaults to 'euclidean'. These are the distances
+        supported by scipy package.
+
+    init : {'percentile' or 'extreme'}
+        Method for initialization, defaults to 'percentile':
+
+        'percentile' : selects initial cluster centers for k-mean
+        clustering starting from specified percentile of distance to
+        already selected clusters
+
+        'extreme': selects initial cluster centers for k-mean
+        clustering starting from the furthest points to already specified
+        clusters
+
+    percentile : float, default: 95.0
+        Specifies the starting percentile for 'percentile' initialization.
+        Must be within range [0.0, 100.0]. At 100.0 it is equivalent to
+        'extreme' initialization.
+
+    max_iter : int, default: 100
+        Maximum number of iterations of the k-means algorithm for a
+        single run.
+
+    normalize_rows : bool, default: False
+        If True, rows are translated to mean of 0.0 and scaled to norm of 1.0.
+
+    Attributes
+    ----------
+
+    cluster_centers_ : array, [n_clusters, n_features]
+        Coordinates of cluster centers.
+
+    labels_ :
+        Labels of each point
+
+    """
     def __init__(self, n_clusters: int, distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
                  max_iter: int = 100, normalize_rows: bool = False):
@@ -131,6 +180,19 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.normalize_rows = normalize_rows
 
     def fit(self, X, y=None):
+        """Compute k-means clustering.
+
+        Parameters
+        ----------
+
+        X : array-like or sparse matrix, shape=(n_samples, n_features)
+            Training instances to cluster. It must be noted that the data
+            will be converted to C ordering, which will cause a memory
+            copy if the given data is not C-contiguous.
+
+        y : Ignored
+            not used, present here for API consistency by convention.
+        """
         dist = parse_distance(self.distance)
         initialize = _parse_initialization(self.init, dist, self.percentile)
         kmeans = _KMeans(
@@ -145,13 +207,49 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         return self
 
     def predict(self, X):
+        """Predict the closest cluster each sample in X belongs to.
+
+        In the vector quantization literature, `cluster_centers_` is called
+        the code book and each value returned by `predict` is the index of
+        the closest code in the code book.
+
+        Parameters
+        ----------
+
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
+            New data to predict.
+
+        Returns
+        -------
+
+        labels : array, shape [n_samples,]
+            Index of the cluster each sample belongs to.
+        """
         check_is_fitted(self, 'cluster_centers_')
         distance = parse_distance(self.distance)
         labels = distance(X, self.cluster_centers_).argmin(axis=1)
         return labels
 
     def transform(self, X):
+        """Transform X to a cluster-distance space.
+
+        In the new space, each dimension is the distance to the cluster
+        centers.  Note that even if X is sparse, the array returned by
+        `transform` will typically be dense.
+
+        Parameters
+        ----------
+
+        X : {array-like, sparse matrix}, shape = [n_samples, n_features]
+            New data to transform.
+
+        Returns
+        -------
+
+        X_new : array, shape [n_samples, k]
+            X transformed in the new space.
+
+        """
         check_is_fitted(self, 'cluster_centers_')
         distance = parse_distance(self.distance)
-        distances = distance(X, self.cluster_centers_).min(axis=1)
-        return distances
+        return distance(X, self.cluster_centers_)
