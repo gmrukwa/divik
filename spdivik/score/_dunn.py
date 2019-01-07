@@ -26,7 +26,7 @@ def dunn_(data: Data, labels: IntLabels, centroids: Centroids,
     return score
 
 
-def dunn(data: Data, kmeans: KMeans) -> float:
+def dunn(kmeans: KMeans, data: Data) -> float:
     distance = parse_distance(kmeans.distance)
     return dunn_(data, kmeans.labels_, kmeans.cluster_centers_, distance)
 
