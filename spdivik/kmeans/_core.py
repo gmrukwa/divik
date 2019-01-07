@@ -81,6 +81,8 @@ class _KMeans(SegmentationMethod):
             raise ValueError("data is expected to be 2D np.array")
         if number_of_clusters < 1:
             raise ValueError("number_of_clusters({0}) < 1".format(number_of_clusters))
+        elif number_of_clusters == 1:
+            return np.zeros((data.shape[0], 1), dtype=int), np.mean(data, axis=0)
         if self.normalize_rows:
             data = _normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
