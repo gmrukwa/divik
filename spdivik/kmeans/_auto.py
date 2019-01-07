@@ -28,6 +28,7 @@ def _processes(n_jobs: int) -> int:
 
 
 class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
+    # TODO: Add documentation
     def __init__(self, min_clusters: int, max_clusters: int, n_jobs: int = 1,
                  method: str = 'dunn', distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
