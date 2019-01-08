@@ -43,7 +43,7 @@ def _scenario(f):
 
 
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
-                           kmeans: km.KMeans,
+                           kmeans: km._KMeans,
                            pool: Pool = None,
                            k_max: int = 10) -> sc.Optimizer:
     dunn = partial(sc.dunn, distance=distance)
@@ -122,9 +122,9 @@ def prefiltered_correlative(minimal_split_segment: int = 20, iters_limit: int = 
     @return: adjusted DiviK pipeline
     """
     distance = dst.ScipyDistance(dst.KnownMetric.correlation)
-    kmeans = km.KMeans(labeling=km.Labeling(distance),
-                       initialize=km.ExtremeInitialization(distance),
-                       number_of_iterations=iters_limit)
+    kmeans = km._KMeans(labeling=km.Labeling(distance),
+                        initialize=km.ExtremeInitialization(distance),
+                        number_of_iterations=iters_limit)
     best_kmeans_with_dunn = _dunn_optimized_kmeans(
         distance, kmeans, pool=pool)
     stop_for_small_size = partial(st.minimal_size, size=minimal_split_segment)
@@ -165,13 +165,13 @@ def master(gap_trials: int = 100, distance_percentile: float = 99.,
         distance = dst.SpearmanDistance()
     labeling = km.Labeling(distance)
     initialize = km.PercentileInitialization(distance, distance_percentile)
-    kmeans = km.KMeans(labeling=km.Labeling(distance),
-                       initialize=initialize,
-                       number_of_iterations=iters_limit)
+    kmeans = km._KMeans(labeling=km.Labeling(distance),
+                        initialize=initialize,
+                        number_of_iterations=iters_limit)
     best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool)
-    fast_kmeans = partial(km.KMeans(labeling=labeling,
-                                    initialize=initialize,
-                                    number_of_iterations=10),
+    fast_kmeans = partial(km._KMeans(labeling=labeling,
+                                     initialize=initialize,
+                                     number_of_iterations=10),
                           number_of_clusters=2)
     stop_if_split_makes_no_sense = st.combine(
         partial(st.minimal_size, size=20),
@@ -242,15 +242,15 @@ def basic(gap_trials: int = 100,
     distance = dst.ScipyDistance(known_metrics[distance])
     labeling = km.Labeling(distance)
     initialize = km.PercentileInitialization(distance, distance_percentile)
-    kmeans = km.KMeans(labeling=km.Labeling(distance),
-                       initialize=initialize,
-                       number_of_iterations=iters_limit,
-                       normalize_rows=normalize_rows)
+    kmeans = km._KMeans(labeling=km.Labeling(distance),
+                        initialize=initialize,
+                        number_of_iterations=iters_limit,
+                        normalize_rows=normalize_rows)
     best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool, k_max)
-    fast_kmeans = partial(km.KMeans(labeling=labeling,
-                                    initialize=initialize,
-                                    number_of_iterations=fast_kmeans_iters,
-                                    normalize_rows=normalize_rows),
+    fast_kmeans = partial(km._KMeans(labeling=labeling,
+                                     initialize=initialize,
+                                     number_of_iterations=fast_kmeans_iters,
+                                     normalize_rows=normalize_rows),
                           number_of_clusters=2)
     stop_if_split_makes_no_sense = st.Gap(distance=distance,
                                           split_into_two=fast_kmeans,

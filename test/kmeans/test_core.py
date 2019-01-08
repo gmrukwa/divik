@@ -70,9 +70,9 @@ class KMeansTest(unittest.TestCase):
             self.mocked_labels,
             self.mocked_labels + 3
         ]))
-        self.kmeans = km.KMeans(labeling=self.mock_labeling,
-                                initialize=self.mock_initialization,
-                                number_of_iterations=3)
+        self.kmeans = km._KMeans(labeling=self.mock_labeling,
+                                 initialize=self.mock_initialization,
+                                 number_of_iterations=3)
 
     def test_only_initializes_for_no_iterations(self):
         self.kmeans.number_of_iterations = 0
@@ -137,9 +137,9 @@ class KMeansIntegrationTest(unittest.TestCase):
 
         distance = dist.ScipyDistance(dist.KnownMetric.euclidean)
         euclidean_labeling = km.Labeling(distance)
-        kmeans = km.KMeans(labeling=euclidean_labeling,
-                           initialize=km.ExtremeInitialization(distance),
-                           number_of_iterations=100)
+        kmeans = km._KMeans(labeling=euclidean_labeling,
+                            initialize=km.ExtremeInitialization(distance),
+                            number_of_iterations=100)
 
         labels, _ = kmeans(data, 2)
 
