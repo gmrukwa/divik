@@ -51,8 +51,12 @@ setup(
         'typing>=3.6.2'
     ],
     extras_require={
-        "quilt_packages": ["quilt>=2.9.12"],
-        "divik": ['matlabruntimeforpython===R2016b'],
+        'all': [
+            'matlabruntimeforpython===R2016b',
+            'quilt>=2.9.12',
+        ],
+        'quilt_packages': ['quilt>=2.9.12'],
+        'divik': ['matlabruntimeforpython===R2016b'],
     },
     python_requires='>=3.4,<3.6',
     package_data={
