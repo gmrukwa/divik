@@ -20,6 +20,84 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 4) [`inspect`](./spdivik/inspect/README.md) - visualizes DiviK result
 5) `visualize` - generates `.png` file with visualization of clusters
 
+# Installation
+
+## Docker
+
+The recommended way to use this software is through
+[Docker](https://www.docker.com/). This is the most convenient way, if you want
+to use `divik` application, since it requires *MATLAB Compiler Runtime*
+and more dependencies.
+
+To install latest stable version use:
+
+```bash
+docker pull gmrukwa/divik
+```
+
+To install specific version, you can specify it in the command, e.g.:
+
+```bash
+docker pull gmrukwa/divik:1.12.0
+```
+
+## Python package
+
+Prerequisites for installation of base package:
+
+- Python 3.5
+- [functional helpers](https://github.com/gmrukwa/functional-helpers)
+
+These are required for using `divik` application:
+
+- [MATLAB Compiler Runtime](https://www.mathworks.com/products/compiler/matlab-runtime.html),
+version 2016b or newer, installed to default path
+- [compiled package with legacy code](https://github.com/spectre-team/matlab-legacy/releases/tag/legacy-v4.0.9)
+
+Installation process may be clearer with insight into Docker images used for
+application deployment:
+
+- [`python_mcr` image](https://github.com/spectre-team/python_mcr) - installs
+MCR r2016b onto Python 3.5 image
+- [`python_msi` image](https://github.com/spectre-team/python_msi) - installs
+compiled legacy code onto MCR image
+- [`divik` image](https://github.com/spectre-team/spectre-divik/blob/master/dockerfile) -
+installs DiviK software onto legacy code image
+
+Functional helpers should be installed with:
+
+```bash
+pip install git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers
+```
+
+Having prerequisites installed, one can install latest base version of the
+package:
+
+```bash
+pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik
+```
+
+or any stable tagged version, e.g.:
+
+```bash
+pip install git+https://github.com/spectre-team/spectre-divik.git@v1.12.0#egg=spectre-divik
+```
+
+Installation of `divik` program dependencies can be validated via:
+
+```bash
+pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik[divik]
+```
+
+**Note:** *Using zsh you may need to escape square brackets with `\ `*
+
+If you want to take advantage of using [Quilt](https://quiltdata.com) for data
+management, you can install also this extra:
+
+```bash
+pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik[quilt_packages]
+```
+
 # References
 
 This software is part of contribution made by [Data Mining Group of Silesian

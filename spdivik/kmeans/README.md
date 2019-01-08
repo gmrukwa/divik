@@ -44,7 +44,8 @@ This parameter supports:
 - `.csv` files without header
 - `.npy` files
 - single-variable `.mat`-files
-- path to the variable within Quilt dataset
+- path to the variable within Quilt dataset (requires installation with
+optional `spdivik[quilt_packages]`)
 
 ### `destination`
 
@@ -63,7 +64,8 @@ This parameter supports:
 - `.csv` files without header
 - `.npy` files
 - single-variable `.mat`-files
-- path to the variable within Quilt dataset
+- path to the variable within Quilt dataset (requires installation with
+optional `spdivik[quilt_packages]`)
 
 There are two columns expected: first with X coordinate and second with Y
 coordinate of each clustered point. **Note:** it is crucial to preserve the same
