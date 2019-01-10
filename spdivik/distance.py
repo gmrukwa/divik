@@ -158,3 +158,12 @@ class SpearmanDistance(DistanceMetric):
         assert not np.any(np.isnan(second_ranks))
         assert np.sum(second_ranks - second_ranks.min()) > 0, second_ranks
         return dist.cdist(self._last_ranks, second_ranks, metric='correlation')
+
+
+def make_distance(name: str) -> ScipyDistance:
+    known_distances = {metric.value: metric for metric in KnownMetric}
+    assert name in known_distances, \
+        'Unknown distance {0}. Known: {1}'.format(
+            name, list(known_distances.keys()))
+    distance = ScipyDistance(known_distances[name])
+    return distance

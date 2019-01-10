@@ -5,8 +5,8 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 
-from spdivik.kmeans._core import KMeans, parse_distance
-from spdivik.distance import DistanceMetric
+from spdivik.kmeans._core import KMeans
+from spdivik.distance import DistanceMetric, make_distance
 from spdivik.score._picker import Picker
 from spdivik.types import Data, IntLabels, Centroids
 
@@ -27,7 +27,7 @@ def dunn(data: Data, labels: IntLabels, centroids: Centroids,
 
 
 def _dunn(kmeans: KMeans, data: Data) -> float:
-    distance = parse_distance(kmeans.distance)
+    distance = make_distance(kmeans.distance)
     return dunn(data, kmeans.labels_, kmeans.cluster_centers_, distance)
 
 
