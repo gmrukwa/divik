@@ -1,0 +1,9 @@
+{
+  "distance": "correlation",
+  "random_state": 0,
+  "n_init": 10,
+  "n_neighbors": 7,
+  "eigen_tol": 0.0,
+  "assign_labels": "kmeans",
+  "n_jobs": -1
+}
