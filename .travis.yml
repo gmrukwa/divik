@@ -23,6 +23,8 @@ script:
       STAGE=alpha
   fi
 
+  set -e
+
   docker build -t $DOCKER_REPO:latest \
                -t $DOCKER_REPO:beta \
                -t $DOCKER_REPO:$MAJOR.$MINOR.$FIXUP${STAGE:+-$STAGE} \
