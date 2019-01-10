@@ -75,7 +75,7 @@ def main():
         logging.error("Failed with exception.")
         logging.error(repr(ex))
         raise
-    save(kmeans, destination)
+    save(kmeans, destination, xy)
 
 
 if __name__ == '__main__':
