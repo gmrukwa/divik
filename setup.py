@@ -30,6 +30,7 @@ setup(
             'inspect=spdivik.inspect.__main__:main',
             'kmeans=spdivik.kmeans.__main__:main',
             'linkage=spdivik._linkage:main',
+            'spectral=spdivik.spectral.__main__:main',
             'visualize=spdivik.visualize:main'
         ],
     },
