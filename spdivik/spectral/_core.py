@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from scipy.sparse import csgraph
 from scipy.sparse.linalg import eigsh
@@ -163,10 +165,15 @@ class AutoSpectralClustering(BaseEstimator, ClusterMixin):
         y : Ignored
 
         """
+        logging.debug('Starting automated spectral clustering.')
         distance = make_distance(self.distance)
+        logging.debug('Computing affinity matrix.')
         self.affinity_matrix_ = locally_adjusted_affinity(distance, X,
                                                           self.n_neighbors)
+        logging.debug('Finding number of clusters via eigengap.')
         self.n_clusters_ = eigengap(self.affinity_matrix_)
+        logging.debug('Segmenting data into {0} clusters.'.format(
+            self.n_clusters_))
         clusterer = SpectralClustering(n_clusters=self.n_clusters_,
                                        eigen_solver=None,
                                        random_state=self.random_state,
@@ -178,4 +185,5 @@ class AutoSpectralClustering(BaseEstimator, ClusterMixin):
                                        assign_labels=self.assign_labels,
                                        n_jobs=self.n_jobs)
         self.labels_ = clusterer.fit_predict(self.affinity_matrix_)
+        logging.debug('Automated spectral clustering done.')
         return self
