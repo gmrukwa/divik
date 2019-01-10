@@ -10,6 +10,7 @@ import pandas as pd
 import skimage.io as sio
 
 import spdivik.kmeans as km
+import spdivik.score
 import spdivik.types as ty
 import spdivik._scripting as scr
 import spdivik.visualize as vis
@@ -27,7 +28,7 @@ def make_segmentations_matrix(kmeans: km.AutoKMeans) -> np.ndarray:
 
 
 def make_scores_report(kmeans: km.AutoKMeans) -> pd.DataFrame:
-    picker = km.make_picker(kmeans.method, kmeans.gap)
+    picker = spdivik.score.make_picker(kmeans.method, kmeans.gap)
     return picker.report(kmeans.estimators_, kmeans.scores_)
 
 
