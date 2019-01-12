@@ -146,7 +146,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         """
         logging.debug('Computing locally adjusted affinities.')
         distance = make_distance(self.distance)
-        self.affinity_matrix_ = locally_adjusted_affinity(
+        affinity_matrix_ = locally_adjusted_affinity(
             distance, X, self.n_neighbors)
 
         logging.debug('Computing embedding of affinities.')
@@ -157,7 +157,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
                                      eigen_solver=self.eigen_solver,
                                      n_neighbors=self.n_neighbors,
                                      n_jobs=self.n_jobs)
-        self.embedding_ = embedder.fit_transform(self.affinity_matrix_)
+        self.embedding_ = embedder.fit_transform(affinity_matrix_)
         return self
 
     def fit_transform(self, X, y=None):
@@ -200,10 +200,6 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         logging.debug('Saving embedding.')
         scr.save_csv(self.embedding_, fname('embedding.csv'))
         np.save(fname('embedding.npy'), self.embedding_)
-
-        logging.debug('Saving affinities.')
-        scr.save_csv(self.affinity_matrix_, fname('affinity_matrix.csv'))
-        np.save(fname('affinity_matrix.npy'), self.affinity_matrix_)
 
 
 def main():
