@@ -35,7 +35,7 @@ class DistanceMetric(object, metaclass=ABCMeta):
         @return: 2D matrix with distances between points.
         result[i, j] describes distance from matrix2d[i] to matrix2d[j]
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _interdistance(self, first: np.ndarray, second: np.ndarray) \
@@ -47,7 +47,7 @@ class DistanceMetric(object, metaclass=ABCMeta):
         @return: 2D matrix with distances between points.
         result[i, j] describes distance from first[i] to second[j]
         """
-        pass
+        raise NotImplementedError
 
     def __call__(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
         """Compute distances between points.
