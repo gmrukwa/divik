@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 from sklearn.base import clone
 
-from spdivik.distance import DistanceMetric
-from spdivik.kmeans._core import KMeans, parse_distance
+from spdivik.distance import DistanceMetric, make_distance
+from spdivik.kmeans._core import KMeans
 from spdivik.score._picker import Picker
 from spdivik.types import Centroids, Data, IntLabels, SegmentationMethod
 from spdivik.seeding import seeded
@@ -86,7 +86,7 @@ class GapPicker(Picker):
             gap(data=data,
                 labels=estimator.labels_,
                 centroids=estimator.cluster_centers_,
-                distance=parse_distance(estimator.distance),
+                distance=make_distance(estimator.distance),
                 split=_fast_kmeans(estimator, self.max_iter),
                 seed=self.seed,
                 n_trials=self.n_trials,

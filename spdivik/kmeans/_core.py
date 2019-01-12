@@ -5,6 +5,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 from spdivik import distance as dist
+from spdivik.distance import make_distance
 from spdivik.kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
@@ -100,15 +101,6 @@ class _KMeans(SegmentationMethod):
         return labels, centroids
 
 
-def parse_distance(name: str) -> dist.ScipyDistance:
-    known_distances = {metric.value: metric for metric in dist.KnownMetric}
-    assert name in known_distances, \
-        'Unknown distance {0}. Known: {1}'.format(
-            name, list(known_distances.keys()))
-    distance = dist.ScipyDistance(known_distances[name])
-    return distance
-
-
 def _parse_initialization(name: str, distance: dist.ScipyDistance,
                           percentile: float=None) -> Initialization:
     if name == 'percentile':
@@ -193,7 +185,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         y : Ignored
             not used, present here for API consistency by convention.
         """
-        dist = parse_distance(self.distance)
+        dist = make_distance(self.distance)
         initialize = _parse_initialization(self.init, dist, self.percentile)
         kmeans = _KMeans(
             labeling=Labeling(dist),
@@ -226,7 +218,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             Index of the cluster each sample belongs to.
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = parse_distance(self.distance)
+        distance = make_distance(self.distance)
         labels = distance(X, self.cluster_centers_).argmin(axis=1)
         return labels
 
@@ -251,5 +243,5 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = parse_distance(self.distance)
+        distance = make_distance(self.distance)
         return distance(X, self.cluster_centers_)

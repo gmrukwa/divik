@@ -7,7 +7,7 @@ from sklearn.utils.validation import check_is_fitted
 import tqdm
 
 from spdivik.kmeans._core import KMeans
-from spdivik.score import DunnPicker, GapPicker
+from spdivik.score import make_picker
 
 
 def _fit_kmeans(**kwargs):
@@ -19,22 +19,6 @@ def _processes(n_jobs: int) -> int:
     cpus = os.cpu_count() or 1
     processes = ((n_jobs + int(n_jobs <= 0)) % cpus) or cpus
     return processes
-
-
-def make_picker(method, gap=None):
-    if method == 'dunn':
-        picker = DunnPicker()
-    elif method == 'gap':
-        if gap is None:
-            gap = {}
-        max_iter = gap.get('max_iter', 10)
-        seed = gap.get('seed', 0)
-        trials = gap.get('trials', 10)
-        correction = gap.get('correction', True)
-        picker = GapPicker(max_iter, seed, trials, correction)
-    else:
-        raise ValueError('Unknown quality measure {0}'.format(method))
-    return picker
 
 
 class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):

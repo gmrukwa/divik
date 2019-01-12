@@ -35,7 +35,7 @@ class DistanceMetric(object, metaclass=ABCMeta):
         @return: 2D matrix with distances between points.
         result[i, j] describes distance from matrix2d[i] to matrix2d[j]
         """
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _interdistance(self, first: np.ndarray, second: np.ndarray) \
@@ -47,7 +47,7 @@ class DistanceMetric(object, metaclass=ABCMeta):
         @return: 2D matrix with distances between points.
         result[i, j] describes distance from first[i] to second[j]
         """
-        pass
+        raise NotImplementedError
 
     def __call__(self, first: np.ndarray, second: np.ndarray) -> np.ndarray:
         """Compute distances between points.
@@ -158,3 +158,12 @@ class SpearmanDistance(DistanceMetric):
         assert not np.any(np.isnan(second_ranks))
         assert np.sum(second_ranks - second_ranks.min()) > 0, second_ranks
         return dist.cdist(self._last_ranks, second_ranks, metric='correlation')
+
+
+def make_distance(name: str) -> ScipyDistance:
+    known_distances = {metric.value: metric for metric in KnownMetric}
+    assert name in known_distances, \
+        'Unknown distance {0}. Known: {1}'.format(
+            name, list(known_distances.keys()))
+    distance = ScipyDistance(known_distances[name])
+    return distance

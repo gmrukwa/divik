@@ -30,6 +30,7 @@ setup(
             'inspect=spdivik.inspect.__main__:main',
             'kmeans=spdivik.kmeans.__main__:main',
             'linkage=spdivik._linkage:main',
+            'spectral=spdivik.spectral:main',
             'visualize=spdivik.visualize:main'
         ],
     },
@@ -53,10 +54,12 @@ setup(
     extras_require={
         'all': [
             'matlabruntimeforpython===R2016b',
+            'pyamg',
             'quilt>=2.9.12',
         ],
         'quilt_packages': ['quilt>=2.9.12'],
         'divik': ['matlabruntimeforpython===R2016b'],
+        'spectral': ['pyamg']
     },
     python_requires='>=3.4,<3.6',
     package_data={
