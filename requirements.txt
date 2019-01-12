@@ -9,6 +9,7 @@ matplotlib==2.2.2
 networkx==2.1
 numpy==1.15.0
 pandas==0.20.3
+pyamg==4.0.0
 quilt==2.9.12
 scikit-image==0.14.1
 scikit-learn==0.19.1
