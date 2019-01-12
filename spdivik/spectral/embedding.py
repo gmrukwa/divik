@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.manifold import SpectralEmbedding
+from sklearn.utils.validation import check_is_fitted
 
 from spdivik.distance import DistanceMetric, make_distance
 from spdivik.types import Data
@@ -175,3 +176,46 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         X_new : array-like, shape (n_samples, n_components)
         """
         return self.fit(X).embedding_
+
+    def save(self, destination: str):
+        """Save embedding to a directory
+
+        Parameters
+        ----------
+        destination : str
+            Directory to save the embedding.
+        """
+        logging.info('Saving embedding to {0}.'.format(destination))
+        check_is_fitted(self, 'embedding_')
+        from functools import partial
+        import os
+        import pickle
+        import spdivik._scripting as scr
+        fname = partial(os.path.join, destination)
+
+        logging.debug('Saving model.')
+        with open(fname('model.pkl'), 'wb') as pkl:
+            pickle.dump(self, pkl)
+
+        logging.debug('Saving embedding.')
+        scr.save_csv(self.embedding_, fname('embedding.csv'))
+
+        logging.debug('Saving affinities.')
+        scr.save_csv(self.affinity_matrix_, fname('affinity_matrix.csv'))
+
+
+def main():
+    import spdivik._scripting as scr
+    data, config, destination, _ = scr.initialize()
+    try:
+        spectral = LocallyAdjustedRbfSpectralEmbedding(**config)
+        spectral.fit(data)
+        spectral.save(destination)
+    except Exception as ex:
+        logging.error("Failed with exception.")
+        logging.error(repr(ex))
+        raise
+
+
+if __name__ == '__main__':
+    main()
