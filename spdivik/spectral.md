@@ -1,14 +1,13 @@
 # `spectral`
 
-This package is responsible for spectral clustering of data.
+This package is responsible for spectral embedding of data.
 
 ## Features
 
 `spectral` tool allows for:
 
-1) Segmentation of dataset into clusters.
-2) Determination of optimal number of clusters.
-3) Visualization of optimal segmentation.
+1) Computing of locally adjusted affinities inside a dataset.
+2) Finding a non-linear graph-based embedding.
 
 ## Parameters
 
@@ -36,7 +35,7 @@ optional arguments:
 
 ### `source`
 
-Path to the clustered points.
+Path to the embedded points.
 
 This parameter supports:
 
@@ -56,19 +55,7 @@ Path to the JSON [configuration file](#configuration-file).
 
 ### `xy`
 
-Path to the spatial coordinates of clustered points.
-
-This parameter supports:
-
-- `.csv` files without header
-- `.npy` files
-- single-variable `.mat`-files
-- path to the variable within Quilt dataset (requires installation with
-optional `spdivik[quilt_packages]`)
-
-There are two columns expected: first with X coordinate and second with Y
-coordinate of each clustered point. **Note:** it is crucial to preserve the same
-order as in the clustered points.
+Unused here, may be unspecified.
 
 ### `verbose`
 
@@ -168,8 +155,7 @@ Then, the analysis is launched via:
 spectral \
     --source my/data/path.npy \
     --config spectral.json \
-    --destination results \
-    --xy my/data/xy.npy
+    --destination results
 ```
 
 ### Docker
@@ -196,8 +182,7 @@ docker run \
     spectral \
     --source my/data/path.npy \
     --config spectral.json \
-    --destination results \
-    --xy my/data/xy.npy
+    --destination results
 ```
 
 and for Windows:
@@ -209,6 +194,5 @@ docker run^
     spectral^
     --source my/data/path.npy^
     --config spectral.json^
-    --destination results^
-    --xy my/data/xy.npy
+    --destination results
 ```
