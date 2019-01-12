@@ -1,6 +1,6 @@
 {
   "distance": "euclidean",
-  "n_components": 1000,
+  "n_components": 2,
   "random_state": 0,
   "eigen_solver": null,
   "n_neighbors": 7,

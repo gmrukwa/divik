@@ -82,12 +82,11 @@ Configuration file should be a JSON file as follows:
 
 ```json
 {
-  "distance": "correlation",
+  "distance": "euclidean",
+  "n_components": 2,
   "random_state": 0,
-  "n_init": 10,
+  "eigen_solver": null,
   "n_neighbors": 7,
-  "eigen_tol": 0.0,
-  "assign_labels": "kmeans",
   "n_jobs": -1
 }
 ```
@@ -119,38 +118,31 @@ supported by `scipy` package. All supported values:
 - `sqeuclidean`
 - `yule`
 
+#### `n_components`
+
+The dimension of the projected subspace.
+
 #### `random_state`
 
 Random seed for generating uniform data sets. Defaults to `0`.
 
-#### `n_init`
+#### `eigen_solver`
 
-Number of time the k-means algorithm will be run with different
-centroid seeds. The final results will be the best output of
-n_init consecutive runs in terms of inertia.
+All supported values:
+
+- `null`
+- `arpack`
+- `lobpcg`
+- `amg`
+
+The eigenvalue decomposition strategy to use. AMG requires `pyamg`
+to be installed. It can be faster on very large, sparse problems,
+but may also lead to instabilities.
 
 #### `n_neighbors`
 
 Number of neighbors to use when constructing the locally adjusted
 affinity matrix using RBF kernel.
-
-#### `eigen_tol`
-
-Stopping criterion for eigendecomposition of the Laplacian matrix
-when using arpack eigen_solver.
-
-#### `assign_labels`
-
-Possible values (default: `kmeans`):
-
-- `kmeans`
-- `discretize`
-
-The strategy to use to assign labels in the embedding
-space. There are two ways to assign labels after the laplacian
-embedding. k-means can be applied and is a popular choice. But it can
-also be sensitive to initialization. Discretization is another approach
-which is less sensitive to random initialization.
 
 #### `n_jobs`
 

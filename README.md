@@ -19,6 +19,8 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 3) `linkage` - runs agglomerative clustering
 4) [`inspect`](./spdivik/inspect/README.md) - visualizes DiviK result
 5) `visualize` - generates `.png` file with visualization of clusters
+6) [`spectral`](./spdivik/spectral.md) - generates spectral embedding of a
+dataset
 
 # Installation
 
