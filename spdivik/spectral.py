@@ -199,9 +199,11 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
 
         logging.debug('Saving embedding.')
         scr.save_csv(self.embedding_, fname('embedding.csv'))
+        np.save(fname('embedding.npy'), self.embedding_)
 
         logging.debug('Saving affinities.')
         scr.save_csv(self.affinity_matrix_, fname('affinity_matrix.csv'))
+        np.save(fname('affinity_matrix.npy'), self.affinity_matrix_)
 
 
 def main():
