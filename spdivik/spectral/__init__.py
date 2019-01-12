@@ -1,2 +1,1 @@
-from ._core import AutoSpectralClustering
 from .embedding import LocallyAdjustedRbfSpectralEmbedding
