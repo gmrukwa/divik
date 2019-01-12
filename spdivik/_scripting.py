@@ -7,6 +7,7 @@ import time
 from typing import Dict, Tuple
 
 import numpy as np
+import pandas as pd
 import tqdm
 
 from spdivik import __version__
@@ -112,3 +113,7 @@ def initialize() -> Tuple[ty.Data, Config, DestinationPath, Coordinates]:
     data = try_load_data(arguments.source)
     xy = try_load_xy(arguments.xy)
     return data, config, destination, xy
+
+
+def save_csv(array: np.ndarray, fname: str):
+    pd.DataFrame(array).to_csv(fname, header=False, index=False)
