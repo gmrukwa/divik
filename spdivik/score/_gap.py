@@ -103,7 +103,7 @@ class GapPicker(Picker):
             is_suggested = GAP[:-1] > (GAP[1:] + s_k[1:])
             suggested_locations = list(np.nonzero(is_suggested))
         else:
-            suggested_locations = [np.argmax(GAP)]
+            suggested_locations = [int(np.argmax(GAP))]
         return suggested_locations[0] if suggested_locations else None
 
     def report(self, estimators: List[KMeans], scores: np.ndarray) \
