@@ -10,9 +10,9 @@ from spdivik.kmeans._core import KMeans
 from spdivik.score import make_picker
 
 
-def _fit_kmeans(**kwargs):
+def _fit_kmeans(*args, **kwargs):
     data = kwargs.pop('data')
-    return KMeans(**kwargs).fit(data)
+    return KMeans(*args, **kwargs).fit(data)
 
 
 def _processes(n_jobs: int) -> int:
