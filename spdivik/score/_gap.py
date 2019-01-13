@@ -101,7 +101,7 @@ class GapPicker(Picker):
         s_k = scores[:, 1]
         if self.correction:
             is_suggested = GAP[:-1] > (GAP[1:] + s_k[1:])
-            suggested_locations = list(np.nonzero(is_suggested))
+            suggested_locations = list(np.flatnonzero(is_suggested))
         else:
             suggested_locations = [int(np.argmax(GAP))]
         return suggested_locations[0] if suggested_locations else None
