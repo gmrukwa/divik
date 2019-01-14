@@ -5,8 +5,10 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 
-from spdivik.kmeans._core import KMeans
 from spdivik.types import Data
+
+
+KMeans = 'spdivik.kmeans._core.KMeans'
 
 
 class Picker(metaclass=ABCMeta):

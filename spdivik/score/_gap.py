@@ -10,10 +10,12 @@ import pandas as pd
 from sklearn.base import clone
 
 from spdivik.distance import DistanceMetric, make_distance
-from spdivik.kmeans._core import KMeans
 from spdivik.score._picker import Picker
 from spdivik.types import Centroids, Data, IntLabels, SegmentationMethod
 from spdivik.seeding import seeded
+
+
+KMeans = 'spdivik.kmeans._core.KMeans'
 
 
 def _dispersion(data: Data, labels: IntLabels, centroids: Centroids,

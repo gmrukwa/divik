@@ -5,7 +5,6 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 
-from spdivik.kmeans._core import KMeans
 from spdivik.distance import DistanceMetric, make_distance
 from spdivik.score._picker import Picker
 from spdivik.types import Data, IntLabels, Centroids
@@ -24,6 +23,9 @@ def dunn(data: Data, labels: IntLabels, centroids: Centroids,
     ])
     score = intercluster / intracluster
     return score
+
+
+KMeans = 'spdivik.kmeans._core.KMeans'
 
 
 def _dunn(kmeans: KMeans, data: Data) -> float:
