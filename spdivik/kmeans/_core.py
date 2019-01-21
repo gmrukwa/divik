@@ -85,7 +85,7 @@ class _KMeans(SegmentationMethod):
                 number_of_clusters))
         elif number_of_clusters == 1:
             return np.zeros((data.shape[0], 1), dtype=int), \
-                   np.mean(data, axis=0)
+                   np.mean(data, axis=0, keepdims=True)
         data = data.reshape(data.shape, order='C')
         if self.normalize_rows:
             data = _normalize_rows(data)
