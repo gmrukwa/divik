@@ -1,5 +1,6 @@
 import argparse as agp
 
+from spdivik._data_io import as_divik_result_path
 from spdivik.inspect.app import app, divik_result, xy
 import spdivik.inspect.callback
 from spdivik.inspect.layout import make_layout
@@ -23,7 +24,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    divik_result(args.result)
+    path = as_divik_result_path(args.result)
+    divik_result(path)
     xy(args.xy)
     app.layout = make_layout()
     app.run_server(

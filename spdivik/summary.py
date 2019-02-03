@@ -20,7 +20,6 @@ limitations under the License.
 import logging
 from typing import List, Optional
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -134,6 +133,7 @@ def plot(tree, with_size=False):
         arguments['labels'] = _make_labels(graph)
     import networkx as nx
     nx.draw_networkx(**arguments)
+    import matplotlib.pyplot as plt
     plt.axis('off')
 
 
