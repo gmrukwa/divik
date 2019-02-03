@@ -1,5 +1,6 @@
 from __future__ import division
 from functools import partial
+import gc
 from multiprocessing import Pool
 from operator import attrgetter
 from typing import List, Optional, Tuple
@@ -36,7 +37,10 @@ def _dispersion_of_random_sample(seed: int,
     np.random.seed(seed)
     sample = np.random.random_sample(shape) * ranges + minima
     labels, centroids = split(sample)
-    return _dispersion(sample, labels, centroids, distance)
+    dispersion = _dispersion(sample, labels, centroids, distance)
+    del sample
+    gc.collect()
+    return dispersion
 
 
 # TODO: Reduce the number of parameters introducing single KMeans object
