@@ -124,16 +124,21 @@ def _result_path_patterns(slug: str) -> List[str]:
     return list((direct, prefixed, suffixed, bothfixed))
 
 
-def as_divik_result_path(path_or_slug: str):
-    possible_location = os.path.join(path_or_slug, DIVIK_RESULT_FNAME)
-    if os.path.exists(possible_location):
-        return path_or_slug
-    patterns = _result_path_patterns(path_or_slug)
+def _find_possible_directories(patterns: List[str]) -> List[str]:
     possible_locations = chain.from_iterable(
         glob.glob(pattern, recursive=True) for pattern in patterns)
     possible_paths = list({
         os.path.split(fname)[0] for fname in possible_locations
     })
+    return possible_paths
+
+
+def as_divik_result_path(path_or_slug: str):
+    possible_location = os.path.join(path_or_slug, DIVIK_RESULT_FNAME)
+    if os.path.exists(possible_location):
+        return path_or_slug
+    patterns = _result_path_patterns(path_or_slug)
+    possible_paths = _find_possible_directories(patterns)
     if not possible_paths:
         raise FileNotFoundError(path_or_slug)
     if len(possible_paths) > 1:
