@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 import skimage.io as sio
+from spdivik._data_io import DIVIK_RESULT_FNAME
 import spdivik.predefined as pred
 import spdivik.summary as _smr
 import spdivik.types as ty
@@ -75,7 +76,7 @@ def save(data: ty.Data, result: typing.Optional[ty.DivikResult],
          destination: str, xy: np.ndarray=None):
     logging.info("Saving result.")
     logging.info("Saving pickle.")
-    with open(os.path.join(destination, 'result.pkl'), 'wb') as pkl:
+    with open(os.path.join(destination, DIVIK_RESULT_FNAME), 'wb') as pkl:
         pickle.dump(result, pkl)
     logging.info("Saving JSON summary.")
     with open(os.path.join(destination, 'summary.json'), 'w') as smr:
