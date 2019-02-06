@@ -24,9 +24,7 @@ def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm.
     if scenario not in available:
         raise ValueError("Unknown scenario {0}, available: {1}"
                          .format(scenario, available))
-    pool = multiprocessing.Pool(**config.pop('pool', {
-        'maxtasksperchild': 4
-    }))
+    pool = multiprocessing.Pool(**config.pop('pool', {}))
     if 'minimal_size_percentage' in config:
         config['minimal_size'] = int(data.shape[0] * config.pop('minimal_size_percentage', 0.01))
     progress_reporter = tqdm.tqdm(file=sys.stdout)

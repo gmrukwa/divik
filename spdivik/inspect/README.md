@@ -110,7 +110,7 @@ Full command to launch the visualization inside Docker (for UNIX) looks like:
 ```bash
 docker run \
     --volume $(pwd):/data \
-    --port 8050:8050 \
+    -p 8050:8050 \
     gmrukwa/divik \
     inspect \
     --result results/my-divik-analysis/20181204-063622 \
@@ -122,7 +122,7 @@ and for Windows:
 ```cmd
 docker run^
     --volume %cd%:/data^
-    --port 8050:8050^
+    -p 8050:8050^
     gmrukwa/divik^
     inspect^
     --result results/my-divik-analysis/20181204-063622^

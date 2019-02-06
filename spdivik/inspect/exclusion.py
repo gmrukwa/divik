@@ -43,7 +43,8 @@ def update_storage(level, disabled_clusters, stamp, old_state):
 
 def is_reloaded(stamp, old_state):
     state = json.loads(old_state)
-    return stamp is not None and stamp > state.get('reloaded_at', 0)
+    reloaded_at = state.get('reloaded_at', 0) or 0
+    return stamp is not None and stamp > reloaded_at
 
 
 def get_options(level):

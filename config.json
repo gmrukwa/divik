@@ -1,7 +1,4 @@
 {
-  "pool": {
-    "maxtasksperchild": 4
-  },
   "scenario": "basic",
   "gap_trials": 10,
   "distance_percentile": 99.0,
@@ -13,5 +10,5 @@
   "minimal_features_percentage": 0.01,
   "fast_kmeans_iters": 10,
   "k_max": 10,
-  "normalize_rows": false
+  "normalize_rows": true
 }
