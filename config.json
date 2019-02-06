@@ -1,7 +1,4 @@
 {
-  "pool": {
-    "maxtasksperchild": 4
-  },
   "scenario": "basic",
   "gap_trials": 10,
   "distance_percentile": 99.0,
