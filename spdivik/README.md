@@ -57,7 +57,17 @@ Path to the JSON [configuration file](#configuration-file).
 
 ### `xy`
 
-Unused here, may be unspecified.
+Path to the spatial coordinates of clustered points.
+
+This parameter supports:
+
+- `.csv` files without header
+- `.npy` files
+- single-variable `.mat`-files
+- path to the variable within Quilt dataset (requires installation with
+optional `spdivik[quilt_packages]`)
+
+There are two columns expected: first with X coordinate and second with Y coordinate of each clustered point. Note: it is crucial to preserve the same order as in the clustered points.
 
 ### `verbose`
 
