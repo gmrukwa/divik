@@ -41,9 +41,9 @@ def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
     return selection
 
 
-def _has_constant_rows(matrix: np.ndarray) -> bool:
-    mins, maxes = matrix.min(axis=1), matrix.max(axis=1)
-    return (mins == maxes).any()
+def _constant_rows(matrix: np.ndarray) -> List[int]:
+    is_constant = matrix.min(axis=1) == matrix.max(axis=1)
+    return np.where(is_constant)[0]
 
 
 class _Reporter:
@@ -57,11 +57,16 @@ class _Reporter:
             lg.debug('Subset shape: {0}'.format(subset.shape))
             lg.debug('Has NaNs: {0}'.format(np.isnan(subset).any()))
             lg.debug('Limits: min={0}; max={1}'.format(subset.min(), subset.max()))
-            lg.debug('Has constant rows: {0}'.format(_has_constant_rows(subset)))
+            lg.debug('Has constant rows: {0}'.format(_constant_rows(subset)))
 
     def filtered(self, data, thresholds):
         lg.debug('Shape after filtering: {0}'.format(data.shape))
         lg.debug('Thresholds for filtering: {0}'.format(thresholds))
+        constant = _constant_rows(data)
+        if constant:
+            msg = 'After feature filtering some rows are constant: {0}. ' \
+                  'This may not work with specific configurations.'
+            lg.warning(msg.format(constant))
 
     def stop_check(self):
         lg.info('Stop condition check.')
