@@ -55,10 +55,10 @@ def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
 
 
 def _normalize_rows(data: Data) -> Data:
-    data -= data.mean(axis=1)[:, np.newaxis]
-    norms = np.sum(np.abs(data) ** 2, axis=-1, keepdims=True)**(1./2)
-    data /= norms
-    return data
+    normalized = data - data.mean(axis=1)[:, np.newaxis]
+    norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True)**(1./2)
+    normalized /= norms
+    return normalized
 
 
 class _KMeans(SegmentationMethod):
