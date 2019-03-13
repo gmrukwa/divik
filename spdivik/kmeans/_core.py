@@ -88,6 +88,11 @@ class _KMeans(SegmentationMethod):
                    np.mean(data, axis=0, keepdims=True)
         data = data.reshape(data.shape, order='C')
         if self.normalize_rows:
+            is_constant = data.min(axis=1) == data.max(axis=1)
+            if is_constant.any():
+                constant_rows = np.where(is_constant)[0]
+                msg = "Constant rows {0} are not allowed for normalization."
+                raise ValueError(msg.format(constant_rows))
             data = _normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
