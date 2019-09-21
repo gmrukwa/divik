@@ -19,8 +19,18 @@ from spdivik.seeding import seeded
 KMeans = 'spdivik.kmeans._core.KMeans'
 
 
+# TODO: Deduplicate this function. It was in `KMeans`.
+def _normalize_rows(data: Data) -> Data:
+    normalized = data - data.mean(axis=1)[:, np.newaxis]
+    norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True)**(1./2)
+    normalized /= norms
+    return normalized
+
+
 def _dispersion(data: Data, labels: IntLabels, centroids: Centroids,
-                distance: DistanceMetric) -> float:
+                distance: DistanceMetric, normalize_rows: bool=False) -> float:
+    if normalize_rows:
+        data = _normalize_rows(data)
     clusters = pd.DataFrame(data).groupby(labels)
     return float(np.sum([
         np.sum(distance(centroids[np.newaxis, label], cluster_members.values))
@@ -33,11 +43,12 @@ def _dispersion_of_random_sample(seed: int,
                                  minima: np.ndarray,
                                  ranges: np.ndarray,
                                  split: SegmentationMethod,
-                                 distance: DistanceMetric) -> float:
+                                 distance: DistanceMetric,
+                                 normalize_rows: bool=False) -> float:
     np.random.seed(seed)
     sample = np.random.random_sample(shape) * ranges + minima
     labels, centroids = split(sample)
-    dispersion = _dispersion(sample, labels, centroids, distance)
+    dispersion = _dispersion(sample, labels, centroids, distance, normalize_rows)
     del sample
     gc.collect()
     return dispersion
@@ -48,7 +59,7 @@ def _dispersion_of_random_sample(seed: int,
 def gap(data: Data, labels: IntLabels, centroids: Centroids,
         distance: DistanceMetric, split: SegmentationMethod,
         seed: int=0, n_trials: int = 100, pool: Pool=None,
-        return_deviation: bool = False) -> float:
+        return_deviation: bool = False, normalize_rows: bool=False) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
     compute_dispersion = partial(_dispersion_of_random_sample,
@@ -56,12 +67,13 @@ def gap(data: Data, labels: IntLabels, centroids: Centroids,
                                  minima=minima,
                                  ranges=ranges,
                                  split=split,
-                                 distance=distance)
+                                 distance=distance,
+                                 normalize_rows=normalize_rows)
     if pool is None:
         dispersions = [compute_dispersion(i) for i in range(seed, seed + n_trials)]
     else:
         dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
-    reference = _dispersion(data, labels, centroids, distance)
+    reference = _dispersion(data, labels, centroids, distance, normalize_rows)
     log_dispersions = np.log(dispersions)
     gap_value = np.mean(log_dispersions) - np.log(reference)
     result = (gap_value, )
@@ -97,7 +109,8 @@ class GapPicker(Picker):
                 seed=self.seed,
                 n_trials=self.n_trials,
                 pool=pool,
-                return_deviation=True)
+                return_deviation=True,
+                normalize_rows=estimator.normalize_rows)
             for estimator in estimators
         ]
         return np.array(scores)
