@@ -33,13 +33,17 @@ def parse_args():
                              'contain X in first column, Y in second. The '
                              'number of rows should be equal to the data.',
                         action='store', dest='xy', required=False, default=None)
+    parser.add_argument('--omit-datetime', action='store_true',
+                        help='If defines, omit the datetime subdirectory of '
+                        'result.')
     parser.add_argument('--verbose', '-v', action='store_true')
     return parser.parse_args()
 
 
-def prepare_destination(destination: str) -> str:
-    datetime = time.strftime("%Y%m%d-%H%M%S")
-    destination = os.path.join(destination, datetime)
+def prepare_destination(destination: str, omit_datetime: bool = False) -> str:
+    if not omit_datetime:
+        datetime = time.strftime("%Y%m%d-%H%M%S")
+        destination = os.path.join(destination, datetime)
     os.makedirs(destination)
     return destination
 
@@ -107,7 +111,8 @@ def try_load_xy(path):
 
 def initialize() -> Tuple[ty.Data, Config, DestinationPath, Coordinates]:
     arguments = parse_args()
-    destination = prepare_destination(arguments.destination)
+    destination = prepare_destination(arguments.destination,
+                                      arguments.omit_datetime)
     setup_logger(destination, arguments.verbose)
     config = load_config(arguments.config, destination)
     data = try_load_data(arguments.source)
