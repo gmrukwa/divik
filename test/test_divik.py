@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import numpy.testing as npt
 
-import spdivik.divik as dv
-import spdivik.feature_selection as fs
+import divik.divik as dv
+import divik.feature_selection as fs
 
 
 def returns(value):

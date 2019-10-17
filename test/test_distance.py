@@ -22,7 +22,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-import spdivik.distance as dist
+import divik.distance as dist
 
 
 class IntradistanceCall(NotImplementedError):

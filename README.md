@@ -12,12 +12,12 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 
 > This section will be further developed soon.
 
-1) [`divik`](./spdivik/README.md) - runs DiviK in one of many scenarios
-2) [`kmeans`](./spdivik/kmeans/README.md) - runs K-means
+1) [`divik`](divik/README.md) - runs DiviK in one of many scenarios
+2) [`kmeans`](divik/kmeans/README.md) - runs K-means
 3) `linkage` - runs agglomerative clustering
-4) [`inspect`](./spdivik/inspect/README.md) - visualizes DiviK result
+4) [`inspect`](divik/inspect/README.md) - visualizes DiviK result
 5) `visualize` - generates `.png` file with visualization of clusters
-6) [`spectral`](./spdivik/spectral.md) - generates spectral embedding of a
+6) [`spectral`](divik/spectral.md) - generates spectral embedding of a
 dataset
 
 # Installation

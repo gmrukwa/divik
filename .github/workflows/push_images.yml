@@ -38,8 +38,8 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
       - name: Embed version to package
         run: |
-          echo "__version__ = \"${MAJOR}.${MINOR}.${FIXUP}\"" > spdivik/__init__.py
-          cat spdivik/__init__.py
+          echo "__version__ = \"${MAJOR}.${MINOR}.${FIXUP}\"" > divik/__init__.py
+          cat divik/__init__.py
       - name: Build image
         run: |
           docker build \

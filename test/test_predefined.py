@@ -4,8 +4,8 @@ from multiprocessing import Pool
 import numpy as np
 from tqdm import tqdm
 
-import spdivik.distance as dst
-import spdivik.predefined as pre
+import divik.distance as dst
+import divik.predefined as pre
 
 N_OBSERVATIONS = 1000
 N_FEATURES = 40

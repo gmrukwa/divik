@@ -1,7 +1,7 @@
 """A setuptools based setup module for DiviK algorithm."""
 
 from setuptools import setup, find_packages
-from spdivik import __version__
+from divik import __version__
 
 setup(
     name='divik',
@@ -26,12 +26,12 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'divik=spdivik.__main__:main',
-            'inspect=spdivik.inspect.__main__:main',
-            'kmeans=spdivik.kmeans.__main__:main',
-            'linkage=spdivik._linkage:main',
-            'spectral=spdivik.spectral:main',
-            'visualize=spdivik.visualize:main'
+            'divik=divik.__main__:main',
+            'inspect=divik.inspect.__main__:main',
+            'kmeans=divik.kmeans.__main__:main',
+            'linkage=divik._linkage:main',
+            'spectral=divik.spectral:main',
+            'visualize=divik.visualize:main'
         ],
     },
     packages=find_packages(exclude=['test']),

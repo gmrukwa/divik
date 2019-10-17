@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-import spdivik.rejection as rj
+import divik.rejection as rj
 
 
 def make_segmentation(partition: np.ndarray):
