@@ -1,0 +1,14 @@
+name: Run unit tests in MCR environment
+
+on: push
+
+jobs:
+  tests:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Run unit tests in MCR environment
+        run: docker build . --file docker/unittest.dockerfile --tag unittest

@@ -12,13 +12,3 @@ RUN mkdir -p /root/.config/matplotlib &&\
 COPY . /app
 
 RUN python -m unittest discover
-
-RUN python setup.py install
-
-EXPOSE 8050
-
-VOLUME /data
-
-WORKDIR /data
-
-RUN rm -rf /app

@@ -1,11 +1,5 @@
 FROM spectreteam/python_msi:v5.0.0
 
-RUN mkdir -p /root/.local/share/QuiltCli
-
-COPY quilt-config/auth.json /root/.local/share/QuiltCli/auth.json
-
-COPY quilt-config/config.json /root/.local/share/QuiltCli/config.json
-
 COPY requirements.txt /app/requirements.txt
 
 WORKDIR /app
@@ -15,10 +9,14 @@ RUN pip install -r requirements.txt
 RUN mkdir -p /root/.config/matplotlib &&\
   echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
+COPY . /app
+
+RUN python setup.py install
+
+EXPOSE 8050
+
 VOLUME /data
 
 WORKDIR /data
 
 RUN rm -rf /app
-
-EXPOSE 8050
