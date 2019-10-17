@@ -4,15 +4,15 @@ from setuptools import setup, find_packages
 from spdivik import __version__
 
 setup(
-    name='spectre-divik',
+    name='divik',
     version=__version__,
     description='Divisive iK-means algorithm implementation',
-    url='https://github.com/spectre-team/spectre-divik',
+    url='https://github.com/gmrukwa/divik',
     author='Grzegorz Mrukwa',
-    author_email='Grzegorz.Mrukwa@polsl.pl',
+    author_email='g.mrukwa@gmail.com',
     classifiers=[
         # based on https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
