@@ -1,12 +1,10 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/spectre-team/spectre-divik/badge)](https://www.codefactor.io/repository/github/spectre-team/spectre-divik)
-[![BCH compliance](https://bettercodehub.com/edge/badge/spectre-team/spectre-divik?branch=master)](https://bettercodehub.com/)
-[![Maintainability](https://api.codeclimate.com/v1/badges/12bf3a9343ab563e2b89/maintainability)](https://codeclimate.com/github/spectre-team/spectre-divik/maintainability)
-[![Windows build status](https://ci.appveyor.com/api/projects/status/962q796vgnve968u/branch/master?svg=true)](https://ci.appveyor.com/project/gmrukwa/spectre-divik/branch/master)
-[![Linux build Status](https://travis-ci.org/spectre-team/spectre-divik.svg?branch=master)](https://travis-ci.org/spectre-team/spectre-divik)
+[![CodeFactor](https://www.codefactor.io/repository/github/gmrukwa/divik/badge)](https://www.codefactor.io/repository/github/gmrukwa/divik)
+[![BCH compliance](https://bettercodehub.com/edge/badge/gmrukwa/divik?branch=master)](https://bettercodehub.com/)
+[![Maintainability](https://api.codeclimate.com/v1/badges/4cf5d42d0a0076c38445/maintainability)](https://codeclimate.com/github/gmrukwa/divik/maintainability)
+![](https://github.com/gmrukwa/divik/workflows/.github/workflows/push_images.yml/badge.svg)
+![](https://github.com/gmrukwa/divik/workflows/.github/workflows/unittest.yml/badge.svg)
 
-![Spectre](https://user-images.githubusercontent.com/1897842/31115297-0fe2c3aa-a822-11e7-90e6-92ceccf76137.jpg)
-
-# spectre-divik
+# divik
 
 Python implementation of Divisive iK-means (DiviK) algorithm.
 
