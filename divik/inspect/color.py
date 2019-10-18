@@ -2,7 +2,6 @@ import colorsys
 import itertools
 from fractions import Fraction
 
-from functional import as_arguments_of, for_each, pipe
 import numpy as np
 
 
@@ -28,21 +27,18 @@ def _generate_hsv_neighbourhood(h):
             yield (h, s, v)
 
 
-flatten = itertools.chain.from_iterable
-
-
 def as_colormap_color(h, s, v):
     r, g, b = colorsys.hsv_to_rgb(h, s, v)
     r, g, b = int(255 * r), int(255 * g), int(255 * b)
     return 'rgb({0},{1},{2})'.format(r, g, b)
 
 
-colormap = pipe(
-    _get_fractions,
-    for_each(_generate_hsv_neighbourhood),
-    flatten,
-    for_each(as_arguments_of(as_colormap_color))
-)
+def colormap():
+    fractions = _get_fractions()
+    neighbors = map(_generate_hsv_neighbourhood, fractions)
+    neighbors = itertools.chain.from_iterable(neighbors)
+    for args in neighbors:
+        yield as_colormap_color(*args)
 
 
 _DISABLED_COLOR = 'rgb(128, 128, 128)'
