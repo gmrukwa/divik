@@ -3,10 +3,15 @@
 from setuptools import setup, find_packages
 from divik import __version__
 
+with open('README.md') as infile:
+    readme = infile.read()
+
 setup(
     name='divik',
     version=__version__,
     description='Divisive iK-means algorithm implementation',
+    long_description=readme,
+    long_description_content_type="text/markdown",
     url='https://github.com/gmrukwa/divik',
     author='Grzegorz Mrukwa',
     author_email='g.mrukwa@gmail.com',
