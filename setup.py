@@ -45,6 +45,7 @@ setup(
         'h5py>=2.8.0',
         'numpy>=0.12.1',
         'pandas>=0.20.3',
+        'pyamg',
         'scipy>=0.19.1',
         'scikit-image>=0.14.1',
         'scikit-learn>=0.19.1',
@@ -52,14 +53,7 @@ setup(
         'typing>=3.6.2'
     ],
     extras_require={
-        'all': [
-            'matlabruntimeforpython===R2016b',
-            'pyamg',
-            'quilt>=2.9.12',
-        ],
-        'quilt_packages': ['quilt>=2.9.12'],
-        'divik': ['matlabruntimeforpython===R2016b'],
-        'spectral': ['pyamg']
+        'quilt_packages': ['quilt>=2.9.12']
     },
     python_requires='>=3.4,<3.6',
     package_data={
