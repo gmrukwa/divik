@@ -32,11 +32,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Authenticate to Docker Hub
-        run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
-        env:
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
       - name: Embed version to package
         uses: ./.github/actions/patch-version
         with:
@@ -44,6 +39,11 @@ jobs:
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Authenticate to Docker Hub
+        run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
       - name: Build image
         run: |
           docker build \
