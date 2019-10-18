@@ -5,7 +5,6 @@ from multiprocessing import Pool
 from operator import attrgetter
 from typing import List, Optional, Tuple
 
-from functional import pipe
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
@@ -87,7 +86,11 @@ def _fast_kmeans(kmeans: KMeans, max_iter: int = 10) -> SegmentationMethod:
     new = clone(kmeans)
     new.max_iter = max_iter
     get_meta = attrgetter('labels_', 'cluster_centers_')
-    return pipe(new.fit, get_meta)
+
+    def fast_kmeans(data: Data) -> Tuple[IntLabels, Centroids]:
+        return get_meta(new.fit(data))
+
+    return fast_kmeans
 
 
 class GapPicker(Picker):
