@@ -38,7 +38,12 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
       - name: Embed version to package
         run: |
-          echo "__version__ = \"${MAJOR}.${MINOR}.${FIXUP}\"" > divik/__init__.py
+          if $IS_ALPHA; then
+            SUFIX=a
+          elif $IS_BETA; then
+            SUFIX=b
+          fi
+          echo "__version__ = \"${MAJOR}.${MINOR}.${FIXUP}${SUFIX:+$SUFIX}\"" > divik/__init__.py
           cat divik/__init__.py
       - name: Build image
         run: |
