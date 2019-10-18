@@ -18,6 +18,7 @@ env:
   MAJOR: ${{ 2 }}
   MINOR: ${{ 0 }}
   FIXUP: ${{ 0 }}
+  PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
   DOCKER_REPO: ${{ 'gmrukwa/divik' }}
   IS_ALPHA: ${{ github.event_name == 'pull_request' }}
   IS_BETA: ${{ github.event_name == 'push' && endsWith(github.event.ref, 'heads/develop') }}
@@ -37,14 +38,12 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
       - name: Embed version to package
-        run: |
-          if $IS_ALPHA; then
-            SUFIX=a
-          elif $IS_BETA; then
-            SUFIX=b
-          fi
-          echo "__version__ = \"${MAJOR}.${MINOR}.${FIXUP}${SUFIX:+$SUFIX}\"" > divik/__init__.py
-          cat divik/__init__.py
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
       - name: Build image
         run: |
           docker build \
