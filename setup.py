@@ -56,9 +56,6 @@ setup(
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
-    extras_require={
-        'quilt_packages': ['quilt>=2.9.12']
-    },
     python_requires='>=3.4,<3.6',
     package_data={
     }

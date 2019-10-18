@@ -42,8 +42,6 @@ This parameter supports:
 - `.csv` files without header
 - `.npy` files
 - single-variable `.mat`-files
-- path to the variable within Quilt dataset (requires installation with
-optional `spdivik[quilt_packages]`)
 
 ### `destination`
 

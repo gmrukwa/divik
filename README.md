@@ -76,13 +76,6 @@ or any stable tagged version, e.g.:
 pip install divik==2.0.0
 ```
 
-If you want to take advantage of using [Quilt](https://quiltdata.com) for data
-management, you can install also this extra:
-
-```bash
-pip install divik[quilt_packages]
-```
-
 # References
 
 This software is part of contribution made by [Data Mining Group of Silesian
