@@ -4,3 +4,7 @@ RUN pip install --no-cache-dir --upgrade \
     setuptools \
     wheel \
     twine
+
+COPY entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

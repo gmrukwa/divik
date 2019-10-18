@@ -69,3 +69,25 @@ jobs:
         run: |
           docker tag deployment $DOCKER_REPO:latest
           docker push $DOCKER_REPO:latest
+
+  push_pypi_package:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Embed version to package
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Build Python package
+        uses: ./.github/actions/build-python-dist
+      - name: Publish Python package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
