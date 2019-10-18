@@ -5,9 +5,9 @@ from functools import partial
 import numpy as np
 import pandas as pd
 
-import spdivik.distance as dst
-import spdivik.kmeans as km
-import spdivik.score as sc
+import divik.distance as dst
+import divik.kmeans as km
+import divik.score as sc
 
 
 class TestGap(unittest.TestCase):

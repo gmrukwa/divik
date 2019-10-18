@@ -5,9 +5,9 @@ from functools import partial
 import numpy as np
 import numpy.testing as npt
 
-import spdivik.rejection as rj
-import spdivik.summary as sm
-import spdivik.types as ty
+import divik.rejection as rj
+import divik.summary as sm
+import divik.types as ty
 
 
 DUMMY_RESULT = ty.DivikResult(

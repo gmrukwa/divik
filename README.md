@@ -1,12 +1,10 @@
-[![CodeFactor](https://www.codefactor.io/repository/github/spectre-team/spectre-divik/badge)](https://www.codefactor.io/repository/github/spectre-team/spectre-divik)
-[![BCH compliance](https://bettercodehub.com/edge/badge/spectre-team/spectre-divik?branch=master)](https://bettercodehub.com/)
-[![Maintainability](https://api.codeclimate.com/v1/badges/12bf3a9343ab563e2b89/maintainability)](https://codeclimate.com/github/spectre-team/spectre-divik/maintainability)
-[![Windows build status](https://ci.appveyor.com/api/projects/status/962q796vgnve968u/branch/master?svg=true)](https://ci.appveyor.com/project/gmrukwa/spectre-divik/branch/master)
-[![Linux build Status](https://travis-ci.org/spectre-team/spectre-divik.svg?branch=master)](https://travis-ci.org/spectre-team/spectre-divik)
+[![CodeFactor](https://www.codefactor.io/repository/github/gmrukwa/divik/badge)](https://www.codefactor.io/repository/github/gmrukwa/divik)
+[![BCH compliance](https://bettercodehub.com/edge/badge/gmrukwa/divik?branch=master)](https://bettercodehub.com/)
+[![Maintainability](https://api.codeclimate.com/v1/badges/4cf5d42d0a0076c38445/maintainability)](https://codeclimate.com/github/gmrukwa/divik/maintainability)
+![](https://github.com/gmrukwa/divik/workflows/.github/workflows/push_images.yml/badge.svg)
+![](https://github.com/gmrukwa/divik/workflows/.github/workflows/unittest.yml/badge.svg)
 
-![Spectre](https://user-images.githubusercontent.com/1897842/31115297-0fe2c3aa-a822-11e7-90e6-92ceccf76137.jpg)
-
-# spectre-divik
+# divik
 
 Python implementation of Divisive iK-means (DiviK) algorithm.
 
@@ -14,12 +12,12 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 
 > This section will be further developed soon.
 
-1) [`divik`](./spdivik/README.md) - runs DiviK in one of many scenarios
-2) [`kmeans`](./spdivik/kmeans/README.md) - runs K-means
+1) [`divik`](divik/README.md) - runs DiviK in one of many scenarios
+2) [`kmeans`](divik/kmeans/README.md) - runs K-means
 3) `linkage` - runs agglomerative clustering
-4) [`inspect`](./spdivik/inspect/README.md) - visualizes DiviK result
+4) [`inspect`](divik/inspect/README.md) - visualizes DiviK result
 5) `visualize` - generates `.png` file with visualization of clusters
-6) [`spectral`](./spdivik/spectral.md) - generates spectral embedding of a
+6) [`spectral`](divik/spectral.md) - generates spectral embedding of a
 dataset
 
 # Installation
@@ -48,9 +46,8 @@ docker pull gmrukwa/divik:1.12.0
 Prerequisites for installation of base package:
 
 - Python 3.5
-- [functional helpers](https://github.com/gmrukwa/functional-helpers)
 
-These are required for using `divik` application:
+These are required for using `divik` application and GMM-based filtering:
 
 - [MATLAB Compiler Runtime](https://www.mathworks.com/products/compiler/matlab-runtime.html),
 version 2016b or newer, installed to default path
@@ -66,38 +63,17 @@ compiled legacy code onto MCR image
 - [`divik` image](https://github.com/spectre-team/spectre-divik/blob/master/dockerfile) -
 installs DiviK software onto legacy code image
 
-Functional helpers should be installed with:
-
-```bash
-pip install git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers
-```
-
 Having prerequisites installed, one can install latest base version of the
 package:
 
 ```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik
+pip install divik
 ```
 
 or any stable tagged version, e.g.:
 
 ```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@v1.12.0#egg=spectre-divik
-```
-
-Installation of `divik` program dependencies can be validated via:
-
-```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik[divik]
-```
-
-**Note:** *Using zsh you may need to escape square brackets with `\ `*
-
-If you want to take advantage of using [Quilt](https://quiltdata.com) for data
-management, you can install also this extra:
-
-```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik[quilt_packages]
+pip install divik==2.0.0
 ```
 
 # References

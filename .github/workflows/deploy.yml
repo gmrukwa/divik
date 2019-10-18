@@ -1,0 +1,90 @@
+name: Build and push deployment images
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  schedule:
+    - cron: '0 17 * * *'
+
+
+env:
+  MAJOR: ${{ 2 }}
+  MINOR: ${{ 0 }}
+  FIXUP: ${{ 0 }}
+  PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
+  DOCKER_REPO: ${{ 'gmrukwa/divik' }}
+  IS_ALPHA: ${{ github.event_name == 'pull_request' }}
+  IS_BETA: ${{ github.event_name == 'push' && endsWith(github.event.ref, 'heads/develop') }}
+
+
+jobs:
+  push_images:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Embed version to package
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Authenticate to Docker Hub
+        run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      - name: Build image
+        run: |
+          docker build \
+            --file docker/deploy.dockerfile \
+            --tag deployment \
+            .
+      - name: Push annotated images
+        run: |
+          if $IS_ALPHA; then
+            STAGE=alpha
+          elif $IS_BETA; then
+            STAGE=beta
+          fi
+          echo "STAGE=$STAGE"
+          docker tag deployment $DOCKER_REPO:$MAJOR.$MINOR.$FIXUP${STAGE:+-$STAGE}
+          docker tag deployment $DOCKER_REPO:$MAJOR.$MINOR${STAGE:+-$STAGE}
+          docker tag deployment $DOCKER_REPO:$MAJOR${STAGE:+-$STAGE}
+          docker push $DOCKER_REPO:$MAJOR.$MINOR.$FIXUP${STAGE:+-$STAGE}
+          docker push $DOCKER_REPO:$MAJOR.$MINOR${STAGE:+-$STAGE}
+          docker push $DOCKER_REPO:$MAJOR${STAGE:+-$STAGE}
+      - name: Push latest image for master branch
+        if: github.event_name == 'push' && endsWith(github.event.ref, 'heads/master')
+        run: |
+          docker tag deployment $DOCKER_REPO:latest
+          docker push $DOCKER_REPO:latest
+
+  push_pypi_package:
+
+    if: github.event_name != 'schedule'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Embed version to package
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Build Python package
+        uses: ./.github/actions/build-python-dist
+      - name: Publish Python package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
