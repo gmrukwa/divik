@@ -2,7 +2,6 @@ dash==0.34.0
 dash-html-components==0.13.4
 dash-core-components==0.42.0
 dash-table==3.1.11
-git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers
 h5py==2.8.0
 matlabruntimeforpython===R2016b
 matplotlib==2.2.2

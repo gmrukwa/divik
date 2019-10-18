@@ -46,9 +46,8 @@ docker pull gmrukwa/divik:1.12.0
 Prerequisites for installation of base package:
 
 - Python 3.5
-- [functional helpers](https://github.com/gmrukwa/functional-helpers)
 
-These are required for using `divik` application:
+These are required for using `divik` application and GMM-based filtering:
 
 - [MATLAB Compiler Runtime](https://www.mathworks.com/products/compiler/matlab-runtime.html),
 version 2016b or newer, installed to default path
@@ -64,38 +63,24 @@ compiled legacy code onto MCR image
 - [`divik` image](https://github.com/spectre-team/spectre-divik/blob/master/dockerfile) -
 installs DiviK software onto legacy code image
 
-Functional helpers should be installed with:
-
-```bash
-pip install git+https://github.com/gmrukwa/functional-helpers.git@2e68a8801f894a14601d70db76086ada723bac35#egg=functional_helpers
-```
-
 Having prerequisites installed, one can install latest base version of the
 package:
 
 ```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik
+pip install divik
 ```
 
 or any stable tagged version, e.g.:
 
 ```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@v1.12.0#egg=spectre-divik
+pip install divik==2.0.0
 ```
-
-Installation of `divik` program dependencies can be validated via:
-
-```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik[divik]
-```
-
-**Note:** *Using zsh you may need to escape square brackets with `\ `*
 
 If you want to take advantage of using [Quilt](https://quiltdata.com) for data
 management, you can install also this extra:
 
 ```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik[quilt_packages]
+pip install divik[quilt_packages]
 ```
 
 # References

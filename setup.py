@@ -46,7 +46,6 @@ setup(
         'dash-html-components==0.13.4',
         'dash-core-components==0.42.0',
         'dash-table==3.1.11',
-        'functional-helpers',
         'h5py>=2.8.0',
         'numpy>=0.12.1',
         'pandas>=0.20.3',
