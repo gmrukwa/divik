@@ -5,11 +5,6 @@ on:
     branches:
       - master
       - develop
-  pull_request:
-    types: [opened, synchronize]
-    branches:
-      - master
-      - develop
   schedule:
     - cron: '0 17 * * *'
 
@@ -71,6 +66,8 @@ jobs:
           docker push $DOCKER_REPO:latest
 
   push_pypi_package:
+
+    if: github.event_name != 'schedule'
 
     runs-on: ubuntu-latest
 
