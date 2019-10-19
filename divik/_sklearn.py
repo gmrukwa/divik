@@ -225,7 +225,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
         self.reverse_paths_ = {value: key for key, value in self.paths_.items()}
-        self.centroids_ = pd.DataFrame(X).groupby(self.labels_).mean().values
+        self.centroids_ = pd.DataFrame(X).groupby(self.labels_, sort=True)\
+            .mean().values
         self.depth_ = summary.depth(self.result_)
         self.n_clusters_ = summary.total_number_of_clusters(self.result_)
 
