@@ -63,7 +63,7 @@ class _Reporter:
         lg.debug('Shape after filtering: {0}'.format(data.shape))
         lg.debug('Thresholds for filtering: {0}'.format(thresholds))
         constant = _constant_rows(data)
-        if constant:
+        if any(constant):
             msg = 'After feature filtering some rows are constant: {0}. ' \
                   'This may not work with specific configurations.'
             lg.warning(msg.format(constant))
