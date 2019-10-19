@@ -28,7 +28,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
                  n_jobs: int = None,
-                 verbose: int = 0):
+                 verbose: bool = False):
         if distance not in list(dst.KnownMetric):
             raise ValueError('Unknown distance: %s' % distance)
 
