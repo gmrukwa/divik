@@ -54,7 +54,7 @@ def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
     return centroids
 
 
-def _normalize_rows(data: Data) -> Data:
+def normalize_rows(data: Data) -> Data:
     normalized = data - data.mean(axis=1)[:, np.newaxis]
     norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True)**(1./2)
     normalized /= norms
@@ -93,7 +93,7 @@ class _KMeans(SegmentationMethod):
                 constant_rows = np.where(is_constant)[0]
                 msg = "Constant rows {0} are not allowed for normalization."
                 raise ValueError(msg.format(constant_rows))
-            data = _normalize_rows(data)
+            data = normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
