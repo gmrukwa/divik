@@ -18,7 +18,7 @@ limitations under the License.
 """
 
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -43,32 +43,40 @@ def total_number_of_clusters(tree) -> int:
                for subtree in tree.subregions)
 
 
-def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf) \
-        -> ty.IntLabels:
+def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf,
+                     return_paths: bool = False) -> ty.IntLabels:
     """Compute merged segmentation labels."""
     assert tree is not None
-    return _merged_partition(tree.partition, tree.subregions, levels_limit)
+    merged, paths =  _merged_partition(
+        tree.partition, tree.subregions, levels_limit)
+    if return_paths:
+        return merged, paths
+    return merged
 
 
 def _merged_partition(partition: ty.IntLabels,
                       subregions: List[Optional[ty.DivikResult]],
                       levels_limit: int = np.inf) \
-        -> ty.IntLabels:
+        -> Tuple[ty.IntLabels, Dict[int, Tuple[int]]]:
     """Compute merged segmentation labels."""
     result = partition * 0 - 1
     known_clusters = 0
+    paths = {}
     for cluster_number, subregion in enumerate(subregions):
         current_cluster = partition == cluster_number
         if subregion is None or levels_limit <= 1:
             result[current_cluster] = known_clusters
+            paths[known_clusters] = (cluster_number,)
             known_clusters += 1
         else:
-            local_partition = _merged_partition(subregion.partition,
-                                                subregion.subregions,
-                                                levels_limit-1)
+            local_partition, down_paths = _merged_partition(
+                subregion.partition, subregion.subregions, levels_limit-1)
             result[current_cluster] = local_partition + known_clusters
+            for cluster in np.unique(local_partition):
+                paths[cluster + known_clusters] = (
+                    cluster_number, *down_paths[cluster])
             known_clusters += np.max(local_partition) + 1
-    return result
+    return result, paths
 
 
 def _update_graph(tree, size: int, graph: 'networkx.Graph' = None,
@@ -186,7 +194,7 @@ def reject_split(tree: Optional[ty.DivikResult],
         reject_split(subregion, rejection_conditions)
         for subregion in tree.subregions
     ]
-    merged = _merged_partition(tree.partition, allowed_subregions)
+    merged, _ = _merged_partition(tree.partition, allowed_subregions)
     logging.debug("Returning pruned tree.")
     return ty.DivikResult(
         centroids=tree.centroids,

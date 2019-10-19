@@ -76,7 +76,7 @@ class DistanceMetric(object, metaclass=ABCMeta):
         return distances
 
 
-class KnownMetric(Enum):
+class KnownMetric(str, Enum):
     """Predefined distance functions."""
 
     braycurtis = "braycurtis"
