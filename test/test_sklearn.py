@@ -48,8 +48,10 @@ class DivikTest(unittest.TestCase):
         sequential = DiviK(distance=dst.KnownMetric.euclidean.value)
         parallel = DiviK(distance=dst.KnownMetric.euclidean.value, n_jobs=-1)
         expected = sequential.fit_predict(X)
-        labels = parallel.fit_predict(X)
-        npt.assert_array_equal(expected, labels)
+        labels1 = parallel.fit_predict(X)
+        labels2 = parallel.predict(X)
+        npt.assert_array_equal(expected, labels1)
+        npt.assert_array_equal(expected, labels2)
 
     def test_has_decent_performance_on_numerous_clusters(self):
         X, y = make_blobs(n_samples=200, n_features=100, centers=20,

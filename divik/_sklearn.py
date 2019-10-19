@@ -1,6 +1,8 @@
-from functools import reduce
+from contextlib import contextmanager
+from functools import partial, reduce
 from multiprocessing import Pool
 import os
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,6 +13,7 @@ import divik.distance as dst
 from divik.kmeans._core import normalize_rows
 import divik.predefined as predefined
 import divik.summary as summary
+import divik.types as ty
 
 
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -85,7 +88,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     n_jobs : int, optional, default: None
         The number of jobs to use for the computation. This works by computing
-        each of the GAP index evaluations in parallel.
+        each of the GAP index evaluations in parallel and by making predictions
+        in parallel.
 
     verbose : bool, optional, default: False
         Whether to report the progress of the computations.
@@ -190,23 +194,12 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         y : Ignored
             not used, present here for API consistency by convention.
         """
-        n_cpu = os.cpu_count()
-        n_jobs = 1 if self.n_jobs is None else self.n_jobs
-        n_jobs = (n_jobs + n_cpu) % n_cpu or n_cpu
-
-        if self.normalize_rows is None:
-            if self.distance == dst.KnownMetric.correlation.value:
-                normalize_rows = True
-            else:
-                normalize_rows = False
-        else:
-            normalize_rows = self.normalize_rows
-
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
+        n_jobs = _get_n_jobs(self.n_jobs)
 
-        with Pool(n_jobs) as pool,\
-                tqdm.tqdm(total=X.shape[0], leave=self.verbose) as progress:
+        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress, \
+                context_if(n_jobs != 1, Pool, n_jobs) as pool:
             divik = predefined.basic(
                 gap_trials=self.gap_trials,
                 distance_percentile=self.distance_percentile,
@@ -219,10 +212,10 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                 fast_kmeans_iters=self.fast_kmeans_iters,
                 k_max=self.k_max,
                 correction_of_gap=True,
-                normalize_rows=normalize_rows,
+                normalize_rows=self._needs_normalization(),
                 use_logfilters=self.use_logfilters,
                 pool=pool,
-                progress_reporter=progress if self.verbose else None
+                progress_reporter=progress
             )
             self.result_ = divik(X)
 
@@ -293,19 +286,10 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         """
         return self.fit(X).transform(X)
 
-    def _normalize_if_needed(self, X):
+    def _needs_normalization(self):
         if self.normalize_rows is None:
-            if self.distance == dst.KnownMetric.correlation.value:
-                normalize_rows_ = True
-            else:
-                normalize_rows_ = False
-        else:
-            normalize_rows_ = self.normalize_rows
-
-        if normalize_rows_:
-            X = normalize_rows(X)
-
-        return X
+            return self.distance == dst.KnownMetric.correlation.value
+        return self.normalize_rows
 
 
     def transform(self, X):
@@ -327,7 +311,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         X_new : array, shape [n_samples, n_clusters_]
             X transformed in the new space.
         """
-        X = self._normalize_if_needed(X)
+        if self._needs_normalization():
+            X = normalize_rows(X)
         distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
         distances = np.hstack([
             distance(X[:, selector], centroid[np.newaxis, selector])
@@ -354,27 +339,49 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         labels : array, shape [n_samples,]
             Index of the cluster each sample belongs to.
         """
-        X = self._normalize_if_needed(X)
-
+        if self._needs_normalization():
+            X = normalize_rows(X)
         distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
-
-        # TODO: optimize
-        labels, paths = [], []
-        for row in X:
-            division = self.result_
-            path = []
-            while division is not None:
-                selectors = division.filters
-                restricted = reduce(np.logical_and, selectors.values(), True)
-                local_X = row[np.newaxis, restricted]
-                d = distance(local_X, division.centroids)
-                assert d.shape[0] == 1 or d.shape[1] == 1
-                d = d.ravel()
-                label = np.argmin(d.ravel())
-                path.append(label)
-                division = division.subregions[label]
-            path = tuple(path)
-            labels.append(self.reverse_paths_[path])
-            paths.append(path)
-
+        n_jobs = _get_n_jobs(self.n_jobs)
+        predict = partial(_predict_path, result=self.result_, distance=distance)
+        if n_jobs == 1:
+            paths = [_predict_path(row, self.result_, distance) for row in X]
+        else:
+            with Pool(n_jobs) as pool:
+                paths = pool.map(predict, X)
+        labels = [self.reverse_paths_[path] for path in paths]
         return np.array(labels, dtype=np.int32)
+
+
+def _predict_path(observation: np.ndarray, result: ty.DivikResult, distance) \
+        -> Tuple[int]:
+    path = []
+    observation = observation[np.newaxis, :]
+    division = result
+    while division is not None:
+        restricted = reduce(np.logical_and, division.filters.values(), True)
+        local_X = observation[:, restricted]
+        d = distance(local_X, division.centroids)
+        assert d.shape[0] == 1 or d.shape[1] == 1
+        d = d.ravel()
+        label = np.argmin(d.ravel())
+        path.append(label)
+        division = division.subregions[label]
+    path = tuple(path)
+    return path
+
+
+def _get_n_jobs(n_jobs):
+    n_cpu = os.cpu_count()
+    n_jobs = 1 if n_jobs is None else n_jobs
+    n_jobs = (n_jobs + n_cpu) % n_cpu or n_cpu
+    return n_jobs
+
+
+@contextmanager
+def context_if(condition, context, *args, **kwargs):
+    if condition:
+        with context(*args, **kwargs) as c:
+            yield c
+    else:
+        yield None
