@@ -60,7 +60,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         else:
             normalize_rows = self.normalize_rows
 
-        minimal_size = int(X.shape[0] * 0.0001) if self.minimal_size is None \
+        minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
 
         with Pool(n_jobs) as pool,\
