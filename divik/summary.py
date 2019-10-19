@@ -194,7 +194,7 @@ def reject_split(tree: Optional[ty.DivikResult],
         reject_split(subregion, rejection_conditions)
         for subregion in tree.subregions
     ]
-    merged = _merged_partition(tree.partition, allowed_subregions)
+    merged, _ = _merged_partition(tree.partition, allowed_subregions)
     logging.debug("Returning pruned tree.")
     return ty.DivikResult(
         centroids=tree.centroids,
