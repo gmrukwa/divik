@@ -65,9 +65,9 @@ def _merged_partition(partition: ty.IntLabels,
         current_cluster = partition == cluster_number
         if subregion is None or levels_limit <= 1:
             result[current_cluster] = known_clusters
-            known_clusters += 1
             if return_paths:
                 paths[known_clusters] = (cluster_number,)
+            known_clusters += 1
         else:
             if return_paths:
                 local_partition, down_paths = _merged_partition(

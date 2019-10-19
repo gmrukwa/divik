@@ -56,8 +56,8 @@ class MergeTest(unittest.TestCase):
     def test_returns_paths_to_partitions(self):
         partition, paths = sm.merged_partition(DUMMY_RESULT, return_paths=True)
         self.assertEqual(paths[0], (0,))
-        self.assertEqual(paths[1], (1, 1))
-        self.assertEqual(paths[3], (2, 1))
+        self.assertEqual(paths[1], (1, 0))
+        self.assertEqual(paths[4], (2, 1))
         self.assertNotIn(6, paths)
 
 
