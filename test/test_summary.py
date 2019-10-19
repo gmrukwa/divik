@@ -53,6 +53,13 @@ class MergeTest(unittest.TestCase):
         npt.assert_equal([10, 1, 4, 2, 3, 5], counts)
         npt.assert_equal(np.arange(6), regions)
 
+    def test_returns_paths_to_partitions(self):
+        partition, paths = sm.merged_partition(DUMMY_RESULT, return_paths=True)
+        self.assertEqual(paths[0], (0,))
+        self.assertEqual(paths[1], (1, 1))
+        self.assertEqual(paths[3], (2, 1))
+        self.assertNotIn(6, paths)
+
 
 class RejectionTest(unittest.TestCase):
     def test_without_rejection_updates_merged_and_nothing_else(self):

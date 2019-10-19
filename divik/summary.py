@@ -43,31 +43,48 @@ def total_number_of_clusters(tree) -> int:
                for subtree in tree.subregions)
 
 
-def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf) \
-        -> ty.IntLabels:
+def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf,
+                     return_paths: bool = False) -> ty.IntLabels:
     """Compute merged segmentation labels."""
     assert tree is not None
-    return _merged_partition(tree.partition, tree.subregions, levels_limit)
+    return _merged_partition(tree.partition, tree.subregions, levels_limit,
+                             return_paths)
 
 
 def _merged_partition(partition: ty.IntLabels,
                       subregions: List[Optional[ty.DivikResult]],
-                      levels_limit: int = np.inf) \
+                      levels_limit: int = np.inf,
+                      return_paths: bool = False) \
         -> ty.IntLabels:
     """Compute merged segmentation labels."""
     result = partition * 0 - 1
     known_clusters = 0
+    if return_paths:
+        paths = {}
     for cluster_number, subregion in enumerate(subregions):
         current_cluster = partition == cluster_number
         if subregion is None or levels_limit <= 1:
             result[current_cluster] = known_clusters
             known_clusters += 1
+            if return_paths:
+                paths[known_clusters] = (cluster_number,)
         else:
-            local_partition = _merged_partition(subregion.partition,
-                                                subregion.subregions,
-                                                levels_limit-1)
+            if return_paths:
+                local_partition, down_paths = _merged_partition(
+                    subregion.partition, subregion.subregions, levels_limit-1,
+                    return_paths=True)
+            else:
+                local_partition = _merged_partition(subregion.partition,
+                                                    subregion.subregions,
+                                                    levels_limit-1)
             result[current_cluster] = local_partition + known_clusters
+            if return_paths:
+                for cluster in np.unique(local_partition):
+                    paths[cluster + known_clusters] = (
+                        cluster_number, *down_paths[cluster])
             known_clusters += np.max(local_partition) + 1
+    if return_paths:
+        return result, paths
     return result
 
 
