@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 import numpy.testing as npt
 from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
@@ -57,3 +58,19 @@ class DivikTest(unittest.TestCase):
         y_pred = model.fit_predict(X)
         score = adjusted_rand_score(y, y_pred)
         self.assertGreaterEqual(score, 0.95)
+
+    def test_transforms_to_n_clusters_dimensions(self):
+        X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
+                          random_state=42)
+        model = DiviK(distance=dst.KnownMetric.euclidean.value, n_jobs=-1)
+        X_trans = model.fit_transform(X)
+        self.assertEqual(X_trans.shape[1], model.n_clusters_)
+
+    def test_is_closest_to_predicted(self):
+        X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
+                          random_state=42)
+        model = DiviK(distance=dst.KnownMetric.euclidean.value, n_jobs=-1)
+        y_pred = model.fit_predict(X)
+        X_trans = model.transform(X)
+        closests = [np.argmin(row) for row in X_trans]
+        npt.assert_array_equal(y_pred, closests)

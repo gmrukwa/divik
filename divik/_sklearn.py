@@ -106,6 +106,10 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         in appropriate features subspace. This is realized by the ``transform``
         method.
 
+    filters_ : array, [n_clusters, n_features]
+        Filters that were applied to the feature space on the level that was
+        the final segmentation for a subset.
+
     depth_ : int
         The number of hierarchy levels in the segmentation.
 
@@ -225,12 +229,24 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
         self.reverse_paths_ = {value: key for key, value in self.paths_.items()}
+        self.filters_ = np.array(
+            [self._get_filter(path) for path in self.reverse_paths_],
+            dtype=bool)
         self.centroids_ = pd.DataFrame(X).groupby(self.labels_, sort=True)\
             .mean().values
         self.depth_ = summary.depth(self.result_)
         self.n_clusters_ = summary.total_number_of_clusters(self.result_)
 
         return self
+
+    def _get_filter(self, path):
+        """This method extracts features filter used for each centroid"""
+        result = self.result_
+        for item in path[:-1]:
+            result = result.subregions[item]
+        selectors = result.filters
+        selection = reduce(np.logical_and, selectors.values(), True)
+        return selection
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
@@ -272,13 +288,27 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         Returns
         -------
 
-        X_new : array, shape [n_samples,]
+        X_new : array, shape [n_samples, n_clusters_]
             X transformed in the new space.
         """
-        # TODO: optimize
         return self.fit(X).transform(X)
 
-    def transform(self, X, with_path: bool = False):
+    def _normalize_if_needed(self, X):
+        if self.normalize_rows is None:
+            if self.distance == dst.KnownMetric.correlation.value:
+                normalize_rows_ = True
+            else:
+                normalize_rows_ = False
+        else:
+            normalize_rows_ = self.normalize_rows
+
+        if normalize_rows_:
+            X = normalize_rows(X)
+
+        return X
+
+
+    def transform(self, X):
         """Transform X to a cluster-distance space.
 
         In the new space, each dimension is the distance to the cluster
@@ -294,45 +324,16 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         Returns
         -------
 
-        X_new : array, shape [n_samples,]
+        X_new : array, shape [n_samples, n_clusters_]
             X transformed in the new space.
         """
-        if self.normalize_rows is None:
-            if self.distance == dst.KnownMetric.correlation.value:
-                normalize_rows_ = True
-            else:
-                normalize_rows_ = False
-        else:
-            normalize_rows_ = self.normalize_rows
-
-        if normalize_rows_:
-            X = normalize_rows(X)
-
+        X = self._normalize_if_needed(X)
         distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
-
-        # TODO: optimize
-        distances, paths = [], []
-        for row in X:
-            division = self.result_
-            path = []
-            while division is not None:
-                selectors = division.filters
-                restricted = reduce(np.logical_and, selectors.values(), True)
-                local_X = row[np.newaxis, restricted]
-                d = distance(local_X, division.centroids)
-                assert d.shape[0] == 1 or d.shape[1] == 1
-                d = d.ravel()
-                label = np.argmin(d.ravel())
-                path.append(label)
-                division = division.subregions[label]
-            path = tuple(path)
-            distances.append(d[label])
-            paths.append(path)
-
-        if with_path:
-            return np.array(distances), paths
-
-        return np.array(distances)
+        distances = np.hstack([
+            distance(X[:, selector], centroid[np.newaxis, selector])
+            for selector, centroid in zip(self.filters_, self.centroids_)
+        ])
+        return distances
 
     def predict(self, X):
         """Predict the closest cluster each sample in X belongs to.
@@ -353,5 +354,27 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         labels : array, shape [n_samples,]
             Index of the cluster each sample belongs to.
         """
-        _, paths = self.transform(X, with_path=True)
-        return np.array([self.reverse_paths_[path] for path in paths])
+        X = self._normalize_if_needed(X)
+
+        distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
+
+        # TODO: optimize
+        labels, paths = [], []
+        for row in X:
+            division = self.result_
+            path = []
+            while division is not None:
+                selectors = division.filters
+                restricted = reduce(np.logical_and, selectors.values(), True)
+                local_X = row[np.newaxis, restricted]
+                d = distance(local_X, division.centroids)
+                assert d.shape[0] == 1 or d.shape[1] == 1
+                d = d.ravel()
+                label = np.argmin(d.ravel())
+                path.append(label)
+                division = division.subregions[label]
+            path = tuple(path)
+            labels.append(self.reverse_paths_[path])
+            paths.append(path)
+
+        return np.array(labels, dtype=np.int32)
