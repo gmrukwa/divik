@@ -1,7 +1,8 @@
 import argparse as agp
 
-from divik._data_io import as_divik_result_path
+from divik.cli._data_io import as_divik_result_path
 from divik.inspect.app import app, divik_result, xy
+# noinspection PyUnresolvedReferences
 import divik.inspect.callback
 from divik.inspect.layout import make_layout
 

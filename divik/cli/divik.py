@@ -11,12 +11,11 @@ import pandas as pd
 import tqdm
 import skimage.io as sio
 
-from divik._data_io import DIVIK_RESULT_FNAME
+from divik.cli._data_io import DIVIK_RESULT_FNAME
 import divik.predefined as pred
 import divik.summary as _smr
-import divik._scripting as sc
+import divik.cli._utils as sc
 import divik.utils as u
-import divik.visualize as vis
 
 
 def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm.tqdm]:
@@ -61,7 +60,7 @@ def _save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
                 os.path.join(destination, 'partition-{0}.npy'.format(level)),
                 merged[:, level]
             )
-            visualization = vis.visualize(merged[:, level], xy=xy)
+            visualization = u.visualize(merged[:, level], xy=xy)
             image_name = os.path.join(destination, 'partition-{0}.png'.format(level))
             sio.imsave(image_name, visualization)
     final_partition = merged[:, -1]

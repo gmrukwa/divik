@@ -6,7 +6,7 @@ import dash
 import numpy as np
 
 from divik.utils import DivikResult
-from divik._data_io import load_data
+from divik.cli._data_io import load_data
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']

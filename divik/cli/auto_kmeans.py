@@ -11,9 +11,8 @@ import skimage.io as sio
 
 import divik.kmeans as km
 import divik.score
-import divik._scripting as scr
+import divik.cli._utils as scr
 import divik.utils as u
-import divik.visualize as vis
 
 
 Segmentations = List[Tuple[u.IntLabels, u.Centroids]]
@@ -58,7 +57,7 @@ def save(kmeans: km.AutoKMeans, destination: str, xy: np.ndarray=None):
                    partitions[:, i].reshape(-1, 1), delimiter=', ', fmt='%i')
 
     if xy is not None:
-        visualization = vis.visualize(kmeans.labels_, xy=xy)
+        visualization = u.visualize(kmeans.labels_, xy=xy)
         sio.imsave(fname('partitions.{0}.png').format(kmeans.n_clusters_),
                    visualization)
 

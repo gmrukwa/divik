@@ -1,10 +1,9 @@
 import argparse as agp
 
-import numpy as np
-from skimage.color import label2rgb
 from skimage.io import imsave
 
-from divik._data_io import load_data
+from divik.cli._data_io import load_data
+from divik.utils import visualize
 
 
 def parse_args():
@@ -18,18 +17,6 @@ def parse_args():
                         help='Path to destination file')
 
     return parser.parse_args()
-
-
-def visualize(label, xy, shape=None):
-    x, y = xy.T
-    if shape is None:
-        shape = np.max(y) + 1, np.max(x) + 1
-    y = y.max() - y
-    label = label - label.min() + 1
-    label_map = np.zeros(shape, dtype=int)
-    label_map[y, x] = label
-    image = label2rgb(label_map, bg_label=0)
-    return image
 
 
 def main():

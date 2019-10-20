@@ -11,9 +11,8 @@ import pandas as pd
 import scipy.cluster.hierarchy as hcl
 import scipy.io as sio
 from skimage.io import imsave
-import divik._scripting as scr
+import divik.cli._utils as scr
 import divik.utils as u
-import divik.visualize as vis
 
 
 LinkageMatrix = NewType('LinkageMatrix', np.ndarray)
@@ -102,7 +101,7 @@ def save_partition(fname, partition: u.IntLabels, xy: np.ndarray=None):
     np.savetxt(fname('partition.csv'), partition, fmt='%i', delimiter=', ')
     if xy is not None:
         logging.info('Generating visulization.')
-        visualization = vis.visualize(partition, xy)
+        visualization = u.visualize(partition, xy)
         imsave(fname('partition.png'), visualization)
 
 

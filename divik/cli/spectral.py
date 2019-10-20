@@ -190,7 +190,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         from functools import partial
         import os
         import pickle
-        import divik._scripting as scr
+        import divik.cli._utils as scr
         fname = partial(os.path.join, destination)
 
         logging.debug('Saving model.')
@@ -203,7 +203,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
 
 
 def main():
-    import divik._scripting as scr
+    import divik.cli._utils as scr
     data, config, destination, _ = scr.initialize()
     try:
         spectral = LocallyAdjustedRbfSpectralEmbedding(**config)
