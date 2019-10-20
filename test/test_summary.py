@@ -7,10 +7,9 @@ import numpy.testing as npt
 
 import divik.rejection as rj
 import divik.summary as sm
-import divik.types as ty
+import divik.utils as u
 
-
-DUMMY_RESULT = ty.DivikResult(
+DUMMY_RESULT = u.DivikResult(
     centroids=np.zeros((3, 1)),
     quality=3.,
     partition=np.array([0] * 10 + [1] * 5 + [2] * 10, dtype=int),
@@ -19,7 +18,7 @@ DUMMY_RESULT = ty.DivikResult(
     merged=np.array([0] * 10 + [1] * 15, dtype=int),
     subregions=[
         None,
-        ty.DivikResult(
+        u.DivikResult(
             centroids=np.zeros((2, 1)),
             quality=2.,
             partition=np.array([0] + [1] * 4, dtype=int),
@@ -28,7 +27,7 @@ DUMMY_RESULT = ty.DivikResult(
             merged=np.array([0] + [1] * 4, dtype=int),
             subregions=[None, None]
         ),
-        ty.DivikResult(
+        u.DivikResult(
             centroids=np.zeros((3, 1)),
             quality=2.,
             partition=np.array([0] * 2 + [1] * 3 + [2] * 5, dtype=int),

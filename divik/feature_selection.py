@@ -23,13 +23,13 @@ from typing import Callable, Tuple, List
 import numpy as np
 
 import divik._matlab_legacy as ml
-import divik.types as ty
-from divik.types import Filter, Data, Filters, Thresholds
+import divik.utils as u
+from divik.utils import Data, Filter, Filters, Thresholds
 
 Matrix = np.ndarray  # 2D Matrix
 Vector = np.ndarray  # 1D Vector
 Statistic = Callable[[Matrix], Vector]  # computes columns' scores
-Selection = Tuple[ty.BoolFilter, float]
+Selection = Tuple[u.BoolFilter, float]
 
 amplitude = partial(np.mean, axis=0)
 variance = partial(np.var, axis=0)
@@ -43,11 +43,11 @@ def log_variance(arr):
     return np.log(variance(arr))
 
 
-def _allow_all(data: ty.Data, topmost: bool = True) -> Selection:
+def _allow_all(data: u.Data, topmost: bool = True) -> Selection:
     return np.ones((data.shape[1],), dtype=bool), -np.inf if topmost else np.inf
 
 
-def select_by(data: ty.Data, statistic: Statistic, discard_up_to: int = -1,
+def select_by(data: u.Data, statistic: Statistic, discard_up_to: int = -1,
               min_features: int = 1, min_features_percentage: float = None,
               preserve_topmost: bool = True) -> Selection:
     """Select features by a statistic decomposition.

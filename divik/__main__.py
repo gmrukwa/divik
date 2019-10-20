@@ -10,11 +10,12 @@ import numpy as np
 import pandas as pd
 import tqdm
 import skimage.io as sio
+
 from divik._data_io import DIVIK_RESULT_FNAME
 import divik.predefined as pred
 import divik.summary as _smr
-import divik.types as ty
 import divik._scripting as sc
+import divik.utils as u
 import divik.visualize as vis
 
 
@@ -29,7 +30,7 @@ def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm.
                       **config), progress_reporter
 
 
-def _make_summary(result: typing.Optional[ty.DivikResult]):
+def _make_summary(result: typing.Optional[u.DivikResult]):
     n_clusters = _smr.total_number_of_clusters(result)
     if result is not None:
         mean_cluster_size = result.partition.shape[0] / float(n_clusters)
@@ -42,7 +43,7 @@ def _make_summary(result: typing.Optional[ty.DivikResult]):
     }
 
 
-def _make_merged(result: typing.Optional[ty.DivikResult]) -> np.ndarray:
+def _make_merged(result: typing.Optional[u.DivikResult]) -> np.ndarray:
     depth = _smr.depth(result)
     return np.hstack(
         _smr.merged_partition(result, limit + 1).reshape(-1, 1)
@@ -69,7 +70,7 @@ def _save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
                delimiter=', ', fmt='%i')
 
 
-def save(data: ty.Data, result: typing.Optional[ty.DivikResult],
+def save(data: u.Data, result: typing.Optional[u.DivikResult],
          destination: str, xy: np.ndarray=None):
     logging.info("Saving result.")
     logging.info("Saving pickle.")

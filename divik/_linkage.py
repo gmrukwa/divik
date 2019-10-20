@@ -13,12 +13,12 @@ import scipy.io as sio
 from skimage.io import imsave
 import divik._scripting as scr
 from divik.kmeans._scripting.parsers import assert_configured
-import divik.types as ty
+import divik.utils as u
 import divik.visualize as vis
 
 
 LinkageMatrix = NewType('LinkageMatrix', np.ndarray)
-LinkageBackend = Callable[[ty.Data], LinkageMatrix]
+LinkageBackend = Callable[[u.Data], LinkageMatrix]
 Dendrogram = NewType('Dendrogram', Dict)
 DendrogramBackend = Callable[[LinkageMatrix], Dendrogram]
 SaveFigureBackend = Callable[[str], None]
@@ -29,7 +29,7 @@ Experiment = NamedTuple('Experiment', [
 ])
 
 
-def flatten_linkage(linkage_matrix: LinkageMatrix) -> ty.IntLabels:
+def flatten_linkage(linkage_matrix: LinkageMatrix) -> u.IntLabels:
     """Flatten partition of the dataset"""
     # default MATLAB behavior, seen on the dendrogram with default color
     # threshold
@@ -40,7 +40,7 @@ def flatten_linkage(linkage_matrix: LinkageMatrix) -> ty.IntLabels:
     return partition
 
 
-def compute_centroids(data: ty.Data, partition: ty.IntLabels) -> ty.Data:
+def compute_centroids(data: u.Data, partition: u.IntLabels) -> u.Data:
     """Find centroids of flat clusters"""
     return pd.DataFrame(data).groupby(partition).mean().values
 
@@ -93,7 +93,7 @@ def save_linkage(fname, linkage: LinkageMatrix):
     sio.savemat(fname('linkage.mat'), {'linkage': matlab_linkage})
 
 
-def save_partition(fname, partition: ty.IntLabels, xy: np.ndarray=None):
+def save_partition(fname, partition: u.IntLabels, xy: np.ndarray=None):
     logging.info('Saving flat partition.')
     np.save(fname('partition.npy'), partition)
     np.savetxt(fname('partition.csv'), partition, fmt='%i', delimiter=', ')

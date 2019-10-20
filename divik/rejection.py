@@ -4,7 +4,7 @@ from typing import Callable
 
 import numpy as np
 
-from divik.types import ScoredSegmentation
+from divik.utils import ScoredSegmentation
 
 RejectionCondition = Callable[[ScoredSegmentation], bool]
 

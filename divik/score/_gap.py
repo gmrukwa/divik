@@ -11,7 +11,7 @@ from sklearn.base import clone
 
 from divik.distance import DistanceMetric, make_distance
 from divik.score._picker import Picker
-from divik.types import Centroids, Data, IntLabels, SegmentationMethod
+from divik.utils import Centroids, IntLabels, Data, SegmentationMethod
 from divik.seeding import seeded
 
 

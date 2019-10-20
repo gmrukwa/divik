@@ -8,7 +8,8 @@ from typing import List
 import h5py
 import numpy as np
 from scipy import io as scio
-from divik import types as ty
+
+import divik.utils as u
 
 
 def _load_mat_with(path: str, backend=scio.loadmat, ignore='__') -> np.ndarray:
@@ -37,7 +38,7 @@ def _load_mat(path: str) -> np.ndarray:
         return _load_mat_with(path, backend=h5py.File, ignore='#').T
 
 
-def _load_disk_file(path: str) -> ty.Data:
+def _load_disk_file(path: str) -> u.Data:
     normalized = path.lower()
     if normalized.endswith('.csv'):
         loader = partial(np.loadtxt, delimiter=',')
@@ -54,7 +55,7 @@ def _load_disk_file(path: str) -> ty.Data:
     return loader(path)
 
 
-def load_data(path: str) -> ty.Data:
+def load_data(path: str) -> u.Data:
     logging.info("Loading data: " + path)
     return _load_disk_file(path)
 

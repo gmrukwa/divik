@@ -11,12 +11,12 @@ import skimage.io as sio
 
 import divik.kmeans as km
 import divik.score
-import divik.types as ty
 import divik._scripting as scr
+import divik.utils as u
 import divik.visualize as vis
 
 
-Segmentations = List[Tuple[ty.IntLabels, ty.Centroids]]
+Segmentations = List[Tuple[u.IntLabels, u.Centroids]]
 
 
 def get_segmentations(kmeans: km.AutoKMeans) -> Segmentations:

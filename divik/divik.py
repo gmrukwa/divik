@@ -26,11 +26,7 @@ import numpy as np
 import tqdm
 
 import divik.feature_selection as fs
-from divik.types import \
-    Data, \
-    SelfScoringSegmentation, \
-    StopCondition, \
-    DivikResult
+from divik.utils import Data, SelfScoringSegmentation, StopCondition, DivikResult
 import divik.rejection as rj
 
 

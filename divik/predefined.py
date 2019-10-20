@@ -30,9 +30,9 @@ import divik.kmeans as km
 import divik.rejection as rj
 import divik.score as sc
 import divik.stop as st
-import divik.types as ty
+import divik.utils as u
 
-Divik = Callable[[ty.Data], Optional[ty.DivikResult]]
+Divik = Callable[[u.Data], Optional[u.DivikResult]]
 
 
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
