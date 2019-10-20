@@ -12,7 +12,6 @@ import scipy.cluster.hierarchy as hcl
 import scipy.io as sio
 from skimage.io import imsave
 import divik._scripting as scr
-from divik.kmeans._scripting.parsers import assert_configured
 import divik.utils as u
 import divik.visualize as vis
 
@@ -43,6 +42,10 @@ def flatten_linkage(linkage_matrix: LinkageMatrix) -> u.IntLabels:
 def compute_centroids(data: u.Data, partition: u.IntLabels) -> u.Data:
     """Find centroids of flat clusters"""
     return pd.DataFrame(data).groupby(partition).mean().values
+
+
+def assert_configured(config, name):
+    assert name in config, 'Missing "' + name + '" field in config.'
 
 
 def build_experiment(config) -> Experiment:
