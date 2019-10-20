@@ -51,34 +51,23 @@ def build_experiment(config) -> Experiment:
     """Create experiment from configuration"""
     assert_configured(config, 'linkage')
     linkage_config = config['linkage']
-    assert_configured(linkage_config, 'method')
-    assert_configured(linkage_config, 'metric')
-    assert_configured(linkage_config, 'optimal_ordering')
+    for item in ['method', 'metric', 'optimal_ordering']:
+        assert_configured(linkage_config, item)
     linkage = partial(hcl.linkage, **linkage_config)
 
     assert_configured(config, 'dendrogram')
     dendrogram_config = config['dendrogram']
-    assert_configured(dendrogram_config, 'truncate_mode')
-    assert_configured(dendrogram_config, 'p')
-    assert_configured(dendrogram_config, 'color_threshold')
-    assert_configured(dendrogram_config, 'orientation')
-    assert_configured(dendrogram_config, 'count_sort')
-    assert_configured(dendrogram_config, 'distance_sort')
-    assert_configured(dendrogram_config, 'show_leaf_counts')
-    assert_configured(dendrogram_config, 'leaf_font_size')
-    assert_configured(dendrogram_config, 'show_contracted')
+    for item in ['truncate_mode', 'p', 'color_threshold', 'orientation',
+                 'count_sort', 'distance_sort', 'show_leaf_counts',
+                 'leaf_font_size', 'show_contracted']:
+        assert_configured(dendrogram_config, item)
     dendrogram = partial(hcl.dendrogram, **dendrogram_config)
 
     assert_configured(config, 'plot')
     plot_config = config['plot']
-    assert_configured(plot_config, 'dpi')
-    assert_configured(plot_config, 'facecolor')
-    assert_configured(plot_config, 'edgecolor')
-    assert_configured(plot_config, 'orientation')
-    assert_configured(plot_config, 'transparent')
-    assert_configured(plot_config, 'frameon')
-    assert_configured(plot_config, 'bbox_inches')
-    assert_configured(plot_config, 'pad_inches')
+    for item in ['dpi', 'facecolor', 'edgecolor', 'orientation', 'transparent',
+                 'frameon', 'bbox_inches', 'pad_inches']:
+        assert_configured(plot_config, item)
     save_figure = partial(plt.savefig, **plot_config)
 
     experiment = Experiment(linkage, dendrogram, save_figure)
