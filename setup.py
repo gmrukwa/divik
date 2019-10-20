@@ -33,7 +33,7 @@ setup(
         'console_scripts': [
             'divik=divik.cli.divik:main',
             'inspect=divik.cli.inspect:main',
-            'kmeans=divik.cli.auto_kmeans.:main',
+            'kmeans=divik.cli.auto_kmeans:main',
             'linkage=divik.cli.linkage:main',
             'spectral=divik.cli.spectral:main',
             'visualize=divik.cli.visualize:main'
