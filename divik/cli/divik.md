@@ -77,10 +77,6 @@ Configuration file should be a JSON file as follows:
 
 ```json
 {
-  "pool": {
-      "maxtasksperchild": 4
-  },
-  "scenario": "basic",
   "distance": "correlation",
   "gap_trials": 10,
   "correction_of_gap": true,
@@ -95,27 +91,6 @@ Configuration file should be a JSON file as follows:
 }
 
 ```
-
-#### `pool`
-
-Optional, kept for backward-compatibility purposes. Allows to specify settings
-for parallel pool processing. `maxtasksperchild` was required to limit memory
-consumption. At this moment `pool` should be possible to be safely omitted.
-
-#### `scenario`
-
-There are several scenarios supported. Default is `basic` with amplitude and
-variance filtering at each step, GAP statistic as stop condition and percentile
-initialization. Options allowed:
-
-- `basic` (recommended)
-- `prefiltered_correlative` - amplitude is filtered only at top level,
-initalization with extreme points
-- `master`
-
-**Note:** Further options will be described for recommended scenario (`basic`).
-You can find description of options of remaining scenarios
-[in this file](./predefined.py).
 
 #### `distance`
 
@@ -209,10 +184,10 @@ Docker container.
 
 ### Installed package
 
-Package in the latest version could be installed via:
+Package in the latest stable version could be installed via:
 
 ```bash
-pip install git+https://github.com/spectre-team/spectre-divik.git@master#egg=spectre-divik
+pip install divik
 ```
 
 Then, the analysis is launched via:

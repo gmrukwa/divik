@@ -1,31 +1,13 @@
-"""Reusable typings used across modules.
-
-types.py
-
-Copyright 2018 Spectre Team
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
 from typing import Callable, Tuple, Dict, NamedTuple, List, Optional
 
 import numpy as np
+from skimage.color import label2rgb
 
 Table = np.ndarray  # 2D matrix
+Data = Table
 Centroids = Table
 IntLabels = np.ndarray
 BoolFilter = np.ndarray
-Data = Table
 Quality = float
 SegmentationMethod = Callable[[Data], Tuple[IntLabels, Centroids]]
 ScoredSegmentation = Tuple[IntLabels, Centroids, Quality]
@@ -44,3 +26,22 @@ DivikResult = NamedTuple('DivikResult', [
     ('merged', IntLabels),
     ('subregions', List[Optional['DivikResult']]),
 ])
+
+
+def normalize_rows(data: Data) -> Data:
+    normalized = data - data.mean(axis=1)[:, np.newaxis]
+    norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True)**(1./2)
+    normalized /= norms
+    return normalized
+
+
+def visualize(label, xy, shape=None):
+    x, y = xy.T
+    if shape is None:
+        shape = np.max(y) + 1, np.max(x) + 1
+    y = y.max() - y
+    label = label - label.min() + 1
+    label_map = np.zeros(shape, dtype=int)
+    label_map[y, x] = label
+    image = label2rgb(label_map, bg_label=0)
+    return image

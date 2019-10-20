@@ -6,7 +6,7 @@ from sklearn.manifold import SpectralEmbedding
 from sklearn.utils.validation import check_is_fitted
 
 from divik.distance import DistanceMetric, make_distance
-from divik.types import Data
+from divik.utils import Data
 
 
 def locally_adjusted_affinity(d: DistanceMetric, X: Data, neighbors: int = 7) \
@@ -190,7 +190,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         from functools import partial
         import os
         import pickle
-        import divik._scripting as scr
+        import divik.cli._utils as scr
         fname = partial(os.path.join, destination)
 
         logging.debug('Saving model.')
@@ -203,7 +203,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
 
 
 def main():
-    import divik._scripting as scr
+    import divik.cli._utils as scr
     data, config, destination, _ = scr.initialize()
     try:
         spectral = LocallyAdjustedRbfSpectralEmbedding(**config)

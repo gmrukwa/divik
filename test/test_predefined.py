@@ -35,65 +35,7 @@ class DataBoundTestCase(unittest.TestCase):
         cls.data = cls.data / np.max(cls.data, axis=0)
 
 
-class TestPrefilteredCorrelation(DataBoundTestCase):
-    def test_constructs_runnable_pipeline(self):
-        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
-        divik = pre.prefiltered_correlative(minimal_split_segment=10,
-                                            progress_reporter=progress_bar)
-        some_result = divik(self.data)
-        self.assertIsNotNone(some_result)
-
-    def test_splits_test_data_into_two_topmost_groups(self):
-        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
-        divik = pre.prefiltered_correlative(minimal_split_segment=10,
-                                            progress_reporter=progress_bar)
-        some_result = divik(self.data)
-        self.assertEqual(len(some_result.subregions), 2)
-
-    def test_preserves_information_about_noise_filter(self):
-        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
-        divik = pre.prefiltered_correlative(minimal_split_segment=10,
-                                            progress_reporter=progress_bar)
-        some_result = divik(self.data)
-        self.assertIn('amplitude', some_result.thresholds)
-        self.assertIn('amplitude', some_result.filters)
-        self.assertNotIn('amplitude', some_result.subregions[0].thresholds)
-
-    def test_scores_segmentation(self):
-        progress_bar = tqdm(desc='divik', total=self.data.shape[0])
-        divik = pre.prefiltered_correlative(minimal_split_segment=10,
-                                            progress_reporter=progress_bar)
-        some_result = divik(self.data)
-        self.assertFalse(np.isnan(some_result.quality))
-
-
 pool = Pool()
-
-
-class TestMaster(DataBoundTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(TestMaster, cls).setUpClass()
-        progress_bar = tqdm(desc='divik', total=cls.data.shape[0])
-        distance = dst.ScipyDistance(dst.KnownMetric.euclidean)
-        divik = pre.master(gap_trials=100, pool=pool,
-                           progress_reporter=progress_bar,
-                           distance=distance)
-        # TODO: K-means must inform about non-convergent metric.
-        cls.result = divik(cls.data)
-
-    def test_constructs_runnable_pipeline(self):
-        self.assertIsNotNone(self.result)
-
-    def test_splits_test_data_into_two_topmost_groups(self):
-        self.assertEqual(len(self.result.subregions), 2)
-
-    def test_makes_only_topmost_split(self):
-        self.assertIsNone(self.result.subregions[0])
-        self.assertIsNone(self.result.subregions[1])
-
-    def test_scores_segmentation(self):
-        self.assertFalse(np.isnan(self.result.quality))
 
 
 class TestBasic(DataBoundTestCase):

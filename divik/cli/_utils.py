@@ -10,9 +10,9 @@ import numpy as np
 import pandas as pd
 import tqdm
 
+import divik.utils as u
 from divik import __version__
-import divik.types as ty
-from divik._data_io import load_data
+from divik.cli._data_io import load_data
 
 
 def parse_args():
@@ -109,7 +109,7 @@ def try_load_xy(path):
     return xy
 
 
-def initialize() -> Tuple[ty.Data, Config, DestinationPath, Coordinates]:
+def initialize() -> Tuple[u.Data, Config, DestinationPath, Coordinates]:
     arguments = parse_args()
     destination = prepare_destination(arguments.destination,
                                       arguments.omit_datetime)

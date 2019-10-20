@@ -10,7 +10,7 @@ from divik.kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
     PercentileInitialization
-from divik.types import Data, Centroids, IntLabels, SegmentationMethod
+from divik.utils import normalize_rows, Centroids, IntLabels, Data, SegmentationMethod
 
 
 class Labeling(object):
@@ -52,13 +52,6 @@ def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
     for label in labels:
         centroids[label] = np.mean(data[labeling == label], axis=0)
     return centroids
-
-
-def normalize_rows(data: Data) -> Data:
-    normalized = data - data.mean(axis=1)[:, np.newaxis]
-    norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True)**(1./2)
-    normalized /= norms
-    return normalized
 
 
 class _KMeans(SegmentationMethod):

@@ -10,10 +10,9 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import tqdm
 
 import divik.distance as dst
-from divik.kmeans._core import normalize_rows
 import divik.predefined as predefined
 import divik.summary as summary
-import divik.types as ty
+from divik.utils import normalize_rows, DivikResult
 
 
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -353,7 +352,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         return np.array(labels, dtype=np.int32)
 
 
-def _predict_path(observation: np.ndarray, result: ty.DivikResult, distance) \
+def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
         -> Tuple[int]:
     path = []
     observation = observation[np.newaxis, :]

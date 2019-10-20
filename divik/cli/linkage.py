@@ -11,14 +11,12 @@ import pandas as pd
 import scipy.cluster.hierarchy as hcl
 import scipy.io as sio
 from skimage.io import imsave
-import divik._scripting as scr
-from divik.kmeans._scripting.parsers import assert_configured
-import divik.types as ty
-import divik.visualize as vis
+import divik.cli._utils as scr
+import divik.utils as u
 
 
 LinkageMatrix = NewType('LinkageMatrix', np.ndarray)
-LinkageBackend = Callable[[ty.Data], LinkageMatrix]
+LinkageBackend = Callable[[u.Data], LinkageMatrix]
 Dendrogram = NewType('Dendrogram', Dict)
 DendrogramBackend = Callable[[LinkageMatrix], Dendrogram]
 SaveFigureBackend = Callable[[str], None]
@@ -29,7 +27,7 @@ Experiment = NamedTuple('Experiment', [
 ])
 
 
-def flatten_linkage(linkage_matrix: LinkageMatrix) -> ty.IntLabels:
+def flatten_linkage(linkage_matrix: LinkageMatrix) -> u.IntLabels:
     """Flatten partition of the dataset"""
     # default MATLAB behavior, seen on the dendrogram with default color
     # threshold
@@ -40,43 +38,36 @@ def flatten_linkage(linkage_matrix: LinkageMatrix) -> ty.IntLabels:
     return partition
 
 
-def compute_centroids(data: ty.Data, partition: ty.IntLabels) -> ty.Data:
+def compute_centroids(data: u.Data, partition: u.IntLabels) -> u.Data:
     """Find centroids of flat clusters"""
     return pd.DataFrame(data).groupby(partition).mean().values
+
+
+def assert_configured(config, name):
+    assert name in config, 'Missing "' + name + '" field in config.'
 
 
 def build_experiment(config) -> Experiment:
     """Create experiment from configuration"""
     assert_configured(config, 'linkage')
     linkage_config = config['linkage']
-    assert_configured(linkage_config, 'method')
-    assert_configured(linkage_config, 'metric')
-    assert_configured(linkage_config, 'optimal_ordering')
+    for item in ['method', 'metric', 'optimal_ordering']:
+        assert_configured(linkage_config, item)
     linkage = partial(hcl.linkage, **linkage_config)
 
     assert_configured(config, 'dendrogram')
     dendrogram_config = config['dendrogram']
-    assert_configured(dendrogram_config, 'truncate_mode')
-    assert_configured(dendrogram_config, 'p')
-    assert_configured(dendrogram_config, 'color_threshold')
-    assert_configured(dendrogram_config, 'orientation')
-    assert_configured(dendrogram_config, 'count_sort')
-    assert_configured(dendrogram_config, 'distance_sort')
-    assert_configured(dendrogram_config, 'show_leaf_counts')
-    assert_configured(dendrogram_config, 'leaf_font_size')
-    assert_configured(dendrogram_config, 'show_contracted')
+    for item in ['truncate_mode', 'p', 'color_threshold', 'orientation',
+                 'count_sort', 'distance_sort', 'show_leaf_counts',
+                 'leaf_font_size', 'show_contracted']:
+        assert_configured(dendrogram_config, item)
     dendrogram = partial(hcl.dendrogram, **dendrogram_config)
 
     assert_configured(config, 'plot')
     plot_config = config['plot']
-    assert_configured(plot_config, 'dpi')
-    assert_configured(plot_config, 'facecolor')
-    assert_configured(plot_config, 'edgecolor')
-    assert_configured(plot_config, 'orientation')
-    assert_configured(plot_config, 'transparent')
-    assert_configured(plot_config, 'frameon')
-    assert_configured(plot_config, 'bbox_inches')
-    assert_configured(plot_config, 'pad_inches')
+    for item in ['dpi', 'facecolor', 'edgecolor', 'orientation', 'transparent',
+                 'frameon', 'bbox_inches', 'pad_inches']:
+        assert_configured(plot_config, item)
     save_figure = partial(plt.savefig, **plot_config)
 
     experiment = Experiment(linkage, dendrogram, save_figure)
@@ -93,13 +84,13 @@ def save_linkage(fname, linkage: LinkageMatrix):
     sio.savemat(fname('linkage.mat'), {'linkage': matlab_linkage})
 
 
-def save_partition(fname, partition: ty.IntLabels, xy: np.ndarray=None):
+def save_partition(fname, partition: u.IntLabels, xy: np.ndarray=None):
     logging.info('Saving flat partition.')
     np.save(fname('partition.npy'), partition)
     np.savetxt(fname('partition.csv'), partition, fmt='%i', delimiter=', ')
     if xy is not None:
         logging.info('Generating visulization.')
-        visualization = vis.visualize(partition, xy)
+        visualization = u.visualize(partition, xy)
         imsave(fname('partition.png'), visualization)
 
 

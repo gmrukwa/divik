@@ -7,7 +7,7 @@ import pandas as pd
 
 from divik.distance import DistanceMetric, make_distance
 from divik.score._picker import Picker
-from divik.types import Data, IntLabels, Centroids
+from divik.utils import Centroids, IntLabels, Data
 
 
 def dunn(data: Data, labels: IntLabels, centroids: Centroids,

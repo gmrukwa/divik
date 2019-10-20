@@ -2,7 +2,7 @@
 
 summary.py
 
-Copyright 2018 Spectre Team
+Copyright 2019 Grzegorz Mrukwa
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 
 import divik.rejection as rj
-import divik.types as ty
+import divik.utils as u
 
 
 def depth(tree, children_collection_name='subregions'):
@@ -43,8 +43,8 @@ def total_number_of_clusters(tree) -> int:
                for subtree in tree.subregions)
 
 
-def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf,
-                     return_paths: bool = False) -> ty.IntLabels:
+def merged_partition(tree: u.DivikResult, levels_limit: int = np.inf,
+                     return_paths: bool = False) -> u.IntLabels:
     """Compute merged segmentation labels."""
     assert tree is not None
     merged, paths =  _merged_partition(
@@ -54,10 +54,10 @@ def merged_partition(tree: ty.DivikResult, levels_limit: int = np.inf,
     return merged
 
 
-def _merged_partition(partition: ty.IntLabels,
-                      subregions: List[Optional[ty.DivikResult]],
+def _merged_partition(partition: u.IntLabels,
+                      subregions: List[Optional[u.DivikResult]],
                       levels_limit: int = np.inf) \
-        -> Tuple[ty.IntLabels, Dict[int, Tuple[int]]]:
+        -> Tuple[u.IntLabels, Dict[int, Tuple[int]]]:
     """Compute merged segmentation labels."""
     result = partition * 0 - 1
     known_clusters = 0
@@ -179,9 +179,9 @@ def statistic(merged, diagnoses, func):
     })
 
 
-def reject_split(tree: Optional[ty.DivikResult],
+def reject_split(tree: Optional[u.DivikResult],
                  rejection_conditions: List[rj.RejectionCondition]) \
-        -> Optional[ty.DivikResult]:
+        -> Optional[u.DivikResult]:
     """Re-apply rejection condition on known result tree."""
     if tree is None:
         logging.debug("Rejecting empty.")
@@ -196,7 +196,7 @@ def reject_split(tree: Optional[ty.DivikResult],
     ]
     merged, _ = _merged_partition(tree.partition, allowed_subregions)
     logging.debug("Returning pruned tree.")
-    return ty.DivikResult(
+    return u.DivikResult(
         centroids=tree.centroids,
         quality=tree.quality,
         partition=tree.partition,

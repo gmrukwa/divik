@@ -2,7 +2,7 @@
 
 divik.py
 
-Copyright 2018 Spectre Team
+Copyright 2019 Grzegorz Mrukwa
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,11 +26,7 @@ import numpy as np
 import tqdm
 
 import divik.feature_selection as fs
-from divik.types import \
-    Data, \
-    SelfScoringSegmentation, \
-    StopCondition, \
-    DivikResult
+from divik.utils import Data, SelfScoringSegmentation, StopCondition, DivikResult
 import divik.rejection as rj
 
 

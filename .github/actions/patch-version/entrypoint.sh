@@ -12,5 +12,5 @@ elif $IS_BETA; then
 fi
 
 VERSION=${VERSION}${SUFIX:+$SUFIX}
-echo "__version__ = \"${VERSION}\"" >> ${TARGET}
+sed -i "1s/.*/__version__ = \"${VERSION}\"/" ${TARGET}
 cat ${TARGET}

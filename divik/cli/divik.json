@@ -1,5 +1,4 @@
 {
-  "scenario": "basic",
   "gap_trials": 10,
   "distance_percentile": 99.0,
   "iters_limit": 100,

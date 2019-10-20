@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 import numpy as np
 
 from divik import distance as dist
-from divik.types import Data, Centroids
+from divik.utils import Centroids, Data
 
 
 class Initialization(object, metaclass=ABCMeta):

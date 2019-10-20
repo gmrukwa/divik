@@ -2,7 +2,7 @@
 
 stop.py
 
-Copyright 2018 Spectre Team
+Copyright 2019 Grzegorz Mrukwa
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,16 +24,16 @@ from typing import Tuple
 import numpy as np
 
 import divik.distance as dst
-import divik.types as ty
 import divik.score as sc
+import divik.utils as u
 
 
-def minimal_size(data: ty.Data, size: int = 2) -> bool:
+def minimal_size(data: u.Data, size: int = 2) -> bool:
     """Check if region is smaller than predefined size."""
     return data.shape[0] <= size
 
 
-def _split_into_one(data: ty.Data) -> Tuple[ty.IntLabels, ty.Centroids]:
+def _split_into_one(data: u.Data) -> Tuple[u.IntLabels, u.Centroids]:
     labels = np.zeros(shape=(data.shape[0],), dtype=int)
     centroids = np.mean(data, axis=0, keepdims=True)
     return labels, centroids
@@ -42,10 +42,10 @@ def _split_into_one(data: ty.Data) -> Tuple[ty.IntLabels, ty.Centroids]:
 class combine:
     """Combine stop conditions to be checked together."""
 
-    def __init__(self, *args: ty.StopCondition):
+    def __init__(self, *args: u.StopCondition):
         self._conditions = args
 
-    def __call__(self, data: ty.Data) -> bool:
+    def __call__(self, data: u.Data) -> bool:
         """Check if there is any precaution for segmentation."""
         return any(precaution(data) for precaution in self._conditions)
 
@@ -54,7 +54,7 @@ class Gap:
     """GAP statistic-based stop condition."""
 
     def __init__(self, distance: dst.DistanceMetric,
-                 split_into_two: ty.SegmentationMethod,
+                 split_into_two: u.SegmentationMethod,
                  n_trials: int = 100, seed: int = 0, correction: bool=True,
                  pool: Pool = None):
         self._split_into_two = split_into_two
@@ -64,7 +64,7 @@ class Gap:
         self._gap_of_two = partial(adjusted_gap, split=split_into_two)
         self._gap_of_one = partial(adjusted_gap, split=_split_into_one)
 
-    def __call__(self, data: ty.Data) -> bool:
+    def __call__(self, data: u.Data) -> bool:
         """Check if segmentation is significantly justified."""
         labels, centroids = self._split_into_two(data)
         split_likelihood, split_deviation = self._gap_of_two(
