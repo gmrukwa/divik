@@ -19,19 +19,14 @@ import divik.visualize as vis
 
 
 def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm.tqdm]:
-    scenario = config.pop('scenario', None)
-    available = pred.scenarios.keys()
-    if scenario not in available:
-        raise ValueError("Unknown scenario {0}, available: {1}"
-                         .format(scenario, available))
     pool = multiprocessing.Pool(**config.pop('pool', {}))
     if 'minimal_size_percentage' in config:
         config['minimal_size'] = int(data.shape[0] * config.pop('minimal_size_percentage', 0.01))
     progress_reporter = tqdm.tqdm(file=sys.stdout)
     logging.info('Scenario configuration: {0}'.format(config))
-    return pred.scenarios[scenario](pool=pool,
-                                    progress_reporter=progress_reporter,
-                                    **config), progress_reporter
+    return pred.basic(pool=pool,
+                      progress_reporter=progress_reporter,
+                      **config), progress_reporter
 
 
 def _make_summary(result: typing.Optional[ty.DivikResult]):

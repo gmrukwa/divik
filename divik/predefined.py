@@ -2,7 +2,7 @@
 
 predefined.py
 
-Copyright 2018 Spectre Team
+Copyright 2019 Grzegorz Mrukwa
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,13 +33,6 @@ import divik.stop as st
 import divik.types as ty
 
 Divik = Callable[[ty.Data], Optional[ty.DivikResult]]
-
-scenarios = {}
-
-
-def _scenario(f):
-    scenarios[f.__name__] = f
-    return f
 
 
 def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
@@ -87,105 +80,6 @@ _LOG_VARIANCE_FILTER = fs.FilteringMethod(
             preserve_topmost=True))
 
 
-class _PrefilteringWrapper:
-    def __init__(self, prefilter: fs.FilteringMethod, divik: Divik):
-        self._prefilter = prefilter
-        self._divik = divik
-
-    def __call__(self, data: ty.Data) -> ty.DivikResult:
-        preselection, threshold = self._prefilter(data)
-        result = self._divik(data[:, preselection])
-        result.thresholds[self._prefilter.name] = threshold
-        result.filters[self._prefilter.name] = preselection
-        return result
-
-
-@_scenario
-def prefiltered_correlative(minimal_split_segment: int = 20, iters_limit: int = 100,
-                            progress_reporter: tqdm.tqdm = None, pool: Pool = None) -> Divik:
-    """Size limited DiviK with extreme initialization and correlation.
-
-    Uses feature abundance pre-filtering before segmentation.
-
-    DiviK preset as in: P. Widlak, G. Mrukwa, M. Kalinowska, M. Pietrowska,
-    M. Chekan, J. Wierzgon, M. Gawin, G. Drazek and J. Polanska, "Detection of
-    molecular signatures of oral squamous cell carcinoma and normal epithelium
-    - application of a novel methodology for unsupervised segmentation of
-    imaging mass spectrometry data," Proteomics, vol. 16, no. 11-12,
-    pp. 1613-21, 2016
-
-    @param minimal_split_segment: lowest size of region to split
-    @param iters_limit: limit of k-means iterations
-    @param progress_reporter: tqdm-alike progress reporting object
-    @param pool: pool for parallel processing. Recommended maxtasksperchild
-    equal to number of cores.
-    @return: adjusted DiviK pipeline
-    """
-    distance = dst.ScipyDistance(dst.KnownMetric.correlation)
-    kmeans = km._KMeans(labeling=km.Labeling(distance),
-                        initialize=km.ExtremeInitialization(distance),
-                        number_of_iterations=iters_limit)
-    best_kmeans_with_dunn = _dunn_optimized_kmeans(
-        distance, kmeans, pool=pool)
-    stop_for_small_size = partial(st.minimal_size, size=minimal_split_segment)
-    divik = partial(dv.divik,
-                    split=best_kmeans_with_dunn,
-                    feature_selectors=[_VARIANCE_FILTER],
-                    stop_condition=stop_for_small_size,
-                    progress_reporter=progress_reporter,
-                    min_features_percentage=.05)
-    prefiltered_divik = _PrefilteringWrapper(prefilter=_AMPLITUDE_FILTER,
-                                             divik=divik)
-    return prefiltered_divik
-
-
-@_scenario
-def master(gap_trials: int = 100, distance_percentile: float = 99.,
-           iters_limit: int = 100, pool: Pool = None,
-           progress_reporter: tqdm.tqdm = None,
-           distance: dst.DistanceMetric = None) -> Divik:
-    """GAP limited DiviK with percentile initialization.
-
-    Used in Master Thesis of Grzegorz Mrukwa.
-
-    @param gap_trials: number of random datasets used in GAP statistic
-    computation. Increases precision and computational overhead.
-    @param distance_percentile: percentile of distance used for selection of
-    initial representatives. Must be contained in range [0, 100] inclusive.
-    Higher may reveal more nuances, but reduce robustness.
-    @param iters_limit: limit of k-means iterations
-    @param pool: pool for parallel processing. Recommended maxtasksperchild
-    equal to number of cores.
-    @param progress_reporter: tqdm-alike progress reporting object
-    @param distance: distance metric
-    @return: adjusted DiviK pipeline
-    """
-    assert 0 <= distance_percentile <= 100, distance_percentile
-    if distance is None:
-        distance = dst.SpearmanDistance()
-    labeling = km.Labeling(distance)
-    initialize = km.PercentileInitialization(distance, distance_percentile)
-    kmeans = km._KMeans(labeling=km.Labeling(distance),
-                        initialize=initialize,
-                        number_of_iterations=iters_limit)
-    best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool)
-    fast_kmeans = partial(km._KMeans(labeling=labeling,
-                                     initialize=initialize,
-                                     number_of_iterations=10),
-                          number_of_clusters=2)
-    stop_if_split_makes_no_sense = st.combine(
-        partial(st.minimal_size, size=20),
-        st.Gap(distance, fast_kmeans, gap_trials, pool=pool))
-    divik = partial(dv.divik,
-                    split=best_kmeans_with_dunn,
-                    feature_selectors=[_AMPLITUDE_FILTER, _VARIANCE_FILTER],
-                    stop_condition=stop_if_split_makes_no_sense,
-                    progress_reporter=progress_reporter,
-                    min_features_percentage=.05)
-    return divik
-
-
-@_scenario
 def basic(gap_trials: int = 100,
           distance_percentile: float = 99.,
           iters_limit: int = 100,
