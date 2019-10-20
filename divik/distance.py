@@ -161,9 +161,5 @@ class SpearmanDistance(DistanceMetric):
 
 
 def make_distance(name: str) -> ScipyDistance:
-    known_distances = {metric.value: metric for metric in KnownMetric}
-    assert name in known_distances, \
-        'Unknown distance {0}. Known: {1}'.format(
-            name, list(known_distances.keys()))
-    distance = ScipyDistance(known_distances[name])
+    distance = ScipyDistance(KnownMetric[name])
     return distance
