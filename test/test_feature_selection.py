@@ -1,9 +1,91 @@
 import unittest
 
+import numpy as np
+import numpy.testing as npt
+from sklearn.metrics import accuracy_score
 
-class SelectSequentiallyTest(unittest.TestCase):
-    def test_applies_filters_on_smaller_and_smaller_data(self):
-        pass
+import divik.feature_selection as fs
 
-    def test_keeps_minimal_number_of_features(self):
-        pass
+
+class GMMSelectorTest(unittest.TestCase):
+    def setUp(self):
+        np.random.seed(42)
+        self.labels = np.concatenate(
+            [30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
+        self.data = self.labels * 5 + np.random.randn(*self.labels.shape)
+        self.data = self.data.reshape((1, -1))
+
+    def test_selects_high_component_by_default(self):
+        selector = fs.GMMSelector('mean').fit(self.data)
+        npt.assert_array_equal(selector.selected_,
+                               self.labels == self.labels.max())
+
+    def test_selects_low_component_when_set(self):
+        selector = fs.GMMSelector('mean', preserve_high=False).fit(self.data)
+        npt.assert_array_equal(selector.selected_,
+                               self.labels == self.labels.min())
+        
+    def test_that_0_candidates_preserves_all_the_features(self):
+        selector = fs.GMMSelector('mean', n_candidates=0).fit(self.data)
+        npt.assert_array_equal(selector.selected_, True)
+
+    def test_can_preserve_more_components(self):
+        selector = fs.GMMSelector('mean', n_candidates=-1).fit(self.data)
+        self.assertGreaterEqual(
+            accuracy_score(self.labels >= 2, selector.selected_), 0.99)
+        selector = fs.GMMSelector('mean', n_candidates=2).fit(self.data)
+        self.assertGreaterEqual(
+            accuracy_score(self.labels >= 2, selector.selected_), 0.99)
+        selector = fs.GMMSelector('mean', n_candidates=1).fit(self.data)
+        self.assertGreaterEqual(
+            accuracy_score(self.labels >= 1, selector.selected_), 0.99)
+        selector = fs.GMMSelector('mean', n_candidates=1, preserve_high=False)
+        selector.fit(self.data)
+        self.assertGreaterEqual(
+            accuracy_score(self.labels < 3, selector.selected_), 0.99)
+
+    def test_fails_log_with_negative_features(self):
+        self.data[0, 1] = -1
+        selector = fs.GMMSelector('mean', use_log=True)
+        with self.assertRaises(ValueError):
+            selector.fit(self.data)
+
+    def test_works_for_mean_and_var_only(self):
+        fs.GMMSelector('mean')
+        fs.GMMSelector('var')
+        with self.assertRaises(ValueError):
+            fs.GMMSelector('yolo')
+
+    def test_preserves_min_features_precisely_or_rate(self):
+        selector = fs.GMMSelector('mean', min_features=50).fit(self.data)
+        self.assertGreaterEqual(selector.selected_.sum(), 50)
+        selector = fs.GMMSelector('mean', min_features_rate=0.5).fit(self.data)
+        self.assertGreaterEqual(selector.selected_.sum(),
+                                0.5 * self.labels.size)
+
+
+class HighAbundanceAndVarianceSelectorTest(unittest.TestCase):
+    def setUp(self):
+        np.random.seed(42)
+        self.labels = np.concatenate(
+            [30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
+        self.data = np.vstack(100 * [self.labels * 10.])
+        self.data += np.random.randn(*self.data.shape)
+        sub = self.data[:, :-40]
+        sub += 5 * np.random.randn(*sub.shape)
+
+    def test_discards_low_abundance(self):
+        selector = fs.HighAbundanceAndVarianceSelector().fit(self.data)
+        TNR = (selector.selected_[self.labels == 0] == False).mean()
+        self.assertGreaterEqual(TNR, 0.99)
+
+    def test_discards_low_variance(self):
+        selector = fs.HighAbundanceAndVarianceSelector().fit(self.data)
+        TNR = (selector.selected_[self.labels == 3] == False).mean()
+        self.assertGreaterEqual(TNR, 0.99)
+
+    def test_passes_informative(self):
+        selector = fs.HighAbundanceAndVarianceSelector().fit(self.data)
+        expected = np.logical_or(self.labels == 1, self.labels == 2)
+        TPR = selector.selected_[expected].mean()
+        self.assertGreaterEqual(TPR, 0.99)

@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from functools import partial, reduce
+from functools import partial
 from multiprocessing import Pool
 import os
 from typing import Tuple
@@ -62,7 +62,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         GMM-based feature selection. By default at least 1% of features is
         preserved in the filtration process.
 
-    fast_kmeans_iters: int, optional, default: 10
+    fast_kmeans_iter: int, optional, default: 10
         Maximum number of iterations of the k-means algorithm for a single run
         during computation of the GAP index. Decreased with respect to the
         max_iter, as GAP index requires multiple segmentations to be evaluated.
@@ -157,7 +157,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  rejection_size: int = None,
                  rejection_percentage: float = None,
                  minimal_features_percentage: float = .01,
-                 fast_kmeans_iters: int = 10,
+                 fast_kmeans_iter: int = 10,
                  k_max: int = 10,
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
@@ -165,6 +165,19 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  verbose: bool = False):
         if distance not in list(dst.KnownMetric):
             raise ValueError('Unknown distance: %s' % distance)
+        if gap_trials <= 0:
+            raise ValueError('gap_trials must be greater than 0')
+        if distance_percentile < 0 or distance_percentile > 100:
+            raise ValueError('distance_percentile must be in range [0, 100]')
+        if max_iter <= 0:
+            raise ValueError('max_iter must be greater than 0')
+        if minimal_size is not None and minimal_size < 0:
+            raise ValueError('minimal_size must be greater or equal to 0')
+        if minimal_features_percentage < 0 or minimal_features_percentage > 1:
+            raise ValueError('minimal_features_percentage must be in range'
+                             ' [0, 1]')
+        if fast_kmeans_iter > max_iter or fast_kmeans_iter < 0:
+            raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
 
         self.gap_trials = gap_trials
         self.distance_percentile = distance_percentile
@@ -174,7 +187,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.rejection_size = rejection_size
         self.rejection_percentage = rejection_percentage
         self.minimal_features_percentage = minimal_features_percentage
-        self.fast_kmeans_iters = fast_kmeans_iters
+        self.fast_kmeans_iters = fast_kmeans_iter
         self.k_max = k_max
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
@@ -196,24 +209,22 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         n_jobs = _get_n_jobs(self.n_jobs)
+        rejection_size = self._get_rejection_size(X)
 
-        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress, \
-                context_if(n_jobs != 1, Pool, n_jobs) as pool:
+        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
             divik = predefined.basic(
                 gap_trials=self.gap_trials,
                 distance_percentile=self.distance_percentile,
                 iters_limit=self.max_iter,
                 distance=self.distance,
                 minimal_size=minimal_size,
-                rejection_size=self.rejection_size,
-                rejection_percentage=self.rejection_percentage,
+                rejection_size=rejection_size,
                 minimal_features_percentage=self.minimal_features_percentage,
                 fast_kmeans_iters=self.fast_kmeans_iters,
                 k_max=self.k_max,
-                correction_of_gap=True,
                 normalize_rows=self._needs_normalization(),
                 use_logfilters=self.use_logfilters,
-                pool=pool,
+                n_jobs=n_jobs,
                 progress_reporter=progress
             )
             self.result_ = divik(X)
@@ -231,14 +242,21 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
         return self
 
+    def _get_rejection_size(self, X):
+        rejection_size = 0
+        if self.rejection_size is not None:
+            rejection_size = max(rejection_size, self.rejection_size)
+        if self.rejection_percentage is not None:
+            rejection_size = max(
+                rejection_size, int(self.rejection_percentage * X.shape[0]))
+        return rejection_size
+
     def _get_filter(self, path):
         """This method extracts features filter used for each centroid"""
         result = self.result_
         for item in path[:-1]:
             result = result.subregions[item]
-        selectors = result.filters
-        selection = reduce(np.logical_and, selectors.values(), True)
-        return selection
+        return result.feature_selector.selected_
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
@@ -358,12 +376,8 @@ def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
     observation = observation[np.newaxis, :]
     division = result
     while division is not None:
-        restricted = reduce(np.logical_and, division.filters.values(), True)
-        local_X = observation[:, restricted]
-        d = distance(local_X, division.centroids)
-        assert d.shape[0] == 1 or d.shape[1] == 1
-        d = d.ravel()
-        label = np.argmin(d.ravel())
+        local_X = division.feature_selector.transform(observation)
+        label = int(division.clustering.predict(local_X))
         path.append(label)
         division = division.subregions[label]
     path = tuple(path)

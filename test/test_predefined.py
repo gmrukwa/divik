@@ -44,11 +44,10 @@ class TestBasic(DataBoundTestCase):
         super(TestBasic, cls).setUpClass()
         progress_bar = tqdm(desc='divik', total=cls.data.shape[0])
         distance = dst.KnownMetric.euclidean.value
-        divik = pre.basic(gap_trials=10, pool=pool,
-                          correction_of_gap=False,
+        divik = pre.basic(gap_trials=10,
                           progress_reporter=progress_bar,
                           distance=distance,
-                          use_logfilters=True)
+                          use_logfilters=False)
         cls.result = divik(cls.data)
 
     def test_constructs_runnable_pipeline(self):
@@ -62,4 +61,4 @@ class TestBasic(DataBoundTestCase):
         self.assertIsNone(self.result.subregions[1])
 
     def test_scores_segmentation(self):
-        self.assertFalse(np.isnan(self.result.quality))
+        self.assertFalse(np.isnan(self.result.clustering.best_score_))

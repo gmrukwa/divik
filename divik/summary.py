@@ -23,7 +23,6 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-import divik.rejection as rj
 import divik.utils as u
 
 
@@ -48,7 +47,7 @@ def merged_partition(tree: u.DivikResult, levels_limit: int = np.inf,
     """Compute merged segmentation labels."""
     assert tree is not None
     merged, paths =  _merged_partition(
-        tree.partition, tree.subregions, levels_limit)
+        tree.clustering.labels_, tree.subregions, levels_limit)
     if return_paths:
         return merged, paths
     return merged
@@ -70,7 +69,8 @@ def _merged_partition(partition: u.IntLabels,
             known_clusters += 1
         else:
             local_partition, down_paths = _merged_partition(
-                subregion.partition, subregion.subregions, levels_limit-1)
+                subregion.clustering.labels_, subregion.subregions,
+                levels_limit-1)
             result[current_cluster] = local_partition + known_clusters
             for cluster in np.unique(local_partition):
                 paths[cluster + known_clusters] = (
@@ -88,7 +88,9 @@ def _update_graph(tree, size: int, graph: 'networkx.Graph' = None,
     if tree is None:
         return
     for idx, subtree in enumerate(tree.subregions):
-        _update_graph(subtree, size=np.sum(tree.partition == idx), graph=graph,
+        _update_graph(subtree,
+                      size=np.sum(tree.clustering.labels_ == idx),
+                      graph=graph,
                       parent=tree_node)
 
 
@@ -180,28 +182,24 @@ def statistic(merged, diagnoses, func):
 
 
 def reject_split(tree: Optional[u.DivikResult],
-                 rejection_conditions: List[rj.RejectionCondition]) \
+                 rejection_size: int = 0) \
         -> Optional[u.DivikResult]:
     """Re-apply rejection condition on known result tree."""
     if tree is None:
         logging.debug("Rejecting empty.")
         return None
-    segmentation = (tree.partition, tree.centroids, tree.quality)
-    if any(reject(segmentation) for reject in rejection_conditions):
+    counts = np.unique(tree.clustering.labels_, return_counts=True)[1]
+    if any(counts <= rejection_size):
         logging.debug("Rejecting by condition.")
         return None
     allowed_subregions = [
-        reject_split(subregion, rejection_conditions)
-        for subregion in tree.subregions
+        reject_split(subregion, rejection_size) for subregion in tree.subregions
     ]
-    merged, _ = _merged_partition(tree.partition, allowed_subregions)
+    merged, _ = _merged_partition(tree.clustering.labels_, allowed_subregions)
     logging.debug("Returning pruned tree.")
     return u.DivikResult(
-        centroids=tree.centroids,
-        quality=tree.quality,
-        partition=tree.partition,
-        filters=tree.filters,
-        thresholds=tree.thresholds,
+        clustering=tree.clustering,
+        feature_selector=tree.feature_selector,
         merged=merged,
         subregions=allowed_subregions
     )
