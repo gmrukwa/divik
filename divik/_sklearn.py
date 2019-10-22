@@ -213,6 +213,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         y : Ignored
             not used, present here for API consistency by convention.
         """
+        if np.isnan(X).any():
+            raise ValueError("NaN values are not supported.")
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         n_jobs = get_n_jobs(self.n_jobs)
