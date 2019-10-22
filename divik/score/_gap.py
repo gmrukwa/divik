@@ -11,25 +11,18 @@ from sklearn.base import clone
 
 from divik.distance import DistanceMetric, make_distance
 from divik.score._picker import Picker
-from divik.utils import Centroids, IntLabels, Data, SegmentationMethod
+from divik.utils import Centroids, IntLabels, Data, SegmentationMethod, \
+    normalize_rows
 from divik.seeding import seeded
 
 
 KMeans = 'divik.kmeans._core.KMeans'
 
 
-# TODO: Deduplicate this function. It was in `KMeans`.
-def _normalize_rows(data: Data) -> Data:
-    normalized = data - data.mean(axis=1)[:, np.newaxis]
-    norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True)**(1./2)
-    normalized /= norms
-    return normalized
-
-
 def _dispersion(data: Data, labels: IntLabels, centroids: Centroids,
-                distance: DistanceMetric, normalize_rows: bool=False) -> float:
-    if normalize_rows:
-        data = _normalize_rows(data)
+                distance: DistanceMetric, normalize: bool=False) -> float:
+    if normalize:
+        data = normalize_rows(data)
     clusters = pd.DataFrame(data).groupby(labels)
     return float(np.sum([
         np.sum(distance(centroids[np.newaxis, label], cluster_members.values))
