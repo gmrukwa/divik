@@ -24,7 +24,6 @@ import tqdm
 
 import divik.distance as dst
 import divik.divik as dv
-import divik.stop as st
 import divik.utils as u
 
 Divik = Callable[[u.Data], Optional[u.DivikResult]]
@@ -93,7 +92,6 @@ def basic(gap_trials: int = 100,
                     random_seed=random_seed,
                     gap_trials=gap_trials,
                     min_features_percentage=minimal_features_percentage,
-                    prefiltering_stop_condition=partial(
-                        st.minimal_size, size=max(k_max, minimal_size)),
+                    minimal_size=minimal_size,
                     use_logfilters=use_logfilters)
     return divik

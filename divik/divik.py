@@ -101,6 +101,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    k_max: int, n_jobs: int, distance: str,
                    distance_percentile: float, iters_limit: int,
                    normalize_rows: bool,
+                   minimal_size: int,
                    rejection_size: int,
                    report: _Reporter,
                    prefiltering_stop_condition: StopCondition,
@@ -110,7 +111,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    use_logfilters: bool = False) -> Optional[DivikResult]:
     subset = data[selection]
 
-    if prefiltering_stop_condition(subset):
+    if subset.shape[0] <= max(k_max, minimal_size):
         report.finished_for(subset.shape[0])
         return None
 
@@ -140,14 +141,13 @@ def _divik_backend(data: Data, selection: np.ndarray,
         verbose=False
     ).fit(filtered_data)
     partition = clusterer.labels_
-    centroids = clusterer.cluster_centers_
-    quality = clusterer.best_score_
+    _, counts = np.unique(partition, return_counts=True)
 
-    if any(np.unique(partition, return_counts=True)[1]) <= rejection_size:
+    if any(counts <= rejection_size):
         report.rejected(subset.shape[0])
         return None
 
-    report.recurring(centroids.shape[0])
+    report.recurring(len(counts))
     recurse = partial(_divik_backend, data=data,
                       fast_kmeans_iters=fast_kmeans_iters,
                       k_max=k_max,
@@ -156,6 +156,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
                       distance_percentile=distance_percentile,
                       iters_limit=iters_limit,
                       normalize_rows=normalize_rows,
+                      minimal_size=minimal_size,
                       rejection_size=rejection_size,
                       report=report,
                       random_seed=random_seed,
@@ -190,6 +191,7 @@ def divik(data: Data,
           gap_trials: int,
           min_features_percentage: float = .05,
           progress_reporter: tqdm.tqdm = None,
+          minimal_size: int = 2,
           rejection_size: int = 0,
           prefiltering_stop_condition: StopCondition = None,
           use_logfilters: bool = False) \
@@ -212,9 +214,6 @@ def divik(data: Data,
         raise ValueError("NaN values are not supported.")
     report = _Reporter(progress_reporter)
     select_all = np.ones(shape=(data.shape[0],), dtype=bool)
-    if prefiltering_stop_condition is None:
-        def prefiltering_stop_condition(data: Data) -> bool:
-            return False
     return _divik_backend(data,
                           selection=select_all,
                           fast_kmeans_iters=fast_kmeans_iters,
@@ -224,6 +223,7 @@ def divik(data: Data,
                           distance_percentile=distance_percentile,
                           iters_limit=iters_limit,
                           normalize_rows=normalize_rows,
+                          minimal_size=minimal_size,
                           rejection_size=rejection_size,
                           report=report,
                           random_seed=random_seed,
