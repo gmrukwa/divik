@@ -25,7 +25,6 @@ import tqdm
 
 import divik.distance as dst
 import divik.divik as dv
-import divik.feature_selection as fs
 import divik.kmeans as km
 import divik.rejection as rj
 import divik.score as sc
@@ -48,36 +47,6 @@ def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
                                          parameters=sweep_clusters_number,
                                          pool=pool)
     return best_kmeans_with_dunn
-
-
-_AMPLITUDE_FILTER = fs.FilteringMethod(
-    'amplitude',
-    partial(fs.select_by,
-            statistic=fs.amplitude,
-            discard_up_to=1,
-            # discarding only lowest component, if possible
-            preserve_topmost=True))
-_VARIANCE_FILTER = fs.FilteringMethod(
-    'variance',
-    partial(fs.select_by,
-            statistic=fs.variance,
-            # selecting only most varying component, if possible
-            discard_up_to=-1,
-            preserve_topmost=True))
-_LOG_AMPLITUDE_FILTER = fs.FilteringMethod(
-    'log_amplitude',
-    partial(fs.select_by,
-            statistic=fs.log_amplitude,
-            discard_up_to=1,
-            # discarding only lowest component, if possible
-            preserve_topmost=True))
-_LOG_VARIANCE_FILTER = fs.FilteringMethod(
-    'log_variance',
-    partial(fs.select_by,
-            statistic=fs.log_variance,
-            # selecting only most varying component, if possible
-            discard_up_to=-1,
-            preserve_topmost=True))
 
 
 def basic(gap_trials: int = 100,
@@ -155,13 +124,8 @@ def basic(gap_trials: int = 100,
         partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
                 percentage=rejection_percentage)
     ]
-    if use_logfilters:
-        filters = [_LOG_AMPLITUDE_FILTER, _LOG_VARIANCE_FILTER]
-    else:
-        filters = [_AMPLITUDE_FILTER, _VARIANCE_FILTER]
     divik = partial(dv.divik,
                     split=best_kmeans_with_dunn,
-                    feature_selectors=filters,
                     stop_condition=stop_if_split_makes_no_sense,
                     rejection_conditions=rejections,
                     progress_reporter=progress_reporter,

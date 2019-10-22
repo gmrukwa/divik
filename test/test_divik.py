@@ -53,7 +53,6 @@ class DivikBackendTest(unittest.TestCase):
         stop_condition = returns(True)
         dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
                           split=MagicMock(),
-                          feature_selectors=[],
                           stop_condition=stop_condition,
                           rejection_conditions=[],
                           report=MagicMock(),
@@ -66,7 +65,6 @@ class DivikBackendTest(unittest.TestCase):
         split = returns((MagicMock(),) * 3)
         tree = dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
                                  split=split,
-                                 feature_selectors=[],
                                  stop_condition=stop_condition,
                                  rejection_conditions=[],
                                  report=MagicMock(),
@@ -83,7 +81,6 @@ class DivikBackendTest(unittest.TestCase):
              patch.object(fs, fs.HighAbundanceAndVarianceSelector.__name__):
             tree = dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
                                      split=split,
-                                     feature_selectors=[],
                                      stop_condition=stop_condition,
                                      rejection_conditions=[],
                                      report=reporter,
@@ -99,7 +96,6 @@ class DivikBackendTest(unittest.TestCase):
         split = returns((MagicMock(),) * 3)
         tree = dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
                                  split=split,
-                                 feature_selectors=[],
                                  stop_condition=stop_condition,
                                  rejection_conditions=[returns(True)],
                                  report=MagicMock(),
@@ -122,7 +118,6 @@ class DivikBackendTest(unittest.TestCase):
                 patch.object(dv, dv._recursive_selection.__name__, new=returns(SELECT_ALL)):
             tree = old(data=DUMMY_DATA, selection=SELECT_ALL,
                        split=split,
-                       feature_selectors=[],
                        stop_condition=stop_condition,
                        rejection_conditions=rejection_conditions,
                        report=report,
@@ -132,7 +127,6 @@ class DivikBackendTest(unittest.TestCase):
         self.assertIsNotNone(tree)
         mock.assert_called_with(data=DUMMY_DATA, selection=SELECT_ALL,
                                 split=split,
-                                feature_selectors=[],
                                 stop_condition=stop_condition,
                                 rejection_conditions=rejection_conditions,
                                 report=report,
@@ -151,7 +145,6 @@ class DivikBackendTest(unittest.TestCase):
              patch.object(dv, dv._recursive_selection.__name__, new=returns(SELECT_ALL)):
             tree = old(data=DUMMY_DATA, selection=SELECT_ALL,
                        split=split,
-                       feature_selectors=[],
                        stop_condition=stop_condition,
                        rejection_conditions=rejection_conditions,
                        report=report,

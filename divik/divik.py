@@ -98,7 +98,6 @@ class _Reporter:
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def _divik_backend(data: Data, selection: np.ndarray,
                    split: SelfScoringSegmentation,
-                   feature_selectors: List[fs.FilteringMethod],
                    stop_condition: StopCondition,
                    rejection_conditions: List[rj.RejectionCondition],
                    report: _Reporter,
@@ -130,7 +129,6 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
     report.recurring(centroids.shape[0])
     recurse = partial(_divik_backend, data=data, split=split,
-                      feature_selectors=feature_selectors,
                       stop_condition=stop_condition,
                       rejection_conditions=rejection_conditions,
                       report=report,
@@ -157,7 +155,6 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
 
 def divik(data: Data, split: SelfScoringSegmentation,
-          feature_selectors: List[fs.FilteringMethod],
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
           progress_reporter: tqdm.tqdm = None,
@@ -191,7 +188,6 @@ def divik(data: Data, split: SelfScoringSegmentation,
     return _divik_backend(data,
                           selection=select_all,
                           split=split,
-                          feature_selectors=feature_selectors,
                           stop_condition=stop_condition,
                           rejection_conditions=rejection_conditions,
                           report=report,
