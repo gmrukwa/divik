@@ -10,6 +10,8 @@ import tqdm
 
 import divik.divik as dv
 import divik.distance as dst
+import divik.feature_selection as fs
+import divik.kmeans as km
 import divik.summary as summary
 from divik.utils import normalize_rows, DivikResult, get_n_jobs
 
@@ -217,21 +219,15 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             raise ValueError("NaN values are not supported.")
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
-        n_jobs = get_n_jobs(self.n_jobs)
         rejection_size = self._get_rejection_size(X)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
             self.result_ = dv.divik(
-                X, fast_kmeans_iters=self.fast_kmeans_iter, k_max=self.k_max,
-                n_jobs=n_jobs, distance=self.distance,
-                distance_percentile=self.distance_percentile,
-                iters_limit=self.max_iter,
-                normalize_rows=self._needs_normalization(),
-                random_seed=self.random_seed, gap_trials=self.gap_trials,
-                min_features_percentage=self.minimal_features_percentage,
+                X, fast_kmeans=self._fast_kmeans(),
+                full_kmeans=self._full_kmeans(),
+                feature_selector=self._feature_selector(),
                 progress_reporter=progress, minimal_size=minimal_size,
-                rejection_size=rejection_size,
-                use_logfilters=self.use_logfilters)
+                rejection_size=rejection_size)
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
@@ -266,6 +262,31 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         if self.normalize_rows is None:
             return self.distance == dst.KnownMetric.correlation.value
         return self.normalize_rows
+
+    def _fast_kmeans(self):
+        return km.AutoKMeans(
+            max_clusters=2, n_jobs=get_n_jobs(self.n_jobs), method="gap",
+            distance=self.distance, init='percentile',
+            percentile=self.distance_percentile, max_iter=self.max_iter,
+            normalize_rows=self._needs_normalization(),
+            gap={"max_iter": self.fast_kmeans_iter, "seed": self.random_seed,
+                 "trials": self.gap_trials, "correction": True},
+            verbose=self.verbose)
+
+    def _full_kmeans(self):
+        return km.AutoKMeans(
+            max_clusters=self.k_max, min_clusters=2,
+            n_jobs=get_n_jobs(self.n_jobs), method='dunn',
+            distance=self.distance, init='percentile',
+            percentile=self.distance_percentile, max_iter=self.max_iter,
+            normalize_rows=self._needs_normalization(), gap=None,
+            verbose=self.verbose
+        )
+
+    def _feature_selector(self):
+        return fs.HighAbundanceAndVarianceSelector(
+            use_log=self.use_logfilters,
+            min_features_rate=self.minimal_features_percentage)
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
