@@ -77,17 +77,20 @@ Configuration file should be a JSON file as follows:
 
 ```json
 {
-  "distance": "correlation",
   "gap_trials": 10,
-  "correction_of_gap": true,
-  "fast_kmeans_iters": 10,
   "distance_percentile": 99.0,
-  "iters_limit": 100,
+  "max_iter": 100,
+  "distance": "correlation",
   "minimal_size": 16,
   "rejection_size": 2,
   "minimal_features_percentage": 0.01,
+  "fast_kmeans_iters": 10,
   "k_max": 10,
-  "normalize_rows": true
+  "normalize_rows": true,
+  "use_logfilters": true,
+  "n_jobs": -1,
+  "random_seed": 0,
+  "verbose": true
 }
 
 ```
@@ -124,13 +127,6 @@ supported by `scipy` package. All supported values:
 Number of times that reference dataset will be drawn from uniform distribution
 for computation of GAP index. Default `10`.
 
-#### `correction_of_gap`
-
-Specifies, whether GAP index should be used in raw version (maximal GAP
-statistic), or suggested in
-[Tibshirani *et al.*](https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/1467-9868.00293) -
-corrected (first matching). Default `true`.
-
 #### `fast_kmeans_iters`
 
 Number of k-means iterations performed during GAP trial. Default `10`. In most
@@ -141,7 +137,7 @@ cases this is sufficient.
 Distance percentile, at which algorithm should look for initial cluster centers.
 Should be between `0.0` and `100.0`.
 
-#### `iters_limit`
+#### `max_iter`
 
 Limit of number of iterations in k-means algorithm. Default `100`. Rather should
 not be less.
