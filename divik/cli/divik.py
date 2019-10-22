@@ -55,19 +55,20 @@ def _save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
                delimiter=', ', fmt='%i')
 
 
-def save(data: u.Data, result: typing.Optional[u.DivikResult],
-         destination: str, xy: np.ndarray=None):
+def save(data: u.Data, divik: DiviK, destination: str, xy: np.ndarray=None):
     logging.info("Saving result.")
     logging.info("Saving pickle.")
     with open(os.path.join(destination, DIVIK_RESULT_FNAME), 'wb') as pkl:
-        pickle.dump(result, pkl)
+        pickle.dump(divik.result_, pkl)
+    with open(os.path.join(destination, 'model.pkl'), 'wb') as pkl:
+        pickle.dump(divik, pkl)
     logging.info("Saving JSON summary.")
     with open(os.path.join(destination, 'summary.json'), 'w') as smr:
-        json.dump(_make_summary(result), smr)
-    if result is not None:
+        json.dump(_make_summary(divik.result_), smr)
+    if divik.result_ is not None:
         logging.info("Saving partitions.")
-        merged = _make_merged(result)
-        assert merged.shape[0] == result.clustering.labels_.size
+        merged = _make_merged(divik.result_)
+        assert merged.shape[0] == divik.result_.clustering.labels_.size
         _save_merged(destination, merged, xy)
         logging.info("Saving centroids.")
         centroids = pd.DataFrame(data).groupby(merged[:, -1]).mean().values
@@ -90,7 +91,7 @@ def main():
         logging.error("Failed with exception.")
         logging.error(repr(ex))
         raise
-    save(data, divik.result_, destination, xy)
+    save(data, divik, destination, xy)
 
 
 if __name__ == '__main__':
