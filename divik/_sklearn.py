@@ -262,6 +262,11 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             result = result.subregions[item]
         return result.feature_selector.selected_
 
+    def _needs_normalization(self):
+        if self.normalize_rows is None:
+            return self.distance == dst.KnownMetric.correlation.value
+        return self.normalize_rows
+
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
 
@@ -306,12 +311,6 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             X transformed in the new space.
         """
         return self.fit(X).transform(X)
-
-    def _needs_normalization(self):
-        if self.normalize_rows is None:
-            return self.distance == dst.KnownMetric.correlation.value
-        return self.normalize_rows
-
 
     def transform(self, X):
         """Transform X to a cluster-distance space.
