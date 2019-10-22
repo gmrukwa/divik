@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 from functools import partial
 from multiprocessing import Pool
-import os
 from typing import Tuple
 
 import numpy as np
@@ -12,7 +11,7 @@ import tqdm
 import divik.divik as dv
 import divik.distance as dst
 import divik.summary as summary
-from divik.utils import normalize_rows, DivikResult
+from divik.utils import normalize_rows, DivikResult, get_n_jobs
 
 
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -216,7 +215,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         """
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
-        n_jobs = _get_n_jobs(self.n_jobs)
+        n_jobs = get_n_jobs(self.n_jobs)
         rejection_size = self._get_rejection_size(X)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
@@ -362,7 +361,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         if self._needs_normalization():
             X = normalize_rows(X)
         distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
-        n_jobs = _get_n_jobs(self.n_jobs)
+        n_jobs = get_n_jobs(self.n_jobs)
         predict = partial(_predict_path, result=self.result_, distance=distance)
         if n_jobs == 1:
             paths = [_predict_path(row, self.result_, distance) for row in X]
@@ -385,13 +384,6 @@ def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
         division = division.subregions[label]
     path = tuple(path)
     return path
-
-
-def _get_n_jobs(n_jobs):
-    n_cpu = os.cpu_count()
-    n_jobs = 1 if n_jobs is None else n_jobs
-    n_jobs = (n_jobs + n_cpu) % n_cpu or n_cpu
-    return n_jobs
 
 
 @contextmanager

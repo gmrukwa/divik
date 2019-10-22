@@ -1,3 +1,4 @@
+import os
 from typing import Callable, Tuple, NamedTuple, List, Optional
 
 import numpy as np
@@ -34,3 +35,10 @@ def visualize(label, xy, shape=None):
     label_map[y, x] = label
     image = label2rgb(label_map, bg_label=0)
     return image
+
+
+def get_n_jobs(n_jobs):
+    n_cpu = os.cpu_count() or 1
+    n_jobs = 1 if n_jobs is None else n_jobs
+    n_jobs = (n_jobs + n_cpu) % n_cpu or n_cpu
+    return n_jobs
