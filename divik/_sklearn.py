@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from functools import partial, reduce
+from functools import partial
 from multiprocessing import Pool
 import os
 from typing import Tuple
