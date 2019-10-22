@@ -171,7 +171,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             raise ValueError('distance_percentile must be in range [0, 100]')
         if max_iter <= 0:
             raise ValueError('max_iter must be greater than 0')
-        if minimal_size < 0:
+        if minimal_size is not None and minimal_size < 0:
             raise ValueError('minimal_size must be greater or equal to 0')
         if minimal_features_percentage < 0 or minimal_features_percentage > 1:
             raise ValueError('minimal_features_percentage must be in range'
