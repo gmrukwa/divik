@@ -196,6 +196,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         n_jobs = _get_n_jobs(self.n_jobs)
+        rejection_size = self._get_rejection_size(X)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
             divik = predefined.basic(
@@ -204,8 +205,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                 iters_limit=self.max_iter,
                 distance=self.distance,
                 minimal_size=minimal_size,
-                rejection_size=self.rejection_size,
-                rejection_percentage=self.rejection_percentage,
+                rejection_size=rejection_size,
                 minimal_features_percentage=self.minimal_features_percentage,
                 fast_kmeans_iters=self.fast_kmeans_iters,
                 k_max=self.k_max,
@@ -228,6 +228,15 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.n_clusters_ = summary.total_number_of_clusters(self.result_)
 
         return self
+
+    def _get_rejection_size(self, X):
+        rejection_size = 0
+        if self.rejection_size is not None:
+            rejection_size = max(rejection_size, self.rejection_size)
+        if self.rejection_percentage is not None:
+            rejection_size = max(
+                rejection_size, int(self.rejection_percentage * X.shape[0]))
+        return rejection_size
 
     def _get_filter(self, path):
         """This method extracts features filter used for each centroid"""

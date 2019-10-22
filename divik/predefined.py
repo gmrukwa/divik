@@ -18,7 +18,6 @@ limitations under the License.
 """
 
 from functools import partial
-from multiprocessing import Pool
 from typing import Callable, Optional
 
 import tqdm
@@ -38,7 +37,6 @@ def basic(gap_trials: int = 100,
           distance: str = None,
           minimal_size: int = 20,
           rejection_size: int = None,
-          rejection_percentage: float = None,
           minimal_features_percentage: float = .01,
           fast_kmeans_iters: int = 10,
           k_max: int = 10,
@@ -83,11 +81,10 @@ def basic(gap_trials: int = 100,
     assert 0 <= minimal_size, minimal_size
     assert 0 <= minimal_features_percentage <= 1, minimal_features_percentage
     assert fast_kmeans_iters > 0, fast_kmeans_iters
-    if rejection_percentage is None and rejection_size is None:
+    if rejection_size is None:
         rejection_size = 0
     rejections = [
-        partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
-                percentage=rejection_percentage)
+        partial(rj.reject_if_clusters_smaller_than, size=rejection_size)
     ]
     divik = partial(dv.divik,
                     fast_kmeans_iters=fast_kmeans_iters,
