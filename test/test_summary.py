@@ -13,8 +13,7 @@ DUMMY_RESULT = u.DivikResult(
     centroids=np.zeros((3, 1)),
     quality=3.,
     partition=np.array([0] * 10 + [1] * 5 + [2] * 10, dtype=int),
-    filters={},
-    thresholds={},
+    feature_selector=None,
     merged=np.array([0] * 10 + [1] * 15, dtype=int),
     subregions=[
         None,
@@ -22,8 +21,7 @@ DUMMY_RESULT = u.DivikResult(
             centroids=np.zeros((2, 1)),
             quality=2.,
             partition=np.array([0] + [1] * 4, dtype=int),
-            filters={},
-            thresholds={},
+            feature_selector=None,
             merged=np.array([0] + [1] * 4, dtype=int),
             subregions=[None, None]
         ),
@@ -31,8 +29,7 @@ DUMMY_RESULT = u.DivikResult(
             centroids=np.zeros((3, 1)),
             quality=2.,
             partition=np.array([0] * 2 + [1] * 3 + [2] * 5, dtype=int),
-            filters={},
-            thresholds={},
+            feature_selector=None,
             merged=np.array([0] * 2 + [1] * 3 + [2] * 5, dtype=int),
             subregions=[None, None, None]
         )

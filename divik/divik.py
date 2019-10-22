@@ -46,6 +46,7 @@ class _Reporter:
     def __init__(self, progress_reporter: tqdm.tqdm = None):
         self.progress_reporter = progress_reporter
         self.paths_open = 1
+        self.warn_const = True
 
     def filter(self, subset):
         lg.info('Feature filtering.')
@@ -55,11 +56,10 @@ class _Reporter:
             lg.debug('Limits: min={0}; max={1}'.format(subset.min(), subset.max()))
             lg.debug('Has constant rows: {0}'.format(_constant_rows(subset)))
 
-    def filtered(self, data, thresholds):
+    def filtered(self, data):
         lg.debug('Shape after filtering: {0}'.format(data.shape))
-        lg.debug('Thresholds for filtering: {0}'.format(thresholds))
         constant = _constant_rows(data)
-        if any(constant):
+        if any(constant) and self.warn_const:
             msg = 'After feature filtering some rows are constant: {0}. ' \
                   'This may not work with specific configurations.'
             lg.warning(msg.format(constant))
@@ -112,9 +112,10 @@ def _divik_backend(data: Data, selection: np.ndarray,
         return None
 
     report.filter(subset)
-    filters, thresholds, filtered_data = fs.select_sequentially(
-        feature_selectors, subset, min_features_percentage)
-    report.filtered(filtered_data, thresholds)
+    feature_selector = fs.HighAbundanceAndVarianceSelector(
+        use_log=use_logfilters, min_features_rate=min_features_percentage)
+    filtered_data = feature_selector.fit_transform(subset)
+    report.filtered(filtered_data)
 
     report.stop_check()
     if stop_condition(filtered_data):
@@ -149,8 +150,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
         centroids=centroids,
         quality=quality,
         partition=partition,
-        filters=filters,
-        thresholds=thresholds,
+        feature_selector=feature_selector,
         merged=partition,
         subregions=subregions
     )

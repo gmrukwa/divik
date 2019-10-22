@@ -200,8 +200,7 @@ def reject_split(tree: Optional[u.DivikResult],
         centroids=tree.centroids,
         quality=tree.quality,
         partition=tree.partition,
-        filters=tree.filters,
-        thresholds=tree.thresholds,
+        feature_selector=tree.feature_selector,
         merged=merged,
         subregions=allowed_subregions
     )

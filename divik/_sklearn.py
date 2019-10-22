@@ -236,9 +236,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         result = self.result_
         for item in path[:-1]:
             result = result.subregions[item]
-        selectors = result.filters
-        selection = reduce(np.logical_and, selectors.values(), True)
-        return selection
+        return result.feature_selector.selected_
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
@@ -358,8 +356,7 @@ def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
     observation = observation[np.newaxis, :]
     division = result
     while division is not None:
-        restricted = reduce(np.logical_and, division.filters.values(), True)
-        local_X = observation[:, restricted]
+        local_X = division.feature_selector.transform(observation)
         d = distance(local_X, division.centroids)
         assert d.shape[0] == 1 or d.shape[1] == 1
         d = d.ravel()

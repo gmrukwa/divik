@@ -71,7 +71,11 @@ class DivikTest(unittest.TestCase):
     def test_is_closest_to_predicted(self):
         X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
                           random_state=42)
-        model = DiviK(distance=dst.KnownMetric.euclidean.value, n_jobs=-1)
+        # This is true only with full feature's space actually, since otherwise
+        # dimensionality may differ too much and influence the distance
+        # comparison.
+        model = DiviK(distance=dst.KnownMetric.euclidean.value,
+                      minimal_features_percentage=1.0, n_jobs=-1)
         y_pred = model.fit_predict(X)
         X_trans = model.transform(X)
         closests = [np.argmin(row) for row in X_trans]

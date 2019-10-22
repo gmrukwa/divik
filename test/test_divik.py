@@ -49,21 +49,6 @@ class RecursiveSelectionTest(unittest.TestCase):
 
 
 class DivikBackendTest(unittest.TestCase):
-    def test_calls_selection(self):
-        with patch.object(fs, fs.select_sequentially.__name__,
-                          new=returns((MagicMock,) * 3)) as selector:
-            dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
-                              split=MagicMock(),
-                              feature_selectors=[],
-                              stop_condition=returns(True),
-                              rejection_conditions=[],
-                              report=MagicMock(),
-                              min_features_percentage=.05,
-                              prefiltering_stop_condition=lambda x: False)
-        self.assertEqual(1, selector.call_count)
-        self.assertSequenceEqual([], selector.call_args[0][0])
-        self.assertEqual(.05, selector.call_args[0][2])
-
     def test_calls_stop_condition(self):
         stop_condition = returns(True)
         dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
@@ -94,7 +79,8 @@ class DivikBackendTest(unittest.TestCase):
         stop_condition = returns_many([False, True, True])
         split = returns((MagicMock(),) * 3)
         reporter = MagicMock()
-        with patch.object(np, np.unique.__name__, new=returns([1, 2])):
+        with patch.object(np, np.unique.__name__, new=returns([1, 2])),\
+             patch.object(fs, fs.HighAbundanceAndVarianceSelector.__name__):
             tree = dv._divik_backend(data=DUMMY_DATA, selection=SELECT_ALL,
                                      split=split,
                                      feature_selectors=[],
@@ -173,5 +159,5 @@ class DivikBackendTest(unittest.TestCase):
                        prefiltering_stop_condition=lambda x: False)
         self.assertIsNotNone(tree)
         self.assertSequenceEqual([None, None], tree.subregions)
-        self.assertSequenceEqual({}, tree.thresholds)
-        self.assertSequenceEqual({}, tree.filters)
+        self.assertIsInstance(tree.feature_selector,
+                              fs.HighAbundanceAndVarianceSelector)

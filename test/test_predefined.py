@@ -48,7 +48,7 @@ class TestBasic(DataBoundTestCase):
                           correction_of_gap=False,
                           progress_reporter=progress_bar,
                           distance=distance,
-                          use_logfilters=True)
+                          use_logfilters=False)
         cls.result = divik(cls.data)
 
     def test_constructs_runnable_pipeline(self):

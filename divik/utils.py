@@ -21,8 +21,7 @@ DivikResult = NamedTuple('DivikResult', [
     ('centroids', Centroids),
     ('quality', float),
     ('partition', IntLabels),
-    ('filters', Filters),
-    ('thresholds', Thresholds),
+    ('feature_selector', 'divik.feature_selection.HighAbundanceAndVarianceSelector'),
     ('merged', IntLabels),
     ('subregions', List[Optional['DivikResult']]),
 ])
