@@ -62,7 +62,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         GMM-based feature selection. By default at least 1% of features is
         preserved in the filtration process.
 
-    fast_kmeans_iters: int, optional, default: 10
+    fast_kmeans_iter: int, optional, default: 10
         Maximum number of iterations of the k-means algorithm for a single run
         during computation of the GAP index. Decreased with respect to the
         max_iter, as GAP index requires multiple segmentations to be evaluated.
@@ -157,7 +157,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  rejection_size: int = None,
                  rejection_percentage: float = None,
                  minimal_features_percentage: float = .01,
-                 fast_kmeans_iters: int = 10,
+                 fast_kmeans_iter: int = 10,
                  k_max: int = 10,
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
@@ -165,6 +165,19 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  verbose: bool = False):
         if distance not in list(dst.KnownMetric):
             raise ValueError('Unknown distance: %s' % distance)
+        if gap_trials <= 0:
+            raise ValueError('gap_trials must be greater than 0')
+        if distance_percentile < 0 or distance_percentile > 100:
+            raise ValueError('distance_percentile must be in range [0, 100]')
+        if max_iter <= 0:
+            raise ValueError('max_iter must be greater than 0')
+        if minimal_size < 0:
+            raise ValueError('minimal_size must be greater or equal to 0')
+        if minimal_features_percentage < 0 or minimal_features_percentage > 1:
+            raise ValueError('minimal_features_percentage must be in range'
+                             ' [0, 1]')
+        if fast_kmeans_iter > max_iter or fast_kmeans_iter < 0:
+            raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
 
         self.gap_trials = gap_trials
         self.distance_percentile = distance_percentile
@@ -174,7 +187,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.rejection_size = rejection_size
         self.rejection_percentage = rejection_percentage
         self.minimal_features_percentage = minimal_features_percentage
-        self.fast_kmeans_iters = fast_kmeans_iters
+        self.fast_kmeans_iters = fast_kmeans_iter
         self.k_max = k_max
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
