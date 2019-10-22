@@ -167,5 +167,6 @@ def basic(gap_trials: int = 100,
                     progress_reporter=progress_reporter,
                     min_features_percentage=minimal_features_percentage,
                     prefiltering_stop_condition=partial(
-                        st.minimal_size, size=max(k_max, minimal_size)))
+                        st.minimal_size, size=max(k_max, minimal_size)),
+                    use_logfilters=use_logfilters)
     return divik

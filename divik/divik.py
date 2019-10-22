@@ -103,7 +103,8 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    rejection_conditions: List[rj.RejectionCondition],
                    report: _Reporter,
                    prefiltering_stop_condition: StopCondition,
-                   min_features_percentage: float = .05) -> Optional[DivikResult]:
+                   min_features_percentage: float = .05,
+                   use_logfilters: bool = False) -> Optional[DivikResult]:
     subset = data[selection]
 
     if prefiltering_stop_condition(subset):
@@ -133,7 +134,8 @@ def _divik_backend(data: Data, selection: np.ndarray,
                       rejection_conditions=rejection_conditions,
                       report=report,
                       min_features_percentage=min_features_percentage,
-                      prefiltering_stop_condition=prefiltering_stop_condition)
+                      prefiltering_stop_condition=prefiltering_stop_condition,
+                      use_logfilters=use_logfilters)
     del subset
     del filtered_data
     gc.collect()
@@ -160,7 +162,8 @@ def divik(data: Data, split: SelfScoringSegmentation,
           min_features_percentage: float = .05,
           progress_reporter: tqdm.tqdm = None,
           rejection_conditions: List[rj.RejectionCondition] = None,
-          prefiltering_stop_condition: StopCondition = None) \
+          prefiltering_stop_condition: StopCondition = None,
+          use_logfilters: bool = False) \
         -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework.
 
@@ -193,4 +196,5 @@ def divik(data: Data, split: SelfScoringSegmentation,
                           rejection_conditions=rejection_conditions,
                           report=report,
                           min_features_percentage=min_features_percentage,
-                          prefiltering_stop_condition=prefiltering_stop_condition)
+                          prefiltering_stop_condition=prefiltering_stop_condition,
+                          use_logfilters=use_logfilters)

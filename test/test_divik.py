@@ -141,7 +141,8 @@ class DivikBackendTest(unittest.TestCase):
                        rejection_conditions=rejection_conditions,
                        report=report,
                        min_features_percentage=.15,
-                       prefiltering_stop_condition=prefiltering)
+                       prefiltering_stop_condition=prefiltering,
+                       use_logfilters=False)
         self.assertIsNotNone(tree)
         mock.assert_called_with(data=DUMMY_DATA, selection=SELECT_ALL,
                                 split=split,
@@ -150,7 +151,8 @@ class DivikBackendTest(unittest.TestCase):
                                 rejection_conditions=rejection_conditions,
                                 report=report,
                                 min_features_percentage=.15,
-                                prefiltering_stop_condition=prefiltering)
+                                prefiltering_stop_condition=prefiltering,
+                                use_logfilters=False)
 
     def test_constructs_result(self):
         old = dv._divik_backend
