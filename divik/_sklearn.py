@@ -163,22 +163,6 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  use_logfilters: bool = False,
                  n_jobs: int = None,
                  verbose: bool = False):
-        if distance not in list(dst.KnownMetric):
-            raise ValueError('Unknown distance: %s' % distance)
-        if gap_trials <= 0:
-            raise ValueError('gap_trials must be greater than 0')
-        if distance_percentile < 0 or distance_percentile > 100:
-            raise ValueError('distance_percentile must be in range [0, 100]')
-        if max_iter <= 0:
-            raise ValueError('max_iter must be greater than 0')
-        if minimal_size is not None and minimal_size < 0:
-            raise ValueError('minimal_size must be greater or equal to 0')
-        if minimal_features_percentage < 0 or minimal_features_percentage > 1:
-            raise ValueError('minimal_features_percentage must be in range'
-                             ' [0, 1]')
-        if fast_kmeans_iter > max_iter or fast_kmeans_iter < 0:
-            raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
-
         self.gap_trials = gap_trials
         self.distance_percentile = distance_percentile
         self.max_iter = max_iter
@@ -187,12 +171,31 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.rejection_size = rejection_size
         self.rejection_percentage = rejection_percentage
         self.minimal_features_percentage = minimal_features_percentage
-        self.fast_kmeans_iters = fast_kmeans_iter
+        self.fast_kmeans_iter = fast_kmeans_iter
         self.k_max = k_max
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
         self.n_jobs = n_jobs
         self.verbose = verbose
+        self._validate_arguments()
+
+    def _validate_arguments(self):
+        if self.distance not in list(dst.KnownMetric):
+            raise ValueError('Unknown distance: %s' % self.distance)
+        if self.gap_trials <= 0:
+            raise ValueError('gap_trials must be greater than 0')
+        if self.distance_percentile < 0 or self.distance_percentile > 100:
+            raise ValueError('distance_percentile must be in range [0, 100]')
+        if self.max_iter <= 0:
+            raise ValueError('max_iter must be greater than 0')
+        if self.minimal_size is not None and self.minimal_size < 0:
+            raise ValueError('minimal_size must be greater or equal to 0')
+        if self.minimal_features_percentage < 0 \
+                or self.minimal_features_percentage > 1:
+            raise ValueError('minimal_features_percentage must be in range'
+                             ' [0, 1]')
+        if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:
+            raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
@@ -220,7 +223,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                 minimal_size=minimal_size,
                 rejection_size=rejection_size,
                 minimal_features_percentage=self.minimal_features_percentage,
-                fast_kmeans_iters=self.fast_kmeans_iters,
+                fast_kmeans_iters=self.fast_kmeans_iter,
                 k_max=self.k_max,
                 normalize_rows=self._needs_normalization(),
                 use_logfilters=self.use_logfilters,
