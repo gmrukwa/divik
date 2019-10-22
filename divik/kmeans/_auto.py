@@ -1,6 +1,5 @@
 from functools import partial
 from multiprocessing import Pool
-import os
 
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
@@ -8,17 +7,12 @@ import tqdm
 
 from divik.kmeans._core import KMeans
 from divik.score import make_picker
+from divik.utils import get_n_jobs
 
 
 def _fit_kmeans(*args, **kwargs):
     data = kwargs.pop('data')
     return KMeans(*args, **kwargs).fit(data)
-
-
-def _processes(n_jobs: int) -> int:
-    cpus = os.cpu_count() or 1
-    processes = ((n_jobs + int(n_jobs <= 0)) % cpus) or cpus
-    return processes
 
 
 class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -168,7 +162,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         method = make_picker(self.method, self.gap)
 
-        processes = _processes(self.n_jobs)
+        processes = get_n_jobs(self.n_jobs)
         if processes == 1:
             self.estimators_ = [fit_kmeans(n_clusters=k) for k in n_clusters]
             self.scores_ = method.score(X, self.estimators_)

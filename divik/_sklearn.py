@@ -1,7 +1,6 @@
 from contextlib import contextmanager
 from functools import partial
 from multiprocessing import Pool
-import os
 from typing import Tuple
 
 import numpy as np
@@ -9,10 +8,12 @@ import pandas as pd
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import tqdm
 
+import divik.divik as dv
 import divik.distance as dst
-import divik.predefined as predefined
+import divik.feature_selection as fs
+import divik.kmeans as km
 import divik.summary as summary
-from divik.utils import normalize_rows, DivikResult
+from divik.utils import normalize_rows, DivikResult, get_n_jobs
 
 
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -90,6 +91,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         each of the GAP index evaluations in parallel and by making predictions
         in parallel.
 
+    random_seed: int, optional, default: 0
+        Seed to initialize the random number generator.
+
     verbose : bool, optional, default: False
         Whether to report the progress of the computations.
 
@@ -162,23 +166,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
                  n_jobs: int = None,
+                 random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
-        if distance not in list(dst.KnownMetric):
-            raise ValueError('Unknown distance: %s' % distance)
-        if gap_trials <= 0:
-            raise ValueError('gap_trials must be greater than 0')
-        if distance_percentile < 0 or distance_percentile > 100:
-            raise ValueError('distance_percentile must be in range [0, 100]')
-        if max_iter <= 0:
-            raise ValueError('max_iter must be greater than 0')
-        if minimal_size is not None and minimal_size < 0:
-            raise ValueError('minimal_size must be greater or equal to 0')
-        if minimal_features_percentage < 0 or minimal_features_percentage > 1:
-            raise ValueError('minimal_features_percentage must be in range'
-                             ' [0, 1]')
-        if fast_kmeans_iter > max_iter or fast_kmeans_iter < 0:
-            raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
-
         self.gap_trials = gap_trials
         self.distance_percentile = distance_percentile
         self.max_iter = max_iter
@@ -187,12 +176,32 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.rejection_size = rejection_size
         self.rejection_percentage = rejection_percentage
         self.minimal_features_percentage = minimal_features_percentage
-        self.fast_kmeans_iters = fast_kmeans_iter
+        self.fast_kmeans_iter = fast_kmeans_iter
         self.k_max = k_max
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
         self.n_jobs = n_jobs
+        self.random_seed = random_seed
         self.verbose = verbose
+        self._validate_arguments()
+
+    def _validate_arguments(self):
+        if self.distance not in list(dst.KnownMetric):
+            raise ValueError('Unknown distance: %s' % self.distance)
+        if self.gap_trials <= 0:
+            raise ValueError('gap_trials must be greater than 0')
+        if self.distance_percentile < 0 or self.distance_percentile > 100:
+            raise ValueError('distance_percentile must be in range [0, 100]')
+        if self.max_iter <= 0:
+            raise ValueError('max_iter must be greater than 0')
+        if self.minimal_size is not None and self.minimal_size < 0:
+            raise ValueError('minimal_size must be greater or equal to 0')
+        if self.minimal_features_percentage < 0 \
+                or self.minimal_features_percentage > 1:
+            raise ValueError('minimal_features_percentage must be in range'
+                             ' [0, 1]')
+        if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:
+            raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
@@ -206,28 +215,19 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         y : Ignored
             not used, present here for API consistency by convention.
         """
+        if np.isnan(X).any():
+            raise ValueError("NaN values are not supported.")
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
-        n_jobs = _get_n_jobs(self.n_jobs)
         rejection_size = self._get_rejection_size(X)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
-            divik = predefined.basic(
-                gap_trials=self.gap_trials,
-                distance_percentile=self.distance_percentile,
-                iters_limit=self.max_iter,
-                distance=self.distance,
-                minimal_size=minimal_size,
-                rejection_size=rejection_size,
-                minimal_features_percentage=self.minimal_features_percentage,
-                fast_kmeans_iters=self.fast_kmeans_iters,
-                k_max=self.k_max,
-                normalize_rows=self._needs_normalization(),
-                use_logfilters=self.use_logfilters,
-                n_jobs=n_jobs,
-                progress_reporter=progress
-            )
-            self.result_ = divik(X)
+            self.result_ = dv.divik(
+                X, fast_kmeans=self._fast_kmeans(),
+                full_kmeans=self._full_kmeans(),
+                feature_selector=self._feature_selector(),
+                progress_reporter=progress, minimal_size=minimal_size,
+                rejection_size=rejection_size)
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
@@ -257,6 +257,36 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         for item in path[:-1]:
             result = result.subregions[item]
         return result.feature_selector.selected_
+
+    def _needs_normalization(self):
+        if self.normalize_rows is None:
+            return self.distance == dst.KnownMetric.correlation.value
+        return self.normalize_rows
+
+    def _fast_kmeans(self):
+        return km.AutoKMeans(
+            max_clusters=2, n_jobs=get_n_jobs(self.n_jobs), method="gap",
+            distance=self.distance, init='percentile',
+            percentile=self.distance_percentile, max_iter=self.max_iter,
+            normalize_rows=self._needs_normalization(),
+            gap={"max_iter": self.fast_kmeans_iter, "seed": self.random_seed,
+                 "trials": self.gap_trials, "correction": True},
+            verbose=self.verbose)
+
+    def _full_kmeans(self):
+        return km.AutoKMeans(
+            max_clusters=self.k_max, min_clusters=2,
+            n_jobs=get_n_jobs(self.n_jobs), method='dunn',
+            distance=self.distance, init='percentile',
+            percentile=self.distance_percentile, max_iter=self.max_iter,
+            normalize_rows=self._needs_normalization(), gap=None,
+            verbose=self.verbose
+        )
+
+    def _feature_selector(self):
+        return fs.HighAbundanceAndVarianceSelector(
+            use_log=self.use_logfilters,
+            min_features_rate=self.minimal_features_percentage)
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
@@ -302,12 +332,6 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             X transformed in the new space.
         """
         return self.fit(X).transform(X)
-
-    def _needs_normalization(self):
-        if self.normalize_rows is None:
-            return self.distance == dst.KnownMetric.correlation.value
-        return self.normalize_rows
-
 
     def transform(self, X):
         """Transform X to a cluster-distance space.
@@ -359,7 +383,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         if self._needs_normalization():
             X = normalize_rows(X)
         distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
-        n_jobs = _get_n_jobs(self.n_jobs)
+        n_jobs = get_n_jobs(self.n_jobs)
         predict = partial(_predict_path, result=self.result_, distance=distance)
         if n_jobs == 1:
             paths = [_predict_path(row, self.result_, distance) for row in X]
@@ -382,13 +406,6 @@ def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
         division = division.subregions[label]
     path = tuple(path)
     return path
-
-
-def _get_n_jobs(n_jobs):
-    n_cpu = os.cpu_count()
-    n_jobs = 1 if n_jobs is None else n_jobs
-    n_jobs = (n_jobs + n_cpu) % n_cpu or n_cpu
-    return n_jobs
 
 
 @contextmanager
