@@ -24,7 +24,6 @@ import tqdm
 
 import divik.distance as dst
 import divik.divik as dv
-import divik.rejection as rj
 import divik.stop as st
 import divik.utils as u
 
@@ -36,7 +35,7 @@ def basic(gap_trials: int = 100,
           iters_limit: int = 100,
           distance: str = None,
           minimal_size: int = 20,
-          rejection_size: int = None,
+          rejection_size: int = 0,
           minimal_features_percentage: float = .01,
           fast_kmeans_iters: int = 10,
           k_max: int = 10,
@@ -81,11 +80,6 @@ def basic(gap_trials: int = 100,
     assert 0 <= minimal_size, minimal_size
     assert 0 <= minimal_features_percentage <= 1, minimal_features_percentage
     assert fast_kmeans_iters > 0, fast_kmeans_iters
-    if rejection_size is None:
-        rejection_size = 0
-    rejections = [
-        partial(rj.reject_if_clusters_smaller_than, size=rejection_size)
-    ]
     divik = partial(dv.divik,
                     fast_kmeans_iters=fast_kmeans_iters,
                     k_max=k_max,
@@ -94,7 +88,7 @@ def basic(gap_trials: int = 100,
                     distance_percentile=distance_percentile,
                     iters_limit=iters_limit,
                     normalize_rows=normalize_rows,
-                    rejection_conditions=rejections,
+                    rejection_size=rejection_size,
                     progress_reporter=progress_reporter,
                     random_seed=random_seed,
                     gap_trials=gap_trials,

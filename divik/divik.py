@@ -28,7 +28,6 @@ import tqdm
 import divik.feature_selection as fs
 import divik.kmeans as km
 from divik.utils import Data, StopCondition, DivikResult
-import divik.rejection as rj
 
 
 def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
@@ -102,7 +101,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    k_max: int, n_jobs: int, distance: str,
                    distance_percentile: float, iters_limit: int,
                    normalize_rows: bool,
-                   rejection_conditions: List[rj.RejectionCondition],
+                   rejection_size: int,
                    report: _Reporter,
                    prefiltering_stop_condition: StopCondition,
                    random_seed: int = 0,
@@ -144,7 +143,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
     centroids = clusterer.cluster_centers_
     quality = clusterer.best_score_
 
-    if any(reject((partition, centroids, quality)) for reject in rejection_conditions):
+    if any(np.unique(partition, return_counts=True)[1]) <= rejection_size:
         report.rejected(subset.shape[0])
         return None
 
@@ -157,7 +156,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
                       distance_percentile=distance_percentile,
                       iters_limit=iters_limit,
                       normalize_rows=normalize_rows,
-                      rejection_conditions=rejection_conditions,
+                      rejection_size=rejection_size,
                       report=report,
                       random_seed=random_seed,
                       gap_trials=gap_trials,
@@ -191,7 +190,7 @@ def divik(data: Data,
           gap_trials: int,
           min_features_percentage: float = .05,
           progress_reporter: tqdm.tqdm = None,
-          rejection_conditions: List[rj.RejectionCondition] = None,
+          rejection_size: int = 0,
           prefiltering_stop_condition: StopCondition = None,
           use_logfilters: bool = False) \
         -> Optional[DivikResult]:
@@ -211,8 +210,6 @@ def divik(data: Data,
     """
     if np.isnan(data).any():
         raise ValueError("NaN values are not supported.")
-    if rejection_conditions is None:
-        rejection_conditions = []
     report = _Reporter(progress_reporter)
     select_all = np.ones(shape=(data.shape[0],), dtype=bool)
     if prefiltering_stop_condition is None:
@@ -227,7 +224,7 @@ def divik(data: Data,
                           distance_percentile=distance_percentile,
                           iters_limit=iters_limit,
                           normalize_rows=normalize_rows,
-                          rejection_conditions=rejection_conditions,
+                          rejection_size=rejection_size,
                           report=report,
                           random_seed=random_seed,
                           gap_trials=gap_trials,

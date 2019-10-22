@@ -23,7 +23,6 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
-import divik.rejection as rj
 import divik.utils as u
 
 
@@ -183,20 +182,18 @@ def statistic(merged, diagnoses, func):
 
 
 def reject_split(tree: Optional[u.DivikResult],
-                 rejection_conditions: List[rj.RejectionCondition]) \
+                 rejection_size: int = 0) \
         -> Optional[u.DivikResult]:
     """Re-apply rejection condition on known result tree."""
     if tree is None:
         logging.debug("Rejecting empty.")
         return None
-    segmentation = (tree.clustering.labels_, tree.clustering.cluster_centers_,
-                    tree.clustering.best_score_)
-    if any(reject(segmentation) for reject in rejection_conditions):
+    counts = np.unique(tree.clustering.labels_, return_counts=True)[1]
+    if any(counts <= rejection_size):
         logging.debug("Rejecting by condition.")
         return None
     allowed_subregions = [
-        reject_split(subregion, rejection_conditions)
-        for subregion in tree.subregions
+        reject_split(subregion, rejection_size) for subregion in tree.subregions
     ]
     merged, _ = _merged_partition(tree.clustering.labels_, allowed_subregions)
     logging.debug("Returning pruned tree.")
