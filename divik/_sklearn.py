@@ -213,6 +213,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                 correction_of_gap=True,
                 normalize_rows=self._needs_normalization(),
                 use_logfilters=self.use_logfilters,
+                n_jobs=n_jobs,
                 pool=pool,
                 progress_reporter=progress
             )
@@ -357,10 +358,7 @@ def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
     division = result
     while division is not None:
         local_X = division.feature_selector.transform(observation)
-        d = distance(local_X, division.centroids)
-        assert d.shape[0] == 1 or d.shape[1] == 1
-        d = d.ravel()
-        label = np.argmin(d.ravel())
+        label = int(division.clustering.predict(local_X))
         path.append(label)
         division = division.subregions[label]
     path = tuple(path)

@@ -34,21 +34,6 @@ import divik.utils as u
 Divik = Callable[[u.Data], Optional[u.DivikResult]]
 
 
-def _dunn_optimized_kmeans(distance: dst.DistanceMetric,
-                           kmeans: km._KMeans,
-                           pool: Pool = None,
-                           k_max: int = 10) -> sc.Optimizer:
-    dunn = partial(sc.dunn, distance=distance)
-    sweep_clusters_number = [
-        sc.ParameterValues('number_of_clusters', list(range(2, k_max + 1)))
-    ]
-    best_kmeans_with_dunn = sc.Optimizer(score=dunn,
-                                         segmentation_method=kmeans,
-                                         parameters=sweep_clusters_number,
-                                         pool=pool)
-    return best_kmeans_with_dunn
-
-
 def basic(gap_trials: int = 100,
           distance_percentile: float = 99.,
           iters_limit: int = 100,
@@ -62,6 +47,7 @@ def basic(gap_trials: int = 100,
           correction_of_gap: bool = True,
           normalize_rows: bool = False,
           use_logfilters: bool = False,
+          n_jobs: int = 1,
           pool: Pool = None,
           progress_reporter: tqdm.tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
@@ -102,14 +88,10 @@ def basic(gap_trials: int = 100,
     assert fast_kmeans_iters > 0, fast_kmeans_iters
     if rejection_percentage is None and rejection_size is None:
         rejection_size = 0
+    metric_name = distance
     distance = dst.ScipyDistance(known_metrics[distance])
     labeling = km.Labeling(distance)
     initialize = km.PercentileInitialization(distance, distance_percentile)
-    kmeans = km._KMeans(labeling=km.Labeling(distance),
-                        initialize=initialize,
-                        number_of_iterations=iters_limit,
-                        normalize_rows=normalize_rows)
-    best_kmeans_with_dunn = _dunn_optimized_kmeans(distance, kmeans, pool, k_max)
     fast_kmeans = partial(km._KMeans(labeling=labeling,
                                      initialize=initialize,
                                      number_of_iterations=fast_kmeans_iters,
@@ -125,7 +107,12 @@ def basic(gap_trials: int = 100,
                 percentage=rejection_percentage)
     ]
     divik = partial(dv.divik,
-                    split=best_kmeans_with_dunn,
+                    k_max=k_max,
+                    n_jobs=n_jobs,
+                    distance=metric_name,
+                    distance_percentile=distance_percentile,
+                    iters_limit=iters_limit,
+                    normalize_rows=normalize_rows,
                     stop_condition=stop_if_split_makes_no_sense,
                     rejection_conditions=rejections,
                     progress_reporter=progress_reporter,

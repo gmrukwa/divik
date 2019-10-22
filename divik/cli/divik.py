@@ -32,7 +32,7 @@ def build_experiment(config, data: np.ndarray) -> typing.Tuple[pred.Divik, tqdm.
 def _make_summary(result: typing.Optional[u.DivikResult]):
     n_clusters = _smr.total_number_of_clusters(result)
     if result is not None:
-        mean_cluster_size = result.partition.shape[0] / float(n_clusters)
+        mean_cluster_size = result.clustering.labels_.shape[0] / float(n_clusters)
     else:
         mean_cluster_size = -1
     return {
@@ -81,7 +81,7 @@ def save(data: u.Data, result: typing.Optional[u.DivikResult],
     if result is not None:
         logging.info("Saving partitions.")
         merged = _make_merged(result)
-        assert merged.shape[0] == result.partition.size
+        assert merged.shape[0] == result.clustering.labels_.size
         _save_merged(destination, merged, xy)
         logging.info("Saving centroids.")
         centroids = pd.DataFrame(data).groupby(merged[:, -1]).mean().values

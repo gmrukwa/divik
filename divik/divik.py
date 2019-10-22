@@ -26,6 +26,7 @@ import numpy as np
 import tqdm
 
 import divik.feature_selection as fs
+import divik.kmeans as km
 from divik.utils import Data, SelfScoringSegmentation, StopCondition, DivikResult
 import divik.rejection as rj
 
@@ -97,7 +98,9 @@ class _Reporter:
 
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def _divik_backend(data: Data, selection: np.ndarray,
-                   split: SelfScoringSegmentation,
+                   k_max: int, n_jobs: int, distance: str,
+                   distance_percentile: float, iters_limit: int,
+                   normalize_rows: bool,
                    stop_condition: StopCondition,
                    rejection_conditions: List[rj.RejectionCondition],
                    report: _Reporter,
@@ -122,13 +125,27 @@ def _divik_backend(data: Data, selection: np.ndarray,
         return None
 
     report.processing(filtered_data)
-    partition, centroids, quality = split(filtered_data)
+    clusterer = km.AutoKMeans(
+        max_clusters=k_max, n_jobs=n_jobs, method='dunn', distance=distance,
+        init='percentile', percentile=distance_percentile, max_iter=iters_limit,
+        normalize_rows=normalize_rows, gap=None, verbose=False
+    ).fit(filtered_data)
+    partition = clusterer.labels_
+    centroids = clusterer.cluster_centers_
+    quality = clusterer.best_score_
+
     if any(reject((partition, centroids, quality)) for reject in rejection_conditions):
         report.rejected(subset.shape[0])
         return None
 
     report.recurring(centroids.shape[0])
-    recurse = partial(_divik_backend, data=data, split=split,
+    recurse = partial(_divik_backend, data=data,
+                      k_max=k_max,
+                      n_jobs=n_jobs,
+                      distance=distance,
+                      distance_percentile=distance_percentile,
+                      iters_limit=iters_limit,
+                      normalize_rows=normalize_rows,
                       stop_condition=stop_condition,
                       rejection_conditions=rejection_conditions,
                       report=report,
@@ -145,16 +162,18 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
     report.assemble()
     return DivikResult(
-        centroids=centroids,
-        quality=quality,
-        partition=partition,
+        clustering=clusterer,
         feature_selector=feature_selector,
         merged=partition,
         subregions=subregions
     )
 
 
-def divik(data: Data, split: SelfScoringSegmentation,
+# TODO: consider how to push the pool without re-creating it.
+def divik(data: Data,
+          k_max: int, n_jobs: int, distance: str,
+          distance_percentile: float, iters_limit: int,
+          normalize_rows: bool,
           stop_condition: StopCondition,
           min_features_percentage: float = .05,
           progress_reporter: tqdm.tqdm = None,
@@ -187,7 +206,12 @@ def divik(data: Data, split: SelfScoringSegmentation,
             return False
     return _divik_backend(data,
                           selection=select_all,
-                          split=split,
+                          k_max=k_max,
+                          n_jobs=n_jobs,
+                          distance=distance,
+                          distance_percentile=distance_percentile,
+                          iters_limit=iters_limit,
+                          normalize_rows=normalize_rows,
                           stop_condition=stop_condition,
                           rejection_conditions=rejection_conditions,
                           report=report,

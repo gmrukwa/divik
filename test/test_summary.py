@@ -1,5 +1,6 @@
 import unittest
 
+from collections import namedtuple
 from functools import partial
 
 import numpy as np
@@ -9,26 +10,37 @@ import divik.rejection as rj
 import divik.summary as sm
 import divik.utils as u
 
+
+DummyClustering = namedtuple(
+    'DummyClustering', ('cluster_centers_', 'best_score_', 'labels_'))
+
+
 DUMMY_RESULT = u.DivikResult(
-    centroids=np.zeros((3, 1)),
-    quality=3.,
-    partition=np.array([0] * 10 + [1] * 5 + [2] * 10, dtype=int),
+    clustering=DummyClustering(
+        cluster_centers_=np.zeros((3, 1)),
+        best_score_=3.,
+        labels_=np.array([0] * 10 + [1] * 5 + [2] * 10, dtype=int)
+    ),
     feature_selector=None,
     merged=np.array([0] * 10 + [1] * 15, dtype=int),
     subregions=[
         None,
         u.DivikResult(
-            centroids=np.zeros((2, 1)),
-            quality=2.,
-            partition=np.array([0] + [1] * 4, dtype=int),
+            clustering=DummyClustering(
+                cluster_centers_=np.zeros((2, 1)),
+                best_score_=2.,
+                labels_=np.array([0] + [1] * 4, dtype=int)
+            ),
             feature_selector=None,
             merged=np.array([0] + [1] * 4, dtype=int),
             subregions=[None, None]
         ),
         u.DivikResult(
-            centroids=np.zeros((3, 1)),
-            quality=2.,
-            partition=np.array([0] * 2 + [1] * 3 + [2] * 5, dtype=int),
+            clustering=DummyClustering(
+                cluster_centers_=np.zeros((3, 1)),
+                best_score_=2.,
+                labels_=np.array([0] * 2 + [1] * 3 + [2] * 5, dtype=int)
+            ),
             feature_selector=None,
             merged=np.array([0] * 2 + [1] * 3 + [2] * 5, dtype=int),
             subregions=[None, None, None]
@@ -60,7 +72,8 @@ class MergeTest(unittest.TestCase):
 class RejectionTest(unittest.TestCase):
     def test_without_rejection_updates_merged_and_nothing_else(self):
         filtered = sm.reject_split(DUMMY_RESULT, [])
-        self.assertEqual(filtered.quality, DUMMY_RESULT.quality)
+        self.assertEqual(filtered.clustering.best_score_,
+                         DUMMY_RESULT.clustering.best_score_)
         self.assertEqual(sm.depth(filtered), sm.depth(DUMMY_RESULT))
         npt.assert_equal(filtered.merged, sm.merged_partition(DUMMY_RESULT))
 

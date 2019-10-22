@@ -18,9 +18,7 @@ FilterName = str
 Filters = Dict[FilterName, BoolFilter]
 Thresholds = Dict[FilterName, float]
 DivikResult = NamedTuple('DivikResult', [
-    ('centroids', Centroids),
-    ('quality', float),
-    ('partition', IntLabels),
+    ('clustering', 'divik.kmeans.AutoKMeans'),
     ('feature_selector', 'divik.feature_selection.HighAbundanceAndVarianceSelector'),
     ('merged', IntLabels),
     ('subregions', List[Optional['DivikResult']]),

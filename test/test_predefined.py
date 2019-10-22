@@ -62,4 +62,4 @@ class TestBasic(DataBoundTestCase):
         self.assertIsNone(self.result.subregions[1])
 
     def test_scores_segmentation(self):
-        self.assertFalse(np.isnan(self.result.quality))
+        self.assertFalse(np.isnan(self.result.clustering.best_score_))

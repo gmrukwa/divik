@@ -48,7 +48,7 @@ def merged_partition(tree: u.DivikResult, levels_limit: int = np.inf,
     """Compute merged segmentation labels."""
     assert tree is not None
     merged, paths =  _merged_partition(
-        tree.partition, tree.subregions, levels_limit)
+        tree.clustering.labels_, tree.subregions, levels_limit)
     if return_paths:
         return merged, paths
     return merged
@@ -70,7 +70,8 @@ def _merged_partition(partition: u.IntLabels,
             known_clusters += 1
         else:
             local_partition, down_paths = _merged_partition(
-                subregion.partition, subregion.subregions, levels_limit-1)
+                subregion.clustering.labels_, subregion.subregions,
+                levels_limit-1)
             result[current_cluster] = local_partition + known_clusters
             for cluster in np.unique(local_partition):
                 paths[cluster + known_clusters] = (
@@ -88,7 +89,9 @@ def _update_graph(tree, size: int, graph: 'networkx.Graph' = None,
     if tree is None:
         return
     for idx, subtree in enumerate(tree.subregions):
-        _update_graph(subtree, size=np.sum(tree.partition == idx), graph=graph,
+        _update_graph(subtree,
+                      size=np.sum(tree.clustering.labels_ == idx),
+                      graph=graph,
                       parent=tree_node)
 
 
@@ -186,7 +189,8 @@ def reject_split(tree: Optional[u.DivikResult],
     if tree is None:
         logging.debug("Rejecting empty.")
         return None
-    segmentation = (tree.partition, tree.centroids, tree.quality)
+    segmentation = (tree.clustering.labels_, tree.clustering.cluster_centers_,
+                    tree.clustering.best_score_)
     if any(reject(segmentation) for reject in rejection_conditions):
         logging.debug("Rejecting by condition.")
         return None
@@ -194,12 +198,10 @@ def reject_split(tree: Optional[u.DivikResult],
         reject_split(subregion, rejection_conditions)
         for subregion in tree.subregions
     ]
-    merged, _ = _merged_partition(tree.partition, allowed_subregions)
+    merged, _ = _merged_partition(tree.clustering.labels_, allowed_subregions)
     logging.debug("Returning pruned tree.")
     return u.DivikResult(
-        centroids=tree.centroids,
-        quality=tree.quality,
-        partition=tree.partition,
+        clustering=tree.clustering,
         feature_selector=tree.feature_selector,
         merged=merged,
         subregions=allowed_subregions
