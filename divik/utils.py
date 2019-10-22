@@ -1,4 +1,4 @@
-from typing import Callable, Tuple, Dict, NamedTuple, List, Optional
+from typing import Callable, Tuple, NamedTuple, List, Optional
 
 import numpy as np
 from skimage.color import label2rgb
@@ -7,16 +7,8 @@ Table = np.ndarray  # 2D matrix
 Data = Table
 Centroids = Table
 IntLabels = np.ndarray
-BoolFilter = np.ndarray
 Quality = float
 SegmentationMethod = Callable[[Data], Tuple[IntLabels, Centroids]]
-ScoredSegmentation = Tuple[IntLabels, Centroids, Quality]
-SelfScoringSegmentation = Callable[[Data], ScoredSegmentation]
-StopCondition = Callable[[Data], bool]
-Filter = Callable[[Data], Tuple[BoolFilter, float]]
-FilterName = str
-Filters = Dict[FilterName, BoolFilter]
-Thresholds = Dict[FilterName, float]
 DivikResult = NamedTuple('DivikResult', [
     ('clustering', 'divik.kmeans.AutoKMeans'),
     ('feature_selector', 'divik.feature_selection.HighAbundanceAndVarianceSelector'),

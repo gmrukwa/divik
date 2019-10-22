@@ -27,7 +27,7 @@ import tqdm
 
 import divik.feature_selection as fs
 import divik.kmeans as km
-from divik.utils import Data, StopCondition, DivikResult
+from divik.utils import Data, DivikResult
 
 
 def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
@@ -104,7 +104,6 @@ def _divik_backend(data: Data, selection: np.ndarray,
                    minimal_size: int,
                    rejection_size: int,
                    report: _Reporter,
-                   prefiltering_stop_condition: StopCondition,
                    random_seed: int = 0,
                    gap_trials: int = 10,
                    min_features_percentage: float = .05,
@@ -162,7 +161,6 @@ def _divik_backend(data: Data, selection: np.ndarray,
                       random_seed=random_seed,
                       gap_trials=gap_trials,
                       min_features_percentage=min_features_percentage,
-                      prefiltering_stop_condition=prefiltering_stop_condition,
                       use_logfilters=use_logfilters)
     del subset
     del filtered_data
@@ -193,7 +191,6 @@ def divik(data: Data,
           progress_reporter: tqdm.tqdm = None,
           minimal_size: int = 2,
           rejection_size: int = 0,
-          prefiltering_stop_condition: StopCondition = None,
           use_logfilters: bool = False) \
         -> Optional[DivikResult]:
     """Deglomerative intelligent segmentation framework.
@@ -229,5 +226,4 @@ def divik(data: Data,
                           random_seed=random_seed,
                           gap_trials=gap_trials,
                           min_features_percentage=min_features_percentage,
-                          prefiltering_stop_condition=prefiltering_stop_condition,
                           use_logfilters=use_logfilters)
