@@ -44,8 +44,7 @@ class TestBasic(DataBoundTestCase):
         super(TestBasic, cls).setUpClass()
         progress_bar = tqdm(desc='divik', total=cls.data.shape[0])
         distance = dst.KnownMetric.euclidean.value
-        divik = pre.basic(gap_trials=10, pool=pool,
-                          correction_of_gap=False,
+        divik = pre.basic(gap_trials=10,
                           progress_reporter=progress_bar,
                           distance=distance,
                           use_logfilters=False)

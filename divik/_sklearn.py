@@ -197,8 +197,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             else self.minimal_size
         n_jobs = _get_n_jobs(self.n_jobs)
 
-        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress, \
-                context_if(n_jobs != 1, Pool, n_jobs) as pool:
+        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
             divik = predefined.basic(
                 gap_trials=self.gap_trials,
                 distance_percentile=self.distance_percentile,
@@ -210,11 +209,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                 minimal_features_percentage=self.minimal_features_percentage,
                 fast_kmeans_iters=self.fast_kmeans_iters,
                 k_max=self.k_max,
-                correction_of_gap=True,
                 normalize_rows=self._needs_normalization(),
                 use_logfilters=self.use_logfilters,
                 n_jobs=n_jobs,
-                pool=pool,
                 progress_reporter=progress
             )
             self.result_ = divik(X)

@@ -25,9 +25,7 @@ import tqdm
 
 import divik.distance as dst
 import divik.divik as dv
-import divik.kmeans as km
 import divik.rejection as rj
-import divik.score as sc
 import divik.stop as st
 import divik.utils as u
 
@@ -44,11 +42,10 @@ def basic(gap_trials: int = 100,
           minimal_features_percentage: float = .01,
           fast_kmeans_iters: int = 10,
           k_max: int = 10,
-          correction_of_gap: bool = True,
+          random_seed: int = 0,
           normalize_rows: bool = False,
           use_logfilters: bool = False,
           n_jobs: int = 1,
-          pool: Pool = None,
           progress_reporter: tqdm.tqdm = None) -> Divik:
     """GAP limited DiviK with percentile initialization.
 
@@ -88,34 +85,22 @@ def basic(gap_trials: int = 100,
     assert fast_kmeans_iters > 0, fast_kmeans_iters
     if rejection_percentage is None and rejection_size is None:
         rejection_size = 0
-    metric_name = distance
-    distance = dst.ScipyDistance(known_metrics[distance])
-    labeling = km.Labeling(distance)
-    initialize = km.PercentileInitialization(distance, distance_percentile)
-    fast_kmeans = partial(km._KMeans(labeling=labeling,
-                                     initialize=initialize,
-                                     number_of_iterations=fast_kmeans_iters,
-                                     normalize_rows=normalize_rows),
-                          number_of_clusters=2)
-    stop_if_split_makes_no_sense = st.Gap(distance=distance,
-                                          split_into_two=fast_kmeans,
-                                          n_trials=gap_trials,
-                                          correction=correction_of_gap,
-                                          pool=pool)
     rejections = [
         partial(rj.reject_if_clusters_smaller_than, size=rejection_size,
                 percentage=rejection_percentage)
     ]
     divik = partial(dv.divik,
+                    fast_kmeans_iters=fast_kmeans_iters,
                     k_max=k_max,
                     n_jobs=n_jobs,
-                    distance=metric_name,
+                    distance=distance,
                     distance_percentile=distance_percentile,
                     iters_limit=iters_limit,
                     normalize_rows=normalize_rows,
-                    stop_condition=stop_if_split_makes_no_sense,
                     rejection_conditions=rejections,
                     progress_reporter=progress_reporter,
+                    random_seed=random_seed,
+                    gap_trials=gap_trials,
                     min_features_percentage=minimal_features_percentage,
                     prefiltering_stop_condition=partial(
                         st.minimal_size, size=max(k_max, minimal_size)),

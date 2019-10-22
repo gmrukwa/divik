@@ -56,7 +56,7 @@ class DivikTest(unittest.TestCase):
     def test_has_decent_performance_on_numerous_clusters(self):
         X, y = make_blobs(n_samples=200, n_features=100, centers=20,
                           random_state=42)
-        model = DiviK(distance=dst.KnownMetric.euclidean.value, n_jobs=-1)
+        model = DiviK(distance=dst.KnownMetric.euclidean.value)
         y_pred = model.fit_predict(X)
         score = adjusted_rand_score(y, y_pred)
         self.assertGreaterEqual(score, 0.95)
@@ -64,7 +64,7 @@ class DivikTest(unittest.TestCase):
     def test_transforms_to_n_clusters_dimensions(self):
         X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
                           random_state=42)
-        model = DiviK(distance=dst.KnownMetric.euclidean.value, n_jobs=-1)
+        model = DiviK(distance=dst.KnownMetric.euclidean.value)
         X_trans = model.fit_transform(X)
         self.assertEqual(X_trans.shape[1], model.n_clusters_)
 
@@ -75,7 +75,7 @@ class DivikTest(unittest.TestCase):
         # dimensionality may differ too much and influence the distance
         # comparison.
         model = DiviK(distance=dst.KnownMetric.euclidean.value,
-                      minimal_features_percentage=1.0, n_jobs=-1)
+                      minimal_features_percentage=1.0)
         y_pred = model.fit_predict(X)
         X_trans = model.transform(X)
         closests = [np.argmin(row) for row in X_trans]

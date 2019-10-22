@@ -179,11 +179,20 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         best = method.select(self.scores_)
 
-        self.n_clusters_ = best + self.min_clusters
-        self.best_score_ = self.scores_[best]
-        self.best_ = self.estimators_[best]
-        self.labels_ = self.best_.labels_
-        self.cluster_centers_ = self.best_.cluster_centers_
+        if best is None:
+            self.fitted_ = False
+            self.n_clusters_ = None
+            self.best_score_ = None
+            self.best_ = None
+            self.labels_ = None
+            self.cluster_centers_ = None
+        else:
+            self.fitted_ = True
+            self.n_clusters_ = best + self.min_clusters
+            self.best_score_ = self.scores_[best]
+            self.best_ = self.estimators_[best]
+            self.labels_ = self.best_.labels_
+            self.cluster_centers_ = self.best_.cluster_centers_
 
         return self
 

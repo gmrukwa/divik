@@ -27,7 +27,7 @@ import tqdm
 
 import divik.feature_selection as fs
 import divik.kmeans as km
-from divik.utils import Data, SelfScoringSegmentation, StopCondition, DivikResult
+from divik.utils import Data, StopCondition, DivikResult
 import divik.rejection as rj
 
 
@@ -98,13 +98,15 @@ class _Reporter:
 
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def _divik_backend(data: Data, selection: np.ndarray,
+                   fast_kmeans_iters: int,
                    k_max: int, n_jobs: int, distance: str,
                    distance_percentile: float, iters_limit: int,
                    normalize_rows: bool,
-                   stop_condition: StopCondition,
                    rejection_conditions: List[rj.RejectionCondition],
                    report: _Reporter,
                    prefiltering_stop_condition: StopCondition,
+                   random_seed: int = 0,
+                   gap_trials: int = 10,
                    min_features_percentage: float = .05,
                    use_logfilters: bool = False) -> Optional[DivikResult]:
     subset = data[selection]
@@ -120,15 +122,23 @@ def _divik_backend(data: Data, selection: np.ndarray,
     report.filtered(filtered_data)
 
     report.stop_check()
-    if stop_condition(filtered_data):
+    fast_kmeans = km.AutoKMeans(
+        max_clusters=2, n_jobs=n_jobs, method="gap", distance=distance,
+        init='percentile', percentile=distance_percentile,
+        max_iter=iters_limit, normalize_rows=normalize_rows,
+        gap={"max_iter": fast_kmeans_iters, "seed": random_seed,
+             "trials": gap_trials, "correction": True},
+        verbose=False).fit(filtered_data)
+    if fast_kmeans.fitted_ and fast_kmeans.n_clusters_ == 1:
         report.finished_for(subset.shape[0])
         return None
 
     report.processing(filtered_data)
     clusterer = km.AutoKMeans(
-        max_clusters=k_max, n_jobs=n_jobs, method='dunn', distance=distance,
-        init='percentile', percentile=distance_percentile, max_iter=iters_limit,
-        normalize_rows=normalize_rows, gap=None, verbose=False
+        max_clusters=k_max, min_clusters=2, n_jobs=n_jobs, method='dunn',
+        distance=distance, init='percentile', percentile=distance_percentile,
+        max_iter=iters_limit, normalize_rows=normalize_rows, gap=None,
+        verbose=False
     ).fit(filtered_data)
     partition = clusterer.labels_
     centroids = clusterer.cluster_centers_
@@ -140,15 +150,17 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
     report.recurring(centroids.shape[0])
     recurse = partial(_divik_backend, data=data,
+                      fast_kmeans_iters=fast_kmeans_iters,
                       k_max=k_max,
                       n_jobs=n_jobs,
                       distance=distance,
                       distance_percentile=distance_percentile,
                       iters_limit=iters_limit,
                       normalize_rows=normalize_rows,
-                      stop_condition=stop_condition,
                       rejection_conditions=rejection_conditions,
                       report=report,
+                      random_seed=random_seed,
+                      gap_trials=gap_trials,
                       min_features_percentage=min_features_percentage,
                       prefiltering_stop_condition=prefiltering_stop_condition,
                       use_logfilters=use_logfilters)
@@ -171,10 +183,12 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
 # TODO: consider how to push the pool without re-creating it.
 def divik(data: Data,
+          fast_kmeans_iters: int,
           k_max: int, n_jobs: int, distance: str,
           distance_percentile: float, iters_limit: int,
           normalize_rows: bool,
-          stop_condition: StopCondition,
+          random_seed: int,
+          gap_trials: int,
           min_features_percentage: float = .05,
           progress_reporter: tqdm.tqdm = None,
           rejection_conditions: List[rj.RejectionCondition] = None,
@@ -206,15 +220,17 @@ def divik(data: Data,
             return False
     return _divik_backend(data,
                           selection=select_all,
+                          fast_kmeans_iters=fast_kmeans_iters,
                           k_max=k_max,
                           n_jobs=n_jobs,
                           distance=distance,
                           distance_percentile=distance_percentile,
                           iters_limit=iters_limit,
                           normalize_rows=normalize_rows,
-                          stop_condition=stop_condition,
                           rejection_conditions=rejection_conditions,
                           report=report,
+                          random_seed=random_seed,
+                          gap_trials=gap_trials,
                           min_features_percentage=min_features_percentage,
                           prefiltering_stop_condition=prefiltering_stop_condition,
                           use_logfilters=use_logfilters)

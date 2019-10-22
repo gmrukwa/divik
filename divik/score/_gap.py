@@ -82,15 +82,22 @@ def gap(data: Data, labels: IntLabels, centroids: Centroids,
     return result
 
 
+class pipe:
+    def __init__(self, *functions):
+        self.functions = functions
+
+    def __call__(self, *args, **kwargs):
+        result = self.functions[0](*args, **kwargs)
+        for func in self.functions[1:]:
+            result = func(result)
+        return result
+
+
 def _fast_kmeans(kmeans: KMeans, max_iter: int = 10) -> SegmentationMethod:
     new = clone(kmeans)
     new.max_iter = max_iter
     get_meta = attrgetter('labels_', 'cluster_centers_')
-
-    def fast_kmeans(data: Data) -> Tuple[IntLabels, Centroids]:
-        return get_meta(new.fit(data))
-
-    return fast_kmeans
+    return pipe(new.fit, get_meta)
 
 
 class GapPicker(Picker):
