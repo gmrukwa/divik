@@ -87,5 +87,5 @@ class HighAbundanceAndVarianceSelectorTest(unittest.TestCase):
     def test_passes_informative(self):
         selector = fs.HighAbundanceAndVarianceSelector().fit(self.data)
         expected = np.logical_or(self.labels == 1, self.labels == 2)
-        TPR = (selector.selected_[expected] == True).mean()
+        TPR = selector.selected_[expected].mean()
         self.assertGreaterEqual(TPR, 0.99)
