@@ -9,8 +9,8 @@ import pandas as pd
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import tqdm
 
+import divik.divik as dv
 import divik.distance as dst
-import divik.predefined as predefined
 import divik.summary as summary
 from divik.utils import normalize_rows, DivikResult
 
@@ -90,6 +90,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         each of the GAP index evaluations in parallel and by making predictions
         in parallel.
 
+    random_seed: int, optional, default: 0
+        Seed to initialize the random number generator.
+
     verbose : bool, optional, default: False
         Whether to report the progress of the computations.
 
@@ -162,6 +165,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
                  n_jobs: int = None,
+                 random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
         self.gap_trials = gap_trials
         self.distance_percentile = distance_percentile
@@ -176,6 +180,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
         self.n_jobs = n_jobs
+        self.random_seed = random_seed
         self.verbose = verbose
         self._validate_arguments()
 
@@ -215,22 +220,17 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         rejection_size = self._get_rejection_size(X)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
-            divik = predefined.basic(
-                gap_trials=self.gap_trials,
+            self.result_ = dv.divik(
+                X, fast_kmeans_iters=self.fast_kmeans_iter, k_max=self.k_max,
+                n_jobs=n_jobs, distance=self.distance,
                 distance_percentile=self.distance_percentile,
                 iters_limit=self.max_iter,
-                distance=self.distance,
-                minimal_size=minimal_size,
-                rejection_size=rejection_size,
-                minimal_features_percentage=self.minimal_features_percentage,
-                fast_kmeans_iters=self.fast_kmeans_iter,
-                k_max=self.k_max,
                 normalize_rows=self._needs_normalization(),
-                use_logfilters=self.use_logfilters,
-                n_jobs=n_jobs,
-                progress_reporter=progress
-            )
-            self.result_ = divik(X)
+                random_seed=self.random_seed, gap_trials=self.gap_trials,
+                min_features_percentage=self.minimal_features_percentage,
+                progress_reporter=progress, minimal_size=minimal_size,
+                rejection_size=rejection_size,
+                use_logfilters=self.use_logfilters)
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
