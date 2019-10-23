@@ -20,6 +20,7 @@ limitations under the License.
 from functools import partial
 import gc
 import logging as lg
+from multiprocessing import Pool
 from typing import List, Optional
 
 import numpy as np
@@ -100,8 +101,8 @@ class _Reporter:
 def _divik_backend(data: Data, selection: np.ndarray,
                    fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
                    feature_selector: fs.HighAbundanceAndVarianceSelector,
-                   minimal_size: int, rejection_size: int, report: _Reporter) \
-        -> Optional[DivikResult]:
+                   minimal_size: int, rejection_size: int, report: _Reporter,
+                   pool: Pool = None) -> Optional[DivikResult]:
     subset = data[selection]
 
     if subset.shape[0] <= max(full_kmeans.max_clusters, minimal_size):
@@ -114,13 +115,13 @@ def _divik_backend(data: Data, selection: np.ndarray,
     report.filtered(filtered_data)
 
     report.stop_check()
-    fast_kmeans = clone(fast_kmeans).fit(filtered_data)
+    fast_kmeans = clone(fast_kmeans).fit(filtered_data, pool=pool)
     if fast_kmeans.fitted_ and fast_kmeans.n_clusters_ == 1:
         report.finished_for(subset.shape[0])
         return None
 
     report.processing(filtered_data)
-    clusterer = clone(full_kmeans).fit(filtered_data)
+    clusterer = clone(full_kmeans).fit(filtered_data, pool=pool)
     partition = clusterer.labels_
     _, counts = np.unique(partition, return_counts=True)
 
@@ -132,7 +133,8 @@ def _divik_backend(data: Data, selection: np.ndarray,
     recurse = partial(
         _divik_backend, data=data, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
-        minimal_size=minimal_size, rejection_size=rejection_size, report=report)
+        minimal_size=minimal_size, rejection_size=rejection_size,
+        report=report, pool=pool)
     del subset
     del filtered_data
     gc.collect()
@@ -146,11 +148,10 @@ def _divik_backend(data: Data, selection: np.ndarray,
                        merged=partition, subregions=subregions)
 
 
-# TODO: consider how to push the pool without re-creating it.
 def divik(data: Data, fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
           feature_selector: fs.HighAbundanceAndVarianceSelector,
           progress_reporter: tqdm.tqdm = None, minimal_size: int = 2,
-          rejection_size: int = 0) -> Optional[DivikResult]:
+          rejection_size: int = 0, pool: Pool = None) -> Optional[DivikResult]:
     if np.isnan(data).any():
         raise ValueError("NaN values are not supported.")
     report = _Reporter(progress_reporter)
@@ -158,4 +159,5 @@ def divik(data: Data, fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
     return _divik_backend(
         data, selection=select_all, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
-        minimal_size=minimal_size, rejection_size=rejection_size, report=report)
+        minimal_size=minimal_size, rejection_size=rejection_size,
+        report=report, pool=pool)

@@ -220,14 +220,16 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         rejection_size = self._get_rejection_size(X)
+        n_jobs = get_n_jobs(self.n_jobs)
 
-        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
+        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress,\
+             context_if(n_jobs != 1, Pool, n_jobs) as pool:
             self.result_ = dv.divik(
                 X, fast_kmeans=self._fast_kmeans(),
                 full_kmeans=self._full_kmeans(),
                 feature_selector=self._feature_selector(),
                 progress_reporter=progress, minimal_size=minimal_size,
-                rejection_size=rejection_size)
+                rejection_size=rejection_size, pool=pool)
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
