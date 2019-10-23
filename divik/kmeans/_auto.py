@@ -139,7 +139,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.gap = gap
         self.verbose = verbose
 
-    def fit(self, X, y=None):
+    def fit(self, X, y=None, pool: Pool=None):
         """Compute k-means clustering and estimate optimal number of clusters.
 
         Parameters
@@ -152,6 +152,9 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         y : Ignored
             not used, present here for API consistency by convention.
+
+        pool: Pool
+            used for parallelization of computations reusing single pool
         """
         fit_kmeans = partial(_fit_kmeans, data=X, distance=self.distance,
                              init=self.init, percentile=self.percentile,
@@ -164,9 +167,12 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         method = make_picker(self.method, self.gap)
 
         processes = get_n_jobs(self.n_jobs)
-        if processes == 1:
+        if processes == 1 or pool is None:
             self.estimators_ = [fit_kmeans(n_clusters=k) for k in n_clusters]
             self.scores_ = method.score(X, self.estimators_)
+        elif pool is not None:
+            self.estimators_ = pool.map(fit_kmeans, n_clusters)
+            self.scores_ = method.score(X, self.estimators_, pool)
         else:
             with Pool(processes) as pool:
                 self.estimators_ = pool.map(fit_kmeans, n_clusters)
