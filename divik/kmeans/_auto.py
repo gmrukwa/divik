@@ -1,5 +1,6 @@
 from functools import partial
 from multiprocessing import Pool
+import sys
 
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
@@ -158,7 +159,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
                              normalize_rows=self.normalize_rows)
         n_clusters = range(self.min_clusters, self.max_clusters + 1)
         if self.verbose:
-            n_clusters = tqdm.tqdm(n_clusters)
+            n_clusters = tqdm.tqdm(n_clusters, leave=False, file=sys.stdout)
 
         method = make_picker(self.method, self.gap)
 

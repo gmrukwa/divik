@@ -6,7 +6,7 @@
   "minimal_size": 16,
   "rejection_size": 2,
   "minimal_features_percentage": 0.01,
-  "fast_kmeans_iters": 10,
+  "fast_kmeans_iter": 10,
   "k_max": 10,
   "normalize_rows": true,
   "use_logfilters": true,
