@@ -40,5 +40,7 @@ def visualize(label, xy, shape=None):
 def get_n_jobs(n_jobs):
     n_cpu = os.cpu_count() or 1
     n_jobs = 1 if n_jobs is None else n_jobs
-    n_jobs = (n_jobs + n_cpu) % n_cpu or n_cpu
+    if n_jobs <= 0:
+        n_jobs = min(n_jobs + 1 + n_cpu, n_cpu)
+    n_jobs = n_jobs or n_cpu
     return n_jobs
