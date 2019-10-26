@@ -39,17 +39,15 @@ def _matlab_paths():
             os.environ['LD_LIBRARY_PATH'] = old_env
             logging.log(logging.DEBUG, os.environ['LD_LIBRARY_PATH'])
 
-
-with _matlab_paths():
-    import MatlabAlgorithms.MsiAlgorithms as msi
-    import matlab
-
 _engine = None
 
 
 def _ensure_engine():
     global _engine
     if _engine is None:
+        with _matlab_paths():
+            import MatlabAlgorithms.MsiAlgorithms as msi
+            import matlab
         _engine = msi.initialize()
     return _engine
 
@@ -73,6 +71,8 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
     """
     with _matlab_paths():
         engine = _ensure_engine()
+        import MatlabAlgorithms.MsiAlgorithms as msi
+        import matlab
         values = matlab.double([[element] for element in values.ravel()])
         try:
             thresholds = engine.fetch_thresholds(values,

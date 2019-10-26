@@ -5,8 +5,8 @@ from collections import namedtuple
 import numpy as np
 import numpy.testing as npt
 
-import divik.summary as sm
-import divik.utils as u
+import divik._summary as sm
+import divik._utils as u
 
 
 DummyClustering = namedtuple(

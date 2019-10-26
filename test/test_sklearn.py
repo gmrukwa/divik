@@ -4,7 +4,7 @@ import numpy.testing as npt
 from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
 
-import divik.distance as dst
+import divik._distance as dst
 
 from divik._sklearn import DiviK
 

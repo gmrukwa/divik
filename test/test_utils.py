@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 import os
 
-import divik.utils as u
+import divik._utils as u
 
 
 @patch.object(os, os.cpu_count.__name__, new=lambda: 4)

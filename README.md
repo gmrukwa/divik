@@ -3,6 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/4cf5d42d0a0076c38445/maintainability)](https://codeclimate.com/github/gmrukwa/divik/maintainability)
 ![](https://github.com/gmrukwa/divik/workflows/.github/workflows/push_images.yml/badge.svg)
 ![](https://github.com/gmrukwa/divik/workflows/.github/workflows/unittest.yml/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/divik/badge/?version=latest)](https://divik.readthedocs.io/en/latest/?badge=latest)
 
 # divik
 
@@ -12,13 +13,13 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 
 > This section will be further developed soon.
 
-1) [`divik`](divik/cli/divik.md) - runs DiviK in one of many scenarios
-2) [`kmeans`](divik/cli/auto_kmeans.md) - runs K-means
+1) [`divik`](divik/_cli/divik.md) - runs DiviK in one of many scenarios
+2) [`kmeans`](divik/_cli/auto_kmeans.md) - runs K-means
 3) `linkage` - runs agglomerative clustering
-4) [`inspect`](divik/cli/inspect.md) - visualizes DiviK result
+4) [`inspect`](divik/_cli/inspect.md) - visualizes DiviK result
 5) `visualize` - generates `.png` file with visualization of clusters for 2D
 maps
-6) [`spectral`](divik/cli/spectral.md) - generates spectral embedding of a
+6) [`spectral`](divik/_cli/spectral.md) - generates spectral embedding of a
 dataset
 
 # Installation
@@ -39,7 +40,7 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:1.12.0
+docker pull gmrukwa/divik:2.1.8
 ```
 
 ## Python package
@@ -74,7 +75,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.0.0
+pip install divik==2.1.8
 ```
 
 # References
