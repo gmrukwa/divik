@@ -4,7 +4,6 @@ dash-core-components==0.42.0
 dash-renderer==0.17.0
 dash-table==3.1.11
 h5py==2.8.0
-matlabruntimeforpython===R2016b
 matplotlib==2.2.2
 networkx==2.1
 numpy==1.15.2
