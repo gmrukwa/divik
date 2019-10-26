@@ -118,6 +118,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         The optimal estimator.
 
     """
+    # TODO: Add example of usage.
     def __init__(self, max_clusters: int, min_clusters: int = 1,
                  n_jobs: int = 1, method: str = 'dunn',
                  distance: str = 'euclidean', init: str = 'percentile',

@@ -151,6 +151,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
            [ 1, ...,  2.]])
 
     """
+    # TODO: Improve docstring so it will work with doctest
 
     def __init__(self,
                  gap_trials: int = 10,

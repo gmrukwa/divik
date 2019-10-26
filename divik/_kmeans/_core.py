@@ -158,6 +158,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         Labels of each point
 
     """
+    # TODO: Add example of usage.
     def __init__(self, n_clusters: int, distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
                  max_iter: int = 100, normalize_rows: bool = False):
