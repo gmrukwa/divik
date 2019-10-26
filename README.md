@@ -3,6 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/4cf5d42d0a0076c38445/maintainability)](https://codeclimate.com/github/gmrukwa/divik/maintainability)
 ![](https://github.com/gmrukwa/divik/workflows/.github/workflows/push_images.yml/badge.svg)
 ![](https://github.com/gmrukwa/divik/workflows/.github/workflows/unittest.yml/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/divik/badge/?version=latest)](https://divik.readthedocs.io/en/latest/?badge=latest)
 
 # divik
 
