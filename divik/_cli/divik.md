@@ -95,6 +95,21 @@ Configuration file should be a JSON file as follows:
 
 ```
 
+#### `gap_trials`
+
+Number of times that reference dataset will be drawn from uniform distribution
+for computation of GAP index. Default `10`.
+
+#### `distance_percentile`
+
+Distance percentile, at which algorithm should look for initial cluster centers.
+Should be between `0.0` and `100.0`.
+
+#### `max_iter`
+
+Limit of number of iterations in k-means algorithm. Default `100`. Rather should
+not be less.
+
 #### `distance`
 
 Distance measure, defaults to `euclidean`. For Mass Spectrometry Imaging
@@ -122,26 +137,6 @@ supported by `scipy` package. All supported values:
 - `sqeuclidean`
 - `yule`
 
-#### `gap_trials`
-
-Number of times that reference dataset will be drawn from uniform distribution
-for computation of GAP index. Default `10`.
-
-#### `fast_kmeans_iters`
-
-Number of k-means iterations performed during GAP trial. Default `10`. In most
-cases this is sufficient.
-
-#### `distance_percentile`
-
-Distance percentile, at which algorithm should look for initial cluster centers.
-Should be between `0.0` and `100.0`.
-
-#### `max_iter`
-
-Limit of number of iterations in k-means algorithm. Default `100`. Rather should
-not be less.
-
 #### `minimal_size`
 
 Size of cluster that will not be further considered for clustering. Could be
@@ -160,6 +155,11 @@ be rejected. Default `2`. To disable this mechanism, just set it to `0`.
 Percent of features that are enforced to be preserved after each filtering.
 Default `0.01` (corresponding to `1%`).
 
+#### `fast_kmeans_iters`
+
+Number of k-means iterations performed during GAP trial. Default `10`. In most
+cases this is sufficient.
+
 #### `k_max`
 
 Maximal number of clusters. Default `10`, since Dunn's index for selection of
@@ -172,6 +172,28 @@ computations.
 Specifies, if rows should be centered and their norm should be set to `1.0`.
 This should be `true` for `correlation` metric, while for others in most cases
 should be `false`.
+
+#### `use_logfilters`
+
+Whether to compute logarithm of feature characteristic instead of the
+characteristic itself. This may improve feature filtering performance, depending
+on the distribution of features, however all the characteristics (mean,
+variance) have to be positive for that - filtering will fail otherwise. This is
+useful for specific cases in biology where the distribution of data may actually
+require this option for any efficient filtering.
+
+#### `n_jobs`
+
+The number of jobs to use for the computation. This works by computing each of
+the GAP index evaluations in parallel and by making predictions in parallel.
+
+#### `random_seed`
+
+Seed to initialize the random number generator.
+
+#### `verbose`
+
+Whether to report the progress of the computations.
 
 ## How to run?
 
