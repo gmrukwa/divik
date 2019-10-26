@@ -1,10 +1,10 @@
 import argparse as agp
 
 from divik._cli._data_io import as_divik_result_path
-from divik.inspect.app import app, divik_result, xy
+from divik._inspect.app import app, divik_result, xy
 # noinspection PyUnresolvedReferences
-import divik.inspect.callback
-from divik.inspect.layout import make_layout
+import divik._inspect.callback
+from divik._inspect.layout import make_layout
 
 
 def parse_args():

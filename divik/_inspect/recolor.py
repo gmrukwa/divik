@@ -1,6 +1,6 @@
 import json
 
-import divik.inspect.color as color
+import divik._inspect.color as color
 
 DEFAULT_COLOR = 128
 

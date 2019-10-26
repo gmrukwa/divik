@@ -1,7 +1,7 @@
 import json
 import os
 
-from divik.inspect.app import divik_result_path
+from divik._inspect.app import divik_result_path
 
 
 def store_path():

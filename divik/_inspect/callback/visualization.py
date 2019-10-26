@@ -2,9 +2,9 @@ import json
 
 from dash.dependencies import Output, Input, State
 
-from divik.inspect import figure as fig
-from divik.inspect.app import app
-from divik.inspect.layout import Fields
+from divik._inspect import figure as fig
+from divik._inspect.app import app
+from divik._inspect.layout import Fields
 
 
 @app.callback(

@@ -4,8 +4,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 
 from divik.summary import depth
-from divik.inspect.app import divik_result, divik_result_path
-from divik.inspect.figure import default_clusters_figure
+from divik._inspect.app import divik_result, divik_result_path
+from divik._inspect.figure import default_clusters_figure
 
 
 def _as_id(name: str) -> str:

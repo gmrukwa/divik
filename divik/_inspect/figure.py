@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from divik.inspect.app import divik_result, xy
-from divik.inspect.color import make_colormap
+from divik._inspect.app import divik_result, xy
+from divik._inspect.color import make_colormap
 from divik.summary import merged_partition
 
 
