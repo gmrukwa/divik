@@ -5,7 +5,7 @@ from multiprocessing import Pool
 import numpy as np
 from typing import Callable, NamedTuple, List, Tuple
 
-from divik.utils import Centroids, IntLabels, Data, Quality, SegmentationMethod
+from divik._utils import Centroids, IntLabels, Data, Quality, SegmentationMethod
 
 Score = Callable[[Data, IntLabels, Centroids], float]
 ParameterValues = NamedTuple('ParameterValues', [

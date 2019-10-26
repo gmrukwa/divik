@@ -3,7 +3,7 @@ from enum import Enum, unique
 import dash_core_components as dcc
 import dash_html_components as html
 
-from divik.summary import depth
+from divik._summary import depth
 from divik._inspect.app import divik_result, divik_result_path
 from divik._inspect.figure import default_clusters_figure
 

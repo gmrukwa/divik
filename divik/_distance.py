@@ -1,6 +1,6 @@
 """Common interface for distance metric.
 
-distance.py
+_distance.py
 
 Copyright 2019 Grzegorz Mrukwa
 

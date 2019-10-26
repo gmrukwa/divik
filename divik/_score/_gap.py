@@ -9,11 +9,11 @@ import numpy as np
 import pandas as pd
 from sklearn.base import clone
 
-from divik.distance import DistanceMetric, make_distance
+from divik._distance import DistanceMetric, make_distance
 from divik._score._picker import Picker
-from divik.utils import Centroids, IntLabels, Data, SegmentationMethod, \
+from divik._utils import Centroids, IntLabels, Data, SegmentationMethod, \
     normalize_rows
-from divik.seeding import seeded
+from divik._seeding import seeded
 
 
 KMeans = 'divik.KMeans'

@@ -9,7 +9,7 @@ import h5py
 import numpy as np
 from scipy import io as scio
 
-import divik.utils as u
+import divik._utils as u
 
 
 def _load_mat_with(path: str, backend=scio.loadmat, ignore='__') -> np.ndarray:

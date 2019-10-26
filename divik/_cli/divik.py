@@ -10,9 +10,9 @@ import skimage.io as sio
 
 from divik._cli._data_io import DIVIK_RESULT_FNAME
 from divik import DiviK
-import divik.summary as _smr
+import divik._summary as _smr
 import divik._cli._utils as sc
-import divik.utils as u
+import divik._utils as u
 
 
 def _make_summary(result: typing.Optional[u.DivikResult]):

@@ -8,7 +8,7 @@ import tqdm
 
 from divik._kmeans._core import KMeans
 from divik._score import make_picker
-from divik.utils import get_n_jobs
+from divik._utils import get_n_jobs
 
 
 def _fit_kmeans(*args, **kwargs):

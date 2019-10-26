@@ -2,8 +2,8 @@ from abc import ABCMeta, abstractmethod
 
 import numpy as np
 
-from divik import distance as dist
-from divik.utils import Centroids, Data
+from divik import _distance as dist
+from divik._utils import Centroids, Data
 
 
 class Initialization(object, metaclass=ABCMeta):

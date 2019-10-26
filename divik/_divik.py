@@ -1,6 +1,6 @@
 """DiviK algorithm implementation.
 
-divik.py
+_divik.py
 
 Copyright 2019 Grzegorz Mrukwa
 
@@ -27,9 +27,9 @@ import numpy as np
 from sklearn.base import clone
 import tqdm
 
-import divik.feature_selection as fs
+import divik._feature_selection as fs
 import divik._kmeans as km
-from divik.utils import Data, DivikResult
+from divik._utils import Data, DivikResult
 
 
 def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,

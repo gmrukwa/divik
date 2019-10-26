@@ -5,7 +5,7 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 
-from divik.utils import Data
+from divik._utils import Data
 
 KMeans = 'divik.KMeans'
 

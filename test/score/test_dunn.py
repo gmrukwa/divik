@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 import divik._score
-from divik.distance import ScipyDistance, KnownMetric
+from divik._distance import ScipyDistance, KnownMetric
 
 
 class TestDunn(unittest.TestCase):

@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import numpy.testing as npt
 
-import divik.divik as dv
+import divik._divik as dv
 
 
 def returns(value):

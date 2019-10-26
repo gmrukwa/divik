@@ -12,7 +12,7 @@ import skimage.io as sio
 import divik._kmeans as km
 import divik._score
 import divik._cli._utils as scr
-import divik.utils as u
+import divik._utils as u
 
 
 Segmentations = List[Tuple[u.IntLabels, u.Centroids]]

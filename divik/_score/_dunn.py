@@ -5,9 +5,9 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 
-from divik.distance import DistanceMetric, make_distance
+from divik._distance import DistanceMetric, make_distance
 from divik._score._picker import Picker
-from divik.utils import Centroids, IntLabels, Data
+from divik._utils import Centroids, IntLabels, Data
 
 
 def dunn(data: Data, labels: IntLabels, centroids: Centroids,

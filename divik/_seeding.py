@@ -1,6 +1,6 @@
 """Convenient control over seeding scopes.
 
-seeding.py
+_seeding.py
 
 Copyright 2019 Grzegorz Mrukwa
 

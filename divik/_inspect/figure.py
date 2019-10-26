@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from divik._inspect.app import divik_result, xy
 from divik._inspect.color import make_colormap
-from divik.summary import merged_partition
+from divik._summary import merged_partition
 
 
 _DEFAULT_CLUSTERS_FIGURE = {

@@ -4,13 +4,13 @@ import numpy as np
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from divik import distance as dist
-from divik.distance import make_distance
+from divik import _distance as dist
+from divik._distance import make_distance
 from divik._kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
     PercentileInitialization
-from divik.utils import normalize_rows, Centroids, IntLabels, Data, SegmentationMethod
+from divik._utils import normalize_rows, Centroids, IntLabels, Data, SegmentationMethod
 
 
 class Labeling(object):

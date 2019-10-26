@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 
-from divik.summary import merged_partition
+from divik._summary import merged_partition
 from divik._inspect.app import divik_result
 
 

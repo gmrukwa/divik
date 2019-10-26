@@ -1,6 +1,6 @@
 """Summarizing functions for DiviK result.
 
-summary.py
+_summary.py
 
 Copyright 2019 Grzegorz Mrukwa
 
@@ -21,9 +21,8 @@ import logging
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-import pandas as pd
 
-import divik.utils as u
+import divik._utils as u
 
 
 def depth(tree, children_collection_name='subregions'):
@@ -145,40 +144,6 @@ def plot(tree, with_size=False):
     nx.draw_networkx(**arguments)
     import matplotlib.pyplot as plt
     plt.axis('off')
-
-
-def dice(first, second):
-    """Dice coefficient of similarity."""
-    numerator = 2. * np.sum(np.logical_and(first, second))
-    denominator = np.sum(first) + np.sum(second)
-    return numerator / denominator
-
-
-def positive_predictive_value(first, second):
-    """PPV coefficient."""
-    true_positive = np.logical_and(first, second).sum()
-    false_positive = np.logical_and(first, ~second).sum()
-    return float(true_positive) / (true_positive + false_positive)
-
-
-def true_positive_rate(first, second):
-    """TPR coefficient."""
-    true_positive = np.logical_and(first, second).sum()
-    false_negative = np.logical_and(~first, second).sum()
-    return float(true_positive) / (true_positive + false_negative)
-
-
-def statistic(merged, diagnoses, func):
-    """Compute statistic w.r.t. known classes."""
-    clusters = np.unique(merged)
-    diagnosis_types = np.unique(diagnoses)
-    return pd.DataFrame({
-        diagnosis: [
-            func(merged == cluster, diagnoses == diagnosis)
-            for cluster in clusters
-        ]
-        for diagnosis in diagnosis_types
-    })
 
 
 def reject_split(tree: Optional[u.DivikResult],

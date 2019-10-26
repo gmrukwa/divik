@@ -5,8 +5,8 @@ from sklearn.base import BaseEstimator
 from sklearn.manifold import SpectralEmbedding
 from sklearn.utils.validation import check_is_fitted
 
-from divik.distance import DistanceMetric, make_distance
-from divik.utils import Data
+from divik._distance import DistanceMetric, make_distance
+from divik._utils import Data
 
 
 def locally_adjusted_affinity(d: DistanceMetric, X: Data, neighbors: int = 7) \

@@ -1,6 +1,6 @@
 """Methods of data-driven feature selection.
 
-feature_selection.py
+_feature_selection.py
 
 Copyright 2019 Grzegorz Mrukwa
 
