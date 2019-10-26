@@ -5,7 +5,7 @@ from typing import List
 
 import numpy as np
 
-import divik.score
+import divik._score
 
 
 def simulate_values(values: List):
@@ -21,10 +21,10 @@ class TestOptimizer(unittest.TestCase):
         dummy_scores = [1, 3, 2]
         self.score = simulate_values(dummy_scores)
         self.segmentation_method = use(lambda data, k: (data, k))
-        self.parameters = [divik.score.ParameterValues(name='k',
-                                                       values=[4, 5, 6])]
+        self.parameters = [divik._score.ParameterValues(name='k',
+                                                        values=[4, 5, 6])]
         self.best_parameter_value = 5
-        self.optimizer = divik.score.Optimizer(
+        self.optimizer = divik._score.Optimizer(
             self.score, self.segmentation_method, self.parameters)
         self.data = np.array([[1], [2], [3]])
 

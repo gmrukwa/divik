@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from divik.distance import DistanceMetric, make_distance
-from divik.score._picker import Picker
+from divik._score._picker import Picker
 from divik.utils import Centroids, IntLabels, Data
 
 

@@ -7,7 +7,7 @@ import pandas as pd
 
 import divik.distance as dst
 import divik._kmeans as km
-import divik.score as sc
+import divik._score as sc
 
 
 class TestGap(unittest.TestCase):

@@ -10,7 +10,7 @@ import pandas as pd
 from sklearn.base import clone
 
 from divik.distance import DistanceMetric, make_distance
-from divik.score._picker import Picker
+from divik._score._picker import Picker
 from divik.utils import Centroids, IntLabels, Data, SegmentationMethod, \
     normalize_rows
 from divik.seeding import seeded
