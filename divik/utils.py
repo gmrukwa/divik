@@ -11,7 +11,7 @@ IntLabels = np.ndarray
 Quality = float
 SegmentationMethod = Callable[[Data], Tuple[IntLabels, Centroids]]
 DivikResult = NamedTuple('DivikResult', [
-    ('clustering', 'divik.kmeans.AutoKMeans'),
+    ('clustering', 'divik.AutoKMeans'),
     ('feature_selector', 'divik.feature_selection.HighAbundanceAndVarianceSelector'),
     ('merged', IntLabels),
     ('subregions', List[Optional['DivikResult']]),

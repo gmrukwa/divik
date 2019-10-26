@@ -25,7 +25,7 @@ def dunn(data: Data, labels: IntLabels, centroids: Centroids,
     return score
 
 
-KMeans = 'divik.kmeans._core.KMeans'
+KMeans = 'divik.KMeans'
 
 
 def _dunn(kmeans: KMeans, data: Data) -> float:

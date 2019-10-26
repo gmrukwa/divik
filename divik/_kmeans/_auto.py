@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import tqdm
 
-from divik.kmeans._core import KMeans
+from divik._kmeans._core import KMeans
 from divik.score import make_picker
 from divik.utils import get_n_jobs
 

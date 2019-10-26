@@ -16,7 +16,7 @@ from divik.utils import Centroids, IntLabels, Data, SegmentationMethod, \
 from divik.seeding import seeded
 
 
-KMeans = 'divik.kmeans._core.KMeans'
+KMeans = 'divik.KMeans'
 
 
 def _dispersion(data: Data, labels: IntLabels, centroids: Centroids,

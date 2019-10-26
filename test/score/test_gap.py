@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 import divik.distance as dst
-import divik.kmeans as km
+import divik._kmeans as km
 import divik.score as sc
 
 

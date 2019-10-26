@@ -7,7 +7,7 @@ import pandas as pd
 
 from divik.utils import Data
 
-KMeans = 'divik.kmeans._core.KMeans'
+KMeans = 'divik.KMeans'
 
 
 class Picker(metaclass=ABCMeta):

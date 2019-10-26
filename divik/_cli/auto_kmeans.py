@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import skimage.io as sio
 
-import divik.kmeans as km
+import divik._kmeans as km
 import divik.score
 import divik._cli._utils as scr
 import divik.utils as u
