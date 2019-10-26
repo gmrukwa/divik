@@ -2,7 +2,7 @@
 test_distance.py
 Tests distance module.
 
-Copyright 2018 Spectre Team
+Copyright 2019 Grzegorz Mrukwa
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-import spdivik.distance as dist
+import divik._distance as dist
 
 
 class IntradistanceCall(NotImplementedError):

@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-import spdivik._matlab_legacy as ml
+import divik._matlab_legacy as ml
 
 
 class TestFindThresholds(unittest.TestCase):

@@ -1,6 +1,3 @@
-# Quilt
-quilt-config/
-
 # PyCharm
 .idea/
 
@@ -105,3 +102,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# local tests
+data.csv
+xy.csv
+result

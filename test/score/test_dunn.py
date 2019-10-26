@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-import spdivik.score
-from spdivik.distance import ScipyDistance, KnownMetric
+import divik._score
+from divik._distance import ScipyDistance, KnownMetric
 
 
 class TestDunn(unittest.TestCase):
@@ -12,5 +12,5 @@ class TestDunn(unittest.TestCase):
         centroids = np.array([[2], [5]])
         labels = np.array([1, 1, 2, 2], dtype=int)
         distance = ScipyDistance(KnownMetric.euclidean)
-        dunn = spdivik.score.dunn(data, labels, centroids, distance)
+        dunn = divik._score.dunn(data, labels, centroids, distance)
         self.assertAlmostEqual(dunn, 3.)

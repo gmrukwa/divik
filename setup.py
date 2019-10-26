@@ -1,18 +1,23 @@
 """A setuptools based setup module for DiviK algorithm."""
 
 from setuptools import setup, find_packages
-from spdivik import __version__
+from divik import __version__
+
+with open('README.md') as infile:
+    readme = infile.read()
 
 setup(
-    name='spectre-divik',
+    name='divik',
     version=__version__,
     description='Divisive iK-means algorithm implementation',
-    url='https://github.com/spectre-team/spectre-divik',
+    long_description=readme,
+    long_description_content_type="text/markdown",
+    url='https://github.com/gmrukwa/divik',
     author='Grzegorz Mrukwa',
-    author_email='Grzegorz.Mrukwa@polsl.pl',
+    author_email='g.mrukwa@gmail.com',
     classifiers=[
         # based on https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
@@ -26,12 +31,12 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'divik=spdivik.__main__:main',
-            'inspect=spdivik.inspect.__main__:main',
-            'kmeans=spdivik.kmeans.__main__:main',
-            'linkage=spdivik._linkage:main',
-            'spectral=spdivik.spectral:main',
-            'visualize=spdivik.visualize:main'
+            'divik=divik._cli.divik:main',
+            'inspect=divik._cli.inspect:main',
+            'kmeans=divik._cli.auto_kmeans:main',
+            'linkage=divik._cli.linkage:main',
+            'spectral=divik._cli.spectral:main',
+            'visualize=divik._cli.visualize:main'
         ],
     },
     packages=find_packages(exclude=['test']),
@@ -41,26 +46,16 @@ setup(
         'dash-html-components==0.13.4',
         'dash-core-components==0.42.0',
         'dash-table==3.1.11',
-        'functional-helpers',
         'h5py>=2.8.0',
         'numpy>=0.12.1',
         'pandas>=0.20.3',
+        'pyamg',
         'scipy>=0.19.1',
         'scikit-image>=0.14.1',
         'scikit-learn>=0.19.1',
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
-    extras_require={
-        'all': [
-            'matlabruntimeforpython===R2016b',
-            'pyamg',
-            'quilt>=2.9.12',
-        ],
-        'quilt_packages': ['quilt>=2.9.12'],
-        'divik': ['matlabruntimeforpython===R2016b'],
-        'spectral': ['pyamg']
-    },
     python_requires='>=3.4,<3.6',
     package_data={
     }
