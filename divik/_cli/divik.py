@@ -8,10 +8,10 @@ import numpy as np
 import pandas as pd
 import skimage.io as sio
 
-from divik.cli._data_io import DIVIK_RESULT_FNAME
+from divik._cli._data_io import DIVIK_RESULT_FNAME
 from divik import DiviK
 import divik.summary as _smr
-import divik.cli._utils as sc
+import divik._cli._utils as sc
 import divik.utils as u
 
 

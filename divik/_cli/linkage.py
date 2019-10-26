@@ -11,7 +11,7 @@ import pandas as pd
 import scipy.cluster.hierarchy as hcl
 import scipy.io as sio
 from skimage.io import imsave
-import divik.cli._utils as scr
+import divik._cli._utils as scr
 import divik.utils as u
 
 

@@ -31,12 +31,12 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'divik=divik.cli.divik:main',
-            'inspect=divik.cli.inspect:main',
-            'kmeans=divik.cli.auto_kmeans:main',
-            'linkage=divik.cli.linkage:main',
-            'spectral=divik.cli.spectral:main',
-            'visualize=divik.cli.visualize:main'
+            'divik=divik._cli.divik:main',
+            'inspect=divik._cli.inspect:main',
+            'kmeans=divik._cli.auto_kmeans:main',
+            'linkage=divik._cli.linkage:main',
+            'spectral=divik._cli.spectral:main',
+            'visualize=divik._cli.visualize:main'
         ],
     },
     packages=find_packages(exclude=['test']),

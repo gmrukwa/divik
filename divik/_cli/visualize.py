@@ -2,7 +2,7 @@ import argparse as agp
 
 from skimage.io import imsave
 
-from divik.cli._data_io import load_data
+from divik._cli._data_io import load_data
 from divik.utils import visualize
 
 

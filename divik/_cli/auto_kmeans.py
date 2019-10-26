@@ -11,7 +11,7 @@ import skimage.io as sio
 
 import divik.kmeans as km
 import divik.score
-import divik.cli._utils as scr
+import divik._cli._utils as scr
 import divik.utils as u
 
 
