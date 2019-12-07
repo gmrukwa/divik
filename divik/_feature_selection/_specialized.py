@@ -64,7 +64,6 @@ class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
     array([[1 1 1 1 1 ...2 2 2]])
 
     """
-    # TODO: Improve docstring so it will work with doctest
     def __init__(self, use_log: bool = False, min_features: int = 1,
                  min_features_rate: float = 0., max_components: int = 10):
         self.use_log = use_log
