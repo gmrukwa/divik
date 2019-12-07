@@ -7,6 +7,7 @@ from ._feature_selection import GMMSelector, HighAbundanceAndVarianceSelector
 from ._summary import depth, plot, reject_split
 
 __all__ = [
+    "__version__",
     "seeded",
     "DiviK",
     "AutoKMeans", "KMeans",
