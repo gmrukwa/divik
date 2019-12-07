@@ -1,11 +1,11 @@
 import numpy as np
 from sklearn.base import BaseEstimator
-from sklearn.feature_selection.base import SelectorMixin
 
 import divik._matlab_legacy as ml
+from ._stat_selector_mixin import StatSelectorMixin
 
 
-class GMMSelector(BaseEstimator, SelectorMixin):
+class GMMSelector(BaseEstimator, StatSelectorMixin):
     """Feature selector that removes low- or high- mean or variance features
 
     Gaussian Mixture Modeling is applied to the features' characteristics
@@ -82,8 +82,6 @@ class GMMSelector(BaseEstimator, SelectorMixin):
     array([[ 0.49671415 -0.1382643  ... -0.29169375]])
     >>> fs.GMMSelector('mean', n_discard=-1).fit_transform(data)
     array([[10.32408397  9.61491772 ... 15.75193303]])
-
-
     """
     def __init__(self, stat: str, use_log: bool = False,
                  n_candidates: int = None, min_features: int = 1,
@@ -98,34 +96,6 @@ class GMMSelector(BaseEstimator, SelectorMixin):
         self.min_features_rate = min_features_rate
         self.preserve_high = preserve_high
         self.max_components = max_components
-
-    def _to_characteristics(self, X):
-        """Extract & normalize characteristics from data"""
-        if self.stat == 'mean':
-            vals = np.mean(X, axis=0)
-        elif self.stat == 'var':
-            vals = np.var(X, axis=0)
-        else:
-            raise ValueError('stat must be one of {"mean", "var"}')
-
-        if self.use_log:
-            if np.any(vals < 0):
-                raise ValueError("Feature characteristic cannot be negative "
-                                 "with log filtering")
-            vals = np.log(vals)
-
-        if not self.preserve_high:
-            vals = -vals
-
-        return vals
-
-    def _to_raw(self, threshold):
-        """Convert threshold to the feature characteristic space"""
-        if not self.preserve_high:
-            threshold = -threshold
-        if self.use_log:
-            threshold = np.exp(threshold)
-        return threshold
 
     def fit(self, X, y=None):
         """Learn data-driven feature thresholds from X.
