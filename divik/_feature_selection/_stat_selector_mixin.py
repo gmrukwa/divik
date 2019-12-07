@@ -13,7 +13,7 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
     `_get_support_mask`.
 
     Additionally, provides a `_to_characteristics` and `_to_raw` implementations
-    given `stat`, `use_log` and optionally `preserve_high`.
+    given `stat`, optionally `use_log` and `preserve_high`.
     """
     def _to_characteristics(self, X):
         """Extract & normalize characteristics from data"""
@@ -24,7 +24,7 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
         else:
             raise ValueError('stat must be one of {"mean", "var"}')
 
-        if self.use_log:
+        if hasattr(self, 'use_log') and self.use_log:
             if np.any(vals < 0):
                 raise ValueError("Feature characteristic cannot be negative "
                                  "with log filtering")
@@ -39,6 +39,6 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
         """Convert threshold to the feature characteristic space"""
         if hasattr(self, 'preserve_high') and not self.preserve_high:
             threshold = -threshold
-        if self.use_log:
+        if hasattr(self, 'use_log') and self.use_log:
             threshold = np.exp(threshold)
         return threshold
