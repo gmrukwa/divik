@@ -285,12 +285,12 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         fast_kmeans = self._fast_kmeans()
         full_kmeans = self._full_kmeans()
         warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
-        report = dv._Reporter(progress, warn_const=warn_const)
+        report = dv.DivikReporter(progress, warn_const=warn_const)
         select_all = np.ones(shape=(X.shape[0],), dtype=bool)
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         rejection_size = self._get_rejection_size(X)
-        return dv._divik_backend(
+        return dv.divik(
             X, selection=select_all, fast_kmeans=fast_kmeans,
             full_kmeans=full_kmeans, feature_selector=self._feature_selector(),
             minimal_size=minimal_size, rejection_size=rejection_size,

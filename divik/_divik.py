@@ -44,9 +44,9 @@ def _constant_rows(matrix: np.ndarray) -> List[int]:
     return np.where(is_constant)[0]
 
 
-class _Reporter:
+class DivikReporter:
     def __init__(self, progress_reporter: tqdm.tqdm = None,
-                 warn_const: bool=True):
+                 warn_const: bool = True):
         self.progress_reporter = progress_reporter
         self.paths_open = 1
         self.warn_const = warn_const
@@ -99,11 +99,11 @@ class _Reporter:
 
 
 # @gmrukwa: I could not find more readable solution than recursion for now.
-def _divik_backend(data: Data, selection: np.ndarray,
-                   fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
-                   feature_selector: fs.StatSelectorMixin,
-                   minimal_size: int, rejection_size: int, report: _Reporter,
-                   pool: Pool = None) -> Optional[DivikResult]:
+def divik(data: Data, selection: np.ndarray,
+          fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
+          feature_selector: fs.StatSelectorMixin,
+          minimal_size: int, rejection_size: int, report: DivikReporter,
+          pool: Pool = None) -> Optional[DivikResult]:
     subset = data[selection]
 
     if subset.shape[0] <= max(full_kmeans.max_clusters, minimal_size):
@@ -132,7 +132,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
     report.recurring(len(counts))
     recurse = partial(
-        _divik_backend, data=data, fast_kmeans=fast_kmeans,
+        divik, data=data, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
         minimal_size=minimal_size, rejection_size=rejection_size,
         report=report, pool=pool)
