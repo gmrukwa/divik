@@ -7,6 +7,7 @@ import platform
 
 import numpy as np
 
+# noinspection SpellCheckingInspection
 _MATLAB_SEARCH_PATHS = \
     "/usr/local/MATLAB/MATLAB_Runtime/v91/runtime/glnxa64:" + \
     "/usr/local/MATLAB/MATLAB_Runtime/v91/bin/glnxa64:" + \
@@ -22,22 +23,27 @@ if _local_system == 'Windows':
     os.environ['PATH'] = os.environ['PATH'].lower()
 
 
+_logger = logging.getLogger(__name__)
+
+
 @contextmanager
 def _matlab_paths():
     if _local_system == 'Linux':
-        logging.log(logging.DEBUG, 'Modifying LD_LIBRARY_PATH.')
+        _logger.log(logging.INFO, 'Modifying LD_LIBRARY_PATH.')
         old_env = os.environ.get('LD_LIBRARY_PATH', '')
         os.environ['LD_LIBRARY_PATH'] = _MATLAB_SEARCH_PATHS + old_env
-        logging.log(logging.DEBUG, os.environ['LD_LIBRARY_PATH'])
+        _logger.log(logging.INFO, os.environ['LD_LIBRARY_PATH'])
     elif _local_system == 'Darwin':
         raise NotImplementedError('OSX hosts are not supported.')
     try:
         yield
     finally:
         if _local_system == 'Linux':
-            logging.log(logging.DEBUG, 'Restoring LD_LIBRARY_PATH.')
+            _logger.log(logging.INFO, 'Restoring LD_LIBRARY_PATH.')
+            # noinspection PyUnboundLocalVariable
             os.environ['LD_LIBRARY_PATH'] = old_env
-            logging.log(logging.DEBUG, os.environ['LD_LIBRARY_PATH'])
+            _logger.log(logging.INFO, os.environ['LD_LIBRARY_PATH'])
+
 
 _engine = None
 
@@ -46,9 +52,10 @@ def _ensure_engine():
     global _engine
     if _engine is None:
         with _matlab_paths():
-            import MatlabAlgorithms.MsiAlgorithms as msi
+            import MatlabAlgorithms.MsiAlgorithms
+            # noinspection PyPackageRequirements
             import matlab
-        _engine = msi.initialize()
+        _engine = MatlabAlgorithms.MsiAlgorithms.initialize()
     return _engine
 
 
@@ -71,7 +78,9 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
     """
     with _matlab_paths():
         engine = _ensure_engine()
-        import MatlabAlgorithms.MsiAlgorithms as msi
+        # noinspection PyUnresolvedReferences
+        import MatlabAlgorithms.MsiAlgorithms
+        # noinspection PyPackageRequirements
         import matlab
         values = matlab.double([[element] for element in values.ravel()])
         try:

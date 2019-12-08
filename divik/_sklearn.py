@@ -151,8 +151,6 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
            [ 1, ...,  2.]])
 
     """
-    # TODO: Improve docstring so it will work with doctest
-
     def __init__(self,
                  gap_trials: int = 10,
                  distance_percentile: float = 99.,
@@ -224,7 +222,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         n_jobs = get_n_jobs(self.n_jobs)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress,\
-             context_if(n_jobs != 1, Pool, n_jobs) as pool:
+                context_if(n_jobs != 1, Pool, n_jobs) as pool:
             self.result_ = dv.divik(
                 X, fast_kmeans=self._fast_kmeans(),
                 full_kmeans=self._full_kmeans(),

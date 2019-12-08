@@ -33,6 +33,7 @@ numpy==1.15.2
 packaging==19.0
 pandas==0.20.3
 pathlib2==2.3.3
+patsy==0.5.1
 Pillow==5.4.1
 plotly==3.6.0
 pluggy==0.8.1
@@ -53,6 +54,7 @@ scikit-image==0.14.1
 scikit-learn==0.19.1
 scipy==1.1.0
 six==1.12.0
+statsmodels==0.10.2
 toolz==0.9.0
 tqdm==4.11.2
 traitlets==4.3.2
