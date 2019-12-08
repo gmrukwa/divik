@@ -12,7 +12,7 @@ Quality = float
 SegmentationMethod = Callable[[Data], Tuple[IntLabels, Centroids]]
 DivikResult = NamedTuple('DivikResult', [
     ('clustering', 'divik.AutoKMeans'),
-    ('feature_selector', 'divik.feature_selection.HighAbundanceAndVarianceSelector'),
+    ('feature_selector', 'divik._feature_selection.StatSelectorMixin'),
     ('merged', IntLabels),
     ('subregions', List[Optional['DivikResult']]),
 ])
