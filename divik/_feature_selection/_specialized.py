@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.feature_selection.base import SelectorMixin
 from ._gmm_selector import GMMSelector
+from ._outlier import OutlierSelector
 
 
 class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
@@ -103,6 +104,54 @@ class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
             min_features=min_features, preserve_high=True,
             max_components=self.max_components
         ).fit(filtered)
+        self.selected_[self.selected_] = self.variance_selector_.selected_
+
+        return self
+
+    def _get_support_mask(self):
+        """
+        Get the boolean mask indicating which features are selected
+
+        Returns
+        -------
+        support : boolean array of shape [# input features]
+            An element is True iff its corresponding feature is selected for
+            retention.
+        """
+        return self.selected_
+
+
+# noinspection PyAttributeOutsideInit
+class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
+    def __init__(self, use_log: bool = False, keep_outliers: bool = False):
+        self.use_log = use_log
+        self.keep_outliers = keep_outliers
+
+    def fit(self, X, y=None):
+        """Learn data-driven feature thresholds from X.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            Sample vectors from which to compute feature characteristic.
+
+        y : any
+            Ignored. This parameter exists only for compatibility with
+            sklearn.pipeline.Pipeline.
+
+        Returns
+        -------
+        self
+        """
+        self.abundance_selector_ = OutlierSelector(
+            stat='mean', use_log=self.use_log,
+            keep_outliers=self.keep_outliers).fit(X)
+        filtered = self.abundance_selector_.transform(X)
+        self.selected_ = self.abundance_selector_.selected_.copy()
+
+        self.variance_selector_ = OutlierSelector(
+            stat='var', use_log=self.use_log,
+            keep_outliers=self.keep_outliers).fit(filtered)
         self.selected_[self.selected_] = self.variance_selector_.selected_
 
         return self

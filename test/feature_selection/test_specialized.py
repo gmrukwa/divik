@@ -30,3 +30,33 @@ class HighAbundanceAndVarianceSelectorTest(unittest.TestCase):
         expected = np.logical_or(self.labels == 1, self.labels == 2)
         TPR = selector.selected_[expected].mean()
         self.assertGreaterEqual(TPR, 0.99)
+
+
+class OutlierAbundanceAndVarianceSelectorTest(unittest.TestCase):
+    def setUp(self):
+        np.random.seed(42)
+        self.labels = np.concatenate(
+            [6 * [0] + 5 * [1] + 25 * [2] + 50 * [3] + 3 * [4] + 4 * [5]])
+        self.data = np.vstack(1000 * [self.labels * 10.])
+        self.data += np.random.randn(*self.data.shape)
+        self.outlier_mean = np.logical_or(self.labels == 4, self.labels == 5)
+        self.high_var = np.zeros_like(self.outlier_mean)
+        self.high_var[np.where(self.labels == 2)[0][:5]] = True
+        shape = self.data[:, self.high_var].shape
+        self.data[:, self.high_var] += 5 * np.random.randn(*shape)
+
+    def test_discards_outlier_abundance(self):
+        selector = fs.OutlierAbundanceAndVarianceSelector().fit(self.data)
+        TNR = (selector.selected_[self.outlier_mean] == False).mean()
+        self.assertGreaterEqual(TNR, 0.95)
+
+    def test_discards_outlier_variance(self):
+        selector = fs.OutlierAbundanceAndVarianceSelector().fit(self.data)
+        TNR = (selector.selected_[self.high_var] == False).mean()
+        self.assertGreaterEqual(TNR, 0.95)
+
+    def test_preserves_inlier_features(self):
+        selector = fs.OutlierAbundanceAndVarianceSelector().fit(self.data)
+        inlier = (self.outlier_mean + self.high_var) == 0
+        TPR = selector.selected_[inlier].mean()
+        self.assertGreaterEqual(TPR, 0.95)
