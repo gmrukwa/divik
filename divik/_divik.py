@@ -101,7 +101,7 @@ class _Reporter:
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def _divik_backend(data: Data, selection: np.ndarray,
                    fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
-                   feature_selector: fs.HighAbundanceAndVarianceSelector,
+                   feature_selector: fs.StatSelectorMixin,
                    minimal_size: int, rejection_size: int, report: _Reporter,
                    pool: Pool = None) -> Optional[DivikResult]:
     subset = data[selection]
@@ -150,7 +150,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
 
 def divik(data: Data, fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
-          feature_selector: fs.HighAbundanceAndVarianceSelector,
+          feature_selector: fs.StatSelectorMixin,
           progress_reporter: tqdm.tqdm = None, minimal_size: int = 2,
           rejection_size: int = 0, pool: Pool = None) -> Optional[DivikResult]:
     if np.isnan(data).any():
