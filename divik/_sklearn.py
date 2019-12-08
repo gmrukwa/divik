@@ -216,19 +216,11 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         """
         if np.isnan(X).any():
             raise ValueError("NaN values are not supported.")
-        minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
-            else self.minimal_size
-        rejection_size = self._get_rejection_size(X)
         n_jobs = get_n_jobs(self.n_jobs)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress,\
                 context_if(n_jobs != 1, Pool, n_jobs) as pool:
-            self.result_ = dv.divik(
-                X, fast_kmeans=self._fast_kmeans(),
-                full_kmeans=self._full_kmeans(),
-                feature_selector=self._feature_selector(),
-                progress_reporter=progress, minimal_size=minimal_size,
-                rejection_size=rejection_size, pool=pool)
+            self.result_ = self._divik(X, progress, pool)
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
@@ -288,6 +280,21 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         return fs.HighAbundanceAndVarianceSelector(
             use_log=self.use_logfilters,
             min_features_rate=self.minimal_features_percentage)
+
+    def _divik(self, X, progress, pool):
+        fast_kmeans = self._fast_kmeans()
+        full_kmeans = self._full_kmeans()
+        warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
+        report = dv._Reporter(progress, warn_const=warn_const)
+        select_all = np.ones(shape=(X.shape[0],), dtype=bool)
+        minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
+            else self.minimal_size
+        rejection_size = self._get_rejection_size(X)
+        return dv._divik_backend(
+            X, selection=select_all, fast_kmeans=fast_kmeans,
+            full_kmeans=full_kmeans, feature_selector=self._feature_selector(),
+            minimal_size=minimal_size, rejection_size=rejection_size,
+            report=report, pool=pool)
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.

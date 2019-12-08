@@ -147,19 +147,3 @@ def _divik_backend(data: Data, selection: np.ndarray,
     report.assemble()
     return DivikResult(clustering=clusterer, feature_selector=feature_selector,
                        merged=partition, subregions=subregions)
-
-
-def divik(data: Data, fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
-          feature_selector: fs.StatSelectorMixin,
-          progress_reporter: tqdm.tqdm = None, minimal_size: int = 2,
-          rejection_size: int = 0, pool: Pool = None) -> Optional[DivikResult]:
-    if np.isnan(data).any():
-        raise ValueError("NaN values are not supported.")
-    warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
-    report = _Reporter(progress_reporter, warn_const=warn_const)
-    select_all = np.ones(shape=(data.shape[0],), dtype=bool)
-    return _divik_backend(
-        data, selection=select_all, fast_kmeans=fast_kmeans,
-        full_kmeans=full_kmeans, feature_selector=feature_selector,
-        minimal_size=minimal_size, rejection_size=rejection_size,
-        report=report, pool=pool)
