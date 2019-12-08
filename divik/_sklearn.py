@@ -95,7 +95,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         the dimensionality. When more than 250 features are present, 'gmm'
         is chosen.
 
-    preserve_outliers: bool, optional, default: False
+    keep_outliers: bool, optional, default: False
         When `filter_type` is `'outlier'`, this will switch feature selection
         to outliers-preserving mode (inlier features are removed).
 
@@ -195,7 +195,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
         self.filter_type = filter_type
-        self.preserve_outliers = preserve_outliers
+        self.keep_outliers = preserve_outliers
         self.n_jobs = n_jobs
         self.random_seed = random_seed
         self.verbose = verbose
