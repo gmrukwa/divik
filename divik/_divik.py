@@ -45,10 +45,11 @@ def _constant_rows(matrix: np.ndarray) -> List[int]:
 
 
 class _Reporter:
-    def __init__(self, progress_reporter: tqdm.tqdm = None):
+    def __init__(self, progress_reporter: tqdm.tqdm = None,
+                 warn_const: bool=True):
         self.progress_reporter = progress_reporter
         self.paths_open = 1
-        self.warn_const = True
+        self.warn_const = warn_const
 
     def filter(self, subset):
         lg.info('Feature filtering.')
@@ -61,7 +62,7 @@ class _Reporter:
     def filtered(self, data):
         lg.debug('Shape after filtering: {0}'.format(data.shape))
         constant = _constant_rows(data)
-        if any(constant) and self.warn_const:
+        if self.warn_const and any(constant):
             msg = 'After feature filtering some rows are constant: {0}. ' \
                   'This may not work with specific configurations.'
             lg.warning(msg.format(constant))
@@ -154,7 +155,8 @@ def divik(data: Data, fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
           rejection_size: int = 0, pool: Pool = None) -> Optional[DivikResult]:
     if np.isnan(data).any():
         raise ValueError("NaN values are not supported.")
-    report = _Reporter(progress_reporter)
+    warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
+    report = _Reporter(progress_reporter, warn_const=warn_const)
     select_all = np.ones(shape=(data.shape[0],), dtype=bool)
     return _divik_backend(
         data, selection=select_all, fast_kmeans=fast_kmeans,
