@@ -47,6 +47,15 @@ class OutlierSelector(BaseEstimator, StatSelectorMixin):
     stat: {'mean', 'var'}
         Kind of statistic to be computed out of the feature.
 
+    use_log: bool, optional, default: False
+        Whether to use the logarithm of feature characteristic instead of the
+        characteristic itself. This may improve feature filtering performance,
+        depending on the distribution of features, however all the
+        characteristics (mean, variance) have to be positive for that -
+        filtering will fail otherwise. This is useful for specific cases in
+        biology where the distribution of data may actually require this option
+        for any efficient filtering.
+
     keep_outliers: bool, optional, default: False
         When True, keeps outliers instead of inlier features.
 
@@ -58,8 +67,10 @@ class OutlierSelector(BaseEstimator, StatSelectorMixin):
     selected_: array, shape (n_features,)
         Vector of binary selections of the informative features.
     """
-    def __init__(self, stat: str, keep_outliers: bool = False):
+    def __init__(self, stat: str, use_log: bool = False,
+                 keep_outliers: bool = False):
         self.stat = stat
+        self.use_log = use_log
         self.keep_outliers = keep_outliers
 
     def fit(self, X, y=None):
