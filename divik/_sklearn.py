@@ -218,6 +218,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                              ' [0, 1]')
         if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:
             raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
+        if self.filter_type not in ['gmm', 'outlier', 'auto']:
+            raise ValueError(
+                "filter_type must be in ['gmm', 'outlier', 'auto']")
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
