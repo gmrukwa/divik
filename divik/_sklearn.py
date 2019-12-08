@@ -293,10 +293,16 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             verbose=self.verbose
         )
 
-    def _feature_selector(self):
-        return fs.HighAbundanceAndVarianceSelector(
-            use_log=self.use_logfilters,
-            min_features_rate=self.minimal_features_percentage)
+    def _feature_selector(self, n_features):
+        if (self.filter_type == 'auto' and n_features > 250) \
+                or self.filter_type == 'gmm':
+            return fs.HighAbundanceAndVarianceSelector(
+                use_log=self.use_logfilters,
+                min_features_rate=self.minimal_features_percentage)
+        elif self.filter_type == 'auto' or self.filter_type == 'outlier':
+            return fs.OutlierAbundanceAndVarianceSelector(
+                self.use_logfilters, self.keep_outliers)
+        raise ValueError("Unknown filter type: %s" % self.filter_type)
 
     def _divik(self, X, progress, pool):
         fast_kmeans = self._fast_kmeans()
@@ -309,7 +315,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         rejection_size = self._get_rejection_size(X)
         return dv.divik(
             X, selection=select_all, fast_kmeans=fast_kmeans,
-            full_kmeans=full_kmeans, feature_selector=self._feature_selector(),
+            full_kmeans=full_kmeans,
+            feature_selector=self._feature_selector(X.shape[1]),
             minimal_size=minimal_size, rejection_size=rejection_size,
             report=report, pool=pool)
 
