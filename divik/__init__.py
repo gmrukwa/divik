@@ -4,6 +4,8 @@ from ._seeding import seeded
 from ._sklearn import DiviK
 from ._kmeans import AutoKMeans, KMeans
 from ._feature_selection import (
+    StatSelectorMixin,
+    NoSelector,
     GMMSelector,
     huberta_outliers,
     OutlierSelector,
@@ -17,6 +19,8 @@ __all__ = [
     "seeded",
     "DiviK",
     "AutoKMeans", "KMeans",
+    "NoSelector",
+    "StatSelectorMixin",
     "GMMSelector", "HighAbundanceAndVarianceSelector",
     'huberta_outliers', 'OutlierSelector',
     'OutlierAbundanceAndVarianceSelector',

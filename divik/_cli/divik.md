@@ -88,6 +88,8 @@ Configuration file should be a JSON file as follows:
   "k_max": 10,
   "normalize_rows": true,
   "use_logfilters": true,
+  "filter_type": "gmm",
+  "keep_outliers": false,
   "n_jobs": -1,
   "random_seed": 0,
   "verbose": true
@@ -181,6 +183,23 @@ on the distribution of features, however all the characteristics (mean,
 variance) have to be positive for that - filtering will fail otherwise. This is
 useful for specific cases in biology where the distribution of data may actually
 require this option for any efficient filtering.
+
+#### `filter_type`
+
+Filtering procedure type, defaults to `'gmm'`.
+
+- `'gmm'` - usual Gaussian Mixture Model-based filtering, useful for high
+dimensional cases
+- `'outlier'` - robust outlier detection-based filtering, useful for low
+dimensional cases
+- `'auto'` - automatically selects between 'gmm' and 'outlier' based on
+the dimensionality. When more than 250 features are present, 'gmm' is chosen.
+- `'none'` - feature selection is disabled
+
+#### `keep_outlier`
+
+When `filter_type` is `'outlier'`, this will switch feature selection
+to outliers-preserving mode (inlier features are removed).
 
 #### `n_jobs`
 

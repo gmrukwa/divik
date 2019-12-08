@@ -44,11 +44,12 @@ def _constant_rows(matrix: np.ndarray) -> List[int]:
     return np.where(is_constant)[0]
 
 
-class _Reporter:
-    def __init__(self, progress_reporter: tqdm.tqdm = None):
+class DivikReporter:
+    def __init__(self, progress_reporter: tqdm.tqdm = None,
+                 warn_const: bool = True):
         self.progress_reporter = progress_reporter
         self.paths_open = 1
-        self.warn_const = True
+        self.warn_const = warn_const
 
     def filter(self, subset):
         lg.info('Feature filtering.')
@@ -61,7 +62,7 @@ class _Reporter:
     def filtered(self, data):
         lg.debug('Shape after filtering: {0}'.format(data.shape))
         constant = _constant_rows(data)
-        if any(constant) and self.warn_const:
+        if self.warn_const and any(constant):
             msg = 'After feature filtering some rows are constant: {0}. ' \
                   'This may not work with specific configurations.'
             lg.warning(msg.format(constant))
@@ -98,11 +99,11 @@ class _Reporter:
 
 
 # @gmrukwa: I could not find more readable solution than recursion for now.
-def _divik_backend(data: Data, selection: np.ndarray,
-                   fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
-                   feature_selector: fs.HighAbundanceAndVarianceSelector,
-                   minimal_size: int, rejection_size: int, report: _Reporter,
-                   pool: Pool = None) -> Optional[DivikResult]:
+def divik(data: Data, selection: np.ndarray,
+          fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
+          feature_selector: fs.StatSelectorMixin,
+          minimal_size: int, rejection_size: int, report: DivikReporter,
+          pool: Pool = None) -> Optional[DivikResult]:
     subset = data[selection]
 
     if subset.shape[0] <= max(full_kmeans.max_clusters, minimal_size):
@@ -131,7 +132,7 @@ def _divik_backend(data: Data, selection: np.ndarray,
 
     report.recurring(len(counts))
     recurse = partial(
-        _divik_backend, data=data, fast_kmeans=fast_kmeans,
+        divik, data=data, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
         minimal_size=minimal_size, rejection_size=rejection_size,
         report=report, pool=pool)
@@ -146,18 +147,3 @@ def _divik_backend(data: Data, selection: np.ndarray,
     report.assemble()
     return DivikResult(clustering=clusterer, feature_selector=feature_selector,
                        merged=partition, subregions=subregions)
-
-
-def divik(data: Data, fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
-          feature_selector: fs.HighAbundanceAndVarianceSelector,
-          progress_reporter: tqdm.tqdm = None, minimal_size: int = 2,
-          rejection_size: int = 0, pool: Pool = None) -> Optional[DivikResult]:
-    if np.isnan(data).any():
-        raise ValueError("NaN values are not supported.")
-    report = _Reporter(progress_reporter)
-    select_all = np.ones(shape=(data.shape[0],), dtype=bool)
-    return _divik_backend(
-        data, selection=select_all, fast_kmeans=fast_kmeans,
-        full_kmeans=full_kmeans, feature_selector=feature_selector,
-        minimal_size=minimal_size, rejection_size=rejection_size,
-        report=report, pool=pool)

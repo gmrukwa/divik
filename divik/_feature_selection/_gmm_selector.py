@@ -134,15 +134,3 @@ class GMMSelector(BaseEstimator, StatSelectorMixin):
         self.raw_threshold_ = self._to_raw(thr)
         self.selected_ = selected
         return self
-
-    def _get_support_mask(self):
-        """
-        Get the boolean mask indicating which features are selected
-
-        Returns
-        -------
-        support : boolean array of shape [# input features]
-            An element is True iff its corresponding feature is selected for
-            retention.
-        """
-        return self.selected_
