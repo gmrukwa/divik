@@ -179,7 +179,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
                  filter_type='gmm',
-                 preserve_outliers=False,
+                 keep_outliers=False,
                  n_jobs: int = None,
                  random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
@@ -196,7 +196,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
         self.filter_type = filter_type
-        self.keep_outliers = preserve_outliers
+        self.keep_outliers = keep_outliers
         self.n_jobs = n_jobs
         self.random_seed = random_seed
         self.verbose = verbose
