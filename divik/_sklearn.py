@@ -86,6 +86,20 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         biology where the distribution of data may actually require this option
         for any efficient filtering.
 
+    filter_type: {'gmm', 'outlier', 'auto', 'none'}, default: 'gmm'
+        - 'gmm' - usual Gaussian Mixture Model-based filtering, useful for high
+        dimensional cases
+        - 'outlier' - robust outlier detection-based filtering, useful for low
+        dimensional cases
+        - 'auto' - automatically selects between 'gmm' and 'outlier' based on
+        the dimensionality. When more than 250 features are present, 'gmm'
+        is chosen.
+        - 'none' - feature selection is disabled
+
+    keep_outliers: bool, optional, default: False
+        When `filter_type` is `'outlier'`, this will switch feature selection
+        to outliers-preserving mode (inlier features are removed).
+
     n_jobs : int, optional, default: None
         The number of jobs to use for the computation. This works by computing
         each of the GAP index evaluations in parallel and by making predictions
@@ -151,8 +165,6 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
            [ 1, ...,  2.]])
 
     """
-    # TODO: Improve docstring so it will work with doctest
-
     def __init__(self,
                  gap_trials: int = 10,
                  distance_percentile: float = 99.,
@@ -166,6 +178,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  k_max: int = 10,
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
+                 filter_type='gmm',
+                 keep_outliers=False,
                  n_jobs: int = None,
                  random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
@@ -181,6 +195,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.k_max = k_max
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
+        self.filter_type = filter_type
+        self.keep_outliers = keep_outliers
         self.n_jobs = n_jobs
         self.random_seed = random_seed
         self.verbose = verbose
@@ -203,6 +219,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                              ' [0, 1]')
         if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:
             raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
+        if self.filter_type not in ['gmm', 'outlier', 'auto', 'none']:
+            raise ValueError(
+                "filter_type must be in ['gmm', 'outlier', 'auto', 'none']")
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
@@ -218,19 +237,11 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         """
         if np.isnan(X).any():
             raise ValueError("NaN values are not supported.")
-        minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
-            else self.minimal_size
-        rejection_size = self._get_rejection_size(X)
         n_jobs = get_n_jobs(self.n_jobs)
 
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress,\
-             context_if(n_jobs != 1, Pool, n_jobs) as pool:
-            self.result_ = dv.divik(
-                X, fast_kmeans=self._fast_kmeans(),
-                full_kmeans=self._full_kmeans(),
-                feature_selector=self._feature_selector(),
-                progress_reporter=progress, minimal_size=minimal_size,
-                rejection_size=rejection_size, pool=pool)
+                context_if(n_jobs != 1, Pool, n_jobs) as pool:
+            self.result_ = self._divik(X, progress, pool)
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
@@ -286,10 +297,34 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             verbose=self.verbose
         )
 
-    def _feature_selector(self):
-        return fs.HighAbundanceAndVarianceSelector(
-            use_log=self.use_logfilters,
-            min_features_rate=self.minimal_features_percentage)
+    def _feature_selector(self, n_features):
+        if (self.filter_type == 'auto' and n_features > 250) \
+                or self.filter_type == 'gmm':
+            return fs.HighAbundanceAndVarianceSelector(
+                use_log=self.use_logfilters,
+                min_features_rate=self.minimal_features_percentage)
+        elif self.filter_type == 'auto' or self.filter_type == 'outlier':
+            return fs.OutlierAbundanceAndVarianceSelector(
+                self.use_logfilters, self.keep_outliers)
+        elif self.filter_type == 'none':
+            return fs.NoSelector()
+        raise ValueError("Unknown filter type: %s" % self.filter_type)
+
+    def _divik(self, X, progress, pool):
+        fast_kmeans = self._fast_kmeans()
+        full_kmeans = self._full_kmeans()
+        warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
+        report = dv.DivikReporter(progress, warn_const=warn_const)
+        select_all = np.ones(shape=(X.shape[0],), dtype=bool)
+        minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
+            else self.minimal_size
+        rejection_size = self._get_rejection_size(X)
+        return dv.divik(
+            X, selection=select_all, fast_kmeans=fast_kmeans,
+            full_kmeans=full_kmeans,
+            feature_selector=self._feature_selector(X.shape[1]),
+            minimal_size=minimal_size, rejection_size=rejection_size,
+            report=report, pool=pool)
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.

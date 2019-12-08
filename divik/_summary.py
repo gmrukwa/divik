@@ -44,8 +44,8 @@ def total_number_of_clusters(tree) -> int:
 def merged_partition(tree: u.DivikResult, levels_limit: int = np.inf,
                      return_paths: bool = False) -> u.IntLabels:
     """Compute merged segmentation labels."""
-    assert tree is not None
-    merged, paths =  _merged_partition(
+    assert tree is not None, 'Nothing was segmented.'
+    merged, paths = _merged_partition(
         tree.clustering.labels_, tree.subregions, levels_limit)
     if return_paths:
         return merged, paths
