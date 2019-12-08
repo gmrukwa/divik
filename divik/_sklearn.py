@@ -86,6 +86,19 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         biology where the distribution of data may actually require this option
         for any efficient filtering.
 
+    filter_type: {'gmm', 'outlier', 'auto'}, default: 'gmm'
+        - 'gmm' - usual Gaussian Mixture Model-based filtering, useful for high
+        dimensional cases
+        - 'outlier' - robust outlier detection-based filtering, useful for low
+        dimensional cases
+        - 'auto' - automatically selects between 'gmm' and 'outlier' based on
+        the dimensionality. When more than 250 features are present, 'gmm'
+        is chosen.
+
+    preserve_outliers: bool, optional, default: False
+        When `filter_type` is `'outlier'`, this will switch feature selection
+        to outliers-preserving mode (inlier features are removed).
+
     n_jobs : int, optional, default: None
         The number of jobs to use for the computation. This works by computing
         each of the GAP index evaluations in parallel and by making predictions
@@ -164,6 +177,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  k_max: int = 10,
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
+                 filter_type='gmm',
+                 preserve_outliers=False,
                  n_jobs: int = None,
                  random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
@@ -179,6 +194,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.k_max = k_max
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
+        self.filter_type = filter_type
+        self.preserve_outliers = preserve_outliers
         self.n_jobs = n_jobs
         self.random_seed = random_seed
         self.verbose = verbose
