@@ -86,7 +86,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         biology where the distribution of data may actually require this option
         for any efficient filtering.
 
-    filter_type: {'gmm', 'outlier', 'auto'}, default: 'gmm'
+    filter_type: {'gmm', 'outlier', 'auto', 'none'}, default: 'gmm'
         - 'gmm' - usual Gaussian Mixture Model-based filtering, useful for high
         dimensional cases
         - 'outlier' - robust outlier detection-based filtering, useful for low
@@ -94,6 +94,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         - 'auto' - automatically selects between 'gmm' and 'outlier' based on
         the dimensionality. When more than 250 features are present, 'gmm'
         is chosen.
+        - 'none' - feature selection is disabled
 
     keep_outliers: bool, optional, default: False
         When `filter_type` is `'outlier'`, this will switch feature selection
@@ -218,9 +219,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                              ' [0, 1]')
         if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:
             raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
-        if self.filter_type not in ['gmm', 'outlier', 'auto']:
+        if self.filter_type not in ['gmm', 'outlier', 'auto', 'none']:
             raise ValueError(
-                "filter_type must be in ['gmm', 'outlier', 'auto']")
+                "filter_type must be in ['gmm', 'outlier', 'auto', 'none']")
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
@@ -305,6 +306,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         elif self.filter_type == 'auto' or self.filter_type == 'outlier':
             return fs.OutlierAbundanceAndVarianceSelector(
                 self.use_logfilters, self.keep_outliers)
+        elif self.filter_type == 'none':
+            return fs.NoSelector()
         raise ValueError("Unknown filter type: %s" % self.filter_type)
 
     def _divik(self, X, progress, pool):
