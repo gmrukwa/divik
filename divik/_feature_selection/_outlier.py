@@ -20,7 +20,7 @@ def huberta_outliers(v):
     -------
     Binary vector indicating all the outliers.
     """
-    q1, med, q3 = np.quantile(v, q=[.25, .5, .75])
+    q1, q3 = np.quantile(v, q=[.25, .75])
     iqr = q3 - q1
     MC = medcouple(v)
     if MC >= 0:
