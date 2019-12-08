@@ -1,6 +1,7 @@
 from abc import ABCMeta
 
 import numpy as np
+from sklearn.base import BaseEstimator
 from sklearn.feature_selection.base import SelectorMixin
 
 
@@ -54,3 +55,25 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
             retention.
         """
         return self.selected_
+
+
+class NoSelector(BaseEstimator, StatSelectorMixin):
+    """Dummy selector to use when no selection is supposed to be made."""
+    def fit(self, X, y=None):
+        """Pass data forward
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            Sample vectors to pass.
+
+        y : any
+            Ignored. This parameter exists only for compatibility with
+            sklearn.pipeline.Pipeline.
+
+        Returns
+        -------
+        self
+        """
+        self.selected_ = np.ones((X.shape[1],), dtype=bool)
+        return self
