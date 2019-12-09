@@ -116,13 +116,13 @@ def divik(data: Data, selection: np.ndarray,
     report.filtered(filtered_data)
 
     report.stop_check()
-    fast_kmeans = clone(fast_kmeans).fit(filtered_data, pool=pool)
+    fast_kmeans = clone(fast_kmeans).fit(filtered_data)
     if fast_kmeans.fitted_ and fast_kmeans.n_clusters_ == 1:
         report.finished_for(subset.shape[0])
         return None
 
     report.processing(filtered_data)
-    clusterer = clone(full_kmeans).fit(filtered_data, pool=pool)
+    clusterer = clone(full_kmeans).fit(filtered_data)
     partition = clusterer.labels_
     _, counts = np.unique(partition, return_counts=True)
 
