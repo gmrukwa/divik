@@ -135,7 +135,7 @@ def divik(data: Data, selection: np.ndarray,
         divik, data=data, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
         minimal_size=minimal_size, rejection_size=rejection_size,
-        report=report, pool=pool)
+        report=report)
     del subset
     del filtered_data
     gc.collect()
