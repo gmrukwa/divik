@@ -102,8 +102,8 @@ class DivikReporter:
 def divik(data: Data, selection: np.ndarray,
           fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
           feature_selector: fs.StatSelectorMixin,
-          minimal_size: int, rejection_size: int, report: DivikReporter,
-          pool: Pool = None) -> Optional[DivikResult]:
+          minimal_size: int, rejection_size: int, report: DivikReporter) \
+        -> Optional[DivikResult]:
     subset = data[selection]
 
     if subset.shape[0] <= max(full_kmeans.max_clusters, minimal_size):

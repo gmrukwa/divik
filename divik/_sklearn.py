@@ -237,11 +237,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         """
         if np.isnan(X).any():
             raise ValueError("NaN values are not supported.")
-        n_jobs = get_n_jobs(self.n_jobs)
 
-        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress,\
-                context_if(n_jobs != 1, Pool, n_jobs) as pool:
-            self.result_ = self._divik(X, progress, pool)
+        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
+            self.result_ = self._divik(X, progress)
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
@@ -310,7 +308,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             return fs.NoSelector()
         raise ValueError("Unknown filter type: %s" % self.filter_type)
 
-    def _divik(self, X, progress, pool):
+    def _divik(self, X, progress):
         fast_kmeans = self._fast_kmeans()
         full_kmeans = self._full_kmeans()
         warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
@@ -324,7 +322,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             full_kmeans=full_kmeans,
             feature_selector=self._feature_selector(X.shape[1]),
             minimal_size=minimal_size, rejection_size=rejection_size,
-            report=report, pool=pool)
+            report=report)
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
