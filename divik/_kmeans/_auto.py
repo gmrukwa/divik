@@ -1,6 +1,7 @@
 from functools import partial
 from multiprocessing import Pool
 import sys
+import uuid
 
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
@@ -11,8 +12,11 @@ from divik._score import make_picker
 from divik._utils import get_n_jobs
 
 
+_DATA = {}
+
+
 def _fit_kmeans(*args, **kwargs):
-    data = kwargs.pop('data')
+    data = _DATA[kwargs.pop('data')]
     return KMeans(*args, **kwargs).fit(data)
 
 
@@ -157,7 +161,9 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         pool: Pool
             used for parallelization of computations reusing single pool
         """
-        fit_kmeans = partial(_fit_kmeans, data=X, distance=self.distance,
+        ref = str(uuid.uuid4())
+        _DATA[ref] = X
+        fit_kmeans = partial(_fit_kmeans, data=ref, distance=self.distance,
                              init=self.init, percentile=self.percentile,
                              max_iter=self.max_iter,
                              normalize_rows=self.normalize_rows)
@@ -178,6 +184,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             with Pool(processes) as pool:
                 self.estimators_ = pool.map(fit_kmeans, n_clusters)
                 self.scores_ = method.score(X, self.estimators_, pool)
+        del _DATA[ref]
 
         best = method.select(self.scores_)
 
