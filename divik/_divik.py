@@ -20,7 +20,6 @@ limitations under the License.
 from functools import partial
 import gc
 import logging as lg
-from multiprocessing import Pool
 from typing import List, Optional
 
 import numpy as np
