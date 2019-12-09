@@ -22,7 +22,6 @@ import gc
 import logging as lg
 from multiprocessing import Pool
 from typing import List, Optional
-import uuid
 
 import numpy as np
 from sklearn.base import clone
@@ -99,23 +98,12 @@ class DivikReporter:
         lg.info('Assembled. {0} paths open.'.format(self.paths_open))
 
 
-_DATA = {}
-
-
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def divik(data: Data, selection: np.ndarray,
           fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
           feature_selector: fs.StatSelectorMixin,
           minimal_size: int, rejection_size: int, report: DivikReporter,
           pool: Pool = None) -> Optional[DivikResult]:
-    data_was_ref = isinstance(data, str)
-    if data_was_ref:
-        ref = data
-        data = _DATA[ref]
-    else:
-        ref = str(uuid.uuid4())
-        _DATA[ref] = data
-
     subset = data[selection]
 
     if subset.shape[0] <= max(full_kmeans.max_clusters, minimal_size):
@@ -144,7 +132,7 @@ def divik(data: Data, selection: np.ndarray,
 
     report.recurring(len(counts))
     recurse = partial(
-        divik, data=ref, fast_kmeans=fast_kmeans,
+        divik, data=data, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
         minimal_size=minimal_size, rejection_size=rejection_size,
         report=report, pool=pool)
@@ -155,9 +143,6 @@ def divik(data: Data, selection: np.ndarray,
         recurse(selection=_recursive_selection(selection, partition, cluster))
         for cluster in np.unique(partition)
     ]
-    if not data_was_ref:
-        del _DATA[ref]
-        gc.collect()
 
     report.assemble()
     return DivikResult(clustering=clusterer, feature_selector=feature_selector,
