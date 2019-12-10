@@ -24,6 +24,7 @@ __all__ = [
     "StatSelectorMixin",
     "GMMSelector", "HighAbundanceAndVarianceSelector",
     'huberta_outliers', 'OutlierSelector',
+    'PercentageSelector',
     'OutlierAbundanceAndVarianceSelector',
     "depth", "plot", "reject_split",
 ]
