@@ -20,7 +20,7 @@ KMeans = 'divik.KMeans'
 
 
 def _dispersion(data: Data, labels: IntLabels, centroids: Centroids,
-                distance: DistanceMetric, normalize: bool=False) -> float:
+                distance: DistanceMetric, normalize: bool = False) -> float:
     if normalize:
         data = normalize_rows(data)
     clusters = pd.DataFrame(data).groupby(labels)
@@ -36,11 +36,12 @@ def _dispersion_of_random_sample(seed: int,
                                  ranges: np.ndarray,
                                  split: SegmentationMethod,
                                  distance: DistanceMetric,
-                                 normalize_rows: bool=False) -> float:
+                                 normalize_rows: bool = False) -> float:
     np.random.seed(seed)
     sample = np.random.random_sample(shape) * ranges + minima
     labels, centroids = split(sample)
-    dispersion = _dispersion(sample, labels, centroids, distance, normalize_rows)
+    dispersion = _dispersion(sample, labels, centroids, distance,
+                             normalize_rows)
     del sample
     gc.collect()
     return dispersion
@@ -50,8 +51,8 @@ def _dispersion_of_random_sample(seed: int,
 @seeded(wrapped_requires_seed=True)
 def gap(data: Data, labels: IntLabels, centroids: Centroids,
         distance: DistanceMetric, split: SegmentationMethod,
-        seed: int=0, n_trials: int = 100, pool: Pool=None,
-        return_deviation: bool = False, normalize_rows: bool=False) -> float:
+        seed: int = 0, n_trials: int = 100, pool: Pool = None,
+        return_deviation: bool = False, normalize_rows: bool = False) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
     compute_dispersion = partial(_dispersion_of_random_sample,
@@ -62,7 +63,8 @@ def gap(data: Data, labels: IntLabels, centroids: Centroids,
                                  distance=distance,
                                  normalize_rows=normalize_rows)
     if pool is None:
-        dispersions = [compute_dispersion(i) for i in range(seed, seed + n_trials)]
+        dispersions = [compute_dispersion(i)
+                       for i in range(seed, seed + n_trials)]
     else:
         dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
     reference = _dispersion(data, labels, centroids, distance, normalize_rows)
