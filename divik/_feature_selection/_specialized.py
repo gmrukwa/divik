@@ -2,7 +2,8 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.feature_selection.base import SelectorMixin
 from ._gmm_selector import GMMSelector
-from ._outlier import OutlierOrTopSelector
+from ._outlier import OutlierSelector, OutlierOrTopSelector
+from ._percentage_selector import PercentageSelector
 
 
 class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
@@ -146,11 +147,13 @@ class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
         -------
         self
         """
-        self.abundance_selector_ = OutlierOrTopSelector(
+        self.abundance_selector_ = OutlierSelector(
             stat='mean', use_log=self.use_log,
-            keep_outliers=self.keep_outliers,
-            min_features_rate=self.min_features_rate,
-            p=1.0 - self.p).fit(X)
+            keep_outliers=False).fit(X)
+        if self.abundance_selector_.selected_.mean() < self.min_features_rate:
+            self.abundance_selector_ = PercentageSelector(
+                stat='mean', use_log=self.use_log, keep_top=True,
+                p=1.0 - self.p).fit(X)
         filtered = self.abundance_selector_.transform(X)
         self.selected_ = self.abundance_selector_.selected_.copy()
 
