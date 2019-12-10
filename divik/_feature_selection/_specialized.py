@@ -150,7 +150,7 @@ class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
             stat='mean', use_log=self.use_log,
             keep_outliers=self.keep_outliers,
             min_features_rate=self.min_features_rate,
-            p=self.p).fit(X)
+            p=1.0 - self.p).fit(X)
         filtered = self.abundance_selector_.transform(X)
         self.selected_ = self.abundance_selector_.selected_.copy()
 

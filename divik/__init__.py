@@ -1,4 +1,4 @@
-__version__ = '2.3.0'
+__version__ = '2.3.1'
 
 from ._seeding import seeded
 from ._sklearn import DiviK
