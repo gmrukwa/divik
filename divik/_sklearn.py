@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from functools import partial
 from multiprocessing import Pool
 from typing import Tuple
@@ -13,7 +12,7 @@ import divik._distance as dst
 import divik._feature_selection as fs
 import divik._kmeans as km
 import divik._summary as summary
-from divik._utils import normalize_rows, DivikResult, get_n_jobs
+from divik._utils import normalize_rows, DivikResult, get_n_jobs, context_if
 
 
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -442,12 +441,3 @@ def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
         division = division.subregions[label]
     path = tuple(path)
     return path
-
-
-@contextmanager
-def context_if(condition, context, *args, **kwargs):
-    if condition:
-        with context(*args, **kwargs) as c:
-            yield c
-    else:
-        yield None
