@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.feature_selection.base import SelectorMixin
 from ._gmm_selector import GMMSelector
-from ._outlier import OutlierSelector
+from ._outlier import OutlierOrTopSelector
 
 
 class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
@@ -123,9 +123,12 @@ class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
 
 # noinspection PyAttributeOutsideInit
 class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
-    def __init__(self, use_log: bool = False, keep_outliers: bool = False):
+    def __init__(self, use_log: bool = False, keep_outliers: bool = False,
+                 min_features_rate: float = 0.01, p: float = 0.2):
         self.use_log = use_log
         self.keep_outliers = keep_outliers
+        self.min_features_rate = min_features_rate
+        self.p = p
 
     def fit(self, X, y=None):
         """Learn data-driven feature thresholds from X.
@@ -143,15 +146,20 @@ class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
         -------
         self
         """
-        self.abundance_selector_ = OutlierSelector(
+        self.abundance_selector_ = OutlierOrTopSelector(
             stat='mean', use_log=self.use_log,
-            keep_outliers=self.keep_outliers).fit(X)
+            keep_outliers=self.keep_outliers,
+            min_features_rate=self.min_features_rate,
+            p=self.p).fit(X)
         filtered = self.abundance_selector_.transform(X)
         self.selected_ = self.abundance_selector_.selected_.copy()
 
-        self.variance_selector_ = OutlierSelector(
+        corrected = self.min_features_rate / self.selected_.mean()
+        self.variance_selector_ = OutlierOrTopSelector(
             stat='var', use_log=self.use_log,
-            keep_outliers=self.keep_outliers).fit(filtered)
+            keep_outliers=self.keep_outliers,
+            min_features_rate=corrected,
+            p=self.p).fit(filtered)
         self.selected_[self.selected_] = self.variance_selector_.selected_
 
         return self
