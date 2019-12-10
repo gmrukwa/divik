@@ -75,7 +75,8 @@ class DivikTest(unittest.TestCase):
         # dimensionality may differ too much and influence the distance
         # comparison.
         model = DiviK(distance=dst.KnownMetric.euclidean.value,
-                      minimal_features_percentage=1.0)
+                      minimal_features_percentage=1.0,
+                      features_percentage=1.0)
         y_pred = model.fit_predict(X)
         X_trans = model.transform(X)
         closests = [np.argmin(row) for row in X_trans]

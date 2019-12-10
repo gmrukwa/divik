@@ -3,6 +3,7 @@ from sklearn.base import BaseEstimator
 from statsmodels.stats.stattools import medcouple
 
 from ._stat_selector_mixin import StatSelectorMixin
+from ._percentage_selector import PercentageSelector
 
 
 def huberta_outliers(v):
@@ -95,4 +96,88 @@ class OutlierSelector(BaseEstimator, StatSelectorMixin):
             self.selected_ = outliers
         else:
             self.selected_ = outliers == False
+        return self
+
+
+# noinspection PyAttributeOutsideInit
+class OutlierOrTopSelector(BaseEstimator, StatSelectorMixin):
+    """Feature selector that removes outlier features or top ones
+
+    This feature selection algorithm looks only at the features (X), not the
+    desired outputs (y), and can thus be used for unsupervised learning.
+
+    Parameters
+    ----------
+    stat: {'mean', 'var'}
+        Kind of statistic to be computed out of the feature.
+
+    use_log: bool, optional, default: False
+        Whether to use the logarithm of feature characteristic instead of the
+        characteristic itself. This may improve feature filtering performance,
+        depending on the distribution of features, however all the
+        characteristics (mean, variance) have to be positive for that -
+        filtering will fail otherwise. This is useful for specific cases in
+        biology where the distribution of data may actually require this option
+        for any efficient filtering.
+
+    keep_outliers: bool, optional, default: False
+        When True, keeps outliers instead of inlier features or top features.
+
+    p: float, optional, default: 0.2
+        Rate of features to keep.
+
+    min_features_rate: float, optional, default: 0.01
+        Minimal rate of features to keep.
+
+    Attributes
+    ----------
+    vals_: array, shape (n_features,)
+        Computed characteristic of each feature.
+
+    selected_: array, shape (n_features,)
+        Vector of binary selections of the informative features.
+
+    outlier_selector_: OutlierSelector
+        Outlier-based feature selector.
+
+    percentage_selector_: PercentageSelector
+        Percentage-based feature selector.
+    """
+    def __init__(self, stat: str, use_log: bool = False,
+                 keep_outliers: bool = False, p: float = 0.2,
+                 min_features_rate: float = 0.01):
+        self.stat = stat
+        self.use_log = use_log
+        self.keep_outliers = keep_outliers
+        self.p = p
+        self.min_features_rate = min_features_rate
+
+    def fit(self, X, y=None):
+        """Learn data-driven feature thresholds from X.
+
+        Parameters
+        ----------
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            Sample vectors from which to compute feature characteristic.
+
+        y : any
+            Ignored. This parameter exists only for compatibility with
+            sklearn.pipeline.Pipeline.
+
+        Returns
+        -------
+        self
+        """
+        self.vals_ = self._to_characteristics(X)
+        self.outlier_selector_ = OutlierSelector(
+            stat=self.stat, use_log=self.use_log,
+            keep_outliers=self.keep_outliers).fit(X)
+        if self.outlier_selector_.selected_.mean() >= self.min_features_rate:
+            self.selected_ = self.outlier_selector_.selected_
+            self.percentage_selector_ = None
+        else:
+            self.percentage_selector_ = PercentageSelector(
+                stat=self.stat, use_log=self.use_log,
+                keep_top=self.keep_outliers, p=self.p).fit(X)
+            self.selected_ = self.percentage_selector_.selected_
         return self

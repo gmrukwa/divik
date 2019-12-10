@@ -62,6 +62,10 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         GMM-based feature selection. By default at least 1% of features is
         preserved in the filtration process.
 
+    features_percentage: float, optional, default: 0.05
+        The target percentage of features that are used by fallback percentage
+        filter for 'outlier' filter.
+
     fast_kmeans_iter: int, optional, default: 10
         Maximum number of iterations of the k-means algorithm for a single run
         during computation of the GAP index. Decreased with respect to the
@@ -89,7 +93,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         - 'gmm' - usual Gaussian Mixture Model-based filtering, useful for high
         dimensional cases
         - 'outlier' - robust outlier detection-based filtering, useful for low
-        dimensional cases
+        dimensional cases. In the case of no outliers, percentage-based
+        filtering is applied.
         - 'auto' - automatically selects between 'gmm' and 'outlier' based on
         the dimensionality. When more than 250 features are present, 'gmm'
         is chosen.
@@ -173,6 +178,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  rejection_size: int = None,
                  rejection_percentage: float = None,
                  minimal_features_percentage: float = .01,
+                 features_percentage: float = 0.05,
                  fast_kmeans_iter: int = 10,
                  k_max: int = 10,
                  normalize_rows: bool = None,
@@ -190,6 +196,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.rejection_size = rejection_size
         self.rejection_percentage = rejection_percentage
         self.minimal_features_percentage = minimal_features_percentage
+        self.features_percentage = features_percentage
         self.fast_kmeans_iter = fast_kmeans_iter
         self.k_max = k_max
         self.normalize_rows = normalize_rows
@@ -202,6 +209,24 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self._validate_arguments()
 
     def _validate_arguments(self):
+        self._validate_clustering()
+        self._validate_feature_selection()
+
+    def _validate_feature_selection(self):
+        if self.minimal_features_percentage < 0 \
+                or self.minimal_features_percentage > 1:
+            raise ValueError('minimal_features_percentage must be in range'
+                             ' [0, 1]')
+        if self.features_percentage < 0 or self.features_percentage > 1:
+            raise ValueError('features_percentage must be in range [0, 1]')
+        if self.features_percentage < self.minimal_features_percentage:
+            raise ValueError('features_percentage must be higher than or equal'
+                             ' to minimal_features_percentage')
+        if self.filter_type not in ['gmm', 'outlier', 'auto', 'none']:
+            raise ValueError(
+                "filter_type must be in ['gmm', 'outlier', 'auto', 'none']")
+
+    def _validate_clustering(self):
         if self.distance not in list(dst.KnownMetric):
             raise ValueError('Unknown distance: %s' % self.distance)
         if self.gap_trials <= 0:
@@ -212,15 +237,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             raise ValueError('max_iter must be greater than 0')
         if self.minimal_size is not None and self.minimal_size < 0:
             raise ValueError('minimal_size must be greater or equal to 0')
-        if self.minimal_features_percentage < 0 \
-                or self.minimal_features_percentage > 1:
-            raise ValueError('minimal_features_percentage must be in range'
-                             ' [0, 1]')
         if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:
             raise ValueError('fast_kmeans_iter must be in range [0, max_iter]')
-        if self.filter_type not in ['gmm', 'outlier', 'auto', 'none']:
-            raise ValueError(
-                "filter_type must be in ['gmm', 'outlier', 'auto', 'none']")
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
@@ -294,15 +312,23 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             verbose=self.verbose
         )
 
+    def _gmm_filter(self):
+        return fs.HighAbundanceAndVarianceSelector(
+            use_log=self.use_logfilters,
+            min_features_rate=self.minimal_features_percentage)
+
+    def _outlier_filter(self):
+        return fs.OutlierAbundanceAndVarianceSelector(
+            self.use_logfilters, self.keep_outliers,
+            min_features_rate=self.minimal_features_percentage,
+            p=self.features_percentage)
+
     def _feature_selector(self, n_features):
         if (self.filter_type == 'auto' and n_features > 250) \
                 or self.filter_type == 'gmm':
-            return fs.HighAbundanceAndVarianceSelector(
-                use_log=self.use_logfilters,
-                min_features_rate=self.minimal_features_percentage)
+            return self._gmm_filter()
         elif self.filter_type == 'auto' or self.filter_type == 'outlier':
-            return fs.OutlierAbundanceAndVarianceSelector(
-                self.use_logfilters, self.keep_outliers)
+            return self._outlier_filter()
         elif self.filter_type == 'none':
             return fs.NoSelector()
         raise ValueError("Unknown filter type: %s" % self.filter_type)
