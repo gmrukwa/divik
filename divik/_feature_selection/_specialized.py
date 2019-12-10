@@ -122,12 +122,14 @@ class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
         return self.selected_
 
 
+EPS = 10e-6
+
+
 # noinspection PyAttributeOutsideInit
 class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
-    def __init__(self, use_log: bool = False, keep_outliers: bool = False,
-                 min_features_rate: float = 0.01, p: float = 0.2):
+    def __init__(self, use_log: bool = False, min_features_rate: float = 0.01,
+                 p: float = 0.2):
         self.use_log = use_log
-        self.keep_outliers = keep_outliers
         self.min_features_rate = min_features_rate
         self.p = p
 
@@ -147,25 +149,45 @@ class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
         -------
         self
         """
-        self.abundance_selector_ = OutlierSelector(
-            stat='mean', use_log=self.use_log,
-            keep_outliers=False).fit(X)
-        if self.abundance_selector_.selected_.mean() < self.min_features_rate:
-            self.abundance_selector_ = PercentageSelector(
-                stat='mean', use_log=self.use_log, keep_top=True,
-                p=1.0 - self.p).fit(X)
-        filtered = self.abundance_selector_.transform(X)
-        self.selected_ = self.abundance_selector_.selected_.copy()
-
-        corrected = self.min_features_rate / self.selected_.mean()
-        self.variance_selector_ = OutlierOrTopSelector(
-            stat='var', use_log=self.use_log,
-            keep_outliers=self.keep_outliers,
-            min_features_rate=corrected,
-            p=self.p).fit(filtered)
-        self.selected_[self.selected_] = self.variance_selector_.selected_
-
+        self.abundance_selector_, a_selected = self._fit_abundance(X)
+        filtered = X[:, a_selected]
+        self.variance_selector_, v_selected = self._fit_variance(
+            filtered, a_selected)
+        self.selected_ = a_selected
+        self.selected_[a_selected] = v_selected
         return self
+    
+    def _fit_abundance(self, X):
+        selector = OutlierSelector(stat='mean', use_log=self.use_log,
+                                   keep_outliers=False).fit(X)
+        selected = selector.selected_
+        inlier = selector.vals_[selected][0]
+        over_inlier = selector.vals_ > inlier
+        selected[over_inlier] = True
+        p = selected.mean()
+        if p < self.min_features_rate or p >= 1 - EPS:
+            selector = PercentageSelector(stat='mean', use_log=self.use_log,
+                                          keep_top=True, p=1.0 - self.p).fit(X)
+            selected = selector.selected_
+        return selector, selected
+
+    def _fit_variance(self, X, old_selected):
+        corrected_min = self.min_features_rate / old_selected.mean()
+        corrected_p = self.p / old_selected.mean()
+
+        selector = OutlierSelector(stat='var', use_log=self.use_log,
+                                   keep_outliers=True).fit(X)
+        selected = selector.selected_
+        inlier = selector.vals_[selected == 0][0]
+        under_inlier = selector.vals_ < inlier
+        selected[under_inlier] = False
+        p = selected.mean()
+
+        if p < corrected_min or p >= 1 - EPS:
+            selector = PercentageSelector(stat='var', use_log=self.use_log,
+                                          keep_top=True, p=corrected_p).fit(X)
+            selected = selector.selected_
+        return selector, selected
 
     def _get_support_mask(self):
         """
