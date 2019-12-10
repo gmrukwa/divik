@@ -20,7 +20,6 @@ limitations under the License.
 from functools import partial
 import gc
 import logging as lg
-from multiprocessing import Pool
 from typing import List, Optional
 
 import numpy as np
@@ -102,8 +101,8 @@ class DivikReporter:
 def divik(data: Data, selection: np.ndarray,
           fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
           feature_selector: fs.StatSelectorMixin,
-          minimal_size: int, rejection_size: int, report: DivikReporter,
-          pool: Pool = None) -> Optional[DivikResult]:
+          minimal_size: int, rejection_size: int, report: DivikReporter) \
+        -> Optional[DivikResult]:
     subset = data[selection]
 
     if subset.shape[0] <= max(full_kmeans.max_clusters, minimal_size):
@@ -116,13 +115,13 @@ def divik(data: Data, selection: np.ndarray,
     report.filtered(filtered_data)
 
     report.stop_check()
-    fast_kmeans = clone(fast_kmeans).fit(filtered_data, pool=pool)
+    fast_kmeans = clone(fast_kmeans).fit(filtered_data)
     if fast_kmeans.fitted_ and fast_kmeans.n_clusters_ == 1:
         report.finished_for(subset.shape[0])
         return None
 
     report.processing(filtered_data)
-    clusterer = clone(full_kmeans).fit(filtered_data, pool=pool)
+    clusterer = clone(full_kmeans).fit(filtered_data)
     partition = clusterer.labels_
     _, counts = np.unique(partition, return_counts=True)
 
@@ -135,7 +134,7 @@ def divik(data: Data, selection: np.ndarray,
         divik, data=data, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
         minimal_size=minimal_size, rejection_size=rejection_size,
-        report=report, pool=pool)
+        report=report)
     del subset
     del filtered_data
     gc.collect()

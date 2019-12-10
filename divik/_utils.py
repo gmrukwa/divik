@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 from typing import Callable, Tuple, NamedTuple, List, Optional
 
 import numpy as np
@@ -44,3 +45,12 @@ def get_n_jobs(n_jobs):
         n_jobs = min(n_jobs + 1 + n_cpu, n_cpu)
     n_jobs = n_jobs or n_cpu
     return n_jobs
+
+
+@contextmanager
+def context_if(condition, context, *args, **kwargs):
+    if condition:
+        with context(*args, **kwargs) as c:
+            yield c
+    else:
+        yield None
