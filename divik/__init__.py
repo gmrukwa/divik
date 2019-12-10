@@ -9,6 +9,7 @@ from ._feature_selection import (
     GMMSelector,
     huberta_outliers,
     OutlierSelector,
+    PercentageSelector,
     HighAbundanceAndVarianceSelector,
     OutlierAbundanceAndVarianceSelector,
 )
