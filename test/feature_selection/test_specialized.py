@@ -55,8 +55,11 @@ class OutlierAbundanceAndVarianceSelectorTest(unittest.TestCase):
         TNR = (selector.selected_[self.high_var] == False).mean()
         self.assertGreaterEqual(TNR, 0.95)
 
-    def test_preserves_inlier_features(self):
-        selector = fs.OutlierAbundanceAndVarianceSelector().fit(self.data)
-        inlier = (self.outlier_mean + self.high_var) == 0
-        TPR = selector.selected_[inlier].mean()
-        self.assertGreaterEqual(TPR, 0.95)
+    def test_selects_percentage_of_features(self):
+        N = self.labels.size
+        p = 5. / N
+        selector = fs.OutlierAbundanceAndVarianceSelector(p=p).fit(self.data)
+        self.assertAlmostEqual(selector.selected_.mean(), p, places=2)
+        p = 20. / N
+        selector = fs.OutlierAbundanceAndVarianceSelector(p=p).fit(self.data)
+        self.assertAlmostEqual(selector.selected_.mean(), p, places=2)
