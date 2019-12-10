@@ -156,7 +156,7 @@ class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
         self.selected_ = a_selected
         self.selected_[a_selected] = v_selected
         return self
-    
+
     def _fit_abundance(self, X):
         selector = OutlierSelector(stat='mean', use_log=self.use_log,
                                    keep_outliers=False).fit(X)
