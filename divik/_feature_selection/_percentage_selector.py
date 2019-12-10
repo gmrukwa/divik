@@ -8,6 +8,9 @@ from ._stat_selector_mixin import StatSelectorMixin
 class PercentageSelector(BaseEstimator, StatSelectorMixin):
     """Feature selector that removes / preserves top some percent of features
 
+    This feature selection algorithm looks only at the features (X), not the
+    desired outputs (y), and can thus be used for unsupervised learning.
+
     Parameters
     ----------
     stat: {'mean', 'var'}
