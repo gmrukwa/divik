@@ -157,6 +157,11 @@ be rejected. Default `2`. To disable this mechanism, just set it to `0`.
 Percent of features that are enforced to be preserved after each filtering.
 Default `0.01` (corresponding to `1%`).
 
+#### `features_percentage`
+
+The target percentage of features that are used by fallback percentage
+filter for `'outlier'` filter.
+
 #### `fast_kmeans_iters`
 
 Number of k-means iterations performed during GAP trial. Default `10`. In most
@@ -191,7 +196,8 @@ Filtering procedure type, defaults to `'gmm'`.
 - `'gmm'` - usual Gaussian Mixture Model-based filtering, useful for high
 dimensional cases
 - `'outlier'` - robust outlier detection-based filtering, useful for low
-dimensional cases
+dimensional cases. In the case of no outliers, percentage-based
+filtering is applied.
 - `'auto'` - automatically selects between 'gmm' and 'outlier' based on
 the dimensionality. When more than 250 features are present, 'gmm' is chosen.
 - `'none'` - feature selection is disabled
