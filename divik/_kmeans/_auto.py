@@ -169,7 +169,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         if self.verbose:
             n_clusters = tqdm.tqdm(n_clusters, leave=False, file=sys.stdout)
 
-        method = make_picker(self.method, self.gap)
+        method = make_picker(self.method, self.n_jobs, self.gap)
 
         processes = get_n_jobs(self.n_jobs)
         if processes == 1:
@@ -178,7 +178,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         else:
             with Pool(processes) as pool:
                 self.estimators_ = pool.map(fit_kmeans, n_clusters)
-                self.scores_ = method.score(X, self.estimators_, pool)
+                self.scores_ = method.score(X, self.estimators_)
         del _DATA[ref]
 
         best = method.select(self.scores_)

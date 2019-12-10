@@ -26,8 +26,8 @@ def make_segmentations_matrix(kmeans: km.AutoKMeans) -> np.ndarray:
     return np.hstack([e.labels_.reshape(-1, 1) for e in kmeans.estimators_])
 
 
-def make_scores_report(kmeans: km.AutoKMeans) -> pd.DataFrame:
-    picker = divik._score.make_picker(kmeans.method, kmeans.gap)
+def make_scores_report(kmeans: km.AutoKMeans, n_jobs: int = 1) -> pd.DataFrame:
+    picker = divik._score.make_picker(kmeans.method, n_jobs, kmeans.gap)
     return picker.report(kmeans.estimators_, kmeans.scores_)
 
 
@@ -62,7 +62,7 @@ def save(kmeans: km.AutoKMeans, destination: str, xy: np.ndarray=None):
                    visualization)
 
     logging.info("Saving scores.")
-    report = make_scores_report(kmeans)
+    report = make_scores_report(kmeans, n_jobs=-1)
     report.to_csv(fname('scores.csv'))
 
 

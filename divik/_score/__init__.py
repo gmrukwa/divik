@@ -3,9 +3,9 @@ from ._gap import gap, GapPicker
 from ._picker import Picker
 
 
-def make_picker(method, gap=None):
+def make_picker(method, n_jobs: int = 1, gap=None):
     if method == 'dunn':
-        picker = DunnPicker()
+        picker = DunnPicker(n_jobs=n_jobs)
     elif method == 'gap':
         if gap is None:
             gap = {}
@@ -13,7 +13,7 @@ def make_picker(method, gap=None):
         seed = gap.get('seed', 0)
         trials = gap.get('trials', 10)
         correction = gap.get('correction', True)
-        picker = GapPicker(max_iter, seed, trials, correction)
+        picker = GapPicker(max_iter, seed, trials, correction, n_jobs=n_jobs)
     else:
         raise ValueError('Unknown quality measure {0}'.format(method))
     return picker

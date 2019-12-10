@@ -7,7 +7,7 @@ import pandas as pd
 
 from divik._distance import DistanceMetric, make_distance
 from divik._score._picker import Picker
-from divik._utils import Centroids, IntLabels, Data
+from divik._utils import Centroids, IntLabels, Data, get_n_jobs
 
 
 def dunn(data: Data, labels: IntLabels, centroids: Centroids,
@@ -35,11 +35,11 @@ def _dunn(kmeans: KMeans, data: Data) -> float:
 
 
 class DunnPicker(Picker):
-    def score(self, data: Data, estimators: List[KMeans], pool: Pool=None) \
-            -> np.ndarray:
+    def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
         score = partial(_dunn, data=data)
-        if pool:
-            scores = pool.map(score, estimators)
+        if self.n_jobs != 1:
+            with Pool(get_n_jobs(self.n_jobs)) as pool:
+                scores = pool.map(score, estimators)
         else:
             scores = [score(estimator) for estimator in estimators]
         return np.array(scores)

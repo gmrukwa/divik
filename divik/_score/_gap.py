@@ -12,7 +12,7 @@ from sklearn.base import clone
 from divik._distance import DistanceMetric, make_distance
 from divik._score._picker import Picker
 from divik._utils import Centroids, IntLabels, Data, SegmentationMethod, \
-    normalize_rows
+    context_if, get_n_jobs, normalize_rows
 from divik._seeding import seeded
 
 
@@ -95,27 +95,27 @@ def _fast_kmeans(kmeans: KMeans, max_iter: int = 10) -> SegmentationMethod:
 
 class GapPicker(Picker):
     def __init__(self, max_iter: int = 10, seed: int = 0, n_trials: int = 10,
-                 correction: bool=True):
+                 correction: bool = True, n_jobs: int = 1):
+        super().__init__(n_jobs=n_jobs)
         self.max_iter = max_iter
         self.seed = seed
         self.n_trials = n_trials
         self.correction = correction
 
-    def score(self, data: Data, estimators: List[KMeans], pool: Pool=None) \
-            -> np.ndarray:
-        scores = [
-            gap(data=data,
-                labels=estimator.labels_,
-                centroids=estimator.cluster_centers_,
-                distance=make_distance(estimator.distance),
-                split=_fast_kmeans(estimator, self.max_iter),
-                seed=self.seed,
-                n_trials=self.n_trials,
-                pool=pool,
-                return_deviation=True,
-                normalize_rows=estimator.normalize_rows)
-            for estimator in estimators
-        ]
+    def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
+        gap_ = partial(gap, data, seed=self.seed, n_trials=self.n_trials,
+                       return_deviation=True)
+        n_jobs = get_n_jobs(self.n_jobs)
+        with context_if(self.n_jobs != 1, Pool, n_jobs) as pool:
+            scores = [
+                gap_(labels=estimator.labels_,
+                     centroids=estimator.cluster_centers_,
+                     distance=make_distance(estimator.distance),
+                     split=_fast_kmeans(estimator, self.max_iter),
+                     pool=pool,
+                     normalize_rows=estimator.normalize_rows)
+                for estimator in estimators
+            ]
         return np.array(scores)
 
     def select(self, scores: np.ndarray) -> Optional[int]:

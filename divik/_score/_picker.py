@@ -11,9 +11,11 @@ KMeans = 'divik.KMeans'
 
 
 class Picker(metaclass=ABCMeta):
+    def __init__(self, n_jobs: int = 1):
+        self.n_jobs = n_jobs
+
     @abstractmethod
-    def score(self, data: Data, estimators: List[KMeans], pool: Pool = None) \
-            -> np.ndarray:
+    def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
         raise NotImplementedError
 
     @abstractmethod
