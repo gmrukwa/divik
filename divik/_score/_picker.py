@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from multiprocessing.pool import Pool
 from typing import List, Optional
 
 import numpy as np
