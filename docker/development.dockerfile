@@ -1,5 +1,7 @@
 FROM spectreteam/python_msi:v5.0.0
 
+ENV PYTHONUNBUFFERED TRUE
+
 COPY requirements.txt /requirements.txt
 
 RUN pip install --no-cache-dir -r /requirements.txt &&\

@@ -1,5 +1,7 @@
 FROM spectreteam/python_msi:v5.0.0
 
+ENV PYTHONUNBUFFERED TRUE
+
 COPY requirements.txt /app/requirements.txt
 
 WORKDIR /app
