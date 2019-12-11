@@ -1,4 +1,4 @@
-__version__ = '2.3.3'
+__version__ = '2.3.4'
 
 from ._seeding import seeded
 from ._sklearn import DiviK
@@ -9,7 +9,6 @@ from ._feature_selection import (
     GMMSelector,
     huberta_outliers,
     OutlierSelector,
-    OutlierOrTopSelector,
     PercentageSelector,
     HighAbundanceAndVarianceSelector,
     OutlierAbundanceAndVarianceSelector,
@@ -24,7 +23,7 @@ __all__ = [
     "NoSelector",
     "StatSelectorMixin",
     "GMMSelector", "HighAbundanceAndVarianceSelector",
-    'huberta_outliers', 'OutlierSelector', 'OutlierOrTopSelector',
+    'huberta_outliers', 'OutlierSelector',
     'PercentageSelector',
     'OutlierAbundanceAndVarianceSelector',
     "depth", "plot", "reject_split",

@@ -319,7 +319,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _outlier_filter(self):
         return fs.OutlierAbundanceAndVarianceSelector(
-            self.use_logfilters, self.keep_outliers,
+            use_log=self.use_logfilters,
             min_features_rate=self.minimal_features_percentage,
             p=self.features_percentage)
 

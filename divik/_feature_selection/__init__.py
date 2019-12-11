@@ -3,7 +3,6 @@ from ._gmm_selector import GMMSelector
 from ._outlier import (
     huberta_outliers,
     OutlierSelector,
-    OutlierOrTopSelector,
 )
 from ._percentage_selector import PercentageSelector
 from ._specialized import (
