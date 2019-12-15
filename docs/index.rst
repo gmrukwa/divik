@@ -6,11 +6,29 @@
 Welcome to divik's documentation!
 =================================
 
+Here you can find a list of documentation topics covered by this page.
+
 .. toctree::
    :maxdepth: 4
-   :caption: Contents:
+   :caption: Topics:
 
-   divik
+   instructions/installation
+   instructions/running_in_docker
+   instructions/simple_windows
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Command Line Interface:
+
+   cli/divik
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Packages:
+
+   modules/divik
+   modules/divik.cluster
+   modules/divik.feature_selection
 
 
 Indices and tables
@@ -18,4 +36,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`

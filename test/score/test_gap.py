@@ -6,7 +6,8 @@ import numpy as np
 import pandas as pd
 
 import divik._distance as dst
-import divik._kmeans as km
+import divik.cluster._kmeans as km
+import divik.cluster._kmeans._initialization as init
 import divik._score as sc
 
 
@@ -35,7 +36,7 @@ class TestGap(unittest.TestCase):
             self.worse_labels).mean().values
         self.distance = dst.ScipyDistance(dst.KnownMetric.euclidean)
         kmeans = km._KMeans(km.Labeling(self.distance),
-                            km.ExtremeInitialization(self.distance),
+                            init.ExtremeInitialization(self.distance),
                             number_of_iterations=10)
         self.split = partial(kmeans, number_of_clusters=2)
         self.gap = partial(sc.gap, distance=self.distance, split=self.split)

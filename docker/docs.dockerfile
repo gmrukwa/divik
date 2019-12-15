@@ -12,4 +12,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		make \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir sphinx numpydoc
+RUN pip install --no-cache-dir sphinx numpydoc sphinx-rtd-theme

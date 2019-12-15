@@ -35,8 +35,10 @@ def seed(seed_: int = 0):
 def seeded(wrapped_requires_seed: bool = False):
     """Create seeded scope for function call.
 
-    @param wrapped_requires_seed: if true, passes seed parameter to the inner
-    function
+    Parameters
+    ----------
+    wrapped_requires_seed: bool, optional, default: False
+        if true, passes seed parameter to the inner function
     """
     get = dict.get if wrapped_requires_seed else dict.pop
 

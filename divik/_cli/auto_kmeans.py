@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import skimage.io as sio
 
-import divik._kmeans as km
+from divik.cluster import AutoKMeans
 import divik._score
 import divik._cli._utils as scr
 import divik._utils as u
@@ -18,20 +18,20 @@ import divik._utils as u
 Segmentations = List[Tuple[u.IntLabels, u.Centroids]]
 
 
-def get_segmentations(kmeans: km.AutoKMeans) -> Segmentations:
+def get_segmentations(kmeans: AutoKMeans) -> Segmentations:
     return [(est.labels_, est.cluster_centers_) for est in kmeans.estimators_]
 
 
-def make_segmentations_matrix(kmeans: km.AutoKMeans) -> np.ndarray:
+def make_segmentations_matrix(kmeans: AutoKMeans) -> np.ndarray:
     return np.hstack([e.labels_.reshape(-1, 1) for e in kmeans.estimators_])
 
 
-def make_scores_report(kmeans: km.AutoKMeans, n_jobs: int = 1) -> pd.DataFrame:
+def make_scores_report(kmeans: AutoKMeans, n_jobs: int = 1) -> pd.DataFrame:
     picker = divik._score.make_picker(kmeans.method, n_jobs, kmeans.gap)
     return picker.report(kmeans.estimators_, kmeans.scores_)
 
 
-def save(kmeans: km.AutoKMeans, destination: str, xy: np.ndarray=None):
+def save(kmeans: AutoKMeans, destination: str, xy: np.ndarray=None):
     logging.info("Saving result.")
 
     logging.info("Saving model.")
@@ -69,7 +69,7 @@ def save(kmeans: km.AutoKMeans, destination: str, xy: np.ndarray=None):
 def main():
     data, config, destination, xy = scr.initialize()
     try:
-        kmeans = km.AutoKMeans(**config)
+        kmeans = AutoKMeans(**config)
         kmeans.fit(data)
     except Exception as ex:
         logging.error("Failed with exception.")

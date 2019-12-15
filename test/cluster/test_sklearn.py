@@ -6,7 +6,7 @@ from sklearn.metrics import adjusted_rand_score
 
 import divik._distance as dst
 
-from divik._sklearn import DiviK
+from divik.cluster._sklearn import DiviK
 
 
 class DivikTest(unittest.TestCase):

@@ -1,7 +1,7 @@
-divik package
-=============
+`divik` package
+===============
 
 .. automodule:: divik
    :members:
    :undoc-members:
-   :show-inheritance:
+   :inherited-members:

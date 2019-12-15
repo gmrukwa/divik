@@ -3,8 +3,9 @@ from unittest.mock import create_autospec, patch
 
 import numpy as np
 
-from divik import _distance as dist, _kmeans as km
-from test.kmeans import data
+from divik import _distance as dist
+from divik.cluster._kmeans import _initialization as km
+from test.cluster.kmeans import data
 
 
 def measure(func):
