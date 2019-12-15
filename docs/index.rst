@@ -11,6 +11,7 @@ Welcome to divik's documentation!
    :caption: Contents:
 
    divik
+   divik.feature_selection
 
 
 Indices and tables
@@ -18,4 +19,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
