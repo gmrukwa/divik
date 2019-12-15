@@ -84,7 +84,7 @@ Configuration file should be a JSON file as follows:
   "minimal_size": 16,
   "rejection_size": 2,
   "minimal_features_percentage": 0.01,
-  "fast_kmeans_iters": 10,
+  "fast_kmeans_iter": 10,
   "k_max": 10,
   "normalize_rows": true,
   "use_logfilters": true,
@@ -162,7 +162,7 @@ Default `0.01` (corresponding to `1%`).
 The target percentage of features that are used by fallback percentage
 filter for `'outlier'` filter.
 
-#### `fast_kmeans_iters`
+#### `fast_kmeans_iter`
 
 Number of k-means iterations performed during GAP trial. Default `10`. In most
 cases this is sufficient.
