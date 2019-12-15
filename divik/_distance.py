@@ -24,6 +24,9 @@ import scipy.spatial.distance as dist
 import scipy.stats as st
 
 
+# TODO: Remove this file and any references.
+
+
 class DistanceMetric(object, metaclass=ABCMeta):
     """Measures distance between points in multidimensional space."""
 

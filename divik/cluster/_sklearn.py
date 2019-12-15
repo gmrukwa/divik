@@ -455,6 +455,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         return np.array(labels, dtype=np.int32)
 
 
+# TODO: remove redundant parameter
 def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
         -> Tuple[int]:
     path = []
