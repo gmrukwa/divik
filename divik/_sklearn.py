@@ -389,7 +389,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         Returns
         -------
 
-        X_new : array, shape [n_samples, n_clusters_]
+        X_new : array, shape [n_samples, self.n_clusters_]
             X transformed in the new space.
         """
         return self.fit(X).transform(X)
@@ -410,7 +410,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         Returns
         -------
 
-        X_new : array, shape [n_samples, n_clusters_]
+        X_new : array, shape [n_samples, self.n_clusters_]
             X transformed in the new space.
         """
         if self._needs_normalization():
