@@ -26,7 +26,7 @@ import numpy as np
 from sklearn.base import clone
 import tqdm
 
-import divik._feature_selection as fs
+import divik.feature_selection as fs
 import divik._kmeans as km
 from divik._utils import Data, DivikResult
 

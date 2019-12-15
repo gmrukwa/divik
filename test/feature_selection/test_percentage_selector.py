@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-import divik._feature_selection as fs
+import divik.feature_selection as fs
 
 
 class PercentageSelectorTest(unittest.TestCase):

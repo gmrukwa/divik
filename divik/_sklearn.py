@@ -9,7 +9,7 @@ import tqdm
 
 import divik._divik as dv
 import divik._distance as dst
-import divik._feature_selection as fs
+import divik.feature_selection as fs
 import divik._kmeans as km
 import divik._summary as summary
 from divik._utils import normalize_rows, DivikResult, get_n_jobs, context_if

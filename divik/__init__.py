@@ -3,7 +3,7 @@ __version__ = '2.3.5'
 from ._seeding import seeded
 from ._sklearn import DiviK
 from ._kmeans import AutoKMeans, KMeans
-from ._feature_selection import (
+from .feature_selection import (
     StatSelectorMixin,
     NoSelector,
     GMMSelector,
