@@ -26,8 +26,6 @@ import numpy as np
 from sklearn.base import clone
 import tqdm
 
-import divik.feature_selection as fs
-import divik.cluster._kmeans as km
 from divik._utils import Data, DivikResult
 
 
@@ -97,10 +95,14 @@ class DivikReporter:
         lg.info('Assembled. {0} paths open.'.format(self.paths_open))
 
 
+AutoKMeans = 'divik.cluster.AutoKMeans'
+StatSelector = 'divik.feature_selection.StatSelectorMixin'
+
+
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def divik(data: Data, selection: np.ndarray,
-          fast_kmeans: km.AutoKMeans, full_kmeans: km.AutoKMeans,
-          feature_selector: fs.StatSelectorMixin,
+          fast_kmeans: AutoKMeans, full_kmeans: AutoKMeans,
+          feature_selector: StatSelector,
           minimal_size: int, rejection_size: int, report: DivikReporter) \
         -> Optional[DivikResult]:
     subset = data[selection]

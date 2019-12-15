@@ -8,7 +8,7 @@ from divik import _distance as dist
 from divik.cluster import _kmeans as km
 from divik.cluster._kmeans import _core as cc
 from divik.cluster._kmeans._core import redefine_centroids
-from test.kmeans import data
+from test.cluster.kmeans import data
 
 
 class LabelingTest(unittest.TestCase):

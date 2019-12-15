@@ -1,14 +1,16 @@
 __version__ = '2.3.5'
 
 from ._seeding import seeded
-from ._sklearn import DiviK
-from divik.cluster._kmeans import AutoKMeans, KMeans
+from ._utils import DivikResult
+from divik import feature_selection
+from divik import cluster
 from ._summary import plot, reject_split
 
 __all__ = [
     "__version__",
+    "cluster",
+    "feature_selection",
     "seeded",
-    "DiviK",
-    "AutoKMeans", "KMeans",
+    'DivikResult',
     "plot", "reject_split",
 ]

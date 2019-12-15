@@ -7,10 +7,10 @@ import pandas as pd
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import tqdm
 
-import divik._divik as dv
 import divik._distance as dst
 import divik.feature_selection as fs
-import divik.cluster._kmeans as km
+from . import _kmeans as km
+from . import _divik as dv
 import divik._summary as summary
 from divik._utils import normalize_rows, DivikResult, get_n_jobs, context_if
 
@@ -104,7 +104,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         When `filter_type` is `'outlier'`, this will switch feature selection
         to outliers-preserving mode (inlier features are removed).
 
-    n_jobs : int, optional, default: None
+    n_jobs: int, optional, default: None
         The number of jobs to use for the computation. This works by computing
         each of the GAP index evaluations in parallel and by making predictions
         in parallel.
@@ -112,49 +112,49 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     random_seed: int, optional, default: 0
         Seed to initialize the random number generator.
 
-    verbose : bool, optional, default: False
+    verbose: bool, optional, default: False
         Whether to report the progress of the computations.
 
     Attributes
     ----------
 
-    result_ : divik.types.DivikResult
+    result_: divik.DivikResult
         Hierarchical structure describing all the consecutive segmentations.
 
-    labels_ :
+    labels_:
         Labels of each point
 
-    centroids_ : array, [n_clusters, n_features]
+    centroids_: array, [n_clusters, n_features]
         Coordinates of cluster centers. If the algorithm stops before fully
         converging, these will not be consistent with ``labels_``. Also, the
         distance between points and respective centroids must be captured
         in appropriate features subspace. This is realized by the ``transform``
         method.
 
-    filters_ : array, [n_clusters, n_features]
+    filters_: array, [n_clusters, n_features]
         Filters that were applied to the feature space on the level that was
         the final segmentation for a subset.
 
-    depth_ : int
+    depth_: int
         The number of hierarchy levels in the segmentation.
 
-    n_clusters_ : int
+    n_clusters_: int
         The final number of clusters in the segmentation, on the tree leaf
         level.
 
-    paths_ : Dict[int, Tuple[int]]
+    paths_: Dict[int, Tuple[int]]
         Describes how the cluster number corresponds to the path in the tree.
         Element of the tuple indicates the sub-segment number on each tree
         level.
 
-    reverse_paths_ : Dict[Tuple[int], int]
+    reverse_paths_: Dict[Tuple[int], int]
         Describes how the path in the tree corresponds to the cluster number.
         For more details see ``paths_``.
 
     Examples
     --------
 
-    >>> from divik import DiviK
+    >>> from divik.cluster import DiviK
     >>> from sklearn.datasets import make_blobs
     >>> X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
     ...                   random_state=42)
