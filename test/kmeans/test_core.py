@@ -4,8 +4,10 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from divik import _kmeans as km, _distance as dist
-from divik._kmeans._core import redefine_centroids
+from divik import _distance as dist
+from divik.cluster import _kmeans as km
+from divik.cluster._kmeans import _core as cc
+from divik.cluster._kmeans._core import redefine_centroids
 from test.kmeans import data
 
 
@@ -138,7 +140,7 @@ class KMeansIntegrationTest(unittest.TestCase):
         distance = dist.ScipyDistance(dist.KnownMetric.euclidean)
         euclidean_labeling = km.Labeling(distance)
         kmeans = km._KMeans(labeling=euclidean_labeling,
-                            initialize=km.ExtremeInitialization(distance),
+                            initialize=cc.ExtremeInitialization(distance),
                             number_of_iterations=100)
 
         labels, _ = kmeans(data, 2)

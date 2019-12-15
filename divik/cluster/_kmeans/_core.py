@@ -6,7 +6,7 @@ from sklearn.utils.validation import check_is_fitted
 
 from divik import _distance as dist
 from divik._distance import make_distance
-from divik._kmeans._initialization import \
+from divik.cluster._kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
     PercentileInitialization
