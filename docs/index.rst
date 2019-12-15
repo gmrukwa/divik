@@ -11,6 +11,7 @@ Welcome to divik's documentation!
    :caption: Contents:
 
    divik
+   divik.cluster
    divik.feature_selection
 
 
