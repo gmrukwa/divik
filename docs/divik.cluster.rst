@@ -1,5 +1,5 @@
-divik.cluster package
-=====================
+`cluster` module
+================
 
 .. automodule:: divik.cluster
    :members:

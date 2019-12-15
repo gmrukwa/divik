@@ -1,5 +1,5 @@
-divik package
-=============
+`divik` package
+===============
 
 .. automodule:: divik
    :members:
