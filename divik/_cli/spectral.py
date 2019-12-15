@@ -1,15 +1,15 @@
 import logging
 
 import numpy as np
+import scipy.spatial.distance as dist
 from sklearn.base import BaseEstimator
 from sklearn.manifold import SpectralEmbedding
 from sklearn.utils.validation import check_is_fitted
 
-from divik._distance import DistanceMetric, make_distance
 from divik._utils import Data
 
 
-def locally_adjusted_affinity(d: DistanceMetric, X: Data, neighbors: int = 7) \
+def locally_adjusted_affinity(X: Data, d: str, neighbors: int = 7) \
         -> Data:
     """Calculate affinity with local density correction
 
@@ -20,11 +20,11 @@ def locally_adjusted_affinity(d: DistanceMetric, X: Data, neighbors: int = 7) \
 
     Parameters
     ----------
-    d : DistanceMetric
-        Measure of distance between points.
-
     X : array-like or sparse matrix, shape=(n_samples, n_features)
         Training instances to cluster.
+
+    d : str
+        Measure of distance between points.
 
     neighbors : int
         The number of neighbors considered a local neighborhood.
@@ -41,7 +41,7 @@ def locally_adjusted_affinity(d: DistanceMetric, X: Data, neighbors: int = 7) \
     https://papers.nips.cc/paper/2619-self-tuning-spectral-clustering.pdf
 
     """
-    distances = d(X, X)
+    distances = dist.pdist(X, metric=d)
     knn_distances = np.sort(distances, axis=0)[neighbors].reshape(-1, 1)
     local_scale = knn_distances.dot(knn_distances.T)
     affinity = - distances ** 2 / local_scale
@@ -145,9 +145,8 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
             Returns the instance itself.
         """
         logging.debug('Computing locally adjusted affinities.')
-        distance = make_distance(self.distance)
         affinity_matrix_ = locally_adjusted_affinity(
-            distance, X, self.n_neighbors)
+            X, self.distance, self.n_neighbors)
 
         logging.debug('Computing embedding of affinities.')
         embedder = SpectralEmbedding(n_components=self.n_components,
