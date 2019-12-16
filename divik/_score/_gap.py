@@ -7,9 +7,9 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import scipy.spatial.distance as dist
 from sklearn.base import clone
 
-from divik._distance import DistanceMetric, make_distance
 from divik._score._picker import Picker
 from divik._utils import Centroids, IntLabels, Data, SegmentationMethod, \
     context_if, get_n_jobs, normalize_rows
@@ -20,12 +20,13 @@ KMeans = 'divik.KMeans'
 
 
 def _dispersion(data: Data, labels: IntLabels, centroids: Centroids,
-                distance: DistanceMetric, normalize: bool = False) -> float:
+                distance: str, normalize: bool = False) -> float:
     if normalize:
         data = normalize_rows(data)
     clusters = pd.DataFrame(data).groupby(labels)
     return float(np.sum([
-        np.sum(distance(centroids[np.newaxis, label], cluster_members.values))
+        np.sum(dist.cdist(centroids[np.newaxis, label],
+                          cluster_members.values, distance))
         for label, cluster_members in clusters
     ]))
 
@@ -35,7 +36,7 @@ def _dispersion_of_random_sample(seed: int,
                                  minima: np.ndarray,
                                  ranges: np.ndarray,
                                  split: SegmentationMethod,
-                                 distance: DistanceMetric,
+                                 distance: str,
                                  normalize_rows: bool = False) -> float:
     np.random.seed(seed)
     sample = np.random.random_sample(shape) * ranges + minima
@@ -50,7 +51,7 @@ def _dispersion_of_random_sample(seed: int,
 # TODO: Reduce the number of parameters introducing single KMeans object
 @seeded(wrapped_requires_seed=True)
 def gap(data: Data, labels: IntLabels, centroids: Centroids,
-        distance: DistanceMetric, split: SegmentationMethod,
+        distance: str, split: SegmentationMethod,
         seed: int = 0, n_trials: int = 100, pool: Pool = None,
         return_deviation: bool = False, normalize_rows: bool = False) -> float:
     minima = np.min(data, axis=0)
@@ -112,7 +113,7 @@ class GapPicker(Picker):
             scores = [
                 gap_(labels=estimator.labels_,
                      centroids=estimator.cluster_centers_,
-                     distance=make_distance(estimator.distance),
+                     distance=estimator.distance,
                      split=_fast_kmeans(estimator, self.max_iter),
                      pool=pool,
                      normalize_rows=estimator.normalize_rows)
