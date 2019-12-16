@@ -37,7 +37,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     distance: str, optional, default: 'correlation'
         The distance metric between points, centroids and for GAP index
-        estimation.
+        estimation. One of the distances supported by scipy package.
 
     minimal_size: int, optional, default: None
         The minimum size of the region (the number of observations) to be
