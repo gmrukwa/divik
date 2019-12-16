@@ -8,23 +8,7 @@ import pandas as pd
 from scipy.spatial import distance as dist
 
 from divik._score._picker import Picker
-from divik._utils import Centroids, IntLabels, Data, get_n_jobs
-
-
-# TODO: Merge with the one below
-def _dunn_backend(data: Data, labels: IntLabels, centroids: Centroids,
-                  distance: str) -> float:
-    if centroids.shape[0] == 1:
-        return -np.inf
-    clusters = pd.DataFrame(data).groupby(labels).apply(np.asarray)
-    intercluster = dist.pdist(centroids, distance)
-    intercluster = np.min(intercluster[intercluster != 0])
-    intracluster = np.max([
-        np.mean(dist.cdist(cluster, centroid.reshape(1, -1), distance))
-        for cluster, centroid in zip(clusters, centroids)
-    ])
-    score = intercluster / intracluster
-    return score
+from divik._utils import Data, get_n_jobs
 
 
 KMeans = 'divik.KMeans'
@@ -36,8 +20,17 @@ _DATA = {}
 def _dunn(kmeans: KMeans, data: Data) -> float:
     if isinstance(data, str):
         data = _DATA[data]
-    return _dunn_backend(data, kmeans.labels_,
-                         kmeans.cluster_centers_, kmeans.distance)
+    if kmeans.cluster_centers_.shape[0] == 1:
+        return -np.inf
+    clusters = pd.DataFrame(data).groupby(kmeans.labels_).apply(np.asarray)
+    intercluster = dist.pdist(kmeans.cluster_centers_, kmeans.distance)
+    intercluster = np.min(intercluster[intercluster != 0])
+    intracluster = np.max([
+        np.mean(dist.cdist(cluster, centroid.reshape(1, -1), kmeans.distance))
+        for cluster, centroid in zip(clusters, kmeans.cluster_centers_)
+    ])
+    score = intercluster / intracluster
+    return score
 
 
 class DunnPicker(Picker):
