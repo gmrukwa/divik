@@ -212,6 +212,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             Index of the cluster each sample belongs to.
         """
         check_is_fitted(self, 'cluster_centers_')
+        if self.normalize_rows:
+            X = normalize_rows(X)
         labels = dst.cdist(
             X, self.cluster_centers_, self.distance).argmin(axis=1)
         return labels
@@ -237,4 +239,6 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         """
         check_is_fitted(self, 'cluster_centers_')
+        if self.normalize_rows:
+            X = normalize_rows(X)
         return dst.cdist(X, self.cluster_centers_, self.distance)
