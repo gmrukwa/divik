@@ -3,7 +3,6 @@ from unittest.mock import create_autospec, patch
 
 import numpy as np
 
-from divik import _distance as dist
 from divik.cluster._kmeans import _initialization as km
 from test.cluster.kmeans import data
 
@@ -15,14 +14,7 @@ def measure(func):
 class ExtremeInitializationTest(unittest.TestCase):
     def setUp(self):
         self.number_of_clusters = 2
-        self.distance = dist.ScipyDistance(dist.KnownMetric.euclidean)
-        self.initialize = km.ExtremeInitialization(self.distance)
-
-    def test_uses_given_distance(self):
-        with patch.object(dist.ScipyDistance, '__call__',
-                          new=measure(dist.ScipyDistance.__call__)) as mock:
-            self.initialize(data, self.number_of_clusters)
-            self.assertGreater(mock.call_count, 0)
+        self.initialize = km.ExtremeInitialization('euclidean')
 
     def test_centroids_have_the_same_number_of_features_as_data(self):
         centroids = self.initialize(data, self.number_of_clusters)
@@ -54,5 +46,4 @@ class ExtremeInitializationTest(unittest.TestCase):
 class PercentileInitializationTest(ExtremeInitializationTest):
     def setUp(self):
         self.number_of_clusters = 2
-        self.distance = dist.ScipyDistance(dist.KnownMetric.euclidean)
-        self.initialize = km.PercentileInitialization(self.distance)
+        self.initialize = km.PercentileInitialization('euclidean')

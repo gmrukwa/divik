@@ -4,10 +4,10 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
+import scipy.spatial.distance as dist
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 import tqdm
 
-import divik._distance as dst
 import divik.feature_selection as fs
 from . import _kmeans as km
 from . import _divik as dv
@@ -37,7 +37,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     distance: str, optional, default: 'correlation'
         The distance metric between points, centroids and for GAP index
-        estimation.
+        estimation. One of the distances supported by scipy package.
 
     minimal_size: int, optional, default: None
         The minimum size of the region (the number of observations) to be
@@ -173,7 +173,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                  gap_trials: int = 10,
                  distance_percentile: float = 99.,
                  max_iter: int = 100,
-                 distance: str = dst.KnownMetric.correlation.value,
+                 distance: str = 'correlation',
                  minimal_size: int = None,
                  rejection_size: int = None,
                  rejection_percentage: float = None,
@@ -227,8 +227,6 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
                 "filter_type must be in ['gmm', 'outlier', 'auto', 'none']")
 
     def _validate_clustering(self):
-        if self.distance not in list(dst.KnownMetric):
-            raise ValueError('Unknown distance: %s' % self.distance)
         if self.gap_trials <= 0:
             raise ValueError('gap_trials must be greater than 0')
         if self.distance_percentile < 0 or self.distance_percentile > 100:
@@ -289,7 +287,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _needs_normalization(self):
         if self.normalize_rows is None:
-            return self.distance == dst.KnownMetric.correlation.value
+            return self.distance == 'correlation'
         return self.normalize_rows
 
     def _fast_kmeans(self):
@@ -415,9 +413,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         """
         if self._needs_normalization():
             X = normalize_rows(X)
-        distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
         distances = np.hstack([
-            distance(X[:, selector], centroid[np.newaxis, selector])
+            dist.cdist(
+                X[:, selector], centroid[np.newaxis, selector], self.distance)
             for selector, centroid in zip(self.filters_, self.centroids_)
         ])
         return distances
@@ -443,11 +441,10 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         """
         if self._needs_normalization():
             X = normalize_rows(X)
-        distance = dst.ScipyDistance(dst.KnownMetric[self.distance])
         n_jobs = get_n_jobs(self.n_jobs)
-        predict = partial(_predict_path, result=self.result_, distance=distance)
+        predict = partial(_predict_path, result=self.result_)
         if n_jobs == 1:
-            paths = [_predict_path(row, self.result_, distance) for row in X]
+            paths = [predict(row) for row in X]
         else:
             with Pool(n_jobs) as pool:
                 paths = pool.map(predict, X)
@@ -455,9 +452,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         return np.array(labels, dtype=np.int32)
 
 
-# TODO: remove redundant parameter
-def _predict_path(observation: np.ndarray, result: DivikResult, distance) \
-        -> Tuple[int]:
+def _predict_path(observation: np.ndarray, result: DivikResult) -> Tuple[int]:
     path = []
     observation = observation[np.newaxis, :]
     division = result

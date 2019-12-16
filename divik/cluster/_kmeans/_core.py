@@ -1,11 +1,10 @@
 from typing import Tuple
 
 import numpy as np
+import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from divik import _distance as dist
-from divik._distance import make_distance
 from divik.cluster._kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
@@ -15,7 +14,7 @@ from divik._utils import normalize_rows, Centroids, IntLabels, Data, Segmentatio
 
 class Labeling(object):
     """Labels observations by closest centroids"""
-    def __init__(self, distance_metric: dist.DistanceMetric):
+    def __init__(self, distance_metric: str):
         """
         @param distance_metric: distance metric for estimation of closest
         """
@@ -32,7 +31,7 @@ class Labeling(object):
             raise ValueError("Dimensionality of data and centroids must be "
                              "equal. Was %i and %i"
                              % (data.shape[1], centroids.shape[1]))
-        distances = self.distance_metric(data, centroids)
+        distances = dst.cdist(data, centroids, self.distance_metric)
         return np.argmin(distances, axis=1)
 
 
@@ -99,7 +98,7 @@ class _KMeans(SegmentationMethod):
         return labels, centroids
 
 
-def _parse_initialization(name: str, distance: dist.ScipyDistance,
+def _parse_initialization(name: str, distance: str,
                           percentile: float=None) -> Initialization:
     if name == 'percentile':
         return PercentileInitialization(distance, percentile)
@@ -118,12 +117,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         The number of clusters to form as well as the number of
         centroids to generate.
 
-    distance : {'braycurtis', 'canberra', 'chebyshev', 'cityblock',
-    'correlation', 'cosine', 'dice', 'euclidean', 'hamming', 'jaccard',
-    'kulsinski', 'mahalanobis', 'atching', 'minkowski', 'rogerstanimoto',
-    'russellrao', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'}
-        Distance measure, defaults to 'euclidean'. These are the distances
-        supported by scipy package.
+    distance : str, optional, default: 'euclidean'
+        Distance measure. One of the distances supported by scipy package.
 
     init : {'percentile' or 'extreme'}
         Method for initialization, defaults to 'percentile':
@@ -184,10 +179,10 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         y : Ignored
             not used, present here for API consistency by convention.
         """
-        dist = make_distance(self.distance)
-        initialize = _parse_initialization(self.init, dist, self.percentile)
+        initialize = _parse_initialization(
+            self.init, self.distance, self.percentile)
         kmeans = _KMeans(
-            labeling=Labeling(dist),
+            labeling=Labeling(self.distance),
             initialize=initialize,
             number_of_iterations=self.max_iter,
             normalize_rows=self.normalize_rows
@@ -217,8 +212,10 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             Index of the cluster each sample belongs to.
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = make_distance(self.distance)
-        labels = distance(X, self.cluster_centers_).argmin(axis=1)
+        if self.normalize_rows:
+            X = normalize_rows(X)
+        labels = dst.cdist(
+            X, self.cluster_centers_, self.distance).argmin(axis=1)
         return labels
 
     def transform(self, X):
@@ -242,5 +239,6 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = make_distance(self.distance)
-        return distance(X, self.cluster_centers_)
+        if self.normalize_rows:
+            X = normalize_rows(X)
+        return dst.cdist(X, self.cluster_centers_, self.distance)

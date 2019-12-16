@@ -45,12 +45,8 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         'gap' : compares dispersion of a clustering to a dispersion in
         grouping of a reference uniformly distributed dataset
 
-    distance: {'braycurtis', 'canberra', 'chebyshev', 'cityblock',
-    'correlation', 'cosine', 'dice', 'euclidean', 'hamming', 'jaccard',
-    'kulsinski', 'mahalanobis', 'atching', 'minkowski', 'rogerstanimoto',
-    'russellrao', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'}
-        Distance measure, defaults to 'euclidean'. These are the distances
-        supported by scipy package.
+    distance : str, optional, default: 'euclidean'
+        Distance measure. One of the distances supported by scipy package.
 
     init: {'percentile' or 'extreme'}
         Method for initialization, defaults to 'percentile':

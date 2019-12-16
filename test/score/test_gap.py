@@ -1,14 +1,18 @@
 import unittest
 
-from functools import partial
-
 import numpy as np
 import pandas as pd
 
-import divik._distance as dst
-import divik.cluster._kmeans as km
-import divik.cluster._kmeans._initialization as init
+import divik.cluster as km
 import divik._score as sc
+
+
+def dummy_kmeans(labels, cluster_centers):
+    kmeans = km.KMeans(n_clusters=len(cluster_centers), distance='euclidean',
+                       init='extreme', max_iter=10)
+    kmeans.labels_ = labels
+    kmeans.cluster_centers_ = cluster_centers
+    return kmeans
 
 
 class TestGap(unittest.TestCase):
@@ -24,34 +28,29 @@ class TestGap(unittest.TestCase):
         # separate a group
         idx = np.random.randint(0, 300, 100)
         self.data[tuple(idx), :] += 100
-        self.labels = np.zeros(shape=(300,), dtype=int)
-        self.labels[idx] = 1
-        self.centroids = pd.DataFrame(self.data).groupby(
-            self.labels).mean().values
+        # make labels
+        labels = np.zeros(shape=(300,), dtype=int)
+        labels[idx] = 1
+        centroids = pd.DataFrame(self.data).groupby(labels).mean().values
         # generate worse labeling
         idx = np.random.randint(0, 300, 50)
-        self.worse_labels = self.labels[:]
-        self.worse_labels[idx] = 1 - self.worse_labels[idx]
-        self.worse_centroids = pd.DataFrame(self.data).groupby(
-            self.worse_labels).mean().values
-        self.distance = dst.ScipyDistance(dst.KnownMetric.euclidean)
-        kmeans = km._KMeans(km.Labeling(self.distance),
-                            init.ExtremeInitialization(self.distance),
-                            number_of_iterations=10)
-        self.split = partial(kmeans, number_of_clusters=2)
-        self.gap = partial(sc.gap, distance=self.distance, split=self.split)
+        worse_labels = labels[:]
+        worse_labels[idx] = 1 - worse_labels[idx]
+        worse_centroids = pd.DataFrame(
+            self.data).groupby(worse_labels).mean().values
+        self.worse = dummy_kmeans(worse_labels, worse_centroids)
+        self.normal = dummy_kmeans(labels, centroids)
 
     def test_computes_score(self):
-        score = self.gap(self.data, self.labels, self.centroids)
+        score = sc.gap(self.data, self.normal)
         self.assertFalse(np.isnan(score))
 
     def test_good_labeling_has_greater_score(self):
-        better = self.gap(self.data, self.labels, self.centroids)
-        worse = self.gap(self.data, self.worse_labels, self.worse_centroids)
+        better = sc.gap(self.data, self.normal)
+        worse = sc.gap(self.data, self.worse)
         self.assertGreater(better, worse)
 
     def test_returns_std_if_requested(self):
-        gap, std = self.gap(self.data, self.labels, self.centroids,
-                            return_deviation=True)
+        gap, std = sc.gap(self.data, self.normal, return_deviation=True)
         self.assertIsNotNone(gap)
         self.assertIsNotNone(std)

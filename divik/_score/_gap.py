@@ -2,30 +2,29 @@ from __future__ import division
 from functools import partial
 import gc
 from multiprocessing import Pool
-from operator import attrgetter
 from typing import List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+import scipy.spatial.distance as dist
 from sklearn.base import clone
 
-from divik._distance import DistanceMetric, make_distance
 from divik._score._picker import Picker
-from divik._utils import Centroids, IntLabels, Data, SegmentationMethod, \
-    context_if, get_n_jobs, normalize_rows
+from divik._utils import Data, context_if, get_n_jobs, normalize_rows
 from divik._seeding import seeded
 
 
 KMeans = 'divik.KMeans'
 
 
-def _dispersion(data: Data, labels: IntLabels, centroids: Centroids,
-                distance: DistanceMetric, normalize: bool = False) -> float:
-    if normalize:
+def _dispersion(data: Data, kmeans: KMeans) -> float:
+    assert data.shape[0] == kmeans.labels_.size, "kmeans not fit on this data"
+    if kmeans.normalize_rows:
         data = normalize_rows(data)
-    clusters = pd.DataFrame(data).groupby(labels)
+    clusters = pd.DataFrame(data).groupby(kmeans.labels_)
     return float(np.sum([
-        np.sum(distance(centroids[np.newaxis, label], cluster_members.values))
+        np.sum(dist.cdist(kmeans.cluster_centers_[np.newaxis, label],
+                          cluster_members.values, kmeans.distance))
         for label, cluster_members in clusters
     ]))
 
@@ -34,14 +33,10 @@ def _dispersion_of_random_sample(seed: int,
                                  shape: Tuple[int, int],
                                  minima: np.ndarray,
                                  ranges: np.ndarray,
-                                 split: SegmentationMethod,
-                                 distance: DistanceMetric,
-                                 normalize_rows: bool = False) -> float:
+                                 kmeans: KMeans) -> float:
     np.random.seed(seed)
     sample = np.random.random_sample(shape) * ranges + minima
-    labels, centroids = split(sample)
-    dispersion = _dispersion(sample, labels, centroids, distance,
-                             normalize_rows)
+    dispersion = _dispersion(sample, kmeans.fit(sample))
     del sample
     gc.collect()
     return dispersion
@@ -49,25 +44,24 @@ def _dispersion_of_random_sample(seed: int,
 
 # TODO: Reduce the number of parameters introducing single KMeans object
 @seeded(wrapped_requires_seed=True)
-def gap(data: Data, labels: IntLabels, centroids: Centroids,
-        distance: DistanceMetric, split: SegmentationMethod,
-        seed: int = 0, n_trials: int = 100, pool: Pool = None,
-        return_deviation: bool = False, normalize_rows: bool = False) -> float:
+def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
+        pool: Pool = None, return_deviation: bool = False,
+        max_iter: int = 10) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
+    fast_kmeans = clone(kmeans)
+    fast_kmeans.max_iter = max_iter
     compute_dispersion = partial(_dispersion_of_random_sample,
                                  shape=data.shape,
                                  minima=minima,
                                  ranges=ranges,
-                                 split=split,
-                                 distance=distance,
-                                 normalize_rows=normalize_rows)
+                                 kmeans=fast_kmeans)
     if pool is None:
         dispersions = [compute_dispersion(i)
                        for i in range(seed, seed + n_trials)]
     else:
         dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
-    reference = _dispersion(data, labels, centroids, distance, normalize_rows)
+    reference = _dispersion(data, kmeans)
     log_dispersions = np.log(dispersions)
     gap_value = np.mean(log_dispersions) - np.log(reference)
     result = (gap_value, )
@@ -88,13 +82,6 @@ class pipe:
         return result
 
 
-def _fast_kmeans(kmeans: KMeans, max_iter: int = 10) -> SegmentationMethod:
-    new = clone(kmeans)
-    new.max_iter = max_iter
-    get_meta = attrgetter('labels_', 'cluster_centers_')
-    return pipe(new.fit, get_meta)
-
-
 class GapPicker(Picker):
     def __init__(self, max_iter: int = 10, seed: int = 0, n_trials: int = 10,
                  correction: bool = True, n_jobs: int = 1):
@@ -105,19 +92,12 @@ class GapPicker(Picker):
         self.correction = correction
 
     def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
-        gap_ = partial(gap, data, seed=self.seed, n_trials=self.n_trials,
-                       return_deviation=True)
         n_jobs = get_n_jobs(self.n_jobs)
         with context_if(self.n_jobs != 1, Pool, n_jobs) as pool:
-            scores = [
-                gap_(labels=estimator.labels_,
-                     centroids=estimator.cluster_centers_,
-                     distance=make_distance(estimator.distance),
-                     split=_fast_kmeans(estimator, self.max_iter),
-                     pool=pool,
-                     normalize_rows=estimator.normalize_rows)
-                for estimator in estimators
-            ]
+            gap_ = partial(gap, data, seed=self.seed, n_trials=self.n_trials,
+                           return_deviation=True, pool=pool,
+                           max_iter=self.max_iter)
+            scores = [gap_(kmeans=estimator) for estimator in estimators]
         return np.array(scores)
 
     def select(self, scores: np.ndarray) -> Optional[int]:
