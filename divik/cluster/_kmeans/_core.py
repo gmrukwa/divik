@@ -9,7 +9,13 @@ from divik.cluster._kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
     PercentileInitialization
-from divik._utils import normalize_rows, Centroids, IntLabels, Data, SegmentationMethod
+from divik._utils import (
+    normalize_rows,
+    Centroids,
+    IntLabels,
+    Data,
+    SegmentationMethod,
+)
 
 
 class Labeling(object):

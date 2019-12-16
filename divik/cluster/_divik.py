@@ -53,7 +53,8 @@ class DivikReporter:
         if lg.getLogger().getEffectiveLevel() <= lg.DEBUG:
             lg.debug('Subset shape: {0}'.format(subset.shape))
             lg.debug('Has NaNs: {0}'.format(np.isnan(subset).any()))
-            lg.debug('Limits: min={0}; max={1}'.format(subset.min(), subset.max()))
+            lg.debug('Limits: min={0}; max={1}'.format(
+                subset.min(), subset.max()))
             lg.debug('Has constant rows: {0}'.format(_constant_rows(subset)))
 
     def filtered(self, data):

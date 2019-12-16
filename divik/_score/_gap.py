@@ -65,7 +65,8 @@ def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
     gap_value = np.mean(log_dispersions) - np.log(reference)
     result = (gap_value, )
     if return_deviation:
-        standard_deviation = np.sqrt(1 + 1 / n_trials) * np.std(log_dispersions)
+        standard_deviation = np.sqrt(1 + 1 / n_trials) \
+                             * np.std(log_dispersions)
         result += (standard_deviation,)
     return result
 

@@ -258,7 +258,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
         self.labels_, self.paths_ = summary.merged_partition(self.result_,
                                                              return_paths=True)
-        self.reverse_paths_ = {value: key for key, value in self.paths_.items()}
+        self.reverse_paths_ = {
+            value: key for key, value in self.paths_.items()}
         self.filters_ = np.array(
             [self._get_filter(path) for path in self.reverse_paths_],
             dtype=bool)

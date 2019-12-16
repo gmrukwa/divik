@@ -102,11 +102,11 @@ class PercentileInitialization(Initialization):
                 locations_of_nans = np.array(list(zip(*np.nonzero(nans))))
                 raise ValueError('Distances between points cannot be NaN. '
                                  + 'This indicates that your data is probably'
-                                 + ' corrupted and analysis cannot be continued'
-                                 + ' in this setting. '
+                                 + ' corrupted and analysis cannot be '
+                                 + 'continued in this setting. '
                                  + 'Amount of NaNs: {0}. '.format(nans.sum())
-                                 + 'At positions described by [spot, centroid]: '
-                                 + '{0}'.format(locations_of_nans))
+                                 + 'At positions described by [spot, '
+                                 + 'centroid]: {0}'.format(locations_of_nans))
             distances[:] = np.minimum(current_distance.ravel(), distances)
             selected = self._get_percentile_element(distances)
             centroids[i] = data[selected]
