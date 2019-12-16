@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from divik import _distance as dist
 from divik.cluster import _kmeans as km
 from divik.cluster._kmeans import _core as cc
 from divik.cluster._kmeans._core import redefine_centroids

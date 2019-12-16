@@ -3,7 +3,6 @@ from unittest.mock import create_autospec, patch
 
 import numpy as np
 
-from divik import _distance as dist
 from divik.cluster._kmeans import _initialization as km
 from test.cluster.kmeans import data
 
