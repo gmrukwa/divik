@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
@@ -15,7 +16,7 @@ from divik._utils import normalize_rows, Centroids, IntLabels, Data, Segmentatio
 
 class Labeling(object):
     """Labels observations by closest centroids"""
-    def __init__(self, distance_metric: dist.DistanceMetric):
+    def __init__(self, distance_metric: str):
         """
         @param distance_metric: distance metric for estimation of closest
         """
@@ -32,7 +33,7 @@ class Labeling(object):
             raise ValueError("Dimensionality of data and centroids must be "
                              "equal. Was %i and %i"
                              % (data.shape[1], centroids.shape[1]))
-        distances = self.distance_metric(data, centroids)
+        distances = dst.cdist(data, centroids, self.distance_metric)
         return np.argmin(distances, axis=1)
 
 
@@ -187,7 +188,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         dist = make_distance(self.distance)
         initialize = _parse_initialization(self.init, dist, self.percentile)
         kmeans = _KMeans(
-            labeling=Labeling(dist),
+            labeling=Labeling(self.distance),
             initialize=initialize,
             number_of_iterations=self.max_iter,
             normalize_rows=self.normalize_rows

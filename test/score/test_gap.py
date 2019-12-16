@@ -35,11 +35,12 @@ class TestGap(unittest.TestCase):
         self.worse_centroids = pd.DataFrame(self.data).groupby(
             self.worse_labels).mean().values
         self.distance = dst.ScipyDistance(dst.KnownMetric.euclidean)
+        self.distance = 'euclidean'
         kmeans = km._KMeans(km.Labeling(self.distance),
-                            init.ExtremeInitialization(self.distance),
+                            init.ExtremeInitialization(dst.ScipyDistance(
+                                dst.KnownMetric.euclidean)),
                             number_of_iterations=10)
         self.split = partial(kmeans, number_of_clusters=2)
-        self.distance = 'euclidean'
         self.gap = partial(sc.gap, distance=self.distance, split=self.split)
 
     def test_computes_score(self):

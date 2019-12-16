@@ -13,7 +13,7 @@ from test.cluster.kmeans import data
 
 class LabelingTest(unittest.TestCase):
     def setUp(self):
-        self.label = km.Labeling(dist.ScipyDistance(dist.KnownMetric.euclidean))
+        self.label = km.Labeling('euclidean')
         self.centroids = np.array([
             [1, 1, 1, 1],
             [1000, 500000, -400000, -7000]
@@ -138,7 +138,7 @@ class KMeansIntegrationTest(unittest.TestCase):
         expected_labels = first_size * [0] + second_size * [1]
 
         distance = dist.ScipyDistance(dist.KnownMetric.euclidean)
-        euclidean_labeling = km.Labeling(distance)
+        euclidean_labeling = km.Labeling('euclidean')
         kmeans = km._KMeans(labeling=euclidean_labeling,
                             initialize=cc.ExtremeInitialization(distance),
                             number_of_iterations=100)
