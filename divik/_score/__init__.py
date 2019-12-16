@@ -1,4 +1,4 @@
-from ._dunn import dunn, DunnPicker
+from ._dunn import DunnPicker
 from ._gap import gap, GapPicker
 from ._picker import Picker
 
