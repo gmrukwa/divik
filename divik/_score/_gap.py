@@ -42,7 +42,6 @@ def _dispersion_of_random_sample(seed: int,
     return dispersion
 
 
-# TODO: Reduce the number of parameters introducing single KMeans object
 @seeded(wrapped_requires_seed=True)
 def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
         pool: Pool = None, return_deviation: bool = False,
