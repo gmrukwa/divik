@@ -53,6 +53,22 @@ def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
     return centroids
 
 
+def _validate_kmeans_input(data: Data, number_of_clusters: int):
+    if not isinstance(data, np.ndarray) or len(data.shape) != 2:
+        raise ValueError("data is expected to be 2D np.array")
+    if number_of_clusters < 1:
+        raise ValueError("number_of_clusters({0}) < 1".format(
+            number_of_clusters))
+
+
+def _validate_normalizable(data):
+    is_constant = data.min(axis=1) == data.max(axis=1)
+    if is_constant.any():
+        constant_rows = np.where(is_constant)[0]
+        msg = "Constant rows {0} are not allowed for normalization."
+        raise ValueError(msg.format(constant_rows))
+
+
 class _KMeans(SegmentationMethod):
     """K-means clustering"""
     def __init__(self, labeling: Labeling, initialize: Initialization,
@@ -70,21 +86,13 @@ class _KMeans(SegmentationMethod):
 
     def __call__(self, data: Data, number_of_clusters: int) \
             -> Tuple[IntLabels, Centroids]:
-        if not isinstance(data, np.ndarray) or len(data.shape) != 2:
-            raise ValueError("data is expected to be 2D np.array")
-        if number_of_clusters < 1:
-            raise ValueError("number_of_clusters({0}) < 1".format(
-                number_of_clusters))
-        elif number_of_clusters == 1:
+        _validate_kmeans_input(data, number_of_clusters)
+        if number_of_clusters == 1:
             return np.zeros((data.shape[0], 1), dtype=int), \
                    np.mean(data, axis=0, keepdims=True)
         data = data.reshape(data.shape, order='C')
         if self.normalize_rows:
-            is_constant = data.min(axis=1) == data.max(axis=1)
-            if is_constant.any():
-                constant_rows = np.where(is_constant)[0]
-                msg = "Constant rows {0} are not allowed for normalization."
-                raise ValueError(msg.format(constant_rows))
+            _validate_normalizable(data)
             data = normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
