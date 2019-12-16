@@ -16,8 +16,7 @@ def _dunn_backend(data: Data, labels: IntLabels, centroids: Centroids,
                   distance: str) -> float:
     if centroids.shape[0] == 1:
         return -np.inf
-    clusters = pd.DataFrame(data).groupby(labels).apply(
-        lambda cluster: cluster.values)
+    clusters = pd.DataFrame(data).groupby(labels).apply(np.asarray)
     intercluster = dist.pdist(centroids, distance)
     intercluster = np.min(intercluster[intercluster != 0])
     intracluster = np.max([
