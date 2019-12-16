@@ -5,8 +5,6 @@ import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from divik import _distance as dist
-from divik._distance import make_distance
 from divik.cluster._kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
@@ -100,7 +98,7 @@ class _KMeans(SegmentationMethod):
         return labels, centroids
 
 
-def _parse_initialization(name: str, distance: dist.ScipyDistance,
+def _parse_initialization(name: str, distance: str,
                           percentile: float=None) -> Initialization:
     if name == 'percentile':
         return PercentileInitialization(distance, percentile)
@@ -185,8 +183,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         y : Ignored
             not used, present here for API consistency by convention.
         """
-        dist = make_distance(self.distance)
-        initialize = _parse_initialization(self.init, dist, self.percentile)
+        initialize = _parse_initialization(
+            self.init, self.distance, self.percentile)
         kmeans = _KMeans(
             labeling=Labeling(self.distance),
             initialize=initialize,
@@ -218,8 +216,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             Index of the cluster each sample belongs to.
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = make_distance(self.distance)
-        labels = distance(X, self.cluster_centers_).argmin(axis=1)
+        labels = dst.cdist(
+            X, self.cluster_centers_, self.distance).argmin(axis=1)
         return labels
 
     def transform(self, X):
@@ -243,5 +241,4 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = make_distance(self.distance)
-        return distance(X, self.cluster_centers_)
+        return dst.cdist(X, self.cluster_centers_, self.distance)

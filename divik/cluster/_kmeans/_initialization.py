@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
 
 import numpy as np
+import scipy.spatial.distance as dist
 
-from divik import _distance as dist
 from divik._utils import Centroids, Data
 
 
@@ -44,7 +44,7 @@ def _validate(data: Data, number_of_centroids: int):
 
 class ExtremeInitialization(Initialization):
     """Initializes k-means by picking extreme points"""
-    def __init__(self, distance: dist.DistanceMetric):
+    def __init__(self, distance: str):
         self.distance = distance
 
     def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
@@ -61,7 +61,8 @@ class ExtremeInitialization(Initialization):
 
         distances = np.inf * np.ones((data.shape[0], ))
         for i in range(1, number_of_centroids):
-            current_distance = self.distance(data, centroids[np.newaxis, i - 1])
+            current_distance = dist.cdist(
+                data, centroids[np.newaxis, i - 1], self.distance)
             distances[:] = np.minimum(current_distance.ravel(), distances)
             centroids[i] = data[np.argmax(distances)]
 
@@ -69,7 +70,7 @@ class ExtremeInitialization(Initialization):
 
 
 class PercentileInitialization(Initialization):
-    def __init__(self, distance: dist.DistanceMetric, percentile: float=99.):
+    def __init__(self, distance: str, percentile: float=99.):
         assert 0 <= percentile <= 100, percentile
         self.distance = distance
         self.percentile = percentile
@@ -94,7 +95,8 @@ class PercentileInitialization(Initialization):
         distances = np.inf * np.ones((data.shape[0],))
         for i in range(1, number_of_centroids):
             assert not np.any(np.isnan(centroids[np.newaxis, i - 1]))
-            current_distance = self.distance(data, centroids[np.newaxis, i - 1])
+            current_distance = dist.cdist(
+                data, centroids[np.newaxis, i - 1], self.distance)
             nans = np.isnan(current_distance)
             if np.any(nans):
                 locations_of_nans = np.array(list(zip(*np.nonzero(nans))))
