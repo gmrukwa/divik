@@ -1,10 +1,10 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import numpy.testing as npt
 
-import divik._divik as dv
+import divik.cluster._divik as dv
 
 
 def returns(value):

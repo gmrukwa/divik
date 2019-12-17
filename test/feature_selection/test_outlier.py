@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-import divik._feature_selection._outlier as fs
+import divik.feature_selection._outlier as fs
 
 
 class HubertaTest(unittest.TestCase):

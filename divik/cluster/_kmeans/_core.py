@@ -1,21 +1,26 @@
 from typing import Tuple
 
 import numpy as np
+import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from divik import _distance as dist
-from divik._distance import make_distance
-from divik._kmeans._initialization import \
+from divik.cluster._kmeans._initialization import \
     Initialization, \
     ExtremeInitialization, \
     PercentileInitialization
-from divik._utils import normalize_rows, Centroids, IntLabels, Data, SegmentationMethod
+from divik._utils import (
+    normalize_rows,
+    Centroids,
+    IntLabels,
+    Data,
+    SegmentationMethod,
+)
 
 
 class Labeling(object):
     """Labels observations by closest centroids"""
-    def __init__(self, distance_metric: dist.DistanceMetric):
+    def __init__(self, distance_metric: str):
         """
         @param distance_metric: distance metric for estimation of closest
         """
@@ -32,7 +37,7 @@ class Labeling(object):
             raise ValueError("Dimensionality of data and centroids must be "
                              "equal. Was %i and %i"
                              % (data.shape[1], centroids.shape[1]))
-        distances = self.distance_metric(data, centroids)
+        distances = dst.cdist(data, centroids, self.distance_metric)
         return np.argmin(distances, axis=1)
 
 
@@ -54,6 +59,22 @@ def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
     return centroids
 
 
+def _validate_kmeans_input(data: Data, number_of_clusters: int):
+    if not isinstance(data, np.ndarray) or len(data.shape) != 2:
+        raise ValueError("data is expected to be 2D np.array")
+    if number_of_clusters < 1:
+        raise ValueError("number_of_clusters({0}) < 1".format(
+            number_of_clusters))
+
+
+def _validate_normalizable(data):
+    is_constant = data.min(axis=1) == data.max(axis=1)
+    if is_constant.any():
+        constant_rows = np.where(is_constant)[0]
+        msg = "Constant rows {0} are not allowed for normalization."
+        raise ValueError(msg.format(constant_rows))
+
+
 class _KMeans(SegmentationMethod):
     """K-means clustering"""
     def __init__(self, labeling: Labeling, initialize: Initialization,
@@ -71,21 +92,13 @@ class _KMeans(SegmentationMethod):
 
     def __call__(self, data: Data, number_of_clusters: int) \
             -> Tuple[IntLabels, Centroids]:
-        if not isinstance(data, np.ndarray) or len(data.shape) != 2:
-            raise ValueError("data is expected to be 2D np.array")
-        if number_of_clusters < 1:
-            raise ValueError("number_of_clusters({0}) < 1".format(
-                number_of_clusters))
-        elif number_of_clusters == 1:
+        _validate_kmeans_input(data, number_of_clusters)
+        if number_of_clusters == 1:
             return np.zeros((data.shape[0], 1), dtype=int), \
                    np.mean(data, axis=0, keepdims=True)
         data = data.reshape(data.shape, order='C')
         if self.normalize_rows:
-            is_constant = data.min(axis=1) == data.max(axis=1)
-            if is_constant.any():
-                constant_rows = np.where(is_constant)[0]
-                msg = "Constant rows {0} are not allowed for normalization."
-                raise ValueError(msg.format(constant_rows))
+            _validate_normalizable(data)
             data = normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
@@ -99,7 +112,7 @@ class _KMeans(SegmentationMethod):
         return labels, centroids
 
 
-def _parse_initialization(name: str, distance: dist.ScipyDistance,
+def _parse_initialization(name: str, distance: str,
                           percentile: float=None) -> Initialization:
     if name == 'percentile':
         return PercentileInitialization(distance, percentile)
@@ -118,12 +131,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         The number of clusters to form as well as the number of
         centroids to generate.
 
-    distance : {'braycurtis', 'canberra', 'chebyshev', 'cityblock',
-    'correlation', 'cosine', 'dice', 'euclidean', 'hamming', 'jaccard',
-    'kulsinski', 'mahalanobis', 'atching', 'minkowski', 'rogerstanimoto',
-    'russellrao', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'}
-        Distance measure, defaults to 'euclidean'. These are the distances
-        supported by scipy package.
+    distance : str, optional, default: 'euclidean'
+        Distance measure. One of the distances supported by scipy package.
 
     init : {'percentile' or 'extreme'}
         Method for initialization, defaults to 'percentile':
@@ -184,10 +193,10 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         y : Ignored
             not used, present here for API consistency by convention.
         """
-        dist = make_distance(self.distance)
-        initialize = _parse_initialization(self.init, dist, self.percentile)
+        initialize = _parse_initialization(
+            self.init, self.distance, self.percentile)
         kmeans = _KMeans(
-            labeling=Labeling(dist),
+            labeling=Labeling(self.distance),
             initialize=initialize,
             number_of_iterations=self.max_iter,
             normalize_rows=self.normalize_rows
@@ -217,8 +226,10 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             Index of the cluster each sample belongs to.
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = make_distance(self.distance)
-        labels = distance(X, self.cluster_centers_).argmin(axis=1)
+        if self.normalize_rows:
+            X = normalize_rows(X)
+        labels = dst.cdist(
+            X, self.cluster_centers_, self.distance).argmin(axis=1)
         return labels
 
     def transform(self, X):
@@ -242,5 +253,6 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         """
         check_is_fitted(self, 'cluster_centers_')
-        distance = make_distance(self.distance)
-        return distance(X, self.cluster_centers_)
+        if self.normalize_rows:
+            X = normalize_rows(X)
+        return dst.cdist(X, self.cluster_centers_, self.distance)

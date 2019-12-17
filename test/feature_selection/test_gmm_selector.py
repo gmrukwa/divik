@@ -4,7 +4,7 @@ import numpy as np
 import numpy.testing as npt
 from sklearn.metrics import accuracy_score
 
-import divik._feature_selection as fs
+import divik.feature_selection as fs
 
 
 class GMMSelectorTest(unittest.TestCase):
