@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import logging
 import os
 import platform
+import warnings
 
 import numpy as np
 
@@ -83,7 +84,9 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
         import MatlabAlgorithms.MsiAlgorithms
         # noinspection PyPackageRequirements
         import matlab
-        values = matlab.double([[element] for element in values.ravel()])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            values = matlab.double([[element] for element in values.ravel()])
         try:
             thresholds = engine.fetch_thresholds(values,
                                                  'MaxComponents',
