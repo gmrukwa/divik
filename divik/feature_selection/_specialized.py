@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.base import BaseEstimator
-from sklearn.feature_selection.base import SelectorMixin
+from ._stat_selector_mixin import SelectorMixin
 from ._gmm_selector import GMMSelector
 from ._outlier import OutlierSelector
 from ._percentage_selector import PercentageSelector
