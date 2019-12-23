@@ -215,7 +215,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         labels : array, shape [n_samples,]
             Index of the cluster each sample belongs to.
         """
-        check_is_fitted(self, 'best_')
+        check_is_fitted(self)
         return self.best_.predict(X)
 
     def transform(self, X):
@@ -238,5 +238,5 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             X transformed in the new space.
 
         """
-        check_is_fitted(self, 'best_')
+        check_is_fitted(self)
         return self.best_.transform(X)

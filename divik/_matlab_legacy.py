@@ -4,15 +4,17 @@ from contextlib import contextmanager
 import logging
 import os
 import platform
+import warnings
 
 import numpy as np
 
+
 # noinspection SpellCheckingInspection
 _MATLAB_SEARCH_PATHS = \
-    "/usr/local/MATLAB/MATLAB_Runtime/v91/runtime/glnxa64:" + \
-    "/usr/local/MATLAB/MATLAB_Runtime/v91/bin/glnxa64:" + \
-    "/usr/local/MATLAB/MATLAB_Runtime/v91/sys/os/glnxa64:" + \
-    "/usr/local/MATLAB/MATLAB_Runtime/v91/sys/opengl/lib/glnxa64:"
+    "/usr/local/MATLAB/MATLAB_Runtime/v96/runtime/glnxa64:" + \
+    "/usr/local/MATLAB/MATLAB_Runtime/v96/bin/glnxa64:" + \
+    "/usr/local/MATLAB/MATLAB_Runtime/v96/sys/os/glnxa64:" + \
+    "/usr/local/MATLAB/MATLAB_Runtime/v96/extern/bin/glnxa64:"
 
 
 _local_system = platform.system()
@@ -82,7 +84,9 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
         import MatlabAlgorithms.MsiAlgorithms
         # noinspection PyPackageRequirements
         import matlab
-        values = matlab.double([[element] for element in values.ravel()])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            values = matlab.double([[element] for element in values.ravel()])
         try:
             thresholds = engine.fetch_thresholds(values,
                                                  'MaxComponents',

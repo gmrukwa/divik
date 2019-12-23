@@ -20,6 +20,6 @@ This is the simplest instruction to run DiviK on Windows.
 #. Adjust the configuration to your needs
 
 .. note:: Configuration follows the JSON format with fields defined as
-``here <https://github.com/gmrukwa/divik/blob/master/divik/_cli/divik.md>`_.
+`here <https://github.com/gmrukwa/divik/blob/master/divik/_cli/divik.md>`_.
 
 #. Double click the ``run_divik.bat``

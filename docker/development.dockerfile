@@ -1,4 +1,4 @@
-FROM spectreteam/python_msi:v5.0.0
+FROM spectreteam/python_msi:v5.1.0.2019a.py37
 
 ENV PYTHONUNBUFFERED TRUE
 

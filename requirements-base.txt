@@ -3,15 +3,14 @@ dash-html-components==0.13.4
 dash-core-components==0.42.0
 dash-renderer==0.17.0
 dash-table==3.1.11
-h5py==2.8.0
-matplotlib==2.2.2
-networkx==2.1
-numpy==1.15.2
-pandas==0.20.3
-pyamg==4.0.0
-scikit-image==0.14.1
-scikit-learn==0.19.1
-scipy==1.1.0
-statsmodels==0.10.2
-tqdm==4.11.2
-typing==3.6.2; python_version=='3.4'
+h5py
+matplotlib
+networkx
+numpy
+pandas
+pyamg
+scikit-image
+scikit-learn
+scipy
+statsmodels
+tqdm
