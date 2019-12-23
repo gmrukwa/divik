@@ -3,7 +3,7 @@ dash-html-components==0.13.4
 dash-core-components==0.42.0
 dash-renderer==0.17.0
 dash-table==3.1.11
-h5py==2.8.0
+h5py
 matplotlib
 networkx
 numpy
