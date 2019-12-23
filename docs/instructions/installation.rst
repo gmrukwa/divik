@@ -15,7 +15,7 @@ To install latest stable version use::
 
 To install specific version, you can specify it in the command, e.g.::
 
-    docker pull gmrukwa/divik:2.3.5
+    docker pull gmrukwa/divik:2.3.6
 
 Python package
 --------------
@@ -43,4 +43,4 @@ package::
 
 or any stable tagged version, e.g.::
 
-    pip install divik==2.3.5
+    pip install divik==2.3.6
