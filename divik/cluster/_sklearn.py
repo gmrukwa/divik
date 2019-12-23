@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import scipy.spatial.distance as dist
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
+from sklearn.utils.validation import check_is_fitted
 import tqdm
 
 import divik.feature_selection as fs
@@ -412,6 +413,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         X_new : array, shape [n_samples, self.n_clusters_]
             X transformed in the new space.
         """
+        check_is_fitted(self)
         if self._needs_normalization():
             X = normalize_rows(X)
         distances = np.hstack([
@@ -440,6 +442,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         labels : array, shape [n_samples,]
             Index of the cluster each sample belongs to.
         """
+        check_is_fitted(self)
         if self._needs_normalization():
             X = normalize_rows(X)
         n_jobs = get_n_jobs(self.n_jobs)
