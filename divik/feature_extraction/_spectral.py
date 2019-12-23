@@ -182,7 +182,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
             Directory to save the embedding.
         """
         logging.info('Saving embedding to {0}.'.format(destination))
-        check_is_fitted(self, 'embedding_')
+        check_is_fitted(self)
         from functools import partial
         import os
         import pickle
