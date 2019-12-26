@@ -122,6 +122,10 @@ def find_thresholds_native(values: np.ndarray, max_components: int = 10) \
     -------
     array of candidate thresholds from crossings between GMM components
     """
+    if values.size <= max_components:
+        max_components = values.size
+    if values.size == 0:
+        return np.array([])
     if max_components <= 0:
         raise ValueError("max_components must be positive")
     if values.ndim != 1:
