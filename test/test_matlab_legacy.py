@@ -39,7 +39,7 @@ class TestFindThresholds(unittest.TestCase):
         first = np.random.randn(100)
         second = 100 + 2 * np.random.randn(100)
         values = np.hstack((first, second))
-        thresholds = ml.find_thresholds(values, max_components=2)
+        thresholds = ml.find_thresholds_native(values, max_components=2)
         self.assertEqual(len(thresholds), 1)
         self.assertLess(thresholds[0], 100)
         self.assertGreater(thresholds[0], 0)
@@ -49,7 +49,7 @@ class TestFindThresholds(unittest.TestCase):
         second = 100 + 2 * np.random.randn(1000)
         third = -second
         values = np.hstack((first, -first, second, third))
-        thresholds = ml.find_thresholds(values, max_components=3)
+        thresholds = ml.find_thresholds_native(values, max_components=3)
         self.assertEqual(len(thresholds), 2)
         self.assertLess(thresholds[0], 0)
         self.assertGreater(thresholds[0], -100)

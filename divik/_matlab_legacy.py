@@ -106,7 +106,7 @@ def find_thresholds_mcr(values: np.ndarray, max_components: int = 10,
         return np.array(thresholds).ravel() + offset
 
 
-def find_thresholds(values: np.ndarray, max_components: int = 10) \
+def find_thresholds_native(values: np.ndarray, max_components: int = 10) \
         -> np.ndarray:
     """Find candidate thresholds for decomposition of values by GMM.
 
@@ -131,3 +131,6 @@ def find_thresholds(values: np.ndarray, max_components: int = 10) \
     if np.min(values) == np.max(values):
         return np.array([])
     return gn.find_thresholds(values - offset, max_components) + offset
+
+
+find_thresholds = find_thresholds_mcr
