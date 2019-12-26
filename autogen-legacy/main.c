@@ -107,13 +107,13 @@ static PyMethodDef GamredNativeMethods[] = {
 
 static struct PyModuleDef gamred_native_module = {
     PyModuleDef_HEAD_INIT,
-    "gamred", // TODO: Change name to gamred_native
+    "gamred_native",
     "Python interface for the MATLAB fetch_thresholds function",
     -1,
     GamredNativeMethods
 };
 
-PyMODINIT_FUNC PyInit_gamred(void) {
+PyMODINIT_FUNC PyInit_gamred_native(void) {
     import_array();
     return PyModule_Create(&gamred_native_module);
 }
