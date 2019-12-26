@@ -30,6 +30,7 @@
 /*                                                                       */
 /*************************************************************************/
 /* Include Files */
+#include <Python.h>
 #include "rt_nonfinite.h"
 #include "fetch_thresholds.h"
 #include "main.h"
@@ -137,3 +138,38 @@ int main(int argc, const char * const argv[])
  *
  * [EOF]
  */
+
+
+static PyObject *method_fetch_thresholds(PyObject *self, PyObject *args) {
+    char *str, *filename = NULL;
+    int bytes_copied = -1;
+
+    /* Parse arguments */
+    if(!PyArg_ParseTuple(args, "ss", &str, &filename)) {
+        return NULL;
+    }
+
+    FILE *fp = fopen(filename, "w");
+    bytes_copied = fputs(str, fp);
+    fclose(fp);
+
+    return PyLong_FromLong(bytes_copied);
+}
+
+static PyMethodDef FputsMethods[] = {
+    {"fetch_thresholds", method_fetch_thresholds, METH_VARARGS, "Python interface for the MATLAB fetch_thresholds function"},
+    {NULL, NULL, 0, NULL}
+};
+
+
+static struct PyModuleDef fputsmodule = {
+    PyModuleDef_HEAD_INIT,
+    "gamred",
+    "Python interface for the MATLAB fetch_thresholds function",
+    -1,
+    FputsMethods
+};
+
+PyMODINIT_FUNC PyInit_gamred(void) {
+    return PyModule_Create(&fputsmodule);
+}

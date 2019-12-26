@@ -1,5 +1,6 @@
 """A setuptools based setup module for DiviK algorithm."""
 
+from glob import glob
 from setuptools import setup, find_packages, Extension
 from divik import __version__
 
@@ -61,6 +62,8 @@ setup(
     package_data={
     },
     ext_modules=[
-        Extension('dummy', ['dummy.c'])
+        Extension('gamred',
+                  sources=glob('autogen-legacy/*.c'),
+                  include_dirs=['autogen-legacy'])
     ],
 )
