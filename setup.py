@@ -64,7 +64,7 @@ setup(
     },
     ext_modules=[
         Extension('gamred_native',
-                  sources=glob('autogen-legacy/*.c'),
-                  include_dirs=['autogen-legacy', numpy.get_include()])
+                  sources=glob('gamred_native/*.c'),
+                  include_dirs=['gamred_native', numpy.get_include()])
     ],
 )
