@@ -124,6 +124,8 @@ def find_thresholds(values: np.ndarray, max_components: int = 10) \
     """
     if max_components <= 0:
         raise ValueError("max_components must be positive")
+    if values.ndim != 1:
+        raise ValueError("values must be 1D array")
     values = np.ascontiguousarray(values)
     offset = np.min(values)
     if np.min(values) == np.max(values):
