@@ -126,4 +126,6 @@ def find_thresholds(values: np.ndarray, max_components: int = 10) \
         raise ValueError("max_components must be positive")
     values = np.ascontiguousarray(values)
     offset = np.min(values)
+    if np.min(values) == np.max(values):
+        return np.array([])
     return gn.find_thresholds(values - offset, max_components) + offset
