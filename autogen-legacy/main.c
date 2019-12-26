@@ -53,7 +53,7 @@ static void main_fetch_thresholds(void);
 static emxArray_real_T *argInit_Unboundedx1_real_T(void)
 {
   emxArray_real_T *result;
-  static int iv0[1] = { 2 };
+  static int iv0[1] = { 2000 };
 
   int idx0;
 
@@ -65,7 +65,7 @@ static emxArray_real_T *argInit_Unboundedx1_real_T(void)
   for (idx0 = 0; idx0 < result->size[0U]; idx0++) {
     /* Set the value of the array element.
        Change this value to the value that the application requires. */
-    result->data[idx0] = argInit_real_T();
+    result->data[idx0] = idx0 % 2 == 1 ? argInit_real_T() : (double)1.0;
   }
 
   return result;
@@ -86,7 +86,7 @@ static double argInit_real_T(void)
  */
 static unsigned long argInit_uint64_T(void)
 {
-  return 0UL;
+  return 10UL;
 }
 
 /*
@@ -152,6 +152,18 @@ static PyObject *method_fetch_thresholds(PyObject *self, PyObject *args) {
     FILE *fp = fopen(filename, "w");
     bytes_copied = fputs(str, fp);
     fclose(fp);
+      
+    /* Initialize the application.
+      You do not need to do this more than one time. */
+    fetch_thresholds_initialize();
+
+    /* Invoke the entry-point functions.
+      You can call entry-point functions multiple times. */
+    main_fetch_thresholds();
+
+    /* Terminate the application.
+      You do not need to do this more than one time. */
+    fetch_thresholds_terminate();
 
     return PyLong_FromLong(bytes_copied);
 }
