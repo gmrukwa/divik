@@ -65,6 +65,9 @@ setup(
     ext_modules=[
         Extension('gamred_native',
                   sources=glob('gamred_native/*.c'),
-                  include_dirs=['gamred_native', numpy.get_include()])
+                  include_dirs=['gamred_native', numpy.get_include()],
+                  define_macros=[
+                      ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),
+                  ]),
     ],
 )
