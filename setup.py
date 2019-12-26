@@ -2,6 +2,7 @@
 
 from glob import glob
 from setuptools import setup, find_packages, Extension
+import numpy
 from divik import __version__
 
 with open('README.md') as infile:
@@ -64,6 +65,6 @@ setup(
     ext_modules=[
         Extension('gamred',
                   sources=glob('autogen-legacy/*.c'),
-                  include_dirs=['autogen-legacy'])
+                  include_dirs=['autogen-legacy', numpy.get_include()])
     ],
 )

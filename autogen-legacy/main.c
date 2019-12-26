@@ -31,6 +31,7 @@
 /*************************************************************************/
 /* Include Files */
 #include <Python.h>
+#include "numpy/arrayobject.h"
 #include "rt_nonfinite.h"
 #include "fetch_thresholds.h"
 #include "main.h"
@@ -187,5 +188,6 @@ static struct PyModuleDef gamred_native_module = {
 };
 
 PyMODINIT_FUNC PyInit_gamred(void) {
+    import_array();
     return PyModule_Create(&gamred_native_module);
 }
