@@ -70,7 +70,7 @@ class MatlabError(Exception):
 
 
 def find_thresholds_mcr(values: np.ndarray, max_components: int = 10,
-                        throw_on_engine_error: bool = True) -> np.ndarray:
+                        throw_on_engine_error: bool = False) -> np.ndarray:
     """Find candidate thresholds for decomposition of values by GMM.
 
     @param values: vector of values to decompose
