@@ -6,6 +6,8 @@ import os
 import platform
 import warnings
 
+import gamred_native as gn
+
 import numpy as np
 
 
@@ -100,3 +102,12 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
             else:
                 return np.array([])
         return np.array(thresholds).ravel()
+
+
+def find_thresholds_native(values: np.ndarray, max_components: int = 10) \
+        -> np.ndarray:
+    if max_components <= 0:
+        raise ValueError("max_components must be positive")
+    values = np.ascontiguousarray(values)
+    offset = np.min(values)
+    return gn.find_thresholds(values - offset, max_components) + offset
