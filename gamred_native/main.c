@@ -60,7 +60,6 @@ static PyObject *method_find_thresholds(PyObject *self, PyObject *args) {
     PyObject *vals=NULL;
     PyArrayObject *vals_arr=NULL;
     PyArrayObject *thresholds=NULL;
-    // TODO: It must be checked on the Python side whether the number is positive.
     unsigned long max_components = 0;
     emxArray_real_T *native_thresholds;
     emxArray_real_T *native_vals;
@@ -81,8 +80,6 @@ static PyObject *method_find_thresholds(PyObject *self, PyObject *args) {
     fetch_thresholds_initialize();
 
     emxInitArray_real_T(&native_thresholds, 1);
-    // TODO: It must be checked on the Python side whether we have any difference
-    // in the data.
     native_vals = PyArrayObject_to_emxArray(vals_arr);
     Py_DECREF(vals_arr);
 
