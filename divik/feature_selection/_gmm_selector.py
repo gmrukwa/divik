@@ -114,10 +114,8 @@ class GMMSelector(BaseEstimator, StatSelectorMixin):
         self
         """
         self.vals_ = self._to_characteristics(X)
-        thrs = ml.find_thresholds(  # the translation is due to MATLAB's problem
-            self.vals_ - self.vals_.min(),
-            max_components=self.max_components,
-            throw_on_engine_error=False) + self.vals_.min()
+        thrs = ml.find_thresholds(
+            self.vals_, max_components=self.max_components)
         n_candidates = len(thrs) if self.n_candidates is None \
             else self.n_candidates
         desired_thrs = thrs[:n_candidates]

@@ -69,8 +69,8 @@ class MatlabError(Exception):
     pass
 
 
-def find_thresholds(values: np.ndarray, max_components: int = 10,
-                    throw_on_engine_error: bool = True) -> np.ndarray:
+def find_thresholds_mcr(values: np.ndarray, max_components: int = 10,
+                        throw_on_engine_error: bool = True) -> np.ndarray:
     """Find candidate thresholds for decomposition of values by GMM.
 
     @param values: vector of values to decompose
@@ -80,6 +80,8 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
     @return: array of candidate thresholds from crossings between GMM
     components
     """
+    offset = np.min(values)
+    values = values - offset
     with _matlab_paths():
         engine = _ensure_engine()
         # noinspection PyUnresolvedReferences
@@ -101,11 +103,25 @@ def find_thresholds(values: np.ndarray, max_components: int = 10,
                 raise MatlabError() from ex
             else:
                 return np.array([])
-        return np.array(thresholds).ravel()
+        return np.array(thresholds).ravel() + offset
 
 
-def find_thresholds_native(values: np.ndarray, max_components: int = 10) \
+def find_thresholds(values: np.ndarray, max_components: int = 10) \
         -> np.ndarray:
+    """Find candidate thresholds for decomposition of values by GMM.
+
+    Parameters
+    ----------
+    values:
+        vector of values to decompose
+
+    max_components:
+        maximal number of components to decompose into
+
+    Returns
+    -------
+    array of candidate thresholds from crossings between GMM components
+    """
     if max_components <= 0:
         raise ValueError("max_components must be positive")
     values = np.ascontiguousarray(values)
