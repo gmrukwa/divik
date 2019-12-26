@@ -38,9 +38,6 @@
 #include "rtwtypes.h"
 #include "fetch_thresholds_types.h"
 
-/* Function Declarations */
-extern int main(int argc, const char * const argv[]);
-
 #endif
 
 /*

@@ -32,6 +32,7 @@
 /* Include Files */
 #include <Python.h>
 #include "numpy/arrayobject.h"
+#include <string.h>
 #include "rt_nonfinite.h"
 #include "fetch_thresholds.h"
 #include "main.h"
@@ -39,138 +40,63 @@
 #include "fetch_thresholds_emxAPI.h"
 #include "fetch_thresholds_initialize.h"
 
-/* Function Declarations */
-static emxArray_real_T *argInit_Unboundedx1_real_T(void);
-static double argInit_real_T(void);
-static unsigned long argInit_uint64_T(void);
-static void main_fetch_thresholds(void);
-
-/* Function Definitions */
-
-/*
- * Arguments    : void
- * Return Type  : emxArray_real_T *
- */
-static emxArray_real_T *argInit_Unboundedx1_real_T(void)
+static emxArray_real_T *PyArrayObject_to_emxArray(PyArrayObject *vals)
 {
-  emxArray_real_T *result;
-  static int iv0[1] = { 2000 };
-
-  int idx0;
-
-  /* Set the size of the array.
-     Change this size to the value that the application requires. */
-  result = emxCreateND_real_T(1, iv0);
-
-  /* Loop over the array to initialize each element. */
-  for (idx0 = 0; idx0 < result->size[0U]; idx0++) {
-    /* Set the value of the array element.
-       Change this value to the value that the application requires. */
-    result->data[idx0] = argInit_real_T();
-  }
-  // TODO: It must be checked on the Python side whether we have any difference
-  // in the data.
-  result->data[idx0 - 1] = (double)1e-7;
-
+  int iv0[1] = { PyArray_SIZE(vals) };
+  emxArray_real_T *result = emxCreateND_real_T(1, iv0);
+  memcpy(result->data, PyArray_DATA(vals), PyArray_NBYTES(vals));
   return result;
 }
 
-/*
- * Arguments    : void
- * Return Type  : double
- */
-static double argInit_real_T(void)
+static PyArrayObject *emxArray_to_PyArrayObject(emxArray_real_T *vals)
 {
-  return 0.0;
+  npy_intp iv0[] = { vals->size[0U] };
+  PyArrayObject *result = (PyArrayObject *)PyArray_SimpleNew(1, iv0, NPY_DOUBLE);
+  memcpy(PyArray_DATA(result), vals->data, PyArray_NBYTES(result));
+  return result;
 }
-
-/*
- * Arguments    : void
- * Return Type  : unsigned long
- */
-static unsigned long argInit_uint64_T(void)
-{
-  // TODO: It must be checked on the Python side whether the number is positive.
-  return 10UL;
-}
-
-/*
- * Arguments    : void
- * Return Type  : void
- */
-static void main_fetch_thresholds(void)
-{
-  emxArray_real_T *thresholds;
-  emxArray_real_T *vals;
-  emxInitArray_real_T(&thresholds, 1);
-
-  /* Initialize function 'fetch_thresholds' input arguments. */
-  /* Initialize function input argument 'vals'. */
-  vals = argInit_Unboundedx1_real_T();
-
-  /* Call the entry-point 'fetch_thresholds'. */
-  fetch_thresholds(vals, argInit_uint64_T(), thresholds);
-  emxDestroyArray_real_T(thresholds);
-  emxDestroyArray_real_T(vals);
-}
-
-/*
- * Arguments    : int argc
- *                const char * const argv[]
- * Return Type  : int
- */
-int main(int argc, const char * const argv[])
-{
-  (void)argc;
-  (void)argv;
-
-  /* Initialize the application.
-     You do not need to do this more than one time. */
-  fetch_thresholds_initialize();
-
-  /* Invoke the entry-point functions.
-     You can call entry-point functions multiple times. */
-  main_fetch_thresholds();
-
-  /* Terminate the application.
-     You do not need to do this more than one time. */
-  fetch_thresholds_terminate();
-  return 0;
-}
-
-/*
- * File trailer for main.c
- *
- * [EOF]
- */
-
 
 static PyObject *method_fetch_thresholds(PyObject *self, PyObject *args) {
-    char *str, *filename = NULL;
-    int bytes_copied = -1;
+    PyObject *vals=NULL;
+    PyArrayObject *vals_arr=NULL;
+    PyArrayObject *thresholds=NULL;
+    // TODO: It must be checked on the Python side whether the number is positive.
+    unsigned long max_components = 0;
+    emxArray_real_T *native_thresholds;
+    emxArray_real_T *native_vals;
 
     /* Parse arguments */
-    if(!PyArg_ParseTuple(args, "ss", &str, &filename)) {
+    // https://docs.python.org/3/c-api/arg.html
+    if(!PyArg_ParseTuple(args, "Ok", &vals, &max_components)) {
         return NULL;
     }
 
-    FILE *fp = fopen(filename, "w");
-    bytes_copied = fputs(str, fp);
-    fclose(fp);
-      
+    vals_arr = (PyArrayObject *)PyArray_FROM_OTF(vals, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (vals_arr == NULL) {
+        return NULL;
+    }
+
     /* Initialize the application.
       You do not need to do this more than one time. */
     fetch_thresholds_initialize();
 
-    /* Invoke the entry-point functions.
-      You can call entry-point functions multiple times. */
-    main_fetch_thresholds();
+    emxInitArray_real_T(&native_thresholds, 1);
+    // TODO: It must be checked on the Python side whether we have any difference
+    // in the data.
+    native_vals = PyArrayObject_to_emxArray(vals_arr);
+    Py_DECREF(vals_arr);
 
+    fetch_thresholds(native_vals, max_components, native_thresholds);
+
+    emxDestroyArray_real_T(native_vals);
+    thresholds = emxArray_to_PyArrayObject(native_thresholds);
+    emxDestroyArray_real_T(native_thresholds);
+    
     /* Terminate the application.
       You do not need to do this more than one time. */
     fetch_thresholds_terminate();
 
-    return PyLong_FromLong(bytes_copied);
+    return (PyObject*)thresholds;
 }
 
 static PyMethodDef GamredNativeMethods[] = {
