@@ -40,6 +40,12 @@
 #include "fetch_thresholds_emxAPI.h"
 #include "fetch_thresholds_initialize.h"
 
+#ifdef UNITTEST
+  #define dbg(x) printf(x)
+#else
+  #define dbg(x) (x)
+#endif
+
 static emxArray_real_T *PyArrayObject_to_emxArray(PyArrayObject *vals)
 {
   int iv0[1] = { PyArray_SIZE(vals) };

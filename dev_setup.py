@@ -16,6 +16,7 @@ setup(
                   sources=glob('gamred_native/*.c'),
                   include_dirs=['gamred_native', numpy.get_include()],
                   define_macros=[
+                      ('UNITTEST', '1'),
                       ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),
                   ]),
     ],
