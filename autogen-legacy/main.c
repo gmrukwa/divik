@@ -168,20 +168,20 @@ static PyObject *method_fetch_thresholds(PyObject *self, PyObject *args) {
     return PyLong_FromLong(bytes_copied);
 }
 
-static PyMethodDef FputsMethods[] = {
+static PyMethodDef GamredNativeMethods[] = {
     {"fetch_thresholds", method_fetch_thresholds, METH_VARARGS, "Python interface for the MATLAB fetch_thresholds function"},
     {NULL, NULL, 0, NULL}
 };
 
 
-static struct PyModuleDef fputsmodule = {
+static struct PyModuleDef gamred_native_module = {
     PyModuleDef_HEAD_INIT,
     "gamred",
     "Python interface for the MATLAB fetch_thresholds function",
     -1,
-    FputsMethods
+    GamredNativeMethods
 };
 
 PyMODINIT_FUNC PyInit_gamred(void) {
-    return PyModule_Create(&fputsmodule);
+    return PyModule_Create(&gamred_native_module);
 }
