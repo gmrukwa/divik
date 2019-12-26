@@ -17,4 +17,6 @@ RUN mkdir -p /root/.config/matplotlib &&\
 
 COPY . /app
 
+RUN python dev_setup.py install
+
 RUN python -m unittest discover
