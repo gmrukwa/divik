@@ -56,7 +56,7 @@ static PyArrayObject *emxArray_to_PyArrayObject(emxArray_real_T *vals)
   return result;
 }
 
-static PyObject *method_fetch_thresholds(PyObject *self, PyObject *args) {
+static PyObject *method_find_thresholds(PyObject *self, PyObject *args) {
     PyObject *vals=NULL;
     PyArrayObject *vals_arr=NULL;
     PyArrayObject *thresholds=NULL;
@@ -100,7 +100,7 @@ static PyObject *method_fetch_thresholds(PyObject *self, PyObject *args) {
 }
 
 static PyMethodDef GamredNativeMethods[] = {
-    {"fetch_thresholds", method_fetch_thresholds, METH_VARARGS, "Python interface for the MATLAB fetch_thresholds function"},
+    {"find_thresholds", method_find_thresholds, METH_VARARGS, "Python interface for the MATLAB fetch_thresholds function"},
     {NULL, NULL, 0, NULL}
 };
 
