@@ -65,8 +65,11 @@ static emxArray_real_T *argInit_Unboundedx1_real_T(void)
   for (idx0 = 0; idx0 < result->size[0U]; idx0++) {
     /* Set the value of the array element.
        Change this value to the value that the application requires. */
-    result->data[idx0] = idx0 % 2 == 1 ? argInit_real_T() : (double)1.0;
+    result->data[idx0] = argInit_real_T();
   }
+  // TODO: It must be checked on the Python side whether we have any difference
+  // in the data.
+  result->data[idx0 - 1] = (double)1e-7;
 
   return result;
 }
@@ -86,6 +89,7 @@ static double argInit_real_T(void)
  */
 static unsigned long argInit_uint64_T(void)
 {
+  // TODO: It must be checked on the Python side whether the number is positive.
   return 10UL;
 }
 
@@ -176,7 +180,7 @@ static PyMethodDef GamredNativeMethods[] = {
 
 static struct PyModuleDef gamred_native_module = {
     PyModuleDef_HEAD_INIT,
-    "gamred",
+    "gamred", // TODO: Change name to gamred_native
     "Python interface for the MATLAB fetch_thresholds function",
     -1,
     GamredNativeMethods
