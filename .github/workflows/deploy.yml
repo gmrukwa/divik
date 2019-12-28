@@ -65,7 +65,7 @@ jobs:
           docker tag deployment $DOCKER_REPO:latest
           docker push $DOCKER_REPO:latest
 
-  push_pypi_package:
+  push_manylinux_pypi_package:
 
     if: github.event_name != 'schedule'
 
@@ -81,8 +81,73 @@ jobs:
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      # TODO: Parallelize this as a matrix
       - name: Build Python package
         uses: ./.github/actions/build-python-dist
+      - name: Publish Python package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+
+  push_windows_pypi_package:
+
+    if: github.event_name != 'schedule'
+
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [ '3.5', '3.6', '3.7', '3.8' ]
+    name: Python ${{ matrix.python-version }} Windows build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Embed version to package
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Build Python package
+        run: python setup.py bdist_wheel
+      - name: Publish Python package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+
+  push_macos_pypi_package:
+
+    if: github.event_name != 'schedule'
+
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        python-version: [ '3.5', '3.6', '3.7', '3.8' ]
+    name: Python ${{ matrix.python-version }} MacOS build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Embed version to package
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Build Python package
+        run: python setup.py bdist_wheel
       - name: Publish Python package
         uses: pypa/gh-action-pypi-publish@master
         with:
