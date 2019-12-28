@@ -100,4 +100,7 @@ class TestFindThresholdsConsistency(unittest.TestCase):
     def test_consistency(self, _, values):
         native = ml.find_thresholds_native(values)
         mcr = ml.find_thresholds_mcr(values)
-        npt.assert_almost_equal(native, mcr, decimal=3)
+        range_ = values.max() - values.min()
+        native_ = (native - values.min()) / range_
+        mcr_ = (mcr - values.min()) / range_
+        npt.assert_almost_equal(native_, mcr_, decimal=3)
