@@ -216,7 +216,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
     emxEnsureCapacity_uint32_T(opt_pals, i2);
     b_loop_ub = loop_ub * mz_out->size[1];
     for (i2 = 0; i2 < b_loop_ub; i2++) {
-      opt_pals->data[i2] = 0U;
+      opt_pals->data[i2] = 1U;
     }
 
     emxInit_real_T(&p_opt_idx, 2);
