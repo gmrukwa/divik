@@ -1,6 +1,8 @@
 """A setuptools based setup module for DiviK algorithm."""
 
-from setuptools import setup, find_packages
+from glob import glob
+from setuptools import setup, find_packages, Extension
+import numpy
 from divik import __version__
 
 with open('README.md') as infile:
@@ -57,7 +59,15 @@ setup(
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
-    python_requires='>=3.4,<3.6',
+    python_requires='>=3.5,<=3.7',
     package_data={
-    }
+    },
+    ext_modules=[
+        Extension('gamred_native',
+                  sources=glob('gamred_native/*.c'),
+                  include_dirs=['gamred_native', numpy.get_include()],
+                  define_macros=[
+                      ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),
+                  ]),
+    ],
 )

@@ -8,6 +8,7 @@ matplotlib
 networkx
 numpy
 pandas
+parameterized
 pyamg
 scikit-image
 scikit-learn
