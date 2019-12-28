@@ -60,6 +60,9 @@ setup(
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
+    setup_requires=[
+        'numpy>=0.12.1',
+    ],
     python_requires='>=3.5',
     package_data={
     },
