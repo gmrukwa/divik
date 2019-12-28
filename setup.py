@@ -27,6 +27,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Topic :: Scientific/Engineering :: Information Analysis',
@@ -59,7 +60,7 @@ setup(
         'tqdm>=4.11.2',
         'typing>=3.6.2'
     ],
-    python_requires='>=3.5,<=3.7',
+    python_requires='>=3.5',
     package_data={
     },
     ext_modules=[
