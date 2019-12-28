@@ -137,4 +137,4 @@ def find_thresholds_native(values: np.ndarray, max_components: int = 10) \
     return gn.find_thresholds(values - offset, max_components) + offset
 
 
-find_thresholds = find_thresholds_mcr
+find_thresholds = find_thresholds_native
