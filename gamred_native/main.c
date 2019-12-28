@@ -80,7 +80,6 @@ static PyObject *method_find_thresholds(PyObject *self, PyObject *args) {
     if (vals_arr == NULL) {
         return NULL;
     }
-    dbg("Parsed arguments.\n");
 
     /* Initialize the application.
       You do not need to do this more than one time. */
@@ -89,15 +88,12 @@ static PyObject *method_find_thresholds(PyObject *self, PyObject *args) {
     emxInitArray_real_T(&native_thresholds, 1);
     native_vals = PyArrayObject_to_emxArray(vals_arr);
     Py_DECREF(vals_arr);
-    dbg("Converted to native types.\n");
 
     fetch_thresholds(native_vals, max_components, native_thresholds);
-    dbg("Found thresholds.\n");
 
     emxDestroyArray_real_T(native_vals);
     thresholds = emxArray_to_PyArrayObject(native_thresholds);
     emxDestroyArray_real_T(native_thresholds);
-    dbg("Converted to ndarray.\n");
     
     /* Terminate the application.
       You do not need to do this more than one time. */
