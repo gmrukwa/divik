@@ -2,7 +2,7 @@
 [![BCH compliance](https://bettercodehub.com/edge/badge/gmrukwa/divik?branch=master)](https://bettercodehub.com/)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4cf5d42d0a0076c38445/maintainability)](https://codeclimate.com/github/gmrukwa/divik/maintainability)
 ![](https://github.com/gmrukwa/divik/workflows/Build%20and%20push%20deployment%20images/badge.svg)
-![](https://github.com/gmrukwa/divik/workflows/Run%20unit%20tests%20in%20MCR%20environment/badge.svg)
+![](https://github.com/gmrukwa/divik/workflows/Run%20unit%20tests/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/divik/badge/?version=latest)](https://divik.readthedocs.io/en/latest/?badge=latest)
 
 # divik
