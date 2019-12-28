@@ -28,8 +28,7 @@ dataset
 
 The recommended way to use this software is through
 [Docker](https://www.docker.com/). This is the most convenient way, if you want
-to use `divik` application, since it requires *MATLAB Compiler Runtime*
-and more dependencies.
+to use `divik` application.
 
 To install latest stable version use:
 
@@ -40,7 +39,7 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.3.6
+docker pull gmrukwa/divik:2.3.7
 ```
 
 ## Python package
@@ -48,22 +47,7 @@ docker pull gmrukwa/divik:2.3.6
 Prerequisites for installation of base package:
 
 - Python 3.5 / 3.6 / 3.7
-
-These are required for using `divik` application and GMM-based filtering:
-
-- [MATLAB Compiler Runtime](https://www.mathworks.com/products/compiler/matlab-runtime.html),
-version 2016b or newer, installed to default path
-- [compiled package with legacy code](https://github.com/spectre-team/matlab-legacy/releases/tag/legacy-v5.0.0)
-
-Installation process may be clearer with insight into Docker images used for
-application deployment:
-
-- [`python_mcr` image](https://github.com/spectre-team/python_mcr) - installs
-MCR r2019a onto Python 3.7 image
-- [`python_msi` image](https://github.com/spectre-team/python_msi) - installs
-compiled legacy code onto MCR image
-- [`divik` image](https://github.com/spectre-team/spectre-divik/blob/master/dockerfile) -
-installs DiviK software onto legacy code image
+- compiler capable of compiling the native C code
 
 Having prerequisites installed, one can install latest base version of the
 package:
@@ -75,7 +59,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.3.6
+pip install divik==2.3.7
 ```
 
 # References

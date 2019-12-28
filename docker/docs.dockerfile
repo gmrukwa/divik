@@ -1,4 +1,8 @@
-FROM spectreteam/python_msi:v5.1.0.2019a.py37
+FROM python:3.7-slim
+
+RUN apt-get update &&\
+    apt-get install -y gcc &&\
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /requirements.txt
 
