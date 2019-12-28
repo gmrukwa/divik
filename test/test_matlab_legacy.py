@@ -37,35 +37,17 @@ def blobs(n):
     return some_blobs
 
 
-class TestFindThresholdsMcr(unittest.TestCase):
-    def test_separates_two_components(self):
-        values = single_th_between_0_and_100()
-        thresholds = ml.find_thresholds_mcr(values, max_components=2)
-        self.assertEqual(len(thresholds), 1)
-        self.assertLess(thresholds[0], 100)
-        self.assertGreater(thresholds[0], 0)
-
-    def test_separates_multiple_components(self):
-        values = two_ths_between_minus_100_0_and_100()
-        thresholds = ml.find_thresholds_mcr(values, max_components=3)
-        self.assertEqual(len(thresholds), 2)
-        self.assertLess(thresholds[0], 0)
-        self.assertGreater(thresholds[0], -100)
-        self.assertLess(thresholds[1], 100)
-        self.assertGreater(thresholds[1], 0)
-
-
 class TestFindThresholdsNative(unittest.TestCase):
     def test_separates_two_components(self):
         values = single_th_between_0_and_100()
-        thresholds = ml.find_thresholds_native(values, max_components=2)
+        thresholds = ml.find_thresholds(values, max_components=2)
         self.assertEqual(len(thresholds), 1)
         self.assertLess(thresholds[0], 100)
         self.assertGreater(thresholds[0], 0)
 
     def test_separates_multiple_components(self):
         values = two_ths_between_minus_100_0_and_100()
-        thresholds = ml.find_thresholds_native(values, max_components=3)
+        thresholds = ml.find_thresholds(values, max_components=3)
         self.assertEqual(len(thresholds), 2)
         self.assertLess(thresholds[0], 0)
         self.assertGreater(thresholds[0], -100)
@@ -127,7 +109,7 @@ class TestFindThresholdsConsistency(unittest.TestCase):
     @parameterized.expand(
         [(f.__name__, f(), e) for f, e in zip(cases, cases_expectations)])
     def test_consistency(self, _, values, expected):
-        native = ml.find_thresholds_native(values)
+        native = ml.find_thresholds(values)
         mcr = np.array(expected)
         range_ = values.max() - values.min()
         native_ = (native - values.min()) / range_
