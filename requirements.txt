@@ -24,7 +24,6 @@ numpy==1.18.0
 packaging==19.2
 pandas==0.25.3
 parameterized==0.7.1
-patsy==0.5.1
 Pillow==6.2.1
 plotly==4.4.1
 pluggy==0.13.1
@@ -40,7 +39,6 @@ scikit-image==0.16.2
 scikit-learn==0.22
 scipy==1.4.1
 six==1.13.0
-statsmodels==0.10.2
 tqdm==4.41.0
 wcwidth==0.1.7
 Werkzeug==0.16.0

@@ -12,5 +12,4 @@ parameterized
 scikit-image
 scikit-learn
 scipy
-statsmodels
 tqdm
