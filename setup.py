@@ -61,6 +61,7 @@ setup(
         'typing>=3.6.2'
     ],
     setup_requires=[
+        'cython',
         'numpy>=0.12.1',
     ],
     python_requires='>=3.5',
