@@ -124,7 +124,7 @@ jobs:
       - name: Build Python package
         run: pip wheel . -w dist
       - name: Publish Python package
-        run: twine upload dist/*
+        run: twine upload dist/divik*whl
 
   push_macos_pypi_package:
 
@@ -160,4 +160,4 @@ jobs:
       - name: Build Python package
         run: pip wheel . -w dist
       - name: Publish Python package
-        run: twine upload dist/*
+        run: twine upload dist/divik*whl
