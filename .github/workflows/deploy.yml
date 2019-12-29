@@ -117,7 +117,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-base.txt
       - name: Build Python package
-        run: python setup.py bdist_wheel
+        run: pip wheel . -w dist
       - name: Publish Python package
         uses: pypa/gh-action-pypi-publish@master
         with:
@@ -151,7 +151,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements-base.txt
       - name: Build Python package
-        run: python setup.py bdist_wheel
+        run: pip wheel . -w dist
       - name: Publish Python package
         uses: pypa/gh-action-pypi-publish@master
         with:
