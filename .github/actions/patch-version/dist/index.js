@@ -56,13 +56,11 @@ try {
   const isBeta = core.getInput('isBeta');
   const rawVersion = core.getInput('version');
 
-  console.log(isAlpha);
-  
   var suffix = "";
 
-  if (isAlpha) {
+  if (isAlpha!="false") {
       suffix = "a";
-  } else if (isBeta) {
+  } else if (isBeta!="false") {
       suffix = "b";
   }
 
