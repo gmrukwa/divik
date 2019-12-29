@@ -99,6 +99,9 @@ jobs:
       matrix:
         python-version: [ '3.5', '3.6', '3.7', '3.8' ]
     name: Python ${{ matrix.python-version }} Windows build
+    env:
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
     steps:
       - name: Checkout
@@ -115,16 +118,13 @@ jobs:
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
       - name: Install build dependencies
-        run: pip install wheel
+        run: pip install wheel twine
       - name: Install dependencies
         run: pip install -r requirements-base.txt
       - name: Build Python package
         run: pip wheel . -w dist
       - name: Publish Python package
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
+        run: twine upload dist/*
 
   push_macos_pypi_package:
 
@@ -135,6 +135,9 @@ jobs:
       matrix:
         python-version: [ '3.5', '3.6', '3.7', '3.8' ]
     name: Python ${{ matrix.python-version }} MacOS build
+    env:
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
     steps:
       - name: Checkout
@@ -151,13 +154,10 @@ jobs:
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
       - name: Install build dependencies
-        run: pip install wheel
+        run: pip install wheel twine
       - name: Install dependencies
         run: pip install -r requirements-base.txt
       - name: Build Python package
         run: pip wheel . -w dist
       - name: Publish Python package
-        uses: pypa/gh-action-pypi-publish@master
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
+        run: twine upload dist/*
