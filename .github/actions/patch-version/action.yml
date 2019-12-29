@@ -16,10 +16,5 @@ inputs:
     description: 'version of the Python package'
     required: true
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.packageInitFile }}
-    - ${{ inputs.isAlpha }}
-    - ${{ inputs.isBeta }}
-    - ${{ inputs.version }}
+  using: 'node12'
+  main: 'main.js'
