@@ -70,7 +70,7 @@ try {
 
   var contents = fs.readFileSync(packageInitFile, 'utf8').split(/\r?\n/);
   contents[0] = "__version__ = '" + version + "'"
-  contents = contents.join("");
+  contents = contents.join("\n");
   console.log(contents);
   fs.writeFileSync(packageInitFile, contents);
 
