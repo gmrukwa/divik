@@ -7,6 +7,8 @@ try {
   const isAlpha = core.getInput('isAlpha');
   const isBeta = core.getInput('isBeta');
   const rawVersion = core.getInput('version');
+
+  console.log(isAlpha);
   
   var suffix = "";
 
