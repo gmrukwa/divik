@@ -114,6 +114,8 @@ jobs:
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Install build dependencies
+        run: pip install wheel
       - name: Install dependencies
         run: pip install -r requirements-base.txt
       - name: Build Python package
@@ -148,6 +150,8 @@ jobs:
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+      - name: Install build dependencies
+        run: pip install wheel
       - name: Install dependencies
         run: pip install -r requirements-base.txt
       - name: Build Python package
