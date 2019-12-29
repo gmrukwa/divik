@@ -1,3 +1,4 @@
+Cython
 dash==0.34.0
 dash-html-components==0.13.4
 dash-core-components==0.42.0
