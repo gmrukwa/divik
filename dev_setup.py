@@ -3,8 +3,11 @@
 from glob import glob
 from setuptools import setup, Extension
 import numpy
+from divik import __version__
 
 setup(
+    name='gamred_native',
+    version=__version__,
     packages=[],
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
