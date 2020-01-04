@@ -10,6 +10,9 @@ setup(
     install_requires=[
         'numpy>=0.12.1',
     ],
+    setup_requires=[
+        'numpy>=0.12.1',
+    ],
     python_requires='>=3.6',
     ext_modules=[
         Extension('gamred_native',
