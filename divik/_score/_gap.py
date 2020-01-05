@@ -9,7 +9,7 @@ import scipy.spatial.distance as dist
 from sklearn.base import clone
 
 from divik._score._picker import Picker
-from divik._utils import Data, context_if, get_n_jobs, normalize_rows
+from divik._utils import Data, DummyPool, get_n_jobs, normalize_rows, maybe_pool
 from divik._seeding import seeded
 
 
@@ -43,7 +43,7 @@ def _dispersion_of_random_sample(seed: int,
 
 @seeded(wrapped_requires_seed=True)
 def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
-        pool: Pool = None, return_deviation: bool = False,
+        pool: Pool = DummyPool(), return_deviation: bool = False,
         max_iter: int = 10) -> float:
     minima = np.min(data, axis=0)
     ranges = np.max(data, axis=0) - minima
@@ -54,11 +54,7 @@ def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
                                  minima=minima,
                                  ranges=ranges,
                                  kmeans=fast_kmeans)
-    if pool is None:
-        dispersions = [compute_dispersion(i)
-                       for i in range(seed, seed + n_trials)]
-    else:
-        dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
+    dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
     reference = _dispersion(data, kmeans)
     log_dispersions = np.log(dispersions)
     gap_value = np.mean(log_dispersions) - np.log(reference)
@@ -92,7 +88,7 @@ class GapPicker(Picker):
 
     def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
         n_jobs = get_n_jobs(self.n_jobs)
-        with context_if(self.n_jobs != 1, Pool, n_jobs) as pool:
+        with maybe_pool(n_jobs) as pool:
             gap_ = partial(gap, data, seed=self.seed, n_trials=self.n_trials,
                            return_deviation=True, pool=pool,
                            max_iter=self.max_iter)

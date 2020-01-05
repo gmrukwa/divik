@@ -13,7 +13,13 @@ import divik.feature_selection as fs
 from . import _kmeans as km
 from . import _divik as dv
 import divik._summary as summary
-from divik._utils import normalize_rows, DivikResult, get_n_jobs, context_if
+from divik._utils import (
+    normalize_rows,
+    DivikResult,
+    get_n_jobs,
+    context_if,
+    maybe_pool,
+)
 
 
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -447,11 +453,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             X = normalize_rows(X)
         n_jobs = get_n_jobs(self.n_jobs)
         predict = partial(_predict_path, result=self.result_)
-        if n_jobs == 1:
-            paths = [predict(row) for row in X]
-        else:
-            with Pool(n_jobs) as pool:
-                paths = pool.map(predict, X)
+        with maybe_pool(n_jobs) as pool:
+            paths = pool.map(predict, X)
         labels = [self.reverse_paths_[path] for path in paths]
         return np.array(labels, dtype=np.int32)
 
