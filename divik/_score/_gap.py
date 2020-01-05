@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import scipy.spatial.distance as dist
 from sklearn.base import clone
+from sklearn.preprocessing import MinMaxScaler
 
 from divik._score._picker import Picker
 from divik._utils import Data, DummyPool, normalize_rows, maybe_pool
@@ -30,11 +31,10 @@ def _dispersion(data: Data, kmeans: KMeans) -> float:
 
 def _dispersion_of_random_sample(seed: int,
                                  shape: Tuple[int, int],
-                                 minima: np.ndarray,
-                                 ranges: np.ndarray,
+                                 scale: MinMaxScaler,
                                  kmeans: KMeans) -> float:
     np.random.seed(seed)
-    sample = np.random.random_sample(shape) * ranges + minima
+    sample = scale.inverse_transform(np.random.random_sample(shape))
     dispersion = _dispersion(sample, kmeans.fit(sample))
     del sample
     gc.collect()
@@ -45,14 +45,12 @@ def _dispersion_of_random_sample(seed: int,
 def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
         pool: Pool = DummyPool(), return_deviation: bool = False,
         max_iter: int = 10) -> float:
-    minima = np.min(data, axis=0)
-    ranges = np.max(data, axis=0) - minima
+    scale = MinMaxScaler().fit(data)
     fast_kmeans = clone(kmeans)
     fast_kmeans.max_iter = max_iter
     compute_dispersion = partial(_dispersion_of_random_sample,
                                  shape=data.shape,
-                                 minima=minima,
-                                 ranges=ranges,
+                                 scale=scale,
                                  kmeans=fast_kmeans)
     dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
     reference = _dispersion(data, kmeans)
