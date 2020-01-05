@@ -64,10 +64,12 @@ class DummyPool:
     def apply(self, func, args, kwds):
         return func(*args, **kwds)
 
-    def map(self, func, iterable, chunksize = None):
+    # noinspection PyUnusedLocal
+    def map(self, func, iterable, chunksize=None):
         return [func(v) for v in iterable]
     
-    def starmap(self, func, iterable, chunksize = None):
+    # noinspection PyUnusedLocal
+    def starmap(self, func, iterable, chunksize=None):
         return [func(*v) for v in iterable]
 
 
