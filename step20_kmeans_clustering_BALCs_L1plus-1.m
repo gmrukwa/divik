@@ -128,21 +128,15 @@ minX=min(X); maxX=max(X);
 % disp('Computing inertia for references') 
 for ii=1:n_references,
 %     ii
-%   @gmrukwa: This is simple stratified sampling
-%   Use: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
     [xx_down, clust_down, flag_downsampling]=perform_downsampling(X, clustering, n_downsampling);
-%   @gmrukwa: Create random sample
     [nx,mx]=size(xx_down);
     disp(['Downsampling #',num2str(ii),' - done'])
     reference_data=rand([nx,mx]);
     for kk=1:mx,
         reference_data(:,kk)=reference_data(:,kk)*(maxX(kk)-minX(kk))+minX(kk);
     end
-%   @gmrukwa: cluster random sample
     clust=kmeans(reference_data,nclusters,'Display','off','MaxIter',1000,'Replicates',5,'OnlinePhase','on','Distance','sqEuclidean','Options',options);
-%   @gmrukwa: inertia on random sample clusters
     [reference_loginertia(ii,1)]=compute_inertia(reference_data,clust);
-%   @gmrukwa: inertia on subsample clusters
     if flag_downsampling,
         [ondata_loginertia(ii,1)]=compute_inertia(xx_down,clust_down);
     else
