@@ -66,6 +66,8 @@ function [logmean_W]=compute_inertia(X,clustering)
 % oblicza średnią odległość pomiędzy elementami klastrów wykorzystując
 % metrykę Euclidean
 nc=length(unique(clustering)); sum_W=0;
+% @gmrukwa: For each cluster we compute mean distance between
+% all the points, except the next one???
 for kk=1:nc,
     jk=find(clustering==kk);
     Xrob=X(jk,:); nn=length(jk);
@@ -80,6 +82,7 @@ for kk=1:nc,
     end
     sum_W=sum_W+W1/ncount;
 end
+% @gmrukwa: Cluster sizes are omitted here, there's no weighting.
 logmean_W=log(sum_W/nc);
 end %function
 
@@ -129,7 +132,7 @@ minX=min(X); maxX=max(X);
 for ii=1:n_references,
 %     ii
 %   @gmrukwa: This is simple stratified sampling
-%   Use: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
+%   Use: https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedShuffleSplit.html#sklearn.model_selection.StratifiedShuffleSplit
     [xx_down, clust_down, flag_downsampling]=perform_downsampling(X, clustering, n_downsampling);
 %   @gmrukwa: Create random sample
     [nx,mx]=size(xx_down);
