@@ -75,8 +75,9 @@ class DummyPool:
 
 @contextmanager
 def maybe_pool(processes: int=None, *args, **kwargs):
-    if processes == 1 or processes == 0:
-        yield DummyPool(processes, *args, **kwargs)
+    n_jobs = get_n_jobs(processes)
+    if n_jobs == 1 or n_jobs == 0:
+        yield DummyPool(n_jobs, *args, **kwargs)
     else:
-        with Pool(processes, *args, **kwargs) as pool:
+        with Pool(n_jobs, *args, **kwargs) as pool:
             yield pool

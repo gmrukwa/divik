@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing import Pool
 from typing import Tuple
 
 import numpy as np
@@ -16,7 +15,6 @@ import divik._summary as summary
 from divik._utils import (
     normalize_rows,
     DivikResult,
-    get_n_jobs,
     context_if,
     maybe_pool,
 )
@@ -300,7 +298,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _fast_kmeans(self):
         return km.AutoKMeans(
-            max_clusters=2, n_jobs=get_n_jobs(self.n_jobs), method="gap",
+            max_clusters=2, n_jobs=self.n_jobs, method="gap",
             distance=self.distance, init='percentile',
             percentile=self.distance_percentile, max_iter=self.max_iter,
             normalize_rows=self._needs_normalization(),
@@ -311,7 +309,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     def _full_kmeans(self):
         return km.AutoKMeans(
             max_clusters=self.k_max, min_clusters=2,
-            n_jobs=get_n_jobs(self.n_jobs), method='dunn',
+            n_jobs=self.n_jobs, method='dunn',
             distance=self.distance, init='percentile',
             percentile=self.distance_percentile, max_iter=self.max_iter,
             normalize_rows=self._needs_normalization(), gap=None,
@@ -451,9 +449,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         check_is_fitted(self)
         if self._needs_normalization():
             X = normalize_rows(X)
-        n_jobs = get_n_jobs(self.n_jobs)
         predict = partial(_predict_path, result=self.result_)
-        with maybe_pool(n_jobs) as pool:
+        with maybe_pool(self.n_jobs) as pool:
             paths = pool.map(predict, X)
         labels = [self.reverse_paths_[path] for path in paths]
         return np.array(labels, dtype=np.int32)

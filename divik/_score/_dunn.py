@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing.pool import Pool
 from typing import List, Optional
 import uuid
 
@@ -8,7 +7,7 @@ import pandas as pd
 from scipy.spatial import distance as dist
 
 from divik._score._picker import Picker
-from divik._utils import Data, get_n_jobs
+from divik._utils import Data, maybe_pool
 
 
 KMeans = 'divik.KMeans'
@@ -40,7 +39,7 @@ class DunnPicker(Picker):
             global _DATA
             _DATA[ref] = data
             score = partial(_dunn, data=ref)
-            with Pool(get_n_jobs(self.n_jobs)) as pool:
+            with maybe_pool(self.n_jobs) as pool:
                 scores = pool.map(score, estimators)
             del _DATA[ref]
         else:

@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing import Pool
 import sys
 import uuid
 
@@ -9,7 +8,7 @@ import tqdm
 
 from divik.cluster._kmeans._core import KMeans
 from divik._score import make_picker
-from divik._utils import get_n_jobs, maybe_pool
+from divik._utils import maybe_pool
 
 
 _DATA = {}
@@ -167,8 +166,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         method = make_picker(self.method, self.n_jobs, self.gap)
 
-        processes = get_n_jobs(self.n_jobs)
-        with maybe_pool(processes) as pool:
+        with maybe_pool(self.n_jobs) as pool:
             self.estimators_ = pool.map(fit_kmeans, n_clusters)
             self.scores_ = method.score(X, self.estimators_)
         del _DATA[ref]

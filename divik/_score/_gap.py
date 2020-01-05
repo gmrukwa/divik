@@ -9,7 +9,7 @@ import scipy.spatial.distance as dist
 from sklearn.base import clone
 
 from divik._score._picker import Picker
-from divik._utils import Data, DummyPool, get_n_jobs, normalize_rows, maybe_pool
+from divik._utils import Data, DummyPool, normalize_rows, maybe_pool
 from divik._seeding import seeded
 
 
@@ -87,8 +87,7 @@ class GapPicker(Picker):
         self.correction = correction
 
     def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
-        n_jobs = get_n_jobs(self.n_jobs)
-        with maybe_pool(n_jobs) as pool:
+        with maybe_pool(self.n_jobs) as pool:
             gap_ = partial(gap, data, seed=self.seed, n_trials=self.n_trials,
                            return_deviation=True, pool=pool,
                            max_iter=self.max_iter)
