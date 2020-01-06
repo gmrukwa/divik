@@ -18,6 +18,7 @@ itsdangerous==1.1.0
 Jinja2==2.10.3
 joblib==0.14.1
 kiwisolver==1.1.0
+kneed==0.5.1
 lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
 matplotlib==3.1.2
