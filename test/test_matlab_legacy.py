@@ -88,7 +88,7 @@ slow_cases = [
 ]
 enable_long = os.environ.get('ENABLE_SLOW_TESTS', 'False').lower() == 'true'
 
-cases = quick_cases if enable_long else quick_cases + slow_cases
+cases = quick_cases + slow_cases if enable_long else quick_cases
 cases_expectations = [
     [1.9128136053649736],
     [32.861988912865336],
