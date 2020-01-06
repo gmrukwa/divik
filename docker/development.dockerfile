@@ -30,6 +30,9 @@ RUN python dev_setup.py install --prefix=/install
 
 
 FROM base
+RUN apt-get update &&\
+    apt-get install -y git ssh &&\
+    rm -rf /var/lib/apt/lists/*
 COPY --from=deps_builder /install /usr/local
 COPY --from=gamred_builder /install /usr/local
 COPY . /app
