@@ -1,3 +1,4 @@
+import os
 import unittest
 from parameterized import parameterized
 
@@ -55,10 +56,12 @@ class TestFindThresholdsNative(unittest.TestCase):
         self.assertGreater(thresholds[1], 0)
 
 
-cases = [
+quick_cases = [
     no_threshold,
     single_th_between_0_and_100,
     two_ths_between_minus_100_0_and_100,
+]
+slow_cases = [
     blobs([-1.559, 0.637, 1.111, 2.043, 4.223]),
     blobs([-1.746, -1.366, 0.852, 1.023, 1.920, 2.860, 4.467]),
     blobs([-2.388, -1.681, -1.495, 0.841, 0.920, 2.202, 2.914, 4.396,
@@ -83,6 +86,9 @@ cases = [
            -1.494, -1.380, -0.624, 0.737, 0.739, 0.975, 3.643, 3.678,
            4.552, 4.646, 4.753, 9.522]),
 ]
+enable_long = os.environ.get('ENABLE_SLOW_TESTS', 'False').lower() == 'true'
+
+cases = quick_cases if enable_long else quick_cases + slow_cases
 cases_expectations = [
     [1.9128136053649736],
     [32.861988912865336],

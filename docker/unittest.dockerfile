@@ -30,6 +30,7 @@ RUN python dev_setup.py install --prefix=/install
 
 
 FROM base
+ENV ENABLE_SLOW_TESTS True
 COPY --from=deps_builder /install /usr/local
 COPY --from=gamred_builder /install /usr/local
 COPY . /app
