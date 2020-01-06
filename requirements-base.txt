@@ -9,6 +9,7 @@ networkx
 numpy
 pandas
 parameterized
+pylint
 scikit-image
 scikit-learn
 scipy
