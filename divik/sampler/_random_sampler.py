@@ -7,8 +7,15 @@ from ._core import BaseSampler
 
 
 class RandomSampler(BaseSampler):
+    def __init__(self, n_samples: int = None):
+        self.n_samples = n_samples
+
     def fit(self, X, y=None):
-        self.shape = X.shape
+        if self.n_samples is None:
+            n_samples = X.shape[0]
+        else:
+            n_samples = self.n_samples
+        self.shape = n_samples, X.shape[1]
         self.scaler_ = MinMaxScaler().fit(X)
         return self
     
@@ -19,13 +26,14 @@ class RandomSampler(BaseSampler):
 
 
 class RandomPCASampler(BaseSampler):
-    def __init__(self, whiten: bool = False):
+    def __init__(self, n_samples: int = None, whiten: bool = False):
+        self.n_samples = n_samples
         self.whiten = whiten
 
     def fit(self, X, y=None):
         self.pca_ = KneePCA(self.whiten)
         transformed = self.pca_.fit_transform(X)
-        self.sampler_ = RandomSampler().fit(transformed)
+        self.sampler_ = RandomSampler(self.n_samples).fit(transformed)
         return self
 
     def get_sample(self, seed):
