@@ -29,6 +29,8 @@ Here you can find a list of documentation topics covered by this page.
    modules/divik
    modules/divik.cluster
    modules/divik.feature_selection
+   modules/divik.feature_extraction
+   modules/divik.sampler
 
 
 Indices and tables
