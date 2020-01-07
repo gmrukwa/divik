@@ -7,6 +7,8 @@ from ._core import BaseSampler
 
 
 class RandomSampler(BaseSampler):
+    # TODO: Docs
+    # TODO: Tests
     def __init__(self, n_rows: int = None, n_samples: int = None):
         self.n_rows = n_rows
         self.n_samples = n_samples
@@ -27,6 +29,8 @@ class RandomSampler(BaseSampler):
 
 
 class RandomPCASampler(BaseSampler):
+    # TODO: Docs
+    # TODO: Tests
     def __init__(self, n_rows: int = None,
                  n_samples: int = None, whiten: bool = False):
         self.n_rows = n_rows

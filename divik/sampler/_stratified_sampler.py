@@ -6,6 +6,8 @@ from ._core import BaseSampler
 
 
 class StratifiedSampler(BaseSampler):
+    # TODO: Docs
+    # TODO: Tests
     def __init__(self, n_rows: Union[int, float] = 10000,
                  n_samples: int = None):
         self.n_rows = n_rows

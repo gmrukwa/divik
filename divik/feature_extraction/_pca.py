@@ -2,7 +2,6 @@ from kneed import KneeLocator
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
-from sklearn.pipeline import make_pipeline
 
 
 # Implementation of PCA with data-driven variance explanation limit
@@ -17,13 +16,16 @@ def knee(explained_variance) -> int:
 
 
 class KneePCA(BaseEstimator, TransformerMixin):
+    # TODO: Tests
     """Principal component analysis (PCA) with knee method
     PCA with automated components selection based on knee method
     over cumulative explained variance.
+
     Attributes
     ----------
     pca_ : PCA
         Fit PCA estimator.
+
     n_components_ : int
         The number of selected components.
     """
@@ -31,6 +33,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
         self.whiten = whiten
 
     def fit(self, X, y=None):
+    # TODO: Docs
         self.pca_ = PCA(n_components=None, copy=True, whiten=self.whiten,
                         svd_solver='full', tol=0.0, iterated_power='auto',
                         random_state=None).fit(X)
@@ -39,10 +42,12 @@ class KneePCA(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
+    # TODO: Docs
         loads = self.pca_.transform(X)
         return loads[:, :self.n_components_]
     
     def inverse_transform(self, X):
+    # TODO: Docs
         n_missing = self.pca_.n_components_ - self.n_components_
         missing = np.zeros(X.shape[0], n_missing)
         full = np.hstack([X, missing])
