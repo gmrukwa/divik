@@ -64,17 +64,6 @@ def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
     return result
 
 
-class pipe:
-    def __init__(self, *functions):
-        self.functions = functions
-
-    def __call__(self, *args, **kwargs):
-        result = self.functions[0](*args, **kwargs)
-        for func in self.functions[1:]:
-            result = func(result)
-        return result
-
-
 class GapPicker(Picker):
     def __init__(self, max_iter: int = 10, seed: int = 0, n_trials: int = 10,
                  correction: bool = True, n_jobs: int = 1):
