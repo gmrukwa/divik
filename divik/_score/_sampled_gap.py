@@ -3,28 +3,16 @@ from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import scipy.spatial.distance as dist
 from sklearn.base import clone
 
 from divik._score._picker import Picker
-from divik._utils import Data, normalize_rows, maybe_pool
+from divik._utils import Data, maybe_pool
 from divik._seeding import seeded
-from divik.sampler import BaseSampler, RandomSampler, StratifiedSampler
+from divik.sampler import RandomSampler, StratifiedSampler
+from divik._score._gap import _sampled_dispersion as _dispersion
 
 
 KMeans = 'divik.KMeans'
-
-
-def _dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans) -> float:
-    X = sampler.get_sample(seed)
-    if kmeans.normalize_rows:
-        X = normalize_rows(X)
-    y = kmeans.fit_predict(X)
-    clusters = pd.DataFrame(X).groupby(y)
-    return float(np.mean([
-        np.mean(dist.pdist(cluster_members.values, kmeans.distance))
-        for _, cluster_members in clusters
-    ]))
 
 
 @seeded(wrapped_requires_seed=True)
@@ -50,7 +38,7 @@ def sampled_gap(data: Data, kmeans: KMeans,
     ref_disp = np.log(ref_disp)
     data_disp = np.log(data_disp)
     gap = np.mean(ref_disp) - np.mean(data_disp)
-    result = (gap, )
+    result = (gap,)
     if return_deviation:
         std = np.sqrt(np.var(ref_disp) + np.var(data_disp)) / n_trials
         result += (std,)
