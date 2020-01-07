@@ -21,6 +21,8 @@ def sampled_gap(data: Data, kmeans: KMeans,
                 n_trials: int = 100,
                 return_deviation: bool = False,
                 max_iter: int = 10) -> float:
+    # TODO: Docs
+    # TODO: Tests
     data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
                               ).fit(data, kmeans.labels_)
     reference_ = RandomSampler(n_rows=sample_size, n_samples=n_trials
