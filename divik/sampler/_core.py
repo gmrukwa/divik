@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
+from itertools import count
 import uuid
 
 from sklearn.base import BaseEstimator, clone
@@ -30,11 +31,13 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
     the data).
     """
     def __iter__(self):
-        """Inifinitely return samples"""
-        i = 0
-        while True:
+        """Iter through `n_samples` samples or infinitely if unspecified"""
+        if hasattr(self, 'n_samples') and self.n_samples is not None:
+            samples = range(self.n_samples)
+        else:
+            samples = count()
+        for i in samples:
             yield self.get_sample(i)
-            i += 1
 
     @abstractmethod
     def get_sample(self, seed):

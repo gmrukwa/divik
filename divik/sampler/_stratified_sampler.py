@@ -1,15 +1,15 @@
 from typing import Union
 
-import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 
-from divik._seeding import seed as seed_
 from ._core import BaseSampler
 
 
 class StratifiedSampler(BaseSampler):
-    def __init__(self, sample_size: Union[int, float] = 10000):
-        self.sample_size = sample_size
+    def __init__(self, n_rows: Union[int, float] = 10000,
+                 n_samples: int = None):
+        self.n_rows = n_rows
+        self.n_samples = n_samples
     
     def fit(self, X, y):
         self.X_ = X
@@ -18,6 +18,6 @@ class StratifiedSampler(BaseSampler):
     
     def get_sample(self, seed):
         split = StratifiedShuffleSplit(
-            n_splits=1, train_size=self.sample_size, random_state=seed)
+            n_splits=1, train_size=self.n_rows, random_state=seed)
         for idx, _ in split.split(self.X_, self.y_):
             return self.X_[idx]
