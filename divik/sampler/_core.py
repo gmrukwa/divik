@@ -43,8 +43,19 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
     def get_sample(self, seed):
         """Return specific sample
         
-        sampler.get_sample(x) == sampler.get_sample(x)
-        x != y should yield sampler.get_sample(x) != sampler.get_sample(y)
+        Following assumptions should be met:
+        a) sampler.get_sample(x) == sampler.get_sample(x)
+        b) x != y should yield sampler.get_sample(x) != sampler.get_sample(y)
+
+        Parameters
+        ----------
+        seed : int
+            The seed to use to draw the sample
+
+        Returns
+        -------
+        sample : array_like, (*self.shape_)
+            Returns the drawn sample
         """
         raise NotImplementedError("get_sample is not implemented")
 
