@@ -1,0 +1,30 @@
+{
+    "name": "divik:dev",
+    "context": "..",
+    "dockerFile": "../docker/development.dockerfile",
+  
+    "runArgs": [
+        "-v", "${env:HOME}${env:USERPROFILE}/.ssh:/root/.ssh-localhost:ro",
+    ],
+
+    "postCreateCommand": "cp -r ~/.ssh-localhost ~/.ssh && chmod 700 ~/.ssh && chmod 600 ~/.ssh/* && rm -f ~/.ssh/config",
+  
+    "settings": { 
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "python.pythonPath": "/usr/local/bin/python",
+        "python.linting.pylintEnabled": true,
+        "python.linting.pylintPath": "/usr/local/bin/pylint",
+        "python.linting.enabled": true
+    },
+  
+    "extensions": [
+      "eamodio.gitlens",
+      "mutantdino.resourcemonitor",
+      "ms-python.python",
+      "angelo-breuer.clock",
+      "donjayamanne.githistory",
+      "tabnine.tabnine-vscode",
+      "redhat.vscode-yaml",
+      "formulahendry.code-runner"
+    ]
+}

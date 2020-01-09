@@ -4,11 +4,13 @@ dash-core-components==0.42.0
 dash-renderer==0.17.0
 dash-table==3.1.11
 h5py
+kneed
 matplotlib
 networkx
 numpy
 pandas
 parameterized
+pylint
 scikit-image
 scikit-learn
 scipy

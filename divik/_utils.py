@@ -1,5 +1,6 @@
 import os
 from contextlib import contextmanager
+from multiprocessing import Pool
 from typing import Callable, Tuple, NamedTuple, List, Optional
 
 import numpy as np
@@ -54,3 +55,29 @@ def context_if(condition, context, *args, **kwargs):
             yield c
     else:
         yield None
+
+
+class DummyPool:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def apply(self, func, args, kwds):
+        return func(*args, **kwds)
+
+    # noinspection PyUnusedLocal
+    def map(self, func, iterable, chunksize=None):
+        return [func(v) for v in iterable]
+    
+    # noinspection PyUnusedLocal
+    def starmap(self, func, iterable, chunksize=None):
+        return [func(*v) for v in iterable]
+
+
+@contextmanager
+def maybe_pool(processes: int=None, *args, **kwargs):
+    n_jobs = get_n_jobs(processes)
+    if n_jobs == 1 or n_jobs == 0:
+        yield DummyPool(n_jobs, *args, **kwargs)
+    else:
+        with Pool(n_jobs, *args, **kwargs) as pool:
+            yield pool

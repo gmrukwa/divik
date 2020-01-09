@@ -1,8 +1,5 @@
-from __future__ import division
 from functools import partial
-import gc
-from multiprocessing import Pool
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
@@ -10,8 +7,9 @@ import scipy.spatial.distance as dist
 from sklearn.base import clone
 
 from divik._score._picker import Picker
-from divik._utils import Data, context_if, get_n_jobs, normalize_rows
+from divik._utils import Data, normalize_rows, maybe_pool
 from divik._seeding import seeded
+from divik.sampler import BaseSampler, UniformSampler
 
 
 KMeans = 'divik.KMeans'
@@ -29,57 +27,41 @@ def _dispersion(data: Data, kmeans: KMeans) -> float:
     ]))
 
 
-def _dispersion_of_random_sample(seed: int,
-                                 shape: Tuple[int, int],
-                                 minima: np.ndarray,
-                                 ranges: np.ndarray,
-                                 kmeans: KMeans) -> float:
-    np.random.seed(seed)
-    sample = np.random.random_sample(shape) * ranges + minima
-    dispersion = _dispersion(sample, kmeans.fit(sample))
-    del sample
-    gc.collect()
-    return dispersion
+def _sampled_dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans) \
+        -> float:
+    X = sampler.get_sample(seed)
+    if kmeans.normalize_rows:
+        X = normalize_rows(X)
+    y = kmeans.fit_predict(X)
+    clusters = pd.DataFrame(X).groupby(y)
+    return float(np.mean([
+        np.mean(dist.pdist(cluster_members.values, kmeans.distance))
+        for _, cluster_members in clusters
+    ]))
 
 
 @seeded(wrapped_requires_seed=True)
-def gap(data: Data, kmeans: KMeans, seed: int = 0, n_trials: int = 100,
-        pool: Pool = None, return_deviation: bool = False,
+def gap(data: Data, kmeans: KMeans,
+        n_jobs: int = None,
+        seed: int = 0,
+        n_trials: int = 100,
+        return_deviation: bool = False,
         max_iter: int = 10) -> float:
-    minima = np.min(data, axis=0)
-    ranges = np.max(data, axis=0) - minima
-    fast_kmeans = clone(kmeans)
-    fast_kmeans.max_iter = max_iter
-    compute_dispersion = partial(_dispersion_of_random_sample,
-                                 shape=data.shape,
-                                 minima=minima,
-                                 ranges=ranges,
-                                 kmeans=fast_kmeans)
-    if pool is None:
-        dispersions = [compute_dispersion(i)
-                       for i in range(seed, seed + n_trials)]
-    else:
-        dispersions = pool.map(compute_dispersion, range(seed, seed + n_trials))
-    reference = _dispersion(data, kmeans)
-    log_dispersions = np.log(dispersions)
-    gap_value = np.mean(log_dispersions) - np.log(reference)
-    result = (gap_value, )
+    reference_ = UniformSampler(n_rows=None, n_samples=n_trials
+                                ).fit(data)
+    kmeans_ = clone(kmeans)
+    kmeans_.max_iter = max_iter
+    with reference_.parallel() as r, maybe_pool(n_jobs) as pool:
+        compute_disp = partial(_sampled_dispersion, sampler=r, kmeans=kmeans_)
+        ref_disp = pool.map(compute_disp, range(seed, seed + n_trials))
+    ref_disp = np.log(ref_disp)
+    data_disp = np.log(_dispersion(data, kmeans))
+    gap = np.mean(ref_disp) - data_disp
+    result = (gap,)
     if return_deviation:
-        standard_deviation = np.sqrt(1 + 1 / n_trials) \
-                             * np.std(log_dispersions)
-        result += (standard_deviation,)
+        std = np.sqrt(1 + 1 / n_trials) * np.std(ref_disp)
+        result += (std,)
     return result
-
-
-class pipe:
-    def __init__(self, *functions):
-        self.functions = functions
-
-    def __call__(self, *args, **kwargs):
-        result = self.functions[0](*args, **kwargs)
-        for func in self.functions[1:]:
-            result = func(result)
-        return result
 
 
 class GapPicker(Picker):
@@ -92,12 +74,13 @@ class GapPicker(Picker):
         self.correction = correction
 
     def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
-        n_jobs = get_n_jobs(self.n_jobs)
-        with context_if(self.n_jobs != 1, Pool, n_jobs) as pool:
-            gap_ = partial(gap, data, seed=self.seed, n_trials=self.n_trials,
-                           return_deviation=True, pool=pool,
-                           max_iter=self.max_iter)
-            scores = [gap_(kmeans=estimator) for estimator in estimators]
+        gap_ = partial(gap, data,
+                       n_jobs=self.n_jobs,
+                       seed=self.seed,
+                       n_trials=self.n_trials,
+                       return_deviation=True,
+                       max_iter=self.max_iter)
+        scores = [gap_(kmeans=estimator) for estimator in estimators]
         return np.array(scores)
 
     def select(self, scores: np.ndarray) -> Optional[int]:
