@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing import Pool
 import sys
 import uuid
 
@@ -9,7 +8,7 @@ import tqdm
 
 from divik.cluster._kmeans._core import KMeans
 from divik._score import make_picker
-from divik._utils import get_n_jobs
+from divik._utils import maybe_pool
 
 
 _DATA = {}
@@ -36,7 +35,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         The number of jobs to use for the computation. This works by computing
         each of the clustering & scoring runs in parallel.
 
-    method: {'dunn', 'gap'}
+    method: {'dunn', 'gap', 'sampled_gap'}
         The method to select the best number of clusters.
 
         'dunn' : computes score that relates dispersion inside a cluster
@@ -44,6 +43,8 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         'gap' : compares dispersion of a clustering to a dispersion in
         grouping of a reference uniformly distributed dataset
+
+        'sampled_gap' : the same as 'gap', but works on data samples
 
     distance : str, optional, default: 'euclidean'
         Distance measure. One of the distances supported by scipy package.
@@ -72,7 +73,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         If True, rows are translated to mean of 0.0 and scaled to norm of 1.0.
 
     gap: dict
-        Configuration of GAP statistic in a form of dict.
+        Configuration of GAP / sampled GAP statistic in a form of dict.
 
         max_iter: int, default: 10
             Maximal number of iterations KMeans will do for computing
@@ -81,14 +82,19 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         seed: int, default: 0
             Random seed for generating uniform data sets.
 
-        trials: int, default: 10
+        n_trials: int, default: 10
             Number of data sets drawn as a reference.
 
         correction: bool, default: True
             If True, the correction is applied and the first feasible solution
             is selected. Otherwise the globally maximal GAP is used.
 
-        Default: {'max_iter': 10, 'seed': 0, 'trials': 10, 'correction': True}
+        sample_size : int, default: 1000
+            Size of the sample used for GAP statistic computation. Used only if
+            method = `sampled_gap`. Otherwise should not be used.
+
+        Default:
+            {'max_iter': 10, 'seed': 0, 'n_trials': 10, 'correction': True}
 
     verbose: bool, default: False
         If True, shows progress with tqdm.
@@ -126,7 +132,7 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
                  normalize_rows: bool = False, gap=None,
                  verbose: bool = False):
         super().__init__()
-        assert method in {'dunn', 'gap'}
+        assert method in {'dunn', 'gap', 'sampled_gap'}
         assert min_clusters <= max_clusters
         self.min_clusters = min_clusters
         self.max_clusters = max_clusters
@@ -167,14 +173,9 @@ class AutoKMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         method = make_picker(self.method, self.n_jobs, self.gap)
 
-        processes = get_n_jobs(self.n_jobs)
-        if processes == 1:
-            self.estimators_ = [fit_kmeans(n_clusters=k) for k in n_clusters]
+        with maybe_pool(self.n_jobs) as pool:
+            self.estimators_ = pool.map(fit_kmeans, n_clusters)
             self.scores_ = method.score(X, self.estimators_)
-        else:
-            with Pool(processes) as pool:
-                self.estimators_ = pool.map(fit_kmeans, n_clusters)
-                self.scores_ = method.score(X, self.estimators_)
         del _DATA[ref]
 
         best = method.select(self.scores_)

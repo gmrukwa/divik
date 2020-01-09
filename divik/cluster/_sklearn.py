@@ -1,5 +1,4 @@
 from functools import partial
-from multiprocessing import Pool
 from typing import Tuple
 
 import numpy as np
@@ -13,7 +12,12 @@ import divik.feature_selection as fs
 from . import _kmeans as km
 from . import _divik as dv
 import divik._summary as summary
-from divik._utils import normalize_rows, DivikResult, get_n_jobs, context_if
+from divik._utils import (
+    normalize_rows,
+    DivikResult,
+    context_if,
+    maybe_pool,
+)
 
 
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -294,18 +298,18 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _fast_kmeans(self):
         return km.AutoKMeans(
-            max_clusters=2, n_jobs=get_n_jobs(self.n_jobs), method="gap",
+            max_clusters=2, n_jobs=self.n_jobs, method="gap",
             distance=self.distance, init='percentile',
             percentile=self.distance_percentile, max_iter=self.max_iter,
             normalize_rows=self._needs_normalization(),
             gap={"max_iter": self.fast_kmeans_iter, "seed": self.random_seed,
-                 "trials": self.gap_trials, "correction": True},
+                 "n_trials": self.gap_trials, "correction": True},
             verbose=self.verbose)
 
     def _full_kmeans(self):
         return km.AutoKMeans(
             max_clusters=self.k_max, min_clusters=2,
-            n_jobs=get_n_jobs(self.n_jobs), method='dunn',
+            n_jobs=self.n_jobs, method='dunn',
             distance=self.distance, init='percentile',
             percentile=self.distance_percentile, max_iter=self.max_iter,
             normalize_rows=self._needs_normalization(), gap=None,
@@ -327,9 +331,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         if (self.filter_type == 'auto' and n_features > 250) \
                 or self.filter_type == 'gmm':
             return self._gmm_filter()
-        elif self.filter_type == 'auto' or self.filter_type == 'outlier':
+        if self.filter_type == 'auto' or self.filter_type == 'outlier':
             return self._outlier_filter()
-        elif self.filter_type == 'none':
+        if self.filter_type == 'none':
             return fs.NoSelector()
         raise ValueError("Unknown filter type: %s" % self.filter_type)
 
@@ -445,13 +449,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         check_is_fitted(self)
         if self._needs_normalization():
             X = normalize_rows(X)
-        n_jobs = get_n_jobs(self.n_jobs)
         predict = partial(_predict_path, result=self.result_)
-        if n_jobs == 1:
-            paths = [predict(row) for row in X]
-        else:
-            with Pool(n_jobs) as pool:
-                paths = pool.map(predict, X)
+        with maybe_pool(self.n_jobs) as pool:
+            paths = pool.map(predict, X)
         labels = [self.reverse_paths_[path] for path in paths]
         return np.array(labels, dtype=np.int32)
 
