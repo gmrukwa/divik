@@ -20,10 +20,9 @@ def _dispersion(data: Data, kmeans: KMeans) -> float:
     if kmeans.normalize_rows:
         data = normalize_rows(data)
     clusters = pd.DataFrame(data).groupby(kmeans.labels_)
-    return float(np.sum([
-        np.sum(dist.cdist(kmeans.cluster_centers_[np.newaxis, label],
-                          cluster_members.values, kmeans.distance))
-        for label, cluster_members in clusters
+    return float(np.mean([
+        np.mean(dist.pdist(cluster_members.values, kmeans.distance))
+        for _, cluster_members in clusters
     ]))
 
 
