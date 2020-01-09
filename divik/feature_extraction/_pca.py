@@ -75,6 +75,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
         self : object
             Returns the instance itself.
         """
+        # Note: random_state is not used in this config!
         self.pca_ = PCA(n_components=None, copy=True, whiten=self.whiten,
                         svd_solver='full', tol=0.0, iterated_power='auto',
                         random_state=None).fit(X)

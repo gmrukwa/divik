@@ -1,5 +1,6 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.decomposition import PCA
 
 from divik._seeding import seed as seed_
 from divik.feature_extraction import KneePCA
@@ -94,20 +95,40 @@ class UniformPCASampler(BaseSampler):
         improve the predictive accuracy of the downstream estimators by
         making their data respect some hard-wired assumptions.
 
+    refit : bool, optional (default False)
+        When True (False by default) the `pca_` is re-fit with the smaller
+        number of components. This could reduce memory footprint, but
+        requires training fitting PCA.
+
+    pca: {'knee', 'full'}, default 'knee'
+        Specifies whether to train full or knee PCA.
+
     Attributes
     ----------
-    pca_ : KneePCA
+    pca_ : KneePCA or PCA
         PCA transform which provided rotation-invariance
     
     sampler_ : UniformSampler
         Sampler from the transformed distribution
     """
     # TODO: Tests
-    def __init__(self, n_rows: int = None,
-                 n_samples: int = None, whiten: bool = False):
+    def __init__(self, n_rows: int = None, n_samples: int = None,
+                 whiten: bool = False, refit: bool = False, pca: str = 'knee'):
         self.n_rows = n_rows
         self.n_samples = n_samples
         self.whiten = whiten
+        self.refit = refit
+        self.pca = pca
+
+    def _make_pca(self):
+        if self.pca == 'knee':
+            return KneePCA(whiten=self.whiten, refit=self.refit)
+        if self.pca == 'full':
+            # Note: random_state is not used in this config!
+            return PCA(n_components=None, copy=True, whiten=self.whiten,
+                       svd_solver='full', tol=0.0, iterated_power='auto',
+                       random_state=None)
+        raise ValueError("Unsupported pca value: {}".format(self.pca))
 
     def fit(self, X, y=None):
         """Fit the model from data in X.
@@ -128,7 +149,7 @@ class UniformPCASampler(BaseSampler):
         self : object
             Returns the instance itself.
         """
-        self.pca_ = KneePCA(whiten=self.whiten)
+        self.pca_ = self._make_pca()
         transformed = self.pca_.fit_transform(X)
         self.sampler_ = UniformSampler(n_rows=self.n_rows).fit(transformed)
         return self
