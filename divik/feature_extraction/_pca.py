@@ -41,7 +41,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
         (the relative variance scales of the components) but can sometime
         improve the predictive accuracy of the downstream estimators by
         making their data respect some hard-wired assumptions.
-    
+
     refit : bool, optional (default False)
         When True (False by default) the `pca_` is re-fit with the smaller
         number of components. This could reduce memory footprint, but
@@ -116,7 +116,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
         """
         loads = self.pca_.transform(X)
         return loads[:, :self.n_components_]
-    
+
     def inverse_transform(self, X):
         """Transform data back to its original space.
 

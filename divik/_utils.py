@@ -67,7 +67,7 @@ class DummyPool:
     # noinspection PyUnusedLocal
     def map(self, func, iterable, chunksize=None):
         return [func(v) for v in iterable]
-    
+
     # noinspection PyUnusedLocal
     def starmap(self, func, iterable, chunksize=None):
         return [func(*v) for v in iterable]

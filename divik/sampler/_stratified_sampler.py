@@ -31,7 +31,7 @@ class StratifiedSampler(BaseSampler):
                  n_samples: int = None):
         self.n_rows = n_rows
         self.n_samples = n_samples
-    
+
     def fit(self, X, y):
         """Fit the model from data in X.
 
@@ -53,7 +53,7 @@ class StratifiedSampler(BaseSampler):
         self.X_ = X
         self.y_ = y
         return self
-    
+
     def get_sample(self, seed):
         """Return specific sample
 

@@ -9,12 +9,12 @@ from ._core import BaseSampler
 
 class UniformSampler(BaseSampler):
     """Samples uniformly from the boundaries of the data
-    
+
     Parameters
     -----------
     n_rows : int, optional (default None)
         Allows to limit the number of rows in the drawn samples
-    
+
     n_samples : int, optional (default None)
         Allows to limit the number of samples when iterating
 
@@ -22,7 +22,7 @@ class UniformSampler(BaseSampler):
     ----------
     shape_ : (n_rows, n_cols)
         Shape of the drawn samples
-    
+
     scaler_ : MinMaxScaler
         Scaler ensuring the proper ranges
     """
@@ -53,7 +53,7 @@ class UniformSampler(BaseSampler):
         self.shape_ = n_rows, X.shape[1]
         self.scaler_ = MinMaxScaler().fit(X)
         return self
-    
+
     def get_sample(self, seed):
         """Return specific sample
 
@@ -74,15 +74,15 @@ class UniformSampler(BaseSampler):
 
 class UniformPCASampler(BaseSampler):
     """Rotation-invariant uniform sampling
-    
+
     Parameters
     -----------
     n_rows : int, optional (default None)
         Allows to limit the number of rows in the drawn samples
-    
+
     n_samples : int, optional (default None)
         Allows to limit the number of samples when iterating
-    
+
     whiten : bool, optional (default False)
         When True (False by default) the `pca_.components_` vectors are
         multiplied by the square root of n_samples and then divided by the
@@ -106,7 +106,7 @@ class UniformPCASampler(BaseSampler):
     ----------
     pca_ : KneePCA or PCA
         PCA transform which provided rotation-invariance
-    
+
     sampler_ : UniformSampler
         Sampler from the transformed distribution
     """

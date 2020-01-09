@@ -22,7 +22,7 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
 
     with sampler.parallel() as sampler_, Pool() as pool:
         pool.map(sampler_.get_sample, range(10))
-    
+
     Keep in mind, that __iter__ and fit are not accessible in parallel
     context. __iter__ would yield the same values independently in
     all the workers. Now it needs to be done consciously and in
@@ -42,7 +42,7 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
     @abstractmethod
     def get_sample(self, seed):
         """Return specific sample
-        
+
         Following assumptions should be met:
         a) sampler.get_sample(x) == sampler.get_sample(x)
         b) x != y should yield sampler.get_sample(x) != sampler.get_sample(y)
@@ -61,7 +61,7 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
 
     def fit(self, X, y=None):
         """Fit sampler to data
-        
+
         It's a base for both supervised and unsupervised samplers.
         """
         return self
@@ -82,11 +82,11 @@ class ParallelSampler:
     """Helper class for sharing the sampler functionality"""
     def __init__(self, sampler: str):
         self.sampler = sampler
-    
+
     def get_sample(self, seed):
         """Return specific sample"""
         return _DATA[self.sampler].get_sample(seed)
-    
+
     def clone(self):
         """Clones the original sampler"""
         return clone(_DATA[self.sampler])
