@@ -6,7 +6,7 @@ from sklearn.base import clone
 
 from divik._utils import Data, maybe_pool
 from divik._seeding import seeded
-from divik.sampler import RandomSampler, StratifiedSampler
+from divik.sampler import UniformSampler, StratifiedSampler
 from divik._score._gap import _sampled_dispersion as _dispersion, GapPicker
 
 
@@ -25,8 +25,8 @@ def sampled_gap(data: Data, kmeans: KMeans,
     # TODO: Tests
     data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
                               ).fit(data, kmeans.labels_)
-    reference_ = RandomSampler(n_rows=sample_size, n_samples=n_trials
-                               ).fit(data)
+    reference_ = UniformSampler(n_rows=sample_size, n_samples=n_trials
+                                ).fit(data)
     kmeans_ = clone(kmeans)
     kmeans_.max_iter = max_iter
     with data_.parallel() as d, reference_.parallel() as r, \

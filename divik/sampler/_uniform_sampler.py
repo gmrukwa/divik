@@ -6,7 +6,7 @@ from divik.feature_extraction import KneePCA
 from ._core import BaseSampler
 
 
-class RandomSampler(BaseSampler):
+class UniformSampler(BaseSampler):
     # TODO: Docs
     # TODO: Tests
     def __init__(self, n_rows: int = None, n_samples: int = None):
@@ -28,7 +28,7 @@ class RandomSampler(BaseSampler):
         return self.scaler_.inverse_transform(unscaled)
 
 
-class RandomPCASampler(BaseSampler):
+class UniformPCASampler(BaseSampler):
     # TODO: Docs
     # TODO: Tests
     def __init__(self, n_rows: int = None,
@@ -40,7 +40,7 @@ class RandomPCASampler(BaseSampler):
     def fit(self, X, y=None):
         self.pca_ = KneePCA(whiten=self.whiten)
         transformed = self.pca_.fit_transform(X)
-        self.sampler_ = RandomSampler(n_rows=self.n_rows).fit(transformed)
+        self.sampler_ = UniformSampler(n_rows=self.n_rows).fit(transformed)
         return self
 
     def get_sample(self, seed):

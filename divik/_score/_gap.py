@@ -9,7 +9,7 @@ from sklearn.base import clone
 from divik._score._picker import Picker
 from divik._utils import Data, normalize_rows, maybe_pool
 from divik._seeding import seeded
-from divik.sampler import BaseSampler, RandomSampler
+from divik.sampler import BaseSampler, UniformSampler
 
 
 KMeans = 'divik.KMeans'
@@ -47,8 +47,8 @@ def gap(data: Data, kmeans: KMeans,
         n_trials: int = 100,
         return_deviation: bool = False,
         max_iter: int = 10) -> float:
-    reference_ = RandomSampler(n_rows=None, n_samples=n_trials
-                               ).fit(data)
+    reference_ = UniformSampler(n_rows=None, n_samples=n_trials
+                                ).fit(data)
     kmeans_ = clone(kmeans)
     kmeans_.max_iter = max_iter
     with reference_.parallel() as r, maybe_pool(n_jobs) as pool:
