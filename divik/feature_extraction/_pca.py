@@ -18,7 +18,7 @@ def knee(explained_variance) -> int:
                             direction='increasing',
                             curve='concave')
     if limit.knee is not None:
-      return limit.knee
+        return limit.knee
     return explained_variance.size
 
 
