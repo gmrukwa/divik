@@ -303,7 +303,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             percentile=self.distance_percentile, max_iter=self.max_iter,
             normalize_rows=self._needs_normalization(),
             gap={"max_iter": self.fast_kmeans_iter, "seed": self.random_seed,
-                 "trials": self.gap_trials, "correction": True},
+                 "n_trials": self.gap_trials, "correction": True},
             verbose=self.verbose)
 
     def _full_kmeans(self):
