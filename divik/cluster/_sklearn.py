@@ -331,9 +331,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         if (self.filter_type == 'auto' and n_features > 250) \
                 or self.filter_type == 'gmm':
             return self._gmm_filter()
-        elif self.filter_type == 'auto' or self.filter_type == 'outlier':
+        if self.filter_type == 'auto' or self.filter_type == 'outlier':
             return self._outlier_filter()
-        elif self.filter_type == 'none':
+        if self.filter_type == 'none':
             return fs.NoSelector()
         raise ValueError("Unknown filter type: %s" % self.filter_type)
 

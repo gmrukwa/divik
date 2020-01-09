@@ -121,4 +121,3 @@ class TestFindThresholdsConsistency(unittest.TestCase):
         native_ = (native - values.min()) / range_
         mcr_ = (mcr - values.min()) / range_
         npt.assert_almost_equal(native_, mcr_, decimal=3)
-
