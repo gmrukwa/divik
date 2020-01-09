@@ -27,7 +27,7 @@ class StratifiedSampler(BaseSampler):
     y_ : array_like, shape (n_rows,)
         Group labels
     """
-    def __init__(self, n_rows: Union[int, float] = 10000,
+    def __init__(self, n_rows: Union[int, float] = 100,
                  n_samples: int = None):
         self.n_rows = n_rows
         self.n_samples = n_samples
@@ -47,7 +47,7 @@ class StratifiedSampler(BaseSampler):
 
         Returns
         -------
-        self : object
+        self : StratifiedSampler
             Returns the instance itself.
         """
         self.X_ = X

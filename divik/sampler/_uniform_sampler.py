@@ -43,7 +43,7 @@ class UniformSampler(BaseSampler):
 
         Returns
         -------
-        self : object
+        self : UniformSampler
             Returns the instance itself.
         """
         if self.n_rows is None:
@@ -144,7 +144,7 @@ class UniformPCASampler(BaseSampler):
 
         Returns
         -------
-        self : object
+        self : UniformPCASampler
             Returns the instance itself.
         """
         self.pca_ = self._make_pca()
