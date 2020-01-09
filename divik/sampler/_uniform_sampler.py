@@ -26,7 +26,6 @@ class UniformSampler(BaseSampler):
     scaler_ : MinMaxScaler
         Scaler ensuring the proper ranges
     """
-    # TODO: Tests
     def __init__(self, n_rows: int = None, n_samples: int = None):
         self.n_rows = n_rows
         self.n_samples = n_samples
@@ -111,7 +110,6 @@ class UniformPCASampler(BaseSampler):
     sampler_ : UniformSampler
         Sampler from the transformed distribution
     """
-    # TODO: Tests
     def __init__(self, n_rows: int = None, n_samples: int = None,
                  whiten: bool = False, refit: bool = False, pca: str = 'knee'):
         self.n_rows = n_rows
