@@ -1,6 +1,6 @@
 """Clustering methods"""
 from ._kmeans import AutoKMeans, KMeans
-from ._sklearn import DiviK
+from ._divik import DiviK
 
 __all__ = [
     'AutoKMeans',

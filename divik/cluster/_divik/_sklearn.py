@@ -8,9 +8,10 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import tqdm
 
+from ._core import divik
+from ._report import DivikReporter
 import divik.feature_selection as fs
-from . import _kmeans as km
-from . import _divik as dv
+from divik.cluster import _kmeans as km
 import divik._summary as summary
 from divik._utils import (
     normalize_rows,
@@ -341,12 +342,12 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         fast_kmeans = self._fast_kmeans()
         full_kmeans = self._full_kmeans()
         warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
-        report = dv.DivikReporter(progress, warn_const=warn_const)
+        report = DivikReporter(progress, warn_const=warn_const)
         select_all = np.ones(shape=(X.shape[0],), dtype=bool)
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         rejection_size = self._get_rejection_size(X)
-        return dv.divik(
+        return divik(
             X, selection=select_all, fast_kmeans=fast_kmeans,
             full_kmeans=full_kmeans,
             feature_selector=self._feature_selector(X.shape[1]),
