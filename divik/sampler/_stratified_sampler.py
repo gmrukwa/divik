@@ -7,7 +7,7 @@ from ._core import BaseSampler
 
 class StratifiedSampler(BaseSampler):
     """Sample the original data preserving proportions of groups
-    
+
     Parameters
     -----------
     n_rows : int or float, optional (default 10000)
@@ -15,15 +15,15 @@ class StratifiedSampler(BaseSampler):
         If float, should be between 0.0 and 1.0 and represent the
         proportion of the dataset to include in the sample. If
         int, represents the absolute number of rows.
-    
+
     n_samples : int, optional (default None)
         Allows to limit the number of samples when iterating
-    
+
     Attributes
     ----------
     X_ : array_like, shape (n_rows, n_features)
         Data to sample from
-    
+
     y_ : array_like, shape (n_rows,)
         Group labels
     """
