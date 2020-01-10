@@ -16,7 +16,22 @@ KMeans = 'divik.KMeans'
 _DATA = {}
 
 
-def _dunn(kmeans: KMeans, data: Data) -> float:
+def dunn(kmeans: KMeans, data: Data) -> float:
+    """Compute Dunn's index for the clustering
+
+    Parameters
+    ----------
+    kmeans : KMeans
+        KMeans object fitted to the data
+
+    data : array, shape (n_samples, n_features)
+        Clustered data
+
+    Returns
+    -------
+    dunn_index : float
+        Value of Dunn's index for the clustering of data
+    """
     if isinstance(data, str):
         data = _DATA[data]
     if kmeans.cluster_centers_.shape[0] == 1:
@@ -38,12 +53,12 @@ class DunnPicker(Picker):
             ref = str(uuid.uuid4())
             global _DATA
             _DATA[ref] = data
-            score = partial(_dunn, data=ref)
+            score = partial(dunn, data=ref)
             with maybe_pool(self.n_jobs) as pool:
                 scores = pool.map(score, estimators)
             del _DATA[ref]
         else:
-            scores = [_dunn(estimator, data) for estimator in estimators]
+            scores = [dunn(estimator, data) for estimator in estimators]
         return np.array(scores)
 
     def select(self, scores: np.ndarray) -> Optional[int]:

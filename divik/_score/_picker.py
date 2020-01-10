@@ -9,6 +9,7 @@ from divik._utils import Data
 KMeans = 'divik.KMeans'
 
 
+# TODO: Remove Picker
 class Picker(metaclass=ABCMeta):
     def __init__(self, n_jobs: int = 1):
         self.n_jobs = n_jobs

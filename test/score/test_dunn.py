@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from divik._score._dunn import _dunn
+from divik._score._dunn import dunn
 
 
 class DummyKMeans:
@@ -14,5 +14,5 @@ class DummyKMeans:
 class TestDunn(unittest.TestCase):
     def test_computes_inter_to_intracluster_distances_rate(self):
         data = np.array([[1], [3], [4], [6]])
-        dunn = _dunn(DummyKMeans(), data)
-        self.assertAlmostEqual(dunn, 3.)
+        dunn_ = dunn(DummyKMeans(), data)
+        self.assertAlmostEqual(dunn_, 3.)
