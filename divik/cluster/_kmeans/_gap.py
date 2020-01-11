@@ -139,6 +139,8 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             prev_gap = gap_
             self.estimators_.append(kmeans)
             self.scores_.append((gap_, std))
+        if self.verbose:
+            n_clusters.close()
         self.scores_ = np.array(self.scores_)
         del _DATA[ref]
 
