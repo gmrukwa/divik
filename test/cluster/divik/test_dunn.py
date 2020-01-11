@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import numpy.testing as npt
 
-import divik.cluster._divik._core as dv
+import divik.cluster._divik._dunn as dv
 
 
 def returns(value):

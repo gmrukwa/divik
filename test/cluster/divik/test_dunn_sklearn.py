@@ -4,7 +4,7 @@ import numpy.testing as npt
 from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
 
-from divik.cluster._divik._sklearn import DiviK
+from divik.cluster._divik._dunn_sklearn import DiviK
 
 
 class DivikTest(unittest.TestCase):

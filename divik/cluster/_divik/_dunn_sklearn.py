@@ -8,7 +8,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import tqdm
 
-from ._core import divik
+from ._dunn import divik
 from ._report import DivikReporter
 import divik.feature_selection as fs
 from divik.cluster import _kmeans as km
