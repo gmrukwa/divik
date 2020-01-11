@@ -85,8 +85,8 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         self.verbose = verbose
 
     def _should_sample(self, data):
-        sampled_complexity = 2 * self.n_trials * self.sample_size ** 2
-        normal_complexity = self.n_trials * data.shape[0] ** 2
+        sampled_complexity = 2 * self.n_trials * self.sample_size
+        normal_complexity = self.n_trials * data.shape[0]
         return sampled_complexity < normal_complexity
 
     def _gap(self, data, kmeans):

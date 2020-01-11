@@ -21,9 +21,9 @@ def _dispersion(data: Data, kmeans: KMeans) -> float:
         data = normalize_rows(data)
     clusters = pd.DataFrame(data).groupby(kmeans.labels_)
     return float(np.mean([
-        np.mean(dist.pdist(cluster_members.values, kmeans.distance))
-        for _, cluster_members in clusters
-        if cluster_members.shape[0] != 1
+        np.mean(dist.cdist(kmeans.cluster_centers_[np.newaxis, label],
+                           cluster_members.values, kmeans.distance))
+        for label, cluster_members in clusters
     ]))
 
 
@@ -35,9 +35,9 @@ def _sampled_dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans) \
     y = kmeans.fit_predict(X)
     clusters = pd.DataFrame(X).groupby(y)
     return float(np.mean([
-        np.mean(dist.pdist(cluster_members.values, kmeans.distance))
-        for _, cluster_members in clusters
-        if cluster_members.shape[0] != 1
+        np.mean(dist.cdist(kmeans.cluster_centers_[np.newaxis, label],
+                           cluster_members.values, kmeans.distance))
+        for label, cluster_members in clusters
     ]))
 
 
