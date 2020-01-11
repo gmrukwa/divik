@@ -6,11 +6,9 @@ import pickle
 from typing import List, Tuple
 
 import numpy as np
-import pandas as pd
 import skimage.io as sio
 
-from divik.cluster import AutoKMeans
-import divik.score
+from divik.cluster import GAPSearch, KMeans
 import divik._cli._utils as scr
 import divik._utils as u
 
@@ -18,20 +16,15 @@ import divik._utils as u
 Segmentations = List[Tuple[u.IntLabels, u.Centroids]]
 
 
-def get_segmentations(kmeans: AutoKMeans) -> Segmentations:
+def get_segmentations(kmeans: GAPSearch) -> Segmentations:
     return [(est.labels_, est.cluster_centers_) for est in kmeans.estimators_]
 
 
-def make_segmentations_matrix(kmeans: AutoKMeans) -> np.ndarray:
+def make_segmentations_matrix(kmeans: GAPSearch) -> np.ndarray:
     return np.hstack([e.labels_.reshape(-1, 1) for e in kmeans.estimators_])
 
 
-def make_scores_report(kmeans: AutoKMeans, n_jobs: int = 1) -> pd.DataFrame:
-    picker = divik.score.make_picker(kmeans.method, n_jobs, kmeans.gap)
-    return picker.report(kmeans.estimators_, kmeans.scores_)
-
-
-def save(kmeans: AutoKMeans, destination: str, xy: np.ndarray=None):
+def save(kmeans: GAPSearch, destination: str, xy: np.ndarray=None):
     logging.info("Saving result.")
 
     logging.info("Saving model.")
@@ -61,15 +54,12 @@ def save(kmeans: AutoKMeans, destination: str, xy: np.ndarray=None):
         sio.imsave(fname('partitions.{0}.png').format(kmeans.n_clusters_),
                    visualization)
 
-    logging.info("Saving scores.")
-    report = make_scores_report(kmeans, n_jobs=-1)
-    report.to_csv(fname('scores.csv'))
-
 
 def main():
     data, config, destination, xy = scr.initialize()
     try:
-        kmeans = AutoKMeans(**config)
+        single_kmeans = KMeans(**config['kmeans'])
+        kmeans = GAPSearch(single_kmeans, **config['gap'])
         kmeans.fit(data)
     except Exception as ex:
         logging.error("Failed with exception.")
