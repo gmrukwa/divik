@@ -313,7 +313,7 @@ class DunnDiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         single_kmeans = km.KMeans(
             n_clusters=2, distance=self.distance, init='percentile',
             percentile=self.distance_percentile,
-            max_iter=self.fast_kmeans_iter,
+            max_iter=self.max_iter,
             normalize_rows=self._needs_normalization())
         kmeans = km.DunnSearch(
             single_kmeans, max_clusters=self.k_max, n_jobs=self.n_jobs,
