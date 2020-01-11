@@ -97,13 +97,22 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
         with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
             self.result_ = self._divik(X, progress)
 
-        self.labels_, self.paths_ = summary.merged_partition(self.result_,
-                                                             return_paths=True)
+        if self.result_ is None:
+            self.labels_ = np.zeros((X.shape[0],), dtype=int)
+            self.paths_ = {0: (0,)}
+        else:
+            self.labels_, self.paths_ = summary.merged_partition(
+                self.result_, return_paths=True)
+
         self.reverse_paths_ = {
             value: key for key, value in self.paths_.items()}
-        self.filters_ = np.array(
-            [self._get_filter(path) for path in self.reverse_paths_],
-            dtype=bool)
+
+        if self.result_ is None:
+            self.filters_ = np.ones([X.shape[0], 1])
+        else:
+            self.filters_ = np.array(
+                [self._get_filter(path) for path in self.reverse_paths_],
+                dtype=bool)
         self.centroids_ = pd.DataFrame(X).groupby(self.labels_, sort=True)\
             .mean().values
         self.depth_ = summary.depth(self.result_)
