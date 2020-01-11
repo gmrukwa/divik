@@ -298,24 +298,27 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         return self.normalize_rows
 
     def _fast_kmeans(self):
-        return km.AutoKMeans(
-            max_clusters=2, n_jobs=self.n_jobs, method="gap",
-            distance=self.distance, init='percentile',
-            percentile=self.distance_percentile, max_iter=self.max_iter,
-            normalize_rows=self._needs_normalization(),
-            gap={"max_iter": self.fast_kmeans_iter, "seed": self.random_seed,
-                 "n_trials": self.gap_trials, "correction": True},
-            verbose=self.verbose)
+        single_kmeans = km.KMeans(
+            n_clusters=2, distance=self.distance, init='percentile',
+            percentile=self.distance_percentile,
+            max_iter=self.fast_kmeans_iter,
+            normalize_rows=self._needs_normalization())
+        kmeans = km.GAPSearch(
+            single_kmeans, max_clusters=2, n_jobs=self.n_jobs,
+            seed=self.random_seed, n_trials=self.gap_trials,
+            sample_size=np.inf, verbose=self.verbose)
+        return kmeans
 
     def _full_kmeans(self):
-        return km.AutoKMeans(
-            max_clusters=self.k_max, min_clusters=2,
-            n_jobs=self.n_jobs, method='dunn',
-            distance=self.distance, init='percentile',
-            percentile=self.distance_percentile, max_iter=self.max_iter,
-            normalize_rows=self._needs_normalization(), gap=None,
-            verbose=self.verbose
-        )
+        single_kmeans = km.KMeans(
+            n_clusters=2, distance=self.distance, init='percentile',
+            percentile=self.distance_percentile,
+            max_iter=self.fast_kmeans_iter,
+            normalize_rows=self._needs_normalization())
+        kmeans = km.DunnSearch(
+            single_kmeans, max_clusters=self.k_max, n_jobs=self.n_jobs,
+            verbose=self.verbose)
+        return kmeans
 
     def _gmm_filter(self):
         return fs.HighAbundanceAndVarianceSelector(
@@ -339,17 +342,17 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         raise ValueError("Unknown filter type: %s" % self.filter_type)
 
     def _divik(self, X, progress):
-        fast_kmeans = self._fast_kmeans()
-        full_kmeans = self._full_kmeans()
-        warn_const = fast_kmeans.normalize_rows or full_kmeans.normalize_rows
+        fast = self._fast_kmeans()
+        full = self._full_kmeans()
+        warn_const = fast.kmeans.normalize_rows or full.kmeans.normalize_rows
         report = DivikReporter(progress, warn_const=warn_const)
         select_all = np.ones(shape=(X.shape[0],), dtype=bool)
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         rejection_size = self._get_rejection_size(X)
         return divik(
-            X, selection=select_all, fast_kmeans=fast_kmeans,
-            full_kmeans=full_kmeans,
+            X, selection=select_all, fast_kmeans=fast,
+            full_kmeans=full,
             feature_selector=self._feature_selector(X.shape[1]),
             minimal_size=minimal_size, rejection_size=rejection_size,
             report=report)

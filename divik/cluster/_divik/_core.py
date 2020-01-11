@@ -17,13 +17,14 @@ def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
     return selection
 
 
-AutoKMeans = 'divik.cluster.AutoKMeans'
 StatSelector = 'divik.feature_selection.StatSelectorMixin'
+DunnSearch = 'divik.cluster._kmeans._dunn.DunnSearch'
+GAPSearch = 'divik.cluster._kmeans._gap.GAPSearch'
 
 
 # @gmrukwa: I could not find more readable solution than recursion for now.
 def divik(data: Data, selection: np.ndarray,
-          fast_kmeans: AutoKMeans, full_kmeans: AutoKMeans,
+          fast_kmeans: DunnSearch, full_kmeans: GAPSearch,
           feature_selector: StatSelector,
           minimal_size: int, rejection_size: int, report: DivikReporter) \
         -> Optional[DivikResult]:
