@@ -1,9 +1,18 @@
 """Clustering methods"""
-from ._kmeans import AutoKMeans, KMeans
-from ._sklearn import DiviK
+from ._kmeans import (
+    DunnSearch,
+    GAPSearch,
+    KMeans,
+)
+from ._divik import (
+    DiviK,
+    DunnDiviK,
+)
 
 __all__ = [
-    'AutoKMeans',
     'DiviK',
+    'DunnDiviK',
+    'DunnSearch',
+    'GAPSearch',
     'KMeans',
 ]

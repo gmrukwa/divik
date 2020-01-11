@@ -1,4 +1,4 @@
-__version__ = '2.3.12'
+__version__ = '2.3.13'
 
 from ._seeding import seeded
 from ._utils import DivikResult
