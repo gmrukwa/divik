@@ -9,7 +9,7 @@
   "minimal_features_percentage": 0.01,
   "features_percentage": 0.05,
   "k_max": 50,
-  "sample_size": 10000,
+  "sample_size": 1000,
   "normalize_rows": true,
   "use_logfilters": true,
   "filter_type": "gmm",
