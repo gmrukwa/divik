@@ -8,7 +8,7 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import tqdm
 
-from ._dunn import divik
+from ._dunn import dunn_divik
 from ._report import DivikReporter
 import divik.feature_selection as fs
 from divik.cluster import _kmeans as km
@@ -21,7 +21,7 @@ from divik._utils import (
 )
 
 
-class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
+class DunnDiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     """DiviK clustering
 
     Parameters
@@ -160,11 +160,11 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     Examples
     --------
 
-    >>> from divik.cluster import DiviK
+    >>> from divik.cluster import DunnDiviK
     >>> from sklearn.datasets import make_blobs
     >>> X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
     ...                   random_state=42)
-    >>> divik = DiviK(distance='euclidean').fit(X)
+    >>> divik = DunnDiviK(distance='euclidean').fit(X)
     >>> divik.labels_
     array([1, 1, 1, 0, ..., 0, 0], dtype=int32)
     >>> divik.predict([[0, ..., 0], [12, ..., 3]])
@@ -350,7 +350,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         rejection_size = self._get_rejection_size(X)
-        return divik(
+        return dunn_divik(
             X, selection=select_all, fast_kmeans=fast,
             full_kmeans=full,
             feature_selector=self._feature_selector(X.shape[1]),

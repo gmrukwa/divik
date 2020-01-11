@@ -4,10 +4,10 @@ from ._kmeans import (
     GAPSearch,
     KMeans,
 )
-from ._divik import DiviK
+from ._divik import DunnDiviK
 
 __all__ = [
-    'DiviK',
+    'DunnDiviK',
     'DunnSearch',
     'GAPSearch',
     'KMeans',

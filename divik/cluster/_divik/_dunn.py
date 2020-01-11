@@ -23,10 +23,10 @@ GAPSearch = 'divik.cluster._kmeans._gap.GAPSearch'
 
 
 # @gmrukwa: I could not find more readable solution than recursion for now.
-def divik(data: Data, selection: np.ndarray,
-          fast_kmeans: DunnSearch, full_kmeans: GAPSearch,
-          feature_selector: StatSelector,
-          minimal_size: int, rejection_size: int, report: DivikReporter) \
+def dunn_divik(data: Data, selection: np.ndarray,
+               fast_kmeans: DunnSearch, full_kmeans: GAPSearch,
+               feature_selector: StatSelector,
+               minimal_size: int, rejection_size: int, report: DivikReporter) \
         -> Optional[DivikResult]:
     subset = data[selection]
 
@@ -56,7 +56,7 @@ def divik(data: Data, selection: np.ndarray,
 
     report.recurring(len(counts))
     recurse = partial(
-        divik, data=data, fast_kmeans=fast_kmeans,
+        dunn_divik, data=data, fast_kmeans=fast_kmeans,
         full_kmeans=full_kmeans, feature_selector=feature_selector,
         minimal_size=minimal_size, rejection_size=rejection_size,
         report=report)

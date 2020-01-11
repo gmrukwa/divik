@@ -1,3 +1,3 @@
 """DiviK algorithm implementation."""
 
-from ._dunn_sklearn import DiviK
+from ._dunn_sklearn import DunnDiviK
