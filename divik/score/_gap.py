@@ -23,6 +23,7 @@ def _dispersion(data: Data, kmeans: KMeans) -> float:
     return float(np.mean([
         np.mean(dist.pdist(cluster_members.values, kmeans.distance))
         for _, cluster_members in clusters
+        if cluster_members.shape[0] != 1
     ]))
 
 
@@ -36,6 +37,7 @@ def _sampled_dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans) \
     return float(np.mean([
         np.mean(dist.pdist(cluster_members.values, kmeans.distance))
         for _, cluster_members in clusters
+        if cluster_members.shape[0] != 1
     ]))
 
 
