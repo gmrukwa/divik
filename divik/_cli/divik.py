@@ -9,7 +9,7 @@ import pandas as pd
 import skimage.io as sio
 
 from divik._cli._data_io import DIVIK_RESULT_FNAME
-from divik.cluster import DunnDiviK
+from divik.cluster import DiviK
 import divik._summary as _smr
 import divik._cli._utils as sc
 import divik._utils as u
@@ -55,7 +55,7 @@ def _save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
                delimiter=', ', fmt='%i')
 
 
-def save(data: u.Data, divik: DunnDiviK, destination: str, xy: np.ndarray=None):
+def save(data: u.Data, divik: DiviK, destination: str, xy: np.ndarray=None):
     logging.info("Saving result.")
     logging.info("Saving pickle.")
     with open(os.path.join(destination, DIVIK_RESULT_FNAME), 'wb') as pkl:
@@ -83,7 +83,7 @@ def main():
     data, config, destination, xy = sc.initialize()
     logging.info('Workspace initialized.')
     logging.info('Scenario configuration: {0}'.format(config))
-    divik = DunnDiviK(**config)
+    divik = DiviK(**config)
     logging.info("Launching experiment.")
     try:
         divik.fit(data)

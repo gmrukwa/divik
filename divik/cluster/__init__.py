@@ -4,9 +4,13 @@ from ._kmeans import (
     GAPSearch,
     KMeans,
 )
-from ._divik import DunnDiviK
+from ._divik import (
+    DiviK,
+    DunnDiviK,
+)
 
 __all__ = [
+    'DiviK',
     'DunnDiviK',
     'DunnSearch',
     'GAPSearch',
