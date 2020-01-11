@@ -20,7 +20,7 @@ def sampled_gap(data: Data, kmeans: KMeans,
                 seed: int = 0,
                 n_trials: int = 100,
                 return_deviation: bool = False,
-                max_iter: int = 10) -> float:
+                max_iter: int = 10) -> float:  # TODO: Delete max_iter
     # TODO: Docs
     data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
                               ).fit(data, kmeans.labels_)

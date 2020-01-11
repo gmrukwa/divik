@@ -45,7 +45,7 @@ def gap(data: Data, kmeans: KMeans,
         seed: int = 0,
         n_trials: int = 100,
         return_deviation: bool = False,
-        max_iter: int = 10) -> float:
+        max_iter: int = 10) -> float:  # TODO: Delete max_iter
     reference_ = UniformSampler(n_rows=None, n_samples=n_trials
                                 ).fit(data)
     kmeans_ = clone(kmeans)
