@@ -222,11 +222,6 @@ filtering is applied.
 the dimensionality. When more than 250 features are present, 'gmm' is chosen.
 - `'none'` - feature selection is disabled
 
-#### `keep_outliers`
-
-When `filter_type` is `'outlier'`, this will switch feature selection
-to outliers-preserving mode (inlier features are removed).
-
 #### `n_jobs`
 
 The number of jobs to use for the computation. This works by computing each of

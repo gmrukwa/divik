@@ -95,10 +95,6 @@ class DunnDiviK(DiviKBase):
         is chosen.
         - 'none' - feature selection is disabled
 
-    keep_outliers: bool, optional, default: False
-        When `filter_type` is `'outlier'`, this will switch feature selection
-        to outliers-preserving mode (inlier features are removed).
-
     n_jobs: int, optional, default: None
         The number of jobs to use for the computation. This works by computing
         each of the GAP index evaluations in parallel and by making predictions
@@ -180,7 +176,6 @@ class DunnDiviK(DiviKBase):
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
                  filter_type='gmm',
-                 keep_outliers=False,
                  n_jobs: int = None,
                  random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
@@ -188,8 +183,7 @@ class DunnDiviK(DiviKBase):
                          minimal_size, rejection_size, rejection_percentage,
                          minimal_features_percentage, features_percentage,
                          k_max, sample_size, normalize_rows, use_logfilters,
-                         filter_type, keep_outliers, n_jobs, random_seed,
-                         verbose)
+                         filter_type, n_jobs, random_seed, verbose)
         self.fast_kmeans_iter = fast_kmeans_iter
         self._validate_arguments()
         if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:

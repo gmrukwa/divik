@@ -13,7 +13,6 @@
   "normalize_rows": true,
   "use_logfilters": true,
   "filter_type": "gmm",
-  "keep_outliers": false,
   "n_jobs": -1,
   "random_seed": 0,
   "verbose": true
