@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.datasets import make_blobs
 
 import divik.cluster as km
-import divik._score as sc
+import divik.score as sc
 
 
 class TestSamplingGap(unittest.TestCase):

@@ -83,9 +83,11 @@ Configuration file should be a JSON file as follows:
   "distance": "correlation",
   "minimal_size": 16,
   "rejection_size": 2,
+  "rejection_percentage": null,
   "minimal_features_percentage": 0.01,
-  "fast_kmeans_iter": 10,
+  "features_percentage": 0.05,
   "k_max": 10,
+  "sample_size": 10000,
   "normalize_rows": true,
   "use_logfilters": true,
   "filter_type": "gmm",
@@ -104,8 +106,11 @@ for computation of GAP index. Default `10`.
 
 #### `distance_percentile`
 
-Distance percentile, at which algorithm should look for initial cluster centers.
-Should be between `0.0` and `100.0`.
+The percentile of the distance between points and their closest
+centroid. 100.0 would simply select the furthest point from all the
+centroids found already. Lower value provides better robustness against
+outliers. Too low value reduces the capability to detect centroid
+candidates during initialization. Should be between `0.0` and `100.0`.
 
 #### `max_iter`
 
@@ -116,7 +121,9 @@ not be less.
 
 Distance measure, defaults to `euclidean`. For Mass Spectrometry Imaging
 purposes `correlation` metric may be more useful. These are the distances
-supported by `scipy` package. All supported values:
+supported by
+[`scipy` package](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.pdist.html).
+All supported values:
 
 - `braycurtis`
 - `canberra`
@@ -149,30 +156,43 @@ smaller.
 
 #### `rejection_size`
 
+Size under which split will be rejected - if a cluster appears in the
+split that is below rejection_size, the split is considered improper
+and discarded. This may be useful for some domains (like there is no
+justification for a 3-cells cluster in biological data). By default,
+no segmentation is discarded, as careful post-processing provides the
+same advantage.
+
 If cluster of size less or equal to this number appears, such segmentation will
 be rejected. Default `2`. To disable this mechanism, just set it to `0`.
 
+#### `rejection_percentage`
+
+An alternative to ``rejection_size``, with the same behavior, but this
+parameter is related to the training data size percentage. By default,
+no segmentation is discarded.
+
 #### `minimal_features_percentage`
 
-Percent of features that are enforced to be preserved after each filtering.
-Default `0.01` (corresponding to `1%`).
+The minimal percentage of features that must be preserved after
+GMM-based feature selection. By default at least 1% of features is
+preserved in the filtration process. Default `0.01` (corresponding to `1%`).
 
 #### `features_percentage`
 
 The target percentage of features that are used by fallback percentage
 filter for `'outlier'` filter.
 
-#### `fast_kmeans_iter`
-
-Number of k-means iterations performed during GAP trial. Default `10`. In most
-cases this is sufficient.
-
 #### `k_max`
 
-Maximal number of clusters. Default `10`, since Dunn's index for selection of
+Maximal number of clusters. Default `50`, since Dunn's index for selection of
 optimal number of clusters favorizes low number of clusters. If there is a
 suspicion that it is not enough, may be increased, but will slow down
 computations. 
+
+#### `sample_size`
+
+Size of the sample used for GAP statistic computation.
 
 #### `normalize_rows`
 
@@ -201,11 +221,6 @@ filtering is applied.
 - `'auto'` - automatically selects between 'gmm' and 'outlier' based on
 the dimensionality. When more than 250 features are present, 'gmm' is chosen.
 - `'none'` - feature selection is disabled
-
-#### `keep_outlier`
-
-When `filter_type` is `'outlier'`, this will switch feature selection
-to outliers-preserving mode (inlier features are removed).
 
 #### `n_jobs`
 

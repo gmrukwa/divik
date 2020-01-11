@@ -4,7 +4,8 @@ from parameterized import parameterized
 from sklearn.datasets import make_blobs
 from sklearn.metrics import adjusted_rand_score
 
-from divik.cluster._kmeans._auto import AutoKMeans
+from divik.cluster._kmeans._core import KMeans
+from divik.cluster._kmeans._gap import GAPSearch
 
 
 def data(n_clusters):
@@ -12,34 +13,26 @@ def data(n_clusters):
                       random_state=0)
 
 
-class AutoKMeansTest(unittest.TestCase):
-    # Here's less numbers checked, as Dunn favorizes small number of clusters.
+class GAPSearchTest(unittest.TestCase):
     @parameterized.expand([
-        ("{}_clusters".format(k), k) for k in [2, 3, 4]
-    ])
-    def test_works_with_dunn(self, _, n_clusters):
-        X, y = data(n_clusters)
-        kmeans = AutoKMeans(max_clusters=10, method='dunn').fit(X)
-        rand = adjusted_rand_score(y, kmeans.labels_)
-        self.assertEqual(kmeans.n_clusters_, n_clusters)
-        self.assertGreater(rand, 0.75)
-
-    @parameterized.expand([
-        ("{}_clusters".format(k), k) for k in [2, 3, 4, 7, 8]
+        ("{}_clusters".format(k), k) for k in [1, 2, 3, 4, 7, 8]
     ])
     def test_works_with_gap(self, _, n_clusters):
         X, y = data(n_clusters)
-        kmeans = AutoKMeans(max_clusters=10, method='gap').fit(X)
+        single_kmeans = KMeans(n_clusters=2)
+        kmeans = GAPSearch(single_kmeans, max_clusters=10,
+                           sample_size=10000).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
         self.assertEqual(kmeans.n_clusters_, n_clusters)
         self.assertGreater(rand, 0.75)
 
     @parameterized.expand([
-        ("{}_clusters".format(k), k) for k in [2, 3, 4, 7, 8]
+        ("{}_clusters".format(k), k) for k in [1, 2, 3, 4, 7, 8]
     ])
     def test_works_with_sampled_gap(self, _, n_clusters):
         X, y = data(n_clusters)
-        kmeans = AutoKMeans(max_clusters=10, method='sampled_gap').fit(X)
+        single_kmeans = KMeans(n_clusters=2)
+        kmeans = GAPSearch(single_kmeans, max_clusters=10).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
         self.assertEqual(kmeans.n_clusters_, n_clusters)
         self.assertGreater(rand, 0.75)

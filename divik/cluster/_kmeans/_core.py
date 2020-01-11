@@ -90,6 +90,23 @@ class _KMeans(SegmentationMethod):
         self.number_of_iterations = number_of_iterations
         self.normalize_rows = normalize_rows
 
+    def _fix_labels(self, data, centroids, labels, n_clusters):
+        new_labels = labels.copy()
+        known_labels = np.unique(labels)
+        expected_labels = np.arange(n_clusters)
+        missing_labels = np.setdiff1d(expected_labels, known_labels)
+        new_centroids = np.nan * np.zeros((n_clusters, centroids.shape[1]))
+        for known in known_labels:
+            new_centroids[known] = centroids[known]
+        for missing in missing_labels:
+            new_center = np.nanmin(dst.cdist(
+                data, new_centroids, metric=self.labeling.distance_metric
+            ), axis=1).argmax()
+            new_labels[new_center] = missing
+            new_centroids[missing] = data[new_center]
+        assert np.unique(new_labels).size == n_clusters
+        return new_centroids, new_labels
+
     def __call__(self, data: Data, number_of_clusters: int) \
             -> Tuple[IntLabels, Centroids]:
         _validate_kmeans_input(data, number_of_clusters)
@@ -104,6 +121,9 @@ class _KMeans(SegmentationMethod):
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
         for _ in range(self.number_of_iterations):
+            if np.unique(labels).size != number_of_clusters:
+                centroids, labels = self._fix_labels(
+                    data, centroids, labels, number_of_clusters)
             if np.all(labels == old_labels):
                 break
             old_labels = labels
