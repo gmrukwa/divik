@@ -66,6 +66,10 @@ class DunnDiviK(DiviKBase):
         Maximum number of clusters evaluated during the auto-tuning process.
         From 1 up to k_max clusters are tested per evaluation.
 
+    sample_size: int, optional, default: 10000
+        Size of the sample used for GPA statistic computation.
+
+
     normalize_rows: bool, optional, default: None
         Whether to normalize each row of the data to the norm of 1. By default,
         it normalizes rows for correlation metric, does no normalization
@@ -172,6 +176,7 @@ class DunnDiviK(DiviKBase):
                  features_percentage: float = 0.05,
                  fast_kmeans_iter: int = 10,
                  k_max: int = 10,
+                 sample_size: int = 10000,
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
                  filter_type='gmm',
@@ -182,8 +187,9 @@ class DunnDiviK(DiviKBase):
         super().__init__(gap_trials, distance_percentile, max_iter, distance,
                          minimal_size, rejection_size, rejection_percentage,
                          minimal_features_percentage, features_percentage,
-                         k_max, normalize_rows, use_logfilters, filter_type,
-                         keep_outliers, n_jobs, random_seed, verbose)
+                         k_max, sample_size, normalize_rows, use_logfilters,
+                         filter_type, keep_outliers, n_jobs, random_seed,
+                         verbose)
         self.fast_kmeans_iter = fast_kmeans_iter
         self._validate_arguments()
         if self.fast_kmeans_iter > self.max_iter or self.fast_kmeans_iter < 0:
@@ -198,7 +204,7 @@ class DunnDiviK(DiviKBase):
         kmeans = km.GAPSearch(
             single_kmeans, max_clusters=2, n_jobs=self.n_jobs,
             seed=self.random_seed, n_trials=self.gap_trials,
-            sample_size=np.inf, verbose=self.verbose)
+            sample_size=self.sample_size, verbose=self.verbose)
         return kmeans
 
     def _full_kmeans(self):
