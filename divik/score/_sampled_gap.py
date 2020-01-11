@@ -19,15 +19,13 @@ def sampled_gap(data: Data, kmeans: KMeans,
                 n_jobs: int = None,
                 seed: int = 0,
                 n_trials: int = 100,
-                return_deviation: bool = False,
-                max_iter: int = 10) -> float:  # TODO: Delete max_iter
+                return_deviation: bool = False) -> float:
     # TODO: Docs
     data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
                               ).fit(data, kmeans.labels_)
     reference_ = UniformSampler(n_rows=sample_size, n_samples=n_trials
                                 ).fit(data)
     kmeans_ = clone(kmeans)
-    kmeans_.max_iter = max_iter
     with data_.parallel() as d, reference_.parallel() as r, \
             maybe_pool(n_jobs) as pool:
         compute_disp = partial(_dispersion, sampler=r, kmeans=kmeans_)
