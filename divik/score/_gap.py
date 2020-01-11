@@ -1,12 +1,10 @@
 from functools import partial
-from typing import List, Optional
 
 import numpy as np
 import pandas as pd
 import scipy.spatial.distance as dist
 from sklearn.base import clone
 
-from divik.score._picker import Picker
 from divik._utils import Data, normalize_rows, maybe_pool
 from divik._seeding import seeded
 from divik.sampler import BaseSampler, UniformSampler
@@ -63,58 +61,3 @@ def gap(data: Data, kmeans: KMeans,
         std = np.sqrt(1 + 1 / n_trials) * np.std(ref_disp)
         result += (std,)
     return result
-
-
-class GapPicker(Picker):
-    def __init__(self, max_iter: int = 10, seed: int = 0, n_trials: int = 10,
-                 correction: bool = True, n_jobs: int = 1):
-        super().__init__(n_jobs=n_jobs)
-        self.max_iter = max_iter
-        self.seed = seed
-        self.n_trials = n_trials
-        self.correction = correction
-
-    def score(self, data: Data, estimators: List[KMeans]) -> np.ndarray:
-        gap_ = partial(gap, data,
-                       n_jobs=self.n_jobs,
-                       seed=self.seed,
-                       n_trials=self.n_trials,
-                       return_deviation=True,
-                       max_iter=self.max_iter)
-        scores = [gap_(kmeans=estimator) for estimator in estimators]
-        return np.array(scores)
-
-    def select(self, scores: np.ndarray) -> Optional[int]:
-        GAP = scores[:, 0]
-        s_k = scores[:, 1]
-        if self.correction:
-            is_suggested = GAP[:-1] > (GAP[1:] + s_k[1:])
-            suggested_locations = list(np.flatnonzero(is_suggested))
-        else:
-            suggested_locations = [int(np.argmax(GAP))]
-        return suggested_locations[0] if suggested_locations else None
-
-    def report(self, estimators: List[KMeans], scores: np.ndarray) \
-            -> pd.DataFrame:
-        GAP = scores[:, 0]
-        s_k = scores[:, 1]
-        best = self.select(scores)
-        suggested = np.zeros((len(estimators) - 1,), dtype=bool)
-        if best is not None:
-            suggested[best] = True
-        suggested = list(suggested)
-        suggested.append(None)
-        return pd.DataFrame(
-            data={
-                'number_of_clusters': [e.n_clusters for e in estimators],
-                'GAP': GAP,
-                's_k': s_k,
-                'suggested_number_of_clusters': suggested
-            },
-            columns=[
-                'number_of_clusters',
-                'GAP',
-                's_k',
-                'suggested_number_of_clusters'
-            ]
-        )
