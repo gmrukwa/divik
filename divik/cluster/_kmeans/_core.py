@@ -77,6 +77,7 @@ def _validate_normalizable(data):
 
 class _KMeans(SegmentationMethod):
     """K-means clustering"""
+    # TODO: There's an issue with disappearing clusters - propose strategy
     def __init__(self, labeling: Labeling, initialize: Initialization,
                  number_of_iterations: int=100, normalize_rows: bool=False):
         """
