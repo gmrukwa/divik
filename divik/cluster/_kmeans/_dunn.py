@@ -8,7 +8,7 @@ from sklearn.utils.validation import check_is_fitted
 import tqdm
 
 from ._core import KMeans
-from divik._score import dunn
+from divik.score import dunn
 from divik._utils import maybe_pool
 
 

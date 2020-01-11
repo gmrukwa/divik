@@ -7,7 +7,7 @@ from sklearn.utils.validation import check_is_fitted
 import tqdm
 
 from divik.cluster._kmeans._core import KMeans
-from divik._score import make_picker
+from divik.score import make_picker
 from divik._utils import maybe_pool
 
 

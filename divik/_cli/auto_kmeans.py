@@ -10,7 +10,7 @@ import pandas as pd
 import skimage.io as sio
 
 from divik.cluster import AutoKMeans
-import divik._score
+import divik.score
 import divik._cli._utils as scr
 import divik._utils as u
 
@@ -27,7 +27,7 @@ def make_segmentations_matrix(kmeans: AutoKMeans) -> np.ndarray:
 
 
 def make_scores_report(kmeans: AutoKMeans, n_jobs: int = 1) -> pd.DataFrame:
-    picker = divik._score.make_picker(kmeans.method, n_jobs, kmeans.gap)
+    picker = divik.score.make_picker(kmeans.method, n_jobs, kmeans.gap)
     return picker.report(kmeans.estimators_, kmeans.scores_)
 
 

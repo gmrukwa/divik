@@ -8,7 +8,7 @@ from sklearn.utils.validation import check_is_fitted
 import tqdm
 
 from divik.cluster._kmeans._core import KMeans
-from divik._score import gap, sampled_gap
+from divik.score import gap, sampled_gap
 
 
 _DATA = {}

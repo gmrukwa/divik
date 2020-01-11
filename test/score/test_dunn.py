@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from divik._score._dunn import dunn
+from divik.score._dunn import dunn
 
 
 class DummyKMeans:

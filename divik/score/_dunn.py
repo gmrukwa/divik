@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import distance as dist
 
-from divik._score._picker import Picker
+from divik.score._picker import Picker
 from divik._utils import Data, maybe_pool
 
 
