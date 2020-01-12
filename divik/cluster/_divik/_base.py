@@ -278,5 +278,5 @@ def _predict_path(observation: np.ndarray, result: DivikResult) -> Tuple[int]:
         label = int(division.clustering.predict(local_X))
         path.append(label)
         division = division.subregions[label]
-    path = tuple(path)
+    path = tuple(path) if len(path) else (0,)
     return path
