@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
+import ctypes
 from functools import wraps
 # RawArray exists, but PyCharm goes crazy
 # noinspection PyUnresolvedReferences
@@ -150,14 +151,14 @@ class WinSharedArrayWrapper(SharedArrayWrapper):
 
 class WinSharedArray(SharedArray):
     _DTYPES = {
-        np.float64: 'd',
-        np.float32: 'f',
-        np.uint64: 'Q',
-        np.uint32: 'L',
-        np.uint16: 'I',
-        np.int64: 'q',
-        np.int32: 'l',
-        np.int16: 'i',
+        np.dtype(np.float64): ctypes.c_double,
+        np.dtype(np.float32): ctypes.c_float,
+        np.dtype(np.uint64): ctypes.c_uint64,
+        np.dtype(np.uint32): ctypes.c_uint32,
+        np.dtype(np.uint16): ctypes.c_uint16,
+        np.dtype(np.int64): ctypes.c_int64,
+        np.dtype(np.int32): ctypes.c_int32,
+        np.dtype(np.int16): ctypes.c_int16,
     }
 
     def __init__(self):
