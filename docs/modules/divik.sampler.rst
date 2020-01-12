@@ -1,4 +1,4 @@
-`samplere` module
+`sampler` module
 ================
 
 .. automodule:: divik.sampler
