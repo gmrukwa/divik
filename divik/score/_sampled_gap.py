@@ -11,6 +11,7 @@ from divik.score._gap import _sampled_dispersion as _dispersion
 
 
 KMeans = 'divik.KMeans'
+_BIG_PRIME = 40013
 
 
 @seeded(wrapped_requires_seed=True)
@@ -26,12 +27,13 @@ def sampled_gap(data: Data, kmeans: KMeans,
     reference_ = UniformSampler(n_rows=sample_size, n_samples=n_trials
                                 ).fit(data)
     kmeans_ = clone(kmeans)
+    seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
     with data_.parallel() as d, reference_.parallel() as r, \
             maybe_pool(n_jobs) as pool:
         compute_disp = partial(_dispersion, sampler=r, kmeans=kmeans_)
-        ref_disp = pool.map(compute_disp, range(seed, seed + n_trials))
+        ref_disp = pool.map(compute_disp, seeds)
         compute_disp = partial(_dispersion, sampler=d, kmeans=kmeans_)
-        data_disp = pool.map(compute_disp, range(seed, seed + n_trials))
+        data_disp = pool.map(compute_disp, seeds)
     ref_disp = np.log(ref_disp)
     data_disp = np.log(data_disp)
     gap = np.mean(ref_disp) - np.mean(data_disp)

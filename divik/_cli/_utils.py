@@ -49,12 +49,6 @@ def prepare_destination(destination: str, omit_datetime: bool = False) -> str:
 
 
 def setup_logger(destination: str, verbose: bool = False):
-    try:
-        import divik._matlab_legacy
-        logger = logging.getLogger(divik._matlab_legacy.__name__)
-        logger.setLevel(logging.CRITICAL)
-    except ImportError:
-        pass  # In environments without MATLAB this should work as well
     log_destination = os.path.join(destination, 'logs.txt')
     if verbose:
         log_format = '%(asctime)s [%(levelname)s] %(filename)40s:%(lineno)3s' \
