@@ -40,7 +40,7 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.3.15
+docker pull gmrukwa/divik:2.3.16
 ```
 
 ## Python package
@@ -60,7 +60,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.3.15
+pip install divik==2.3.16
 ```
 
 If you want to have compatibility with
