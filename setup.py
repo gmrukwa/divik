@@ -34,6 +34,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'dunn-divik=divik._cli.dunn_divik:main',
             'divik=divik._cli.divik:main',
             'inspect=divik._cli.inspect:main',
             'kmeans=divik._cli.auto_kmeans:main',

@@ -1,0 +1,21 @@
+{
+    "gap_trials": 10,
+    "distance_percentile": 99.0,
+    "max_iter": 100,
+    "distance": "correlation",
+    "minimal_size": 16,
+    "rejection_size": 2,
+    "rejection_percentage": null,
+    "minimal_features_percentage": 0.01,
+    "features_percentage": 0.05,
+    "fast_kmeans_iter": 10,
+    "k_max": 10,
+    "sample_size": 1000,
+    "normalize_rows": true,
+    "use_logfilters": true,
+    "filter_type": "gmm",
+    "n_jobs": -1,
+    "random_seed": 0,
+    "verbose": true
+  }
+  
