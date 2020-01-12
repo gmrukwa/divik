@@ -5,8 +5,7 @@ from typing import Optional
 import numpy as np
 from sklearn import clone
 
-from divik import DivikResult
-from divik._utils import Data
+from divik.core import Data, DivikResult
 from ._report import DivikReporter
 
 

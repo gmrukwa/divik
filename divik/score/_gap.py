@@ -5,8 +5,7 @@ import pandas as pd
 import scipy.spatial.distance as dist
 from sklearn.base import clone
 
-from divik._utils import Data, normalize_rows, maybe_pool
-from divik._seeding import seeded
+from divik.core import Data, normalize_rows, maybe_pool, seeded
 from divik.sampler import BaseSampler, UniformSampler
 
 

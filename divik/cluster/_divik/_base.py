@@ -9,8 +9,8 @@ from scipy.spatial import distance as dist
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from divik import _summary as summary, feature_selection as fs, DivikResult
-from divik._utils import context_if, normalize_rows, maybe_pool
+from divik import _summary as summary, feature_selection as fs
+from divik.core import context_if, DivikResult, normalize_rows, maybe_pool
 
 
 class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta):

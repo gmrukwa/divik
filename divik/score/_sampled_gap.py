@@ -4,8 +4,7 @@ from typing import Union
 import numpy as np
 from sklearn.base import clone
 
-from divik._utils import Data, maybe_pool
-from divik._seeding import seeded
+from divik.core import Data, maybe_pool, seeded
 from divik.sampler import UniformSampler, StratifiedSampler
 from divik.score._gap import _sampled_dispersion as _dispersion
 

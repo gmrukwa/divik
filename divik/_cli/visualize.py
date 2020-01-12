@@ -3,7 +3,7 @@ import argparse as agp
 from skimage.io import imsave
 
 from divik._cli._data_io import load_data
-from divik._utils import visualize
+from divik.core import visualize
 
 
 def parse_args():

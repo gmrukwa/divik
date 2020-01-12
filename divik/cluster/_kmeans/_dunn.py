@@ -9,7 +9,7 @@ import tqdm
 
 from ._core import KMeans
 from divik.score import dunn
-from divik._utils import maybe_pool
+from divik.core import maybe_pool
 
 
 _DATA = {}

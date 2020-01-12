@@ -49,9 +49,9 @@ class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
 
     Examples
     --------
-    >>> import numpy as np
+import divik._utils    >>> import numpy as np
     >>> import divik.feature_selection as fs
-    >>> np.random.seed(42)
+    >>> divik._utils.seed(42)
     >>> # Data in this case must be carefully crafted
     >>> labels = np.concatenate([30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
     >>> data = np.vstack(100 * [labels * 10.])
