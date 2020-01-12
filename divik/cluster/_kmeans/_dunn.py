@@ -9,10 +9,14 @@ import tqdm
 
 from ._core import KMeans
 from divik.score import dunn
-from divik.core import maybe_pool
+from divik.core import maybe_pool, share
 
 
 _DATA = {}
+
+
+def _pool_initialize(ref, data):
+    _DATA[ref] = data
 
 
 class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -72,7 +76,7 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         self.verbose = verbose
 
     def _fit_kmeans(self, n_clusters, data_ref):
-        data = _DATA[data_ref]
+        data = _DATA[data_ref].value
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
         kmeans.fit(data)
@@ -94,15 +98,17 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             not used, present here for API consistency by convention.
 
         """
-        ref = str(uuid.uuid4())
-        _DATA[ref] = X
-        fit_kmeans = partial(self._fit_kmeans, data_ref=ref)
         n_clusters = range(self.min_clusters, self.max_clusters + 1)
         if self.verbose:
             n_clusters = tqdm.tqdm(n_clusters, leave=False, file=sys.stdout)
-        with maybe_pool(self.n_jobs) as pool:
-            kmeans_and_scores = pool.map(fit_kmeans, n_clusters)
-        del _DATA[ref]
+        ref = str(uuid.uuid4())
+        with share(X) as x:
+            _DATA[ref] = x
+            with maybe_pool(self.n_jobs, initializer=_pool_initialize,
+                            initargs=(ref, x)) as pool:
+                fit_kmeans = partial(self._fit_kmeans, data_ref=ref)
+                kmeans_and_scores = pool.map(fit_kmeans, n_clusters)
+            del _DATA[ref]
 
         self.estimators_, self.scores_ = zip(*kmeans_and_scores)
         self.scores_ = np.array(self.scores_)

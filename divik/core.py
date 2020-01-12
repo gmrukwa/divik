@@ -1,9 +1,13 @@
+from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 from functools import wraps
-from multiprocessing import Pool
+# RawArray exists, but PyCharm goes crazy
+# noinspection PyUnresolvedReferences
+from multiprocessing import Pool, RawArray
 import os
 import sys
 from typing import Callable, Tuple, NamedTuple, List, Optional
+import uuid
 
 try:
     import gin
@@ -20,6 +24,7 @@ __all__ = [
     'DivikResult',
     'normalize_rows',
     'maybe_pool',
+    'share',
     'context_if',
     'seed',
     'seeded',
@@ -82,6 +87,120 @@ def context_if(condition, context, *args, **kwargs):
 ##############################################################################
 
 
+class SharedArrayWrapper(metaclass=ABCMeta):
+    @property
+    @abstractmethod
+    def value(self):
+        """Get data (can be called by the recipient)
+
+        Recipient must not modify the data.
+        """
+        pass
+
+
+class SharedArray(metaclass=ABCMeta):
+    @abstractmethod
+    def store(self, data: np.ndarray) -> SharedArrayWrapper:
+        """Store the data (must be called by the owner)"""
+        pass
+
+    @abstractmethod
+    def purge(self):
+        """Purge data (must be called by the owner)"""
+        pass
+
+
+class PosixSharedArrayWrapper(SharedArrayWrapper):
+    def __init__(self, ref: str):
+        self._ref = ref
+
+    @property
+    def value(self):
+        return PosixSharedArray.DATA[self._ref]
+
+
+class PosixSharedArray(SharedArray):
+    DATA = {}
+
+    def __init__(self):
+        self._ref = str(uuid.uuid4())
+
+    def store(self, data):
+        if self._ref in PosixSharedArray.DATA:
+            raise RuntimeError("UnixSharedArray already stores value")
+        PosixSharedArray.DATA[self._ref] = data
+        return PosixSharedArrayWrapper(self._ref)
+
+    def purge(self):
+        if self._ref in PosixSharedArray.DATA:
+            del PosixSharedArray.DATA[self._ref]
+
+
+class WinSharedArrayWrapper(SharedArrayWrapper):
+    def __init__(self, shape, dtype, array):
+        self._shape = shape
+        self._dtype = dtype
+        self._array = array
+
+    @property
+    def value(self):
+        return np.frombuffer(self._array, dtype=self._dtype
+                             ).reshape(self._shape)
+
+
+class WinSharedArray(SharedArray):
+    _DTYPES = {
+        np.float64: 'd',
+        np.float32: 'f',
+        np.uint64: 'Q',
+        np.uint32: 'L',
+        np.uint16: 'I',
+        np.int64: 'q',
+        np.int32: 'l',
+        np.int16: 'i',
+    }
+
+    def __init__(self):
+        self._shape = None
+        self._dtype = None
+        self._array = None
+
+    def store(self, data):
+        if self._array is not None:
+            raise RuntimeError("WindowsSharedArray already stores value")
+        if data.dtype not in WinSharedArray._DTYPES:
+            raise ValueError("Unsupported data type")
+        self._shape = data.shape
+        self._dtype = data.dtype
+        ctype = WinSharedArray._DTYPES[data.dtype]
+        self._array = RawArray(ctype, data.size)
+        numpied = np.frombuffer(self._array, dtype=self._dtype)
+        np.copyto(numpied, data.ravel())
+        return WinSharedArrayWrapper(self._shape, self._dtype, self._array)
+
+    def purge(self):
+        self._shape = None
+        self._dtype = None
+        self._array = None
+
+
+def _make_shared_array() -> SharedArray:
+    if os.name == 'posix':
+        return PosixSharedArray()
+    return WinSharedArray()
+
+
+@contextmanager
+def share(array: np.ndarray):
+    shared = _make_shared_array()
+    try:
+        yield shared.store(array)
+    except Exception:
+        raise
+    finally:
+        shared.purge()
+
+
 def get_n_jobs(n_jobs):
     n_cpu = os.cpu_count() or 1
     n_jobs = 1 if n_jobs is None else n_jobs
@@ -92,8 +211,12 @@ def get_n_jobs(n_jobs):
 
 
 class DummyPool:
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, processes, initializer=None, initargs=None,
+                 *args, **kwargs):
+        if initargs is None:
+            initargs = ()
+        if initializer is not None:
+            initializer(*initargs)
 
     def apply(self, func, args, kwds):
         return func(*args, **kwds)
