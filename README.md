@@ -63,6 +63,16 @@ or any stable tagged version, e.g.:
 pip install divik==2.3.14
 ```
 
+If you want to have compatibility with
+[`gin-config`](https://github.com/google/gin-config), you can install
+necessary extras with:
+
+```bash
+pip install divik[gin]
+```
+
+**Note:** Remember about `\` before `[` and `]` in `zsh` shell.
+
 # References
 
 This software is part of contribution made by [Data Mining Group of Silesian

@@ -62,6 +62,12 @@ setup(
     setup_requires=[
         'numpy>=0.12.1',
     ],
+    extras_require={
+        'gin': [
+            "absl-py",
+            "gin-config",
+        ]
+    },
     python_requires='>=3.6',
     package_data={
     },

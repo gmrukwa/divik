@@ -32,3 +32,11 @@ package::
 or any stable tagged version, e.g.::
 
     pip install divik==2.3.14
+
+If you want to have compatibility with
+`gin-config <https://github.com/google/gin-config>`_, you can install
+necessary extras with::
+
+    pip install divik[gin]
+
+.. note:: Remember about `\` before `[` and `]` in `zsh` shell.
