@@ -12,6 +12,7 @@ from divik.score import gap, sampled_gap
 
 
 _DATA = {}
+_BIG_PRIME = 32801
 
 
 class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
@@ -94,7 +95,8 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             score = partial(sampled_gap, sample_size=self.sample_size)
         else:
             score = gap
-        return score(data, kmeans, n_jobs=self.n_jobs, seed=self.seed,
+        return score(data, kmeans, n_jobs=self.n_jobs,
+                     seed=self.seed + _BIG_PRIME * kmeans.n_clusters,
                      n_trials=self.n_trials, return_deviation=True)
 
     def _fit_kmeans(self, n_clusters, data_ref):
