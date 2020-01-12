@@ -13,8 +13,9 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 
 > This section will be further developed soon.
 
-1) [`divik`](divik/_cli/divik.md) - runs DiviK in one of many scenarios
-2) [`kmeans`](divik/_cli/auto_kmeans.md) - runs K-means
+1) [`divik`](divik/_cli/divik.md) - runs DiviK in GAP-only scenario
+2) [`dunn-divik`](dunn-divik/_cli/dunn-divik.md) - runs DiviK in GAP & Dunn scenario
+2) [`kmeans`](divik/_cli/auto_kmeans.md) - runs K-means with GAP statistic
 3) `linkage` - runs agglomerative clustering
 4) [`inspect`](divik/_cli/inspect.md) - visualizes DiviK result
 5) `visualize` - generates `.png` file with visualization of clusters for 2D
@@ -39,7 +40,7 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.3.13
+docker pull gmrukwa/divik:2.3.14
 ```
 
 ## Python package
@@ -59,8 +60,18 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.3.13
+pip install divik==2.3.14
 ```
+
+If you want to have compatibility with
+[`gin-config`](https://github.com/google/gin-config), you can install
+necessary extras with:
+
+```bash
+pip install divik[gin]
+```
+
+**Note:** Remember about `\` before `[` and `]` in `zsh` shell.
 
 # References
 
