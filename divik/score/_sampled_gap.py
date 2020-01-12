@@ -27,12 +27,16 @@ def sampled_gap(data: Data, kmeans: KMeans,
                                 ).fit(data)
     kmeans_ = clone(kmeans)
     seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
-    with data_.parallel() as d, reference_.parallel() as r, \
-            maybe_pool(n_jobs) as pool:
-        compute_disp = partial(_dispersion, sampler=r, kmeans=kmeans_)
-        ref_disp = pool.map(compute_disp, seeds)
-        compute_disp = partial(_dispersion, sampler=d, kmeans=kmeans_)
-        data_disp = pool.map(compute_disp, seeds)
+    with data_.parallel() as d, reference_.parallel() as r:
+        def initializer(*args):
+            for arg, sampler in zip(args, [d, r]):
+                sampler.initializer(*arg)
+        with maybe_pool(n_jobs, initializer=initializer,
+                        initargs=(d.initargs, r.initargs)) as pool:
+            compute_disp = partial(_dispersion, sampler=r, kmeans=kmeans_)
+            ref_disp = pool.map(compute_disp, seeds)
+            compute_disp = partial(_dispersion, sampler=d, kmeans=kmeans_)
+            data_disp = pool.map(compute_disp, seeds)
     ref_disp = np.log(ref_disp)
     data_disp = np.log(data_disp)
     gap = np.mean(ref_disp) - np.mean(data_disp)
