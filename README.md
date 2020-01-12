@@ -14,7 +14,7 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 > This section will be further developed soon.
 
 1) [`divik`](divik/_cli/divik.md) - runs DiviK in GAP-only scenario
-2) [`dunn-divik`](dunn-divik/_cli/dunn-divik.md) - runs DiviK in GAP & Dunn scenario
+2) [`dunn-divik`](dunn-divik/_cli/dunn_divik.md) - runs DiviK in GAP & Dunn scenario
 2) [`kmeans`](divik/_cli/auto_kmeans.md) - runs K-means with GAP statistic
 3) `linkage` - runs agglomerative clustering
 4) [`inspect`](divik/_cli/inspect.md) - visualizes DiviK result
