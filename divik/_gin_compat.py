@@ -1,4 +1,3 @@
-import importlib
 import sys
 
 try:
@@ -11,7 +10,7 @@ except ImportError:
 
 def parse_gin_args():
     """Parse arguments with gin-config
-    
+
     If you have `gin` extras installed, you can call `parse_gin_args`
     to parse command line arguments or config files to configure
     your runs.
