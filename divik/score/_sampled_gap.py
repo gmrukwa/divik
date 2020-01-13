@@ -13,6 +13,11 @@ KMeans = 'divik.KMeans'
 _BIG_PRIME = 40013
 
 
+def _pool_initialize(initializers, *args):
+    for arg, sampler in zip(args, initializers):
+        sampler.initializer(*arg)
+
+
 @seeded(wrapped_requires_seed=True)
 def sampled_gap(data: Data, kmeans: KMeans,
                 sample_size: Union[int, float] = 1000,
@@ -28,9 +33,7 @@ def sampled_gap(data: Data, kmeans: KMeans,
     kmeans_ = clone(kmeans)
     seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
     with data_.parallel() as d, reference_.parallel() as r:
-        def initializer(*args):
-            for arg, sampler in zip(args, [d, r]):
-                sampler.initializer(*arg)
+        initializer = partial(_pool_initialize, [d, r])
         with maybe_pool(n_jobs, initializer=initializer,
                         initargs=(d.initargs, r.initargs)) as pool:
             compute_disp = partial(_dispersion, sampler=r, kmeans=kmeans_)
