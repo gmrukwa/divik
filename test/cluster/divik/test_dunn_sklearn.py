@@ -51,6 +51,20 @@ class DivikTest(unittest.TestCase):
         npt.assert_array_equal(expected, labels1)
         npt.assert_array_equal(expected, labels2)
 
+    def test_works_with_pool_and_sampling(self):
+        X, _ = make_blobs(n_samples=1000, n_features=100, centers=5,
+                          random_state=42)
+        sequential = DunnDiviK(distance='euclidean', distance_percentile=.9,
+                               max_iter=10, sample_size=50, rejection_size=5)
+        parallel = DunnDiviK(distance='euclidean', distance_percentile=.9,
+                             n_jobs=-1, max_iter=10, sample_size=50,
+                             rejection_size=5)
+        expected = sequential.fit_predict(X)
+        labels1 = parallel.fit_predict(X)
+        labels2 = parallel.predict(X)
+        npt.assert_array_equal(expected, labels1)
+        npt.assert_array_equal(expected, labels2)
+
     def test_has_decent_performance_on_numerous_clusters(self):
         X, y = make_blobs(n_samples=200, n_features=100, centers=20,
                           random_state=42)
