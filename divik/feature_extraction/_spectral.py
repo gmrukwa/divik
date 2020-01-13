@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator
 from sklearn.manifold import SpectralEmbedding
 from sklearn.utils.validation import check_is_fitted
 
-from divik._utils import Data
+from divik.core import Data
 
 
 def locally_adjusted_affinity(X: Data, d: str, neighbors: int = 7) -> Data:

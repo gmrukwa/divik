@@ -1,8 +1,14 @@
+from contextlib import contextmanager
 from typing import Union
+import uuid
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
-from ._core import BaseSampler
+from ._core import BaseSampler, ParallelSampler
+from divik.core import share
+
+
+_DATA = {}
 
 
 class StratifiedSampler(BaseSampler):
@@ -75,3 +81,38 @@ class StratifiedSampler(BaseSampler):
             n_splits=1, train_size=self.n_rows, random_state=seed)
         for idx, _ in split.split(self.X_, self.y_):
             return self.X_[idx]
+
+    @contextmanager
+    def parallel(self):
+        global _DATA
+        ref = str(uuid.uuid4())
+        with share(self.X_) as X, share(self.y_) as y:
+            _DATA[ref] = ((self.n_rows, self.n_samples), (X, y))
+            try:
+                yield StratifiedParallelSampler(ref)
+            finally:
+                del _DATA[ref]
+
+
+class StratifiedParallelSampler(ParallelSampler):
+    def __init__(self, ref):
+        self._ref = ref
+
+    @property
+    def sampler(self):
+        global _DATA
+        init_args, fit_args = _DATA[self._ref]
+        X, y = fit_args
+        return StratifiedSampler(*init_args).fit(X.value, y.value)
+
+    def get_sample(self, seed):
+        return self.sampler.get_sample(seed)
+
+    def initializer(self, *args):
+        global _DATA
+        _DATA[self._ref] = args
+
+    @property
+    def initargs(self):
+        global _DATA
+        return _DATA[self._ref]

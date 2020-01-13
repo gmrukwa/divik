@@ -6,7 +6,7 @@ import numpy as np
 import numpy.testing as npt
 
 import divik._summary as sm
-import divik._utils as u
+import divik.core as u
 
 
 DummyClustering = namedtuple(

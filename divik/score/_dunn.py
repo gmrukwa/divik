@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import distance as dist
 
-from divik._utils import Data
+from divik.core import Data
 
 
 KMeans = 'divik.KMeans'

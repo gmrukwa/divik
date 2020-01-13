@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 
-from divik._seeding import seed as seed_
+from ..core import seed as seed_
 from divik.feature_extraction import KneePCA
 from ._core import BaseSampler
 

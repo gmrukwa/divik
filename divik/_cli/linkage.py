@@ -12,7 +12,7 @@ import scipy.cluster.hierarchy as hcl
 import scipy.io as sio
 from skimage.io import imsave
 import divik._cli._utils as scr
-import divik._utils as u
+import divik.core as u
 
 
 LinkageMatrix = NewType('LinkageMatrix', np.ndarray)
