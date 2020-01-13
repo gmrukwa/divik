@@ -1,6 +1,5 @@
 from functools import partial
 import sys
-import uuid
 
 import numpy as np
 from sklearn.base import clone, BaseEstimator, ClusterMixin, TransformerMixin
@@ -11,7 +10,6 @@ from divik.cluster._kmeans._core import KMeans
 from divik.score import gap, sampled_gap
 
 
-_DATA = {}
 _BIG_PRIME = 32801
 
 
@@ -99,8 +97,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
                      seed=self.seed + _BIG_PRIME * kmeans.n_clusters,
                      n_trials=self.n_trials, return_deviation=True)
 
-    def _fit_kmeans(self, n_clusters, data_ref):
-        data = _DATA[data_ref]
+    def _fit_kmeans(self, n_clusters, data):
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
         kmeans.fit(data)
@@ -122,9 +119,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             not used, present here for API consistency by convention.
 
         """
-        ref = str(uuid.uuid4())
-        _DATA[ref] = X
-        fit_kmeans = partial(self._fit_kmeans, data_ref=ref)
+        fit_kmeans = partial(self._fit_kmeans, data=X)
         n_clusters = range(self.min_clusters, self.max_clusters + 1)
         if self.verbose:
             n_clusters = tqdm.tqdm(n_clusters, leave=False, file=sys.stdout)
@@ -144,7 +139,6 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         if self.verbose:
             n_clusters.close()
         self.scores_ = np.array(self.scores_)
-        del _DATA[ref]
 
         if self.fitted_:
             self.best_ = self.estimators_[-1]

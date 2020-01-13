@@ -10,7 +10,7 @@ import skimage.io as sio
 
 from divik.cluster import GAPSearch, KMeans
 import divik._cli._utils as scr
-import divik._utils as u
+import divik.core as u
 
 
 Segmentations = List[Tuple[u.IntLabels, u.Centroids]]

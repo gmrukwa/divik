@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import tqdm
 
-import divik._utils as u
+import divik.core as u
 from divik import __version__
 from divik._cli._data_io import load_data
 

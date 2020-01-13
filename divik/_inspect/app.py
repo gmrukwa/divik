@@ -5,7 +5,7 @@ from typing import Optional
 import dash
 import numpy as np
 
-from divik._utils import DivikResult
+from divik.core import DivikResult
 from divik._cli._data_io import load_data
 
 

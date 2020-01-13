@@ -5,8 +5,7 @@ import pandas as pd
 import scipy.spatial.distance as dist
 from sklearn.base import clone
 
-from divik._utils import Data, normalize_rows, maybe_pool
-from divik._seeding import seeded
+from divik.core import Data, normalize_rows, maybe_pool, seeded
 from divik.sampler import BaseSampler, UniformSampler
 
 
@@ -50,9 +49,12 @@ def gap(data: Data, kmeans: KMeans,
                                 ).fit(data)
     kmeans_ = clone(kmeans)
     seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
-    with reference_.parallel() as r, maybe_pool(n_jobs) as pool:
-        compute_disp = partial(_sampled_dispersion, sampler=r, kmeans=kmeans_)
-        ref_disp = pool.map(compute_disp, seeds)
+    with reference_.parallel() as r:
+        with maybe_pool(n_jobs, initializer=r.initializer,
+                        initargs=r.initargs) as pool:
+            compute_disp = partial(
+                _sampled_dispersion, sampler=r, kmeans=kmeans_)
+            ref_disp = pool.map(compute_disp, seeds)
     ref_disp = np.log(ref_disp)
     data_disp = np.log(_dispersion(data, kmeans))
     gap = np.mean(ref_disp) - data_disp

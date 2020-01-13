@@ -1,12 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 from itertools import count
-import uuid
 
 from sklearn.base import BaseEstimator, clone
-
-
-_DATA = {}
 
 
 class BaseSampler(BaseEstimator, metaclass=ABCMeta):
@@ -20,8 +16,10 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
     variable. To simplify that process a contract has been prepared.
     You open a context and operate within a context:
 
-    with sampler.parallel() as sampler_, Pool() as pool:
-        pool.map(sampler_.get_sample, range(10))
+    with sampler.parallel() as sampler_
+        with Pool(initializer=sampler_.initializer,
+                  initargs=sampler_.initargs) as pool:
+            pool.map(sampler_.get_sample, range(10))
 
     Keep in mind, that __iter__ and fit are not accessible in parallel
     context. __iter__ would yield the same values independently in
@@ -69,24 +67,25 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
     @contextmanager
     def parallel(self):
         """Create parallel context for the sampler to operate"""
-        global _DATA
-        sampler = str(uuid.uuid4())
-        _DATA[sampler] = self
-        try:
-            yield ParallelSampler(sampler)
-        finally:
-            del _DATA[sampler]
+        yield ParallelSampler(self)
 
 
 class ParallelSampler:
     """Helper class for sharing the sampler functionality"""
-    def __init__(self, sampler: str):
+    def __init__(self, sampler: BaseSampler):
         self.sampler = sampler
 
     def get_sample(self, seed):
         """Return specific sample"""
-        return _DATA[self.sampler].get_sample(seed)
+        return self.sampler.get_sample(seed)
+
+    def initializer(self, *args):
+        pass
+
+    @property
+    def initargs(self):
+        return ()
 
     def clone(self):
         """Clones the original sampler"""
-        return clone(_DATA[self.sampler])
+        return clone(self.sampler)

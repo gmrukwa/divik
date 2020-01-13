@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 
-import divik._utils as u
+import divik.core as u
 
 
 def depth(tree, children_collection_name='subregions'):
