@@ -1,4 +1,4 @@
-__version__ = '2.3.19'
+__version__ = '2.3.20'
 
 from divik import core
 from divik import feature_selection
