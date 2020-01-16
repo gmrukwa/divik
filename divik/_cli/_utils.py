@@ -80,7 +80,7 @@ def setup_logger(destination: str, verbose: bool = False):
         file_handler,
     ]
     del logging.root.handlers[:]
-    logging.basicConfig(handlers=handlers)
+    logging.basicConfig(level=logging.DEBUG, handlers=handlers)
     version_notice = "Using " + sys.argv[0] + \
                      " (divik, version " + __version__ + ")"
     logging.info(version_notice)
