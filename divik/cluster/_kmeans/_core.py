@@ -1,4 +1,3 @@
-import logging
 from typing import Tuple
 
 import numpy as np
@@ -92,7 +91,6 @@ class _KMeans(SegmentationMethod):
         self.normalize_rows = normalize_rows
 
     def _fix_labels(self, data, centroids, labels, n_clusters):
-        logging.debug("Fixing labels in KMeans")
         new_labels = labels.copy()
         known_labels = np.unique(labels)
         expected_labels = np.arange(n_clusters)
@@ -112,32 +110,25 @@ class _KMeans(SegmentationMethod):
     def __call__(self, data: Data, number_of_clusters: int) \
             -> Tuple[IntLabels, Centroids]:
         _validate_kmeans_input(data, number_of_clusters)
-        logging.debug("KMeans input valid")
         if number_of_clusters == 1:
             return np.zeros((data.shape[0], 1), dtype=int), \
                    np.mean(data, axis=0, keepdims=True)
         data = data.reshape(data.shape, order='C')
-        logging.debug("Data reordered for C")
         if self.normalize_rows:
-            logging.debug("Validation if normalizable")
             _validate_normalizable(data)
             data = normalize_rows(data)
         centroids = self.initialize(data, number_of_clusters)
-        logging.debug("Initialized")
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
-        logging.debug("Labeled")
         for _ in range(self.number_of_iterations):
             if np.unique(labels).size != number_of_clusters:
                 centroids, labels = self._fix_labels(
                     data, centroids, labels, number_of_clusters)
             if np.all(labels == old_labels):
-                logging.debug("Labels unchanged, converged")
                 break
             old_labels = labels
             centroids = redefine_centroids(data, old_labels)
             labels = self.labeling(data, centroids)
-        logging.debug("KMeans finished")
         return labels, centroids
 
 
@@ -230,10 +221,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             number_of_iterations=self.max_iter,
             normalize_rows=self.normalize_rows
         )
-        logging.debug("Calling KMeans backend")
         self.labels_, self.cluster_centers_ = kmeans(
             X, number_of_clusters=self.n_clusters)
-        logging.debug("Fitted")
         self.labels_ = self.labels_.ravel()
         return self
 

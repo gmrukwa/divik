@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-import logging
 
 import numpy as np
 import scipy.spatial.distance as dist
@@ -87,16 +86,11 @@ class PercentileInitialization(Initialization):
 
     def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
         _validate(data, number_of_centroids)
-        logging.debug("Validated initialization")
         residuals = _find_residuals(data)
-        logging.debug("Found residuals")
         selected = self._get_percentile_element(residuals)
-        logging.debug("Got percentile element")
         centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
         centroids[0] = data[selected]
-        logging.debug("Assigned first centroid")
         assert not np.any(np.isnan(centroids[0]))
-        logging.debug("Found first centroid")
 
         distances = np.inf * np.ones((data.shape[0],))
         for i in range(1, number_of_centroids):

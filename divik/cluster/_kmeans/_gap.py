@@ -1,5 +1,4 @@
 from functools import partial
-import logging
 import sys
 
 import numpy as np
@@ -87,15 +86,9 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     def _should_sample(self, data):
         sampled_complexity = 2 * self.n_trials * self.sample_size ** 2
         normal_complexity = self.n_trials * data.shape[0] ** 2
-        should_sample = sampled_complexity < normal_complexity
-        if should_sample:
-            logging.debug("Uses GAP with sampling")
-        else:
-            logging.debug("Uses GAP without sampling")
-        return should_sample
+        return sampled_complexity < normal_complexity
 
     def _gap(self, data, kmeans):
-        logging.debug("Computing GAP")
         if self._should_sample(data):
             score = partial(sampled_gap, sample_size=self.sample_size)
         else:
@@ -105,7 +98,6 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
                      n_trials=self.n_trials, return_deviation=True)
 
     def _fit_kmeans(self, n_clusters, data):
-        logging.debug(f"Fitting K-Means (n_clusters={n_clusters})")
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
         kmeans.fit(data)
@@ -140,7 +132,6 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             kmeans, gap_, std = fit_kmeans(n_clust)
             if prev_gap > gap_ + std:
                 self.fitted_ = True
-                logging.debug(f"Fitted {n_clusters} clusters")
                 break
             prev_gap = gap_
             self.estimators_.append(kmeans)
@@ -156,7 +147,6 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             self.labels_ = self.best_.labels_
             self.cluster_centers_ = self.best_.cluster_centers_
         else:
-            logging.info("Did not converge")
             self.best_ = None
             self.best_score_ = None
             self.n_clusters_ = None
