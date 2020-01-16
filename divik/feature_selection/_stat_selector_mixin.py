@@ -2,7 +2,10 @@ from abc import ABCMeta
 
 import numpy as np
 from sklearn.base import BaseEstimator
-from sklearn.feature_selection._base import SelectorMixin
+try:
+    from sklearn.feature_selection._base import SelectorMixin
+except ImportError:
+    from sklearn.feature_selection.base import SelectorMixin
 
 
 class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):

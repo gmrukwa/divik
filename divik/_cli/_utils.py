@@ -48,22 +48,39 @@ def prepare_destination(destination: str, omit_datetime: bool = False) -> str:
     return destination
 
 
-def setup_logger(destination: str, verbose: bool = False):
+_PRECISE_FORMAT = '%(asctime)s [%(levelname)s] %(filename)40s:%(lineno)3s' \
+    + ' - %(funcName)40s\t%(message)s'
+_INFO_FORMAT = '%(asctime)s [%(levelname)s]\t%(message)s'
+
+
+def _file_handler(destination: str):
     log_destination = os.path.join(destination, 'logs.txt')
+    handler = logging.FileHandler(filename=log_destination, mode='a')
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(logging.Formatter(_PRECISE_FORMAT))
+    return handler
+
+
+def _stream_handler(verbose: bool):
+    handler = logging.StreamHandler(tqdm.tqdm)
     if verbose:
-        log_format = '%(asctime)s [%(levelname)s] %(filename)40s:%(lineno)3s' \
-                     + ' - %(funcName)40s\t%(message)s'
-        log_level = logging.DEBUG
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter(_INFO_FORMAT))
     else:
-        log_format = '%(asctime)s [%(levelname)s]\t%(message)s'
-        log_level = logging.INFO
+        handler.setLevel(logging.CRITICAL)
+        handler.setFormatter(logging.Formatter(_INFO_FORMAT))
+    return handler
+
+
+def setup_logger(destination: str, verbose: bool = False):
+    stream_handler = _stream_handler(verbose)
+    file_handler = _file_handler(destination)
     handlers = [
-        logging.StreamHandler(tqdm.tqdm),
-        logging.FileHandler(filename=log_destination,
-                            mode='a')
+        stream_handler,
+        file_handler,
     ]
     del logging.root.handlers[:]
-    logging.basicConfig(format=log_format, level=log_level, handlers=handlers)
+    logging.basicConfig(level=logging.DEBUG, handlers=handlers)
     version_notice = "Using " + sys.argv[0] + \
                      " (divik, version " + __version__ + ")"
     logging.info(version_notice)

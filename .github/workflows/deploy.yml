@@ -12,7 +12,7 @@ on:
 env:
   MAJOR: ${{ 2 }}
   MINOR: ${{ 3 }}
-  FIXUP: ${{ 18 }}
+  FIXUP: ${{ 19 }}
   PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
   DOCKER_REPO: ${{ 'gmrukwa/divik' }}
   IS_ALPHA: ${{ github.event_name == 'pull_request' }}
