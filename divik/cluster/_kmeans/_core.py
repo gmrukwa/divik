@@ -41,20 +41,21 @@ class Labeling(object):
         return np.argmin(distances, axis=1)
 
 
-def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
+def redefine_centroids(data: Data, labeling: IntLabels,
+                       label_set: IntLabels) -> Centroids:
     """Recompute centroids in data for given labeling
 
     @param data: observations
     @param labeling: partition of dataset into groups
+    @param label_set: set of labels used for partitioning
     @return: centroids
     """
     if data.shape[0] != labeling.size:
         raise ValueError("Each observation must have label specified. Number "
                          "of labels: %i, number of observations: %i."
                          % (labeling.size, data.shape[0]))
-    labels = np.unique(labeling)
-    centroids = np.nan * np.zeros((len(labels), data.shape[1]))
-    for label in labels:
+    centroids = np.nan * np.zeros((len(label_set), data.shape[1]))
+    for label in label_set:
         centroids[label] = np.mean(data[labeling == label], axis=0)
     return centroids
 
@@ -117,6 +118,7 @@ class _KMeans(SegmentationMethod):
         if self.normalize_rows:
             _validate_normalizable(data)
             data = normalize_rows(data)
+        label_set = np.arange(number_of_clusters)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
@@ -127,7 +129,7 @@ class _KMeans(SegmentationMethod):
             if np.all(labels == old_labels):
                 break
             old_labels = labels
-            centroids = redefine_centroids(data, old_labels)
+            centroids = redefine_centroids(data, old_labels, label_set)
             labels = self.labeling(data, centroids)
         return labels, centroids
 

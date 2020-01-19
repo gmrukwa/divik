@@ -49,12 +49,12 @@ class CentroidRedefinitionTest(unittest.TestCase):
         ])
 
     def test_new_centroids_are_means_of_observations_in_cluster(self):
-        centroids = redefine_centroids(self.simple_data, self.labeling)
+        centroids = redefine_centroids(self.simple_data, self.labeling, [0, 1])
         np.testing.assert_equal(centroids, self.expected_centroids)
 
     def test_throws_on_labels_and_data_length_mismatch(self):
         with self.assertRaises(ValueError):
-            redefine_centroids(self.simple_data[:-1], self.labeling)
+            redefine_centroids(self.simple_data[:-1], self.labeling, [0, 1])
 
 
 class KMeansTest(unittest.TestCase):
