@@ -7,6 +7,7 @@ try {
   const isAlpha = core.getInput('isAlpha');
   const isBeta = core.getInput('isBeta');
   const rawVersion = core.getInput('version');
+  const line = parseInt(core.getInput('line')) - 1;
 
   var suffix = "";
 
@@ -19,7 +20,7 @@ try {
   const version = rawVersion + suffix;
 
   var contents = fs.readFileSync(packageInitFile, 'utf8').split(/\r?\n/);
-  contents[0] = "__version__ = '" + version + "'"
+  contents[line] = "__version__ = '" + version + "'"
   contents = contents.join("\n");
   console.log(contents);
   fs.writeFileSync(packageInitFile, contents);
