@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
+from numba import njit
 import numpy as np
 import scipy.spatial.distance as dist
 
@@ -20,15 +21,26 @@ class Initialization(object, metaclass=ABCMeta):
                                   + " must implement __call__.")
 
 
+# We do not need super-accuracy, as we only need max.
+@njit(parallel=True, fastmath=True)
+def _residuals_numba(X, y, coef):
+    return np.abs(np.dot(X, coef) - y)
+
+
+@njit
+def _lstsq_numba(X, y):
+    default = -1
+    coefficients, _, _, _ = np.linalg.lstsq(X, y, rcond=default)
+    return coefficients
+
+
 def _find_residuals(data: Data) -> np.ndarray:
     features = data.T
     assumed_ys = features[0]
     modelled_xs = np.hstack([np.ones((data.shape[0], 1)),
                              features[1:].T])
-    default_singular_value_threshold = -1
-    coefficients, _, _, _ = np.linalg.lstsq(
-        modelled_xs, assumed_ys, rcond=default_singular_value_threshold)
-    residuals = np.abs(np.dot(modelled_xs, coefficients) - assumed_ys)
+    coefficients = _lstsq_numba(modelled_xs, assumed_ys)
+    residuals = _residuals_numba(modelled_xs, assumed_ys, coefficients)
     return residuals
 
 
