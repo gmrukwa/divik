@@ -3,7 +3,8 @@
 from glob import glob
 from setuptools import setup, find_packages, Extension
 import numpy
-from divik import __version__
+
+__version__ = '2.3.20'
 
 with open('README.md') as infile:
     readme = infile.read()

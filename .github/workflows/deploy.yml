@@ -14,6 +14,9 @@ env:
   MINOR: ${{ 3 }}
   FIXUP: ${{ 20 }}
   PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
+  PACKAGE_INIT_FILE_VERSION_LINE: ${{ 1 }}
+  PACKAGE_SETUP_FILE: $${{ 'setup.py' }}
+  PACKAGE_SETUP_FILE_VERSION_LINE: ${{ 7 }}
   DOCKER_REPO: ${{ 'gmrukwa/divik' }}
   IS_ALPHA: ${{ github.event_name == 'pull_request' }}
   IS_BETA: ${{ github.event_name == 'push' && endsWith(github.event.ref, 'heads/develop') }}
@@ -27,13 +30,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Embed version to package
+      - name: Embed version to divik.__version__
         uses: ./.github/actions/patch-version
         with:
           packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
+      - name: Embed version to setup.py
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
       - name: Authenticate to Docker Hub
         run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
         env:
@@ -74,13 +86,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Embed version to package
+      - name: Embed version to divik.__version__
         uses: ./.github/actions/patch-version
         with:
           packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
+      - name: Embed version to setup.py
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
       # TODO: Parallelize this as a matrix
       - name: Build Python package
         uses: ./.github/actions/build-python-dist
@@ -111,13 +132,22 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Embed version to package
+      - name: Embed version to divik.__version__
         uses: ./.github/actions/patch-version
         with:
           packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
+      - name: Embed version to setup.py
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
       - name: Install build dependencies
         run: pip install wheel twine
       - name: Install dependencies
@@ -148,13 +178,22 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Embed version to package
+      - name: Embed version to divik.__version__
         uses: ./.github/actions/patch-version
         with:
           packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
           isAlpha: ${{ env.IS_ALPHA }}
           isBeta: ${{ env.IS_BETA }}
           version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
+      - name: Embed version to setup.py
+        uses: ./.github/actions/patch-version
+        with:
+          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
+          isAlpha: ${{ env.IS_ALPHA }}
+          isBeta: ${{ env.IS_BETA }}
+          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
+          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
       - name: Install build dependencies
         run: pip install wheel twine
       - name: Install dependencies
