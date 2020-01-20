@@ -4,7 +4,7 @@ from typing import Union
 import numpy as np
 from sklearn.base import clone
 
-from divik.core import Data, maybe_pool, seeded
+from divik.core import Data, maybe_pool
 from divik.sampler import UniformSampler, StratifiedSampler
 from divik.score._gap import _sampled_dispersion as _dispersion
 
@@ -18,7 +18,6 @@ def _pool_initialize(initializers, *args):
         sampler.initializer(*arg)
 
 
-@seeded(wrapped_requires_seed=True)
 def sampled_gap(data: Data, kmeans: KMeans,
                 sample_size: Union[int, float] = 1000,
                 n_jobs: int = None,
