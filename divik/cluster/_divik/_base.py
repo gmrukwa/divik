@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
+import sys
 from typing import Tuple
 
 import numpy as np
@@ -94,7 +95,8 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
         if np.isnan(X).any():
             raise ValueError("NaN values are not supported.")
 
-        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
+        with context_if(self.verbose, tqdm.tqdm,
+                total=X.shape[0], file=sys.stdout) as progress:
             self.result_ = self._divik(X, progress)
 
         if self.result_ is None:
