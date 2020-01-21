@@ -73,6 +73,14 @@ pip install divik[gin]
 
 **Note:** Remember about `\` before `[` and `]` in `zsh` shell.
 
+## Known Issues
+
+### Mac OS & Numba
+
+Certain code compilation is not supported for Mac OS, as it started to
+freeze. Therefore it is disabled and slower. You can try yourself by
+installation of `numba` package, but I had no luck up to this point.
+
 # References
 
 This software is part of contribution made by [Data Mining Group of Silesian

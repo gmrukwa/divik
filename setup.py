@@ -53,7 +53,6 @@ setup(
         'dash-table==3.1.11',
         'h5py>=2.8.0',
         'kneed>=0.5.1',
-        'numba',
         'numpy>=0.12.1',
         'pandas>=0.20.3',
         'scipy>=0.19.1',
@@ -69,7 +68,11 @@ setup(
         'gin': [
             "absl-py",
             "gin-config",
-        ]
+        ],
+        'numba': [
+            "numba",
+            "icc_rt",
+        ],
     },
     python_requires='>=3.6',
     package_data={

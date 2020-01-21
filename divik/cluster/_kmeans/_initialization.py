@@ -1,6 +1,13 @@
 from abc import ABCMeta, abstractmethod
 
-from numba import njit
+try:
+    from numba import njit
+except ImportError:  # MacOS has some problems with njit
+    def njit(fun_or_smth=None, *args, **kwargs):
+        if hasattr(fun_or_smth, '__call__'):
+            return fun_or_smth
+        return lambda f: f
+
 import numpy as np
 import scipy.spatial.distance as dist
 
