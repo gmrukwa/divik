@@ -29,12 +29,12 @@ class Initialization(object, metaclass=ABCMeta):
 
 
 # We do not need super-accuracy, as we only need max.
-@njit(parallel=True, fastmath=True)
+@njit(parallel=True, fastmath=True, cache=True)
 def _residuals_numba(X, y, coef):
     return np.abs(np.dot(X, coef) - y)
 
 
-@njit
+@njit(cache=True)
 def _lstsq_numba(X, y):
     default = -1
     coefficients, _, _, _ = np.linalg.lstsq(X, y, rcond=default)
