@@ -26,7 +26,8 @@ class Initialization(object, metaclass=ABCMeta):
 def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
     features = data.T
     assumed_ys = features[0]
-    modelled_xs = features[1:].T
+    modelled_xs = np.hstack([np.ones((data.shape[0], 1)),
+                            features[1:].T])
     lr = LinearRegression().fit(modelled_xs, assumed_ys,
                                 sample_weight=sample_weight)
     residuals = np.abs(lr.predict(modelled_xs) - assumed_ys)
