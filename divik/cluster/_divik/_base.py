@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
 import sys
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ from divik.core import context_if, DivikResult, normalize_rows, maybe_pool
 class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta):
     def __init__(self,
                  gap_trials: int = 10,
-                 distance_percentile: float = 99.,
+                 leaf_size: Union[int, float] = 0.01,
                  max_iter: int = 100,
                  distance: str = 'correlation',
                  minimal_size: int = None,
@@ -34,7 +34,7 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
                  random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
         self.gap_trials = gap_trials
-        self.distance_percentile = distance_percentile
+        self.leaf_size = leaf_size
         self.max_iter = max_iter
         self.distance = distance
         self.minimal_size = minimal_size
@@ -69,8 +69,8 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
     def _validate_clustering(self):
         if self.gap_trials <= 0:
             raise ValueError('gap_trials must be greater than 0')
-        if self.distance_percentile < 0 or self.distance_percentile > 100:
-            raise ValueError('distance_percentile must be in range [0, 100]')
+        if self.leaf_size < 0:
+            raise ValueError('leaf_size must be greater than 0')
         if self.max_iter <= 0:
             raise ValueError('max_iter must be greater than 0')
         if self.minimal_size is not None and self.minimal_size < 0:

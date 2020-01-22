@@ -1,6 +1,6 @@
 {
   "gap_trials": 10,
-  "distance_percentile": 99.0,
+  "leaf_size": 0.01,
   "max_iter": 100,
   "distance": "correlation",
   "minimal_size": 16,

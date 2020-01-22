@@ -78,7 +78,7 @@ Configuration file should be a JSON file as follows:
 ```json
 {
   "gap_trials": 10,
-  "distance_percentile": 99.0,
+  "leaf_size": 0.01,
   "max_iter": 100,
   "distance": "correlation",
   "minimal_size": 16,
@@ -104,13 +104,11 @@ Configuration file should be a JSON file as follows:
 Number of times that reference dataset will be drawn from uniform distribution
 for computation of GAP index. Default `10`.
 
-#### `distance_percentile`
+#### `leaf_size`
 
-The percentile of the distance between points and their closest
-centroid. 100.0 would simply select the furthest point from all the
-centroids found already. Lower value provides better robustness against
-outliers. Too low value reduces the capability to detect centroid
-candidates during initialization. Should be between `0.0` and `100.0`.
+Desired leaf size in `kdtree` initialization. When int, the box size
+will be between `leaf_size` and `2 * leaf_size`. When float, it will
+be between `leaf_size * n_samples` and `2 * leaf_size * n_samples`.
 
 #### `max_iter`
 

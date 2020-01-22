@@ -1,3 +1,5 @@
+from typing import Union
+
 import numpy as np
 
 from ._base import DiviKBase
@@ -16,12 +18,10 @@ class DunnDiviK(DiviKBase):
         The number of random dataset draws to estimate the GAP index for the
         clustering quality assessment.
 
-    distance_percentile: float, optional, default: 99.0
-        The percentile of the distance between points and their closest
-        centroid. 100.0 would simply select the furthest point from all the
-        centroids found already. Lower value provides better robustness against
-        outliers. Too low value reduces the capability to detect centroid
-        candidates during initialization.
+    leaf_size : int or float, optional (default 0.01)
+        Desired leaf size in kdtree initialization. When int, the box size
+        will be between `leaf_size` and `2 * leaf_size`. When float, it will
+        be between `leaf_size * n_samples` and `2 * leaf_size * n_samples`
 
     max_iter: int, optional, default: 100
         Maximum number of iterations of the k-means algorithm for a single run.
@@ -162,7 +162,7 @@ class DunnDiviK(DiviKBase):
     """
     def __init__(self,
                  gap_trials: int = 10,
-                 distance_percentile: float = 99.,
+                 leaf_size: Union[int, float] = 0.01,
                  max_iter: int = 100,
                  distance: str = 'correlation',
                  minimal_size: int = None,
@@ -179,7 +179,7 @@ class DunnDiviK(DiviKBase):
                  n_jobs: int = None,
                  random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
-        super().__init__(gap_trials, distance_percentile, max_iter, distance,
+        super().__init__(gap_trials, leaf_size, max_iter, distance,
                          minimal_size, rejection_size, rejection_percentage,
                          minimal_features_percentage, features_percentage,
                          k_max, sample_size, normalize_rows, use_logfilters,
@@ -191,8 +191,8 @@ class DunnDiviK(DiviKBase):
 
     def _fast_kmeans(self):
         single_kmeans = km.KMeans(
-            n_clusters=2, distance=self.distance, init='percentile',
-            percentile=self.distance_percentile,
+            n_clusters=2, distance=self.distance, init='kdtree',
+            leaf_size=self.leaf_size,
             max_iter=self.fast_kmeans_iter,
             normalize_rows=self._needs_normalization())
         kmeans = km.GAPSearch(
@@ -203,8 +203,8 @@ class DunnDiviK(DiviKBase):
 
     def _full_kmeans(self):
         single_kmeans = km.KMeans(
-            n_clusters=2, distance=self.distance, init='percentile',
-            percentile=self.distance_percentile,
+            n_clusters=2, distance=self.distance, init='kdtree',
+            leaf_size=self.leaf_size,
             max_iter=self.max_iter,
             normalize_rows=self._needs_normalization())
         kmeans = km.DunnSearch(

@@ -2,6 +2,8 @@
 
 This package is responsible for k-means segmentation of data.
 
+**TODO: THESE INSTRUCTIONS ARE OUTDATED**
+
 ## Features
 
 `kmeans` tool allows for:

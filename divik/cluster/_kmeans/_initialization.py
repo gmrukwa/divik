@@ -1,15 +1,10 @@
 from abc import ABCMeta, abstractmethod
-
-try:
-    from numba import njit
-except ImportError:  # MacOS has some problems with njit
-    def njit(fun_or_smth=None, *args, **kwargs):
-        if hasattr(fun_or_smth, '__call__'):
-            return fun_or_smth
-        return lambda f: f
+from typing import List, NamedTuple, Union
 
 import numpy as np
 import scipy.spatial.distance as dist
+from skimage.filters import threshold_otsu
+from sklearn.linear_model import LinearRegression
 
 from divik.core import Centroids, Data
 
@@ -28,26 +23,13 @@ class Initialization(object, metaclass=ABCMeta):
                                   + " must implement __call__.")
 
 
-# We do not need super-accuracy, as we only need max.
-@njit(parallel=True, fastmath=True, cache=True)
-def _residuals_numba(X, y, coef):
-    return np.abs(np.dot(X, coef) - y)
-
-
-@njit(cache=True)
-def _lstsq_numba(X, y):
-    default = -1
-    coefficients, _, _, _ = np.linalg.lstsq(X, y, rcond=default)
-    return coefficients
-
-
-def _find_residuals(data: Data) -> np.ndarray:
+def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
     features = data.T
     assumed_ys = features[0]
-    modelled_xs = np.hstack([np.ones((data.shape[0], 1)),
-                             features[1:].T])
-    coefficients = _lstsq_numba(modelled_xs, assumed_ys)
-    residuals = _residuals_numba(modelled_xs, assumed_ys, coefficients)
+    modelled_xs = features[1:].T
+    lr = LinearRegression().fit(modelled_xs, assumed_ys,
+                                sample_weight=sample_weight)
+    residuals = np.abs(lr.predict(modelled_xs) - assumed_ys)
     return residuals
 
 
@@ -129,5 +111,117 @@ class PercentileInitialization(Initialization):
             distances[:] = np.minimum(current_distance.ravel(), distances)
             selected = self._get_percentile_element(distances)
             centroids[i] = data[selected]
+
+        return centroids
+
+
+class Leaf(NamedTuple):
+    bounds: np.ndarray
+    centroid: np.ndarray
+    count: int = 0
+
+KDTree = Union['Node', Leaf]
+        
+class Node(NamedTuple):
+    pivot_value: float
+    pivot_feature: int
+    left: KDTree = None
+    right: KDTree = None
+
+
+def make_tree(X, leaf_size: Union[int, float]=0.01, pivot=threshold_otsu) -> KDTree:
+    """Make KDTree out of the data
+
+    Construct a KDTree out of data using Otsu threshold as a pivoting element.
+    Each split makes two segments. The result doesn't contain the original
+    data, just the splitting points, bounds of leaves, centroids in each box
+    and count of items.
+
+    Parameters
+    ==========
+    X : array_like, (n_samples, n_features)
+        Set of observations to divide into boxes
+        
+    leaf_size : int or float, optional (default 0.01)
+        Desired leaf size. When int, it will be between `leaf_size` and
+        `2 * leaf_size`. When float, it will be between
+        `leaf_size * n_samples` and `2 * leaf_size * n_samples`
+    
+    pivot : callable, optional (default skimage.threshold_otsu)
+        Method to find the pivot element. Recommended are:
+        - skimage.threshold_otsu
+        - np.median
+        - np.mean
+    
+    Returns
+    =======
+    tree : KDTree
+        Lightweight KD-Tree over the data
+    """
+    X = np.asanyarray(X)
+    if isinstance(leaf_size, float):
+        if 0 <= leaf_size <= 1:
+            leaf_size = max(int(leaf_size * X.shape[0]), 1)
+        else:
+            raise ValueError('leaf_size must be between 0 and 1 when float')
+    if X.shape[0] < 2 * leaf_size:
+        bounds = np.vstack([X.min(axis=0, keepdims=True),
+                            X.max(axis=0, keepdims=True)])
+        centroid = X.mean(axis=0, keepdims=True)
+        return Leaf(bounds, centroid, X.shape[0])
+    most_variant = X.var(axis=0).argmax()
+    feature = X[:, most_variant]
+    thr = pivot(feature)
+    left = X[feature < thr]
+    right = X[feature > thr]
+    return Node(
+        pivot_value=thr, pivot_feature=most_variant,
+        left=make_tree(left, leaf_size=leaf_size, pivot=pivot),
+        right=make_tree(right, leaf_size=leaf_size, pivot=pivot),
+    )
+
+
+def get_leaves(tree: KDTree) -> List[Leaf]:
+    """Extract leaves of the KDTree
+    
+    Parameters
+    ==========
+    tree : KDTree
+        KDTree constructed on the data
+        
+    Returns
+    =======
+    leaves : list of Leaf
+        All the leaves from the full depth of the tree
+    """
+    if isinstance(tree, Leaf):
+        return [tree]
+    return get_leaves(tree.left) + get_leaves(tree.right)
+
+
+class KDTreeInitialization(Initialization):
+    """Initializes k-means by picking extreme KDTree box"""
+    def __init__(self, distance: str, leaf_size: Union[int, float] = 0.01):
+        self.distance = distance
+        self.leaf_size = leaf_size
+
+    def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
+        """Generate initial centroids for k-means algorithm"""
+        _validate(data, number_of_centroids)
+        tree = make_tree(data, leaf_size=self.leaf_size, pivot=threshold_otsu)
+        leaves = get_leaves(tree)
+        box_centroids = np.vstack([l.centroid for l in leaves])
+        box_weights = np.array([l.count for l in leaves])
+
+        residuals = _find_residuals(box_centroids, box_weights)
+        centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
+        centroids[0] = box_centroids[np.argmax(residuals)]
+
+        distances = np.inf * np.ones((data.shape[0], ))
+        for i in range(1, number_of_centroids):
+            current_distance = dist.cdist(
+                data, centroids[np.newaxis, i - 1], self.distance)
+            distances[:] = np.minimum(current_distance.ravel(), distances)
+            centroids[i] = data[np.argmax(distances)]
 
         return centroids

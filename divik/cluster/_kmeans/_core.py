@@ -1,14 +1,16 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from divik.cluster._kmeans._initialization import \
-    Initialization, \
-    ExtremeInitialization, \
-    PercentileInitialization
+from divik.cluster._kmeans._initialization import (
+    Initialization,
+    ExtremeInitialization,
+    PercentileInitialization,
+    KDTreeInitialization,
+)
 from divik.core import (
     normalize_rows,
     Centroids,
@@ -135,11 +137,15 @@ class _KMeans(SegmentationMethod):
 
 
 def _parse_initialization(name: str, distance: str,
-                          percentile: float=None) -> Initialization:
+                          percentile: float=None,
+                          leaf_size: Union[int, float] = 0.01) \
+        -> Initialization:
     if name == 'percentile':
         return PercentileInitialization(distance, percentile)
     if name == 'extreme':
         return ExtremeInitialization(distance)
+    if name == 'kdtree':
+        return KDTreeInitialization(distance, leaf_size)
     raise ValueError('Unknown initialization: {0}'.format(name))
 
 
@@ -171,6 +177,11 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         Specifies the starting percentile for 'percentile' initialization.
         Must be within range [0.0, 100.0]. At 100.0 it is equivalent to
         'extreme' initialization.
+    
+    leaf_size : int or float, optional (default 0.01)
+        Desired leaf size in kdtree initialization. When int, the box size
+        will be between `leaf_size` and `2 * leaf_size`. When float, it will
+        be between `leaf_size * n_samples` and `2 * leaf_size * n_samples`
 
     max_iter : int, default: 100
         Maximum number of iterations of the k-means algorithm for a
@@ -192,12 +203,14 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
     # TODO: Add example of usage.
     def __init__(self, n_clusters: int, distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
+                 leaf_size : Union[int, float] = 0.01,
                  max_iter: int = 100, normalize_rows: bool = False):
         super().__init__()
         self.n_clusters = n_clusters
         self.distance = distance
         self.init = init
         self.percentile = percentile
+        self.leaf_size = leaf_size
         self.max_iter = max_iter
         self.normalize_rows = normalize_rows
 
@@ -216,7 +229,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             not used, present here for API consistency by convention.
         """
         initialize = _parse_initialization(
-            self.init, self.distance, self.percentile)
+            self.init, self.distance, self.percentile, self.leaf_size)
         kmeans = _KMeans(
             labeling=Labeling(self.distance),
             initialize=initialize,
