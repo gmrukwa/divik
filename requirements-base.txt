@@ -6,11 +6,9 @@ dash-renderer==0.17.0
 dash-table==3.1.11
 gin-config
 h5py
-icc_rt; sys_platform!='darwin'
 kneed
 matplotlib
 networkx
-numba; sys_platform!='darwin'
 numpy
 pandas
 parameterized

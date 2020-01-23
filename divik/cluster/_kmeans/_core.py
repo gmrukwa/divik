@@ -236,6 +236,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             number_of_iterations=self.max_iter,
             normalize_rows=self.normalize_rows
         )
+        X = np.asanyarray(X)
         self.labels_, self.cluster_centers_ = kmeans(
             X, number_of_clusters=self.n_clusters)
         self.labels_ = self.labels_.ravel()

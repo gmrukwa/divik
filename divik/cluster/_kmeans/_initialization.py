@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
+from functools import partial
 from typing import List, NamedTuple, Union
 
 import numpy as np
 import scipy.spatial.distance as dist
-from skimage.filters import threshold_otsu
 from sklearn.linear_model import LinearRegression
 
 from divik.core import Centroids, Data
@@ -117,68 +117,48 @@ class PercentileInitialization(Initialization):
 
 
 class Leaf(NamedTuple):
-    bounds: np.ndarray
     centroid: np.ndarray
     count: int = 0
 
 KDTree = Union['Node', Leaf]
         
 class Node(NamedTuple):
-    pivot_value: float
-    pivot_feature: int
     left: KDTree = None
     right: KDTree = None
 
 
-def make_tree(X, leaf_size: Union[int, float]=0.01, pivot=threshold_otsu) -> KDTree:
+def make_tree(X, leaf_size: int, _feature_idx: int = 0) -> KDTree:
     """Make KDTree out of the data
 
-    Construct a KDTree out of data using Otsu threshold as a pivoting element.
+    Construct a KDTree out of data using mean as a pivoting element.
     Each split makes two segments. The result doesn't contain the original
-    data, just the splitting points, bounds of leaves, centroids in each box
-    and count of items.
+    data, just centroids in each box and count of items.
 
     Parameters
     ==========
     X : array_like, (n_samples, n_features)
         Set of observations to divide into boxes
         
-    leaf_size : int or float, optional (default 0.01)
-        Desired leaf size. When int, it will be between `leaf_size` and
-        `2 * leaf_size`. When float, it will be between
-        `leaf_size * n_samples` and `2 * leaf_size * n_samples`
-    
-    pivot : callable, optional (default skimage.threshold_otsu)
-        Method to find the pivot element. Recommended are:
-        - skimage.threshold_otsu
-        - np.median
-        - np.mean
+    leaf_size : int
+        Desired leaf size. It should more than `leaf_size` and
+        will be up to `2 * leaf_size`
     
     Returns
     =======
     tree : KDTree
         Lightweight KD-Tree over the data
     """
-    X = np.asanyarray(X)
-    if isinstance(leaf_size, float):
-        if 0 <= leaf_size <= 1:
-            leaf_size = max(int(leaf_size * X.shape[0]), 1)
-        else:
-            raise ValueError('leaf_size must be between 0 and 1 when float')
     if X.shape[0] < 2 * leaf_size:
-        bounds = np.vstack([X.min(axis=0, keepdims=True),
-                            X.max(axis=0, keepdims=True)])
         centroid = X.mean(axis=0, keepdims=True)
-        return Leaf(bounds, centroid, X.shape[0])
-    most_variant = X.var(axis=0).argmax()
-    feature = X[:, most_variant]
-    thr = pivot(feature)
+        return Leaf(centroid, X.shape[0])
+    feature = X[:, _feature_idx]
+    thr = np.mean(feature)
     left = X[feature < thr]
     right = X[feature > thr]
+    next_feature = (_feature_idx + 1) % X.shape[1]
     return Node(
-        pivot_value=thr, pivot_feature=most_variant,
-        left=make_tree(left, leaf_size=leaf_size, pivot=pivot),
-        right=make_tree(right, leaf_size=leaf_size, pivot=pivot),
+        left=make_tree(left, leaf_size=leaf_size, _feature_idx=next_feature),
+        right=make_tree(right, leaf_size=leaf_size, _feature_idx=next_feature),
     )
 
 
@@ -209,7 +189,13 @@ class KDTreeInitialization(Initialization):
     def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
         """Generate initial centroids for k-means algorithm"""
         _validate(data, number_of_centroids)
-        tree = make_tree(data, leaf_size=self.leaf_size, pivot=threshold_otsu)
+        leaf_size = self.leaf_size
+        if isinstance(leaf_size, float):
+            if 0 <= leaf_size <= 1:
+                leaf_size = max(int(leaf_size * data.shape[0]), 1)
+            else:
+                raise ValueError('leaf_size must be between 0 and 1 when float')
+        tree = make_tree(data, leaf_size=leaf_size)
         leaves = get_leaves(tree)
         box_centroids = np.vstack([l.centroid for l in leaves])
         box_weights = np.array([l.count for l in leaves])
@@ -218,11 +204,11 @@ class KDTreeInitialization(Initialization):
         centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
         centroids[0] = box_centroids[np.argmax(residuals)]
 
-        distances = np.inf * np.ones((data.shape[0], ))
+        distances = np.inf * np.ones((box_centroids.shape[0], ))
         for i in range(1, number_of_centroids):
             current_distance = dist.cdist(
-                data, centroids[np.newaxis, i - 1], self.distance)
+                box_centroids, centroids[np.newaxis, i - 1], self.distance)
             distances[:] = np.minimum(current_distance.ravel(), distances)
-            centroids[i] = data[np.argmax(distances)]
+            centroids[i] = box_centroids[np.argmax(distances)]
 
         return centroids

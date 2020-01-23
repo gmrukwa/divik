@@ -69,10 +69,6 @@ setup(
             "absl-py",
             "gin-config",
         ],
-        'numba': [
-            "numba",
-            "icc_rt",
-        ],
     },
     python_requires='>=3.6',
     package_data={
