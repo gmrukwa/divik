@@ -110,7 +110,7 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
             value: key for key, value in self.paths_.items()}
 
         if self.result_ is None:
-            self.filters_ = np.ones([X.shape[0], 1])
+            self.filters_ = np.ones([1, X.shape[1]], dtype=bool)
         else:
             self.filters_ = np.array(
                 [self._get_filter(path) for path in self.reverse_paths_],
