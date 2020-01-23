@@ -6,7 +6,7 @@ from sklearn.datasets import make_blobs
 from divik.cluster._divik._gap_sklearn import DiviK
 
 
-class DivikTest(unittest.TestCase):
+class GapDivikTest(unittest.TestCase):
     def test_predict_gives_consistent_results(self):
         X, _ = make_blobs(n_samples=300, n_features=100, centers=3,
                           random_state=42)
