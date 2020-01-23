@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple, Union
 
 import numpy as np
@@ -94,20 +95,26 @@ class _KMeans(SegmentationMethod):
         self.normalize_rows = normalize_rows
 
     def _fix_labels(self, data, centroids, labels, n_clusters):
+        logging.debug('A label vanished - fixing')
         new_labels = labels.copy()
         known_labels = np.unique(labels)
         expected_labels = np.arange(n_clusters)
         missing_labels = np.setdiff1d(expected_labels, known_labels)
+        logging.debug('Missing labels ({0} were expected): {1}'.format(
+                      n_clusters, missing_labels))
         new_centroids = np.nan * np.zeros((n_clusters, centroids.shape[1]))
         for known in known_labels:
             new_centroids[known] = centroids[known]
         for missing in missing_labels:
+            logging.debug('Fixing label: {0}'.format(missing))
             new_center = np.nanmin(dst.cdist(
                 data, new_centroids, metric=self.labeling.distance_metric
             ), axis=1).argmax()
+            logging.debug('Assigning to label: {0}'.format(labels[new_center]))
             new_labels[new_center] = missing
             new_centroids[missing] = data[new_center]
-        assert np.unique(new_labels).size == n_clusters
+        assert np.unique(new_labels).size == n_clusters, 'fixed: {0}'.format(
+            np.unique(new_labels))
         return new_centroids, new_labels
 
     def __call__(self, data: Data, number_of_clusters: int) \
