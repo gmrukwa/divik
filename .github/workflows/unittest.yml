@@ -14,6 +14,18 @@ jobs:
         run: docker build . --file docker/unittest.dockerfile --tag unittest
         env:
           ENABLE_SLOW_TESTS: True
+
+  docker_conda_tests:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Run unit tests
+        run: docker build . --file docker/conda_test.dockerfile --tag conda_test
+        env:
+          ENABLE_SLOW_TESTS: True
   
   windows_tests:
 
