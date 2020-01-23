@@ -153,8 +153,10 @@ def make_tree(X, leaf_size: int, _feature_idx: int = 0) -> KDTree:
         return Leaf(centroid, X.shape[0])
     feature = X[:, _feature_idx]
     thr = np.mean(feature)
-    left = X[feature < thr]
-    right = X[feature > thr]
+    left_idx = feature < thr
+    right_idx = np.logical_not(left_idx)
+    left = np.compress(left_idx, X, axis=0)
+    right = np.compress(right_idx, X, axis=0)
     next_feature = (_feature_idx + 1) % X.shape[1]
     return Node(
         left=make_tree(left, leaf_size=leaf_size, _feature_idx=next_feature),
