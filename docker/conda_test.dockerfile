@@ -24,6 +24,8 @@ COPY requirements-base.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt \
     && rm requirements.txt
 
+ENV ENABLE_SLOW_TESTS True
+
 COPY . /app
 
 WORKDIR /app
