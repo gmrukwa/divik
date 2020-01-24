@@ -40,7 +40,7 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.3.19
+docker pull gmrukwa/divik:2.4.0
 ```
 
 ## Python package
@@ -60,7 +60,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.3.19
+pip install divik==2.4.0
 ```
 
 If you want to have compatibility with
@@ -72,6 +72,14 @@ pip install divik[gin]
 ```
 
 **Note:** Remember about `\` before `[` and `]` in `zsh` shell.
+
+## Known Issues
+
+### Mac OS & Numba
+
+Certain code compilation is not supported for Mac OS, as it started to
+freeze. Therefore it is disabled and slower. You can try yourself by
+installation of `numba` package, but I had no luck up to this point.
 
 # References
 

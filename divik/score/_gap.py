@@ -39,7 +39,6 @@ def _sampled_dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans) \
     ]))
 
 
-@seeded(wrapped_requires_seed=True)
 def gap(data: Data, kmeans: KMeans,
         n_jobs: int = None,
         seed: int = 0,

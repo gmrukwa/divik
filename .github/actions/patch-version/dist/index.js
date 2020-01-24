@@ -34,7 +34,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(34);
+/******/ 		return __webpack_require__(973);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -43,41 +43,6 @@ module.exports =
 /************************************************************************/
 /******/ ({
 
-/***/ 34:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
-
-// https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-a-javascript-action
-const core = __webpack_require__(310);
-const fs = __webpack_require__(747);
-
-try {
-  const packageInitFile = core.getInput('packageInitFile');
-  const isAlpha = core.getInput('isAlpha');
-  const isBeta = core.getInput('isBeta');
-  const rawVersion = core.getInput('version');
-
-  var suffix = "";
-
-  if (isAlpha!="false") {
-      suffix = "a";
-  } else if (isBeta!="false") {
-      suffix = "b";
-  }
-
-  const version = rawVersion + suffix;
-
-  var contents = fs.readFileSync(packageInitFile, 'utf8').split(/\r?\n/);
-  contents[0] = "__version__ = '" + version + "'"
-  contents = contents.join("\n");
-  console.log(contents);
-  fs.writeFileSync(packageInitFile, contents);
-
-} catch (error) {
-  core.setFailed(error.message);
-}
-
-/***/ }),
-
 /***/ 87:
 /***/ (function(module) {
 
@@ -85,7 +50,80 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 310:
+/***/ 249:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const os = __webpack_require__(87);
+/**
+ * Commands
+ *
+ * Command Format:
+ *   ##[name key=value;key=value]message
+ *
+ * Examples:
+ *   ##[warning]This is the user warning message
+ *   ##[set-secret name=mypassword]definitelyNotAPassword!
+ */
+function issueCommand(command, properties, message) {
+    const cmd = new Command(command, properties, message);
+    process.stdout.write(cmd.toString() + os.EOL);
+}
+exports.issueCommand = issueCommand;
+function issue(name, message = '') {
+    issueCommand(name, {}, message);
+}
+exports.issue = issue;
+const CMD_STRING = '::';
+class Command {
+    constructor(command, properties, message) {
+        if (!command) {
+            command = 'missing.command';
+        }
+        this.command = command;
+        this.properties = properties;
+        this.message = message;
+    }
+    toString() {
+        let cmdStr = CMD_STRING + this.command;
+        if (this.properties && Object.keys(this.properties).length > 0) {
+            cmdStr += ' ';
+            for (const key in this.properties) {
+                if (this.properties.hasOwnProperty(key)) {
+                    const val = this.properties[key];
+                    if (val) {
+                        // safely append the val - avoid blowing up when attempting to
+                        // call .replace() if message is not a string for some reason
+                        cmdStr += `${key}=${escape(`${val || ''}`)},`;
+                    }
+                }
+            }
+        }
+        cmdStr += CMD_STRING;
+        // safely append the message - avoid blowing up when attempting to
+        // call .replace() if message is not a string for some reason
+        const message = `${this.message || ''}`;
+        cmdStr += escapeData(message);
+        return cmdStr;
+    }
+}
+function escapeData(s) {
+    return s.replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+}
+function escape(s) {
+    return s
+        .replace(/\r/g, '%0D')
+        .replace(/\n/g, '%0A')
+        .replace(/]/g, '%5D')
+        .replace(/;/g, '%3B');
+}
+//# sourceMappingURL=command.js.map
+
+/***/ }),
+
+/***/ 576:
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
@@ -100,7 +138,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const command_1 = __webpack_require__(997);
+const command_1 = __webpack_require__(249);
 const os = __webpack_require__(87);
 const path = __webpack_require__(622);
 /**
@@ -301,76 +339,39 @@ module.exports = require("fs");
 
 /***/ }),
 
-/***/ 997:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 973:
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-"use strict";
+// https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-a-javascript-action
+const core = __webpack_require__(576);
+const fs = __webpack_require__(747);
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const os = __webpack_require__(87);
-/**
- * Commands
- *
- * Command Format:
- *   ##[name key=value;key=value]message
- *
- * Examples:
- *   ##[warning]This is the user warning message
- *   ##[set-secret name=mypassword]definitelyNotAPassword!
- */
-function issueCommand(command, properties, message) {
-    const cmd = new Command(command, properties, message);
-    process.stdout.write(cmd.toString() + os.EOL);
+try {
+  const packageInitFile = core.getInput('packageInitFile');
+  const isAlpha = core.getInput('isAlpha');
+  const isBeta = core.getInput('isBeta');
+  const rawVersion = core.getInput('version');
+  const line = parseInt(core.getInput('line')) - 1;
+
+  var suffix = "";
+
+  if (isAlpha!="false") {
+      suffix = "a";
+  } else if (isBeta!="false") {
+      suffix = "b";
+  }
+
+  const version = rawVersion + suffix;
+
+  var contents = fs.readFileSync(packageInitFile, 'utf8').split(/\r?\n/);
+  contents[line] = "__version__ = '" + version + "'"
+  contents = contents.join("\n");
+  console.log(contents);
+  fs.writeFileSync(packageInitFile, contents);
+
+} catch (error) {
+  core.setFailed(error.message);
 }
-exports.issueCommand = issueCommand;
-function issue(name, message = '') {
-    issueCommand(name, {}, message);
-}
-exports.issue = issue;
-const CMD_STRING = '::';
-class Command {
-    constructor(command, properties, message) {
-        if (!command) {
-            command = 'missing.command';
-        }
-        this.command = command;
-        this.properties = properties;
-        this.message = message;
-    }
-    toString() {
-        let cmdStr = CMD_STRING + this.command;
-        if (this.properties && Object.keys(this.properties).length > 0) {
-            cmdStr += ' ';
-            for (const key in this.properties) {
-                if (this.properties.hasOwnProperty(key)) {
-                    const val = this.properties[key];
-                    if (val) {
-                        // safely append the val - avoid blowing up when attempting to
-                        // call .replace() if message is not a string for some reason
-                        cmdStr += `${key}=${escape(`${val || ''}`)},`;
-                    }
-                }
-            }
-        }
-        cmdStr += CMD_STRING;
-        // safely append the message - avoid blowing up when attempting to
-        // call .replace() if message is not a string for some reason
-        const message = `${this.message || ''}`;
-        cmdStr += escapeData(message);
-        return cmdStr;
-    }
-}
-function escapeData(s) {
-    return s.replace(/\r/g, '%0D').replace(/\n/g, '%0A');
-}
-function escape(s) {
-    return s
-        .replace(/\r/g, '%0D')
-        .replace(/\n/g, '%0A')
-        .replace(/]/g, '%5D')
-        .replace(/;/g, '%3B');
-}
-//# sourceMappingURL=command.js.map
 
 /***/ })
 

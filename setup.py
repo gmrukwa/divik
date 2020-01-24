@@ -3,7 +3,8 @@
 from glob import glob
 from setuptools import setup, find_packages, Extension
 import numpy
-from divik import __version__
+
+__version__ = '2.4.0'
 
 with open('README.md') as infile:
     readme = infile.read()
@@ -67,7 +68,7 @@ setup(
         'gin': [
             "absl-py",
             "gin-config",
-        ]
+        ],
     },
     python_requires='>=3.6',
     package_data={

@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 try:
     from sklearn.feature_selection._base import SelectorMixin
-except ImportError:
+except ModuleNotFoundError:
     from sklearn.feature_selection.base import SelectorMixin
 
 

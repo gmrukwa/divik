@@ -2,19 +2,23 @@ name: 'Patch version number'
 description: 'Patches version number of the Python package'
 inputs:
   packageInitFile:
-    description: '__init__.py file that should be patched'
+    description: 'file that should be patched'
     required: true
   isAlpha:
     description: 'if true, package will be annotated with alpha'
     required: true
-    default: false
+    default: 'false'
   isBeta:
     description: 'if true, package will be annotated with beta'
     required: true
-    default: false
+    default: 'false'
   version:
     description: 'version of the Python package'
     required: true
+  line:
+    description: 'line of the file that should be patched'
+    required: false
+    default: '1'
 runs:
   using: 'node12'
   main: 'dist/index.js'

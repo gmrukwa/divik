@@ -7,7 +7,7 @@ from sklearn.metrics import adjusted_rand_score
 from divik.cluster._divik._dunn_sklearn import DunnDiviK
 
 
-class DivikTest(unittest.TestCase):
+class DunnDivikTest(unittest.TestCase):
     def test_predict_gives_consistent_results(self):
         X, _ = make_blobs(n_samples=100, n_features=100, centers=3,
                           random_state=42)
@@ -54,9 +54,9 @@ class DivikTest(unittest.TestCase):
     def test_works_with_pool_and_sampling(self):
         X, _ = make_blobs(n_samples=1000, n_features=100, centers=5,
                           random_state=42)
-        sequential = DunnDiviK(distance='euclidean', distance_percentile=.9,
+        sequential = DunnDiviK(distance='euclidean',
                                max_iter=10, sample_size=50, rejection_size=5)
-        parallel = DunnDiviK(distance='euclidean', distance_percentile=.9,
+        parallel = DunnDiviK(distance='euclidean',
                              n_jobs=-1, max_iter=10, sample_size=50,
                              rejection_size=5)
         expected = sequential.fit_predict(X)

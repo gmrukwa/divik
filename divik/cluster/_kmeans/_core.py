@@ -1,14 +1,17 @@
-from typing import Tuple
+import logging
+from typing import Tuple, Union
 
 import numpy as np
 import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
-from divik.cluster._kmeans._initialization import \
-    Initialization, \
-    ExtremeInitialization, \
-    PercentileInitialization
+from divik.cluster._kmeans._initialization import (
+    Initialization,
+    ExtremeInitialization,
+    PercentileInitialization,
+    KDTreeInitialization,
+)
 from divik.core import (
     normalize_rows,
     Centroids,
@@ -41,20 +44,21 @@ class Labeling(object):
         return np.argmin(distances, axis=1)
 
 
-def redefine_centroids(data: Data, labeling: IntLabels) -> Centroids:
+def redefine_centroids(data: Data, labeling: IntLabels,
+                       label_set: IntLabels) -> Centroids:
     """Recompute centroids in data for given labeling
 
     @param data: observations
     @param labeling: partition of dataset into groups
+    @param label_set: set of labels used for partitioning
     @return: centroids
     """
     if data.shape[0] != labeling.size:
         raise ValueError("Each observation must have label specified. Number "
                          "of labels: %i, number of observations: %i."
                          % (labeling.size, data.shape[0]))
-    labels = np.unique(labeling)
-    centroids = np.nan * np.zeros((len(labels), data.shape[1]))
-    for label in labels:
+    centroids = np.nan * np.zeros((len(label_set), data.shape[1]))
+    for label in label_set:
         centroids[label] = np.mean(data[labeling == label], axis=0)
     return centroids
 
@@ -90,21 +94,30 @@ class _KMeans(SegmentationMethod):
         self.number_of_iterations = number_of_iterations
         self.normalize_rows = normalize_rows
 
-    def _fix_labels(self, data, centroids, labels, n_clusters):
+    def _fix_labels(self, data, centroids, labels, n_clusters, retries=10):
+        logging.debug('A label vanished - fixing')
         new_labels = labels.copy()
         known_labels = np.unique(labels)
         expected_labels = np.arange(n_clusters)
         missing_labels = np.setdiff1d(expected_labels, known_labels)
+        logging.debug('Missing labels ({0} were expected): {1}'.format(
+                      n_clusters, missing_labels))
         new_centroids = np.nan * np.zeros((n_clusters, centroids.shape[1]))
         for known in known_labels:
             new_centroids[known] = centroids[known]
         for missing in missing_labels:
+            logging.debug('Fixing label: {0}'.format(missing))
             new_center = np.nanmin(dst.cdist(
                 data, new_centroids, metric=self.labeling.distance_metric
             ), axis=1).argmax()
+            logging.debug('Assigning to label: {0}'.format(labels[new_center]))
             new_labels[new_center] = missing
             new_centroids[missing] = data[new_center]
-        assert np.unique(new_labels).size == n_clusters
+        if np.unique(new_labels).size != n_clusters and retries > 0:
+            logging.debug('fixed but lost another: {0}'.format(
+                np.unique(new_labels)))
+            return self._fix_labels(
+                data, new_centroids, new_labels, n_clusters, retries-1)
         return new_centroids, new_labels
 
     def __call__(self, data: Data, number_of_clusters: int) \
@@ -117,6 +130,7 @@ class _KMeans(SegmentationMethod):
         if self.normalize_rows:
             _validate_normalizable(data)
             data = normalize_rows(data)
+        label_set = np.arange(number_of_clusters)
         centroids = self.initialize(data, number_of_clusters)
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
@@ -127,17 +141,21 @@ class _KMeans(SegmentationMethod):
             if np.all(labels == old_labels):
                 break
             old_labels = labels
-            centroids = redefine_centroids(data, old_labels)
+            centroids = redefine_centroids(data, old_labels, label_set)
             labels = self.labeling(data, centroids)
         return labels, centroids
 
 
 def _parse_initialization(name: str, distance: str,
-                          percentile: float=None) -> Initialization:
+                          percentile: float=None,
+                          leaf_size: Union[int, float] = 0.01) \
+        -> Initialization:
     if name == 'percentile':
         return PercentileInitialization(distance, percentile)
     if name == 'extreme':
         return ExtremeInitialization(distance)
+    if name == 'kdtree':
+        return KDTreeInitialization(distance, leaf_size)
     raise ValueError('Unknown initialization: {0}'.format(name))
 
 
@@ -169,6 +187,11 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         Specifies the starting percentile for 'percentile' initialization.
         Must be within range [0.0, 100.0]. At 100.0 it is equivalent to
         'extreme' initialization.
+    
+    leaf_size : int or float, optional (default 0.01)
+        Desired leaf size in kdtree initialization. When int, the box size
+        will be between `leaf_size` and `2 * leaf_size`. When float, it will
+        be between `leaf_size * n_samples` and `2 * leaf_size * n_samples`
 
     max_iter : int, default: 100
         Maximum number of iterations of the k-means algorithm for a
@@ -190,12 +213,14 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
     # TODO: Add example of usage.
     def __init__(self, n_clusters: int, distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
+                 leaf_size : Union[int, float] = 0.01,
                  max_iter: int = 100, normalize_rows: bool = False):
         super().__init__()
         self.n_clusters = n_clusters
         self.distance = distance
         self.init = init
         self.percentile = percentile
+        self.leaf_size = leaf_size
         self.max_iter = max_iter
         self.normalize_rows = normalize_rows
 
@@ -214,13 +239,14 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             not used, present here for API consistency by convention.
         """
         initialize = _parse_initialization(
-            self.init, self.distance, self.percentile)
+            self.init, self.distance, self.percentile, self.leaf_size)
         kmeans = _KMeans(
             labeling=Labeling(self.distance),
             initialize=initialize,
             number_of_iterations=self.max_iter,
             normalize_rows=self.normalize_rows
         )
+        X = np.asanyarray(X)
         self.labels_, self.cluster_centers_ = kmeans(
             X, number_of_clusters=self.n_clusters)
         self.labels_ = self.labels_.ravel()
