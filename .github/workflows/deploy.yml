@@ -11,8 +11,8 @@ on:
 
 env:
   MAJOR: ${{ 2 }}
-  MINOR: ${{ 3 }}
-  FIXUP: ${{ 20 }}
+  MINOR: ${{ 4 }}
+  FIXUP: ${{ 0 }}
   PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
   PACKAGE_INIT_FILE_VERSION_LINE: ${{ 1 }}
   PACKAGE_SETUP_FILE: $${{ 'setup.py' }}

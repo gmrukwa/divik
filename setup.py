@@ -4,7 +4,7 @@ from glob import glob
 from setuptools import setup, find_packages, Extension
 import numpy
 
-__version__ = '2.3.20'
+__version__ = '2.4.0'
 
 with open('README.md') as infile:
     readme = infile.read()
