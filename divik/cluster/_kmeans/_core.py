@@ -94,7 +94,7 @@ class _KMeans(SegmentationMethod):
         self.number_of_iterations = number_of_iterations
         self.normalize_rows = normalize_rows
 
-    def _fix_labels(self, data, centroids, labels, n_clusters):
+    def _fix_labels(self, data, centroids, labels, n_clusters, retries=10):
         logging.debug('A label vanished - fixing')
         new_labels = labels.copy()
         known_labels = np.unique(labels)
@@ -113,8 +113,11 @@ class _KMeans(SegmentationMethod):
             logging.debug('Assigning to label: {0}'.format(labels[new_center]))
             new_labels[new_center] = missing
             new_centroids[missing] = data[new_center]
-        assert np.unique(new_labels).size == n_clusters, 'fixed: {0}'.format(
-            np.unique(new_labels))
+        if np.unique(new_labels).size != n_clusters and retries > 0:
+            logging.debug('fixed but lost another: {0}'.format(
+                np.unique(new_labels)))
+            return self._fix_labels(
+                data, new_centroids, new_labels, n_clusters, retries-1)
         return new_centroids, new_labels
 
     def __call__(self, data: Data, number_of_clusters: int) \
