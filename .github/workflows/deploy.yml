@@ -15,7 +15,7 @@ env:
   FIXUP: ${{ 0 }}
   PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
   PACKAGE_INIT_FILE_VERSION_LINE: ${{ 1 }}
-  PACKAGE_SETUP_FILE: $${{ 'setup.py' }}
+  PACKAGE_SETUP_FILE: ${{ 'setup.py' }}
   PACKAGE_SETUP_FILE_VERSION_LINE: ${{ 7 }}
   DOCKER_REPO: ${{ 'gmrukwa/divik' }}
   IS_ALPHA: ${{ github.event_name == 'pull_request' }}
