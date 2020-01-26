@@ -6,6 +6,7 @@ from sklearn.base import clone, BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import tqdm
 
+from divik.core import configurable
 from divik.cluster._kmeans._core import KMeans
 from divik.score import gap, sampled_gap
 
@@ -13,6 +14,7 @@ from divik.score import gap, sampled_gap
 _BIG_PRIME = 32801
 
 
+@configurable
 class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     """Select best number of cluters for k-means
 

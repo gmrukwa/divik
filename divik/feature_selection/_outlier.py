@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator
 
+from divik.core import configurable
 from ._stat_selector_mixin import StatSelectorMixin
 
 
@@ -128,6 +129,7 @@ def huberta_outliers(v):
 
 
 # noinspection PyAttributeOutsideInit
+@configurable
 class OutlierSelector(BaseEstimator, StatSelectorMixin):
     """Feature selector that removes outlier features w.r.t. mean or variance
 

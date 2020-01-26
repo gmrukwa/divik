@@ -7,6 +7,7 @@ from sklearn.base import clone, BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 import tqdm
 
+from divik.core import configurable
 from ._core import KMeans
 from divik.score import dunn
 from divik.core import maybe_pool, share
@@ -19,6 +20,7 @@ def _pool_initialize(ref, data):
     _DATA[ref] = data
 
 
+@configurable
 class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     """Select best number of clusters for k-means
 

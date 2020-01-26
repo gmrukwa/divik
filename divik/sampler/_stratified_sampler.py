@@ -5,12 +5,13 @@ import uuid
 from sklearn.model_selection import StratifiedShuffleSplit
 
 from ._core import BaseSampler, ParallelSampler
-from divik.core import share
+from divik.core import configurable, share
 
 
 _DATA = {}
 
 
+@configurable
 class StratifiedSampler(BaseSampler):
     """Sample the original data preserving proportions of groups
 
