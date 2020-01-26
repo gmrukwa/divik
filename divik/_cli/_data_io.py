@@ -39,7 +39,8 @@ def _load_mat(path: str) -> np.ndarray:
         return _load_mat_with(path, backend=hdf5, ignore='#').T
 
 
-def _load_disk_file(path: str) -> u.Data:
+def load_data(path: str) -> u.Data:
+    logging.info("Loading data: " + path)
     normalized = path.lower()
     if normalized.endswith('.csv'):
         loader = partial(np.loadtxt, delimiter=',')
@@ -54,11 +55,6 @@ def _load_disk_file(path: str) -> u.Data:
         logging.error(message)
         raise IOError(message)
     return loader(path)
-
-
-def load_data(path: str) -> u.Data:
-    logging.info("Loading data: " + path)
-    return _load_disk_file(path)
 
 
 DIVIK_RESULT_FNAME = 'result.pkl'
