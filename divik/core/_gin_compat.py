@@ -9,6 +9,12 @@ except ImportError:
     _HAS_GIN = False
 
 
+MISSING_GIN_ERROR = """
+gin-config package missing. You should install divik with appropriate extras:
+    pip install divik[gin]
+"""
+
+
 def parse_gin_args():
     """Parse arguments with gin-config
 
@@ -22,8 +28,11 @@ def parse_gin_args():
     More about format of `.gin` files can be found here:
     https://github.com/google/gin-config
     """
-    import gin
-    from absl import flags
+    try:
+        import gin
+        from absl import flags
+    except ImportError as ex:
+        raise ImportError(MISSING_GIN_ERROR) from ex
     flags.DEFINE_multi_string(
         'config', None, 'List of paths to the config files.')
     flags.DEFINE_multi_string(
