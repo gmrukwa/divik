@@ -52,6 +52,8 @@ def configurable(klass, *args, **kwargs):
 
 
 if _HAS_GIN:
+    import divik.core._gin_bugfix
+
     # TODO: Delete when https://github.com/google/gin-config/pull/49 gets merged
 
     # Most of the classes mentioned in the docs:
