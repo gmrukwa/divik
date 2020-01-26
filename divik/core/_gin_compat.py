@@ -43,8 +43,10 @@ def parse_gin_args():
     gin.parse_config_files_and_bindings(FLAGS.config, FLAGS.param)
 
 
-def configurable(klass, *args, **kwargs):
-    """Marks class as configurable via gin-config"""
-    if _HAS_GIN:
-        klass = gin.configurable(klass, *args, **kwargs)
-    return klass
+if _HAS_GIN:
+    configurable = gin.configurable
+else:
+    def configurable(name_or_fn=None, *args, **kwargs):
+        if name_or_fn is None:
+            return lambda x: x
+        return name_or_fn
