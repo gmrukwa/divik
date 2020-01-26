@@ -40,14 +40,14 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.4.0
+docker pull gmrukwa/divik:2.4.1
 ```
 
 ## Python package
 
 Prerequisites for installation of base package:
 
-- Python 3.6 / 3.7 / 3.8
+- Python 3.6 / 3.7
 - compiler capable of compiling the native C code
 
 Having prerequisites installed, one can install latest base version of the
@@ -60,7 +60,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.4.0
+pip install divik==2.4.1
 ```
 
 If you want to have compatibility with
