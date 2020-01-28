@@ -1,0 +1,20 @@
+import divik.cluster
+DunnDiviK.gap_trials = 10
+DunnDiviK.leaf_size = 0.01
+DunnDiviK.distance = 'correlation'
+DunnDiviK.minimal_size = 200
+DunnDiviK.rejection_size = 20
+DunnDiviK.minimal_features_percentage = 0.05
+DunnDiviK.fast_kmeans_iter = 100
+DunnDiviK.k_max = 10
+DunnDiviK.sample_size = 1000
+DunnDiviK.normalize_rows = True
+DunnDiviK.use_logfilters = True
+DunnDiviK.filter_type = 'auto'
+DunnDiviK.n_jobs = -1
+DunnDiviK.random_seed = 42
+DunnDiviK.verbose = True
+
+load_data.path = 'data.csv'
+load_xy.path = 'xy.csv'
+experiment.model = @DunnDiviK()

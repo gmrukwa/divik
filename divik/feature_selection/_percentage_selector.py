@@ -1,10 +1,12 @@
 import numpy as np
 from sklearn.base import BaseEstimator
 
+from divik.core import configurable
 from ._stat_selector_mixin import StatSelectorMixin
 
 
 # noinspection PyAttributeOutsideInit
+@configurable
 class PercentageSelector(BaseEstimator, StatSelectorMixin):
     """Feature selector that removes / preserves top some percent of features
 

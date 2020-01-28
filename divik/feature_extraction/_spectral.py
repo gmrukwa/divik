@@ -6,7 +6,7 @@ from sklearn.base import BaseEstimator
 from sklearn.manifold import SpectralEmbedding
 from sklearn.utils.validation import check_is_fitted
 
-from divik.core import Data
+from divik.core import configurable, Data
 
 
 def locally_adjusted_affinity(X: Data, d: str, neighbors: int = 7) -> Data:
@@ -50,6 +50,7 @@ def locally_adjusted_affinity(X: Data, d: str, neighbors: int = 7) -> Data:
     return affinity
 
 
+@configurable
 class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
     """Spectral embedding for non-linear dimensionality reduction.
 

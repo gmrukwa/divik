@@ -7,6 +7,8 @@ try:
 except ModuleNotFoundError:
     from sklearn.feature_selection.base import SelectorMixin
 
+from divik.core import configurable
+
 
 class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
     """
@@ -60,6 +62,7 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
         return self.selected_
 
 
+@configurable
 class NoSelector(BaseEstimator, StatSelectorMixin):
     """Dummy selector to use when no selection is supposed to be made."""
     def fit(self, X, y=None):

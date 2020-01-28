@@ -6,6 +6,7 @@ import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
+from divik.core import configurable
 from divik.cluster._kmeans._initialization import (
     Initialization,
     ExtremeInitialization,
@@ -159,6 +160,7 @@ def _parse_initialization(name: str, distance: str,
     raise ValueError('Unknown initialization: {0}'.format(name))
 
 
+@configurable
 class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
     """K-Means clustering
 

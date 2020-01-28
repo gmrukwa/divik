@@ -28,15 +28,15 @@ def _make_summary(result: typing.Optional[u.DivikResult]):
     }
 
 
-def _make_merged(result: typing.Optional[u.DivikResult]) -> np.ndarray:
+def make_merged(result: typing.Optional[u.DivikResult]) -> np.ndarray:
     depth = _smr.depth(result)
-    return np.hstack(
+    return np.hstack([
         _smr.merged_partition(result, limit + 1).reshape(-1, 1)
         for limit in range(depth)
-    )
+    ])
 
 
-def _save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
+def save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
     np.savetxt(os.path.join(destination, 'partitions.csv'),
                merged, delimiter=', ', fmt='%i')
     np.save(os.path.join(destination, 'partitions.npy'), merged)
@@ -67,9 +67,9 @@ def save(data: u.Data, divik: DiviK, destination: str, xy: np.ndarray=None):
         json.dump(_make_summary(divik.result_), smr)
     if divik.result_ is not None:
         logging.info("Saving partitions.")
-        merged = _make_merged(divik.result_)
+        merged = make_merged(divik.result_)
         assert merged.shape[0] == divik.result_.clustering.labels_.size
-        _save_merged(destination, merged, xy)
+        save_merged(destination, merged, xy)
         logging.info("Saving centroids.")
         centroids = pd.DataFrame(data).groupby(merged[:, -1]).mean().values
         np.save(os.path.join(destination, 'centroids.npy'), centroids)

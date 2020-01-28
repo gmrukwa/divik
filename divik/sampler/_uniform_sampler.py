@@ -2,11 +2,12 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 
-from ..core import seed as seed_
+from divik.core import configurable, seed as seed_
 from divik.feature_extraction import KneePCA
 from ._core import BaseSampler
 
 
+@configurable
 class UniformSampler(BaseSampler):
     """Samples uniformly from the boundaries of the data
 
@@ -72,6 +73,7 @@ class UniformSampler(BaseSampler):
         return self.scaler_.inverse_transform(unscaled)
 
 
+@configurable
 class UniformPCASampler(BaseSampler):
     """Rotation-invariant uniform sampling
 

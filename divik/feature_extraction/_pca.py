@@ -6,6 +6,8 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 
+from divik.core import configurable
+
 
 def knee(explained_variance) -> int:
     """Find empirical knee point for explained variance"""
@@ -22,6 +24,7 @@ def knee(explained_variance) -> int:
     return explained_variance.size
 
 
+@configurable
 class KneePCA(BaseEstimator, TransformerMixin):
     """Principal component analysis (PCA) with knee method
 

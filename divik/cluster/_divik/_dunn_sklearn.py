@@ -2,12 +2,14 @@ from typing import Union
 
 import numpy as np
 
+from divik.core import configurable
 from ._base import DiviKBase
 from ._dunn import dunn_divik
 from ._report import DivikReporter
 from divik.cluster import _kmeans as km
 
 
+@configurable
 class DunnDiviK(DiviKBase):
     """DiviK clustering
 
