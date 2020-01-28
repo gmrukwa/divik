@@ -4,7 +4,7 @@ import numpy as np
 
 from divik.core import configurable
 from ._base import DiviKBase
-from ._dunn import dunn_divik
+from ._backend import divik
 from ._report import DivikReporter
 from divik.cluster import _kmeans as km
 
@@ -223,9 +223,9 @@ class DunnDiviK(DiviKBase):
         minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
             else self.minimal_size
         rejection_size = self._get_rejection_size(X)
-        return dunn_divik(
+        return divik(
             X, selection=select_all, fast_kmeans=fast,
-            full_kmeans=full,
+            kmeans=full,
             feature_selector=self._feature_selector(X.shape[1]),
             minimal_size=minimal_size, rejection_size=rejection_size,
             report=report)

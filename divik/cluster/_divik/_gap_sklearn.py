@@ -4,7 +4,7 @@ import numpy as np
 
 from divik.core import configurable
 from ._base import DiviKBase
-from ._gap import divik
+from ._backend import divik
 from ._report import DivikReporter
 from divik.cluster import _kmeans as km
 
@@ -202,7 +202,7 @@ class DiviK(DiviKBase):
             else self.minimal_size
         rejection_size = self._get_rejection_size(X)
         return divik(
-            X, selection=select_all, kmeans=kmeans,
+            X, selection=select_all, kmeans=kmeans, fast_kmeans=None,
             feature_selector=self._feature_selector(X.shape[1]),
             minimal_size=minimal_size, rejection_size=rejection_size,
             report=report)
