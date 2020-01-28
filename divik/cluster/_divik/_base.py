@@ -143,26 +143,12 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
             return self.distance == 'correlation'
         return self.normalize_rows
 
-    def _gmm_filter(self):
-        return fs.HighAbundanceAndVarianceSelector(
-            use_log=self.use_logfilters,
-            min_features_rate=self.minimal_features_percentage)
-
-    def _outlier_filter(self):
-        return fs.OutlierAbundanceAndVarianceSelector(
-            use_log=self.use_logfilters,
-            min_features_rate=self.minimal_features_percentage,
-            p=self.features_percentage)
-
     def _feature_selector(self, n_features):
-        if (self.filter_type == 'auto' and n_features > 250) \
-                or self.filter_type == 'gmm':
-            return self._gmm_filter()
-        if self.filter_type == 'auto' or self.filter_type == 'outlier':
-            return self._outlier_filter()
-        if self.filter_type == 'none':
-            return fs.NoSelector()
-        raise ValueError("Unknown filter type: %s" % self.filter_type)
+        return fs.make_specialized_selector(
+            self.filter_type, n_features, use_log=self.use_logfilters,
+            min_features_rate=self.minimal_features_percentage,
+            p=self.features_percentage
+        )
 
     @abstractmethod
     def _divik(self, X, progress):

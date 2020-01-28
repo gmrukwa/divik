@@ -9,6 +9,7 @@ from ._percentage_selector import PercentageSelector
 from ._specialized import (
     HighAbundanceAndVarianceSelector,
     OutlierAbundanceAndVarianceSelector,
+    make_specialized_selector,
 )
 
 
@@ -21,4 +22,5 @@ __all__ = [
     'PercentageSelector',
     'HighAbundanceAndVarianceSelector',
     'OutlierAbundanceAndVarianceSelector',
+    'make_specialized_selector',
 ]
