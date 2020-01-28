@@ -30,10 +30,10 @@ def _make_summary(result: typing.Optional[u.DivikResult]):
 
 def make_merged(result: typing.Optional[u.DivikResult]) -> np.ndarray:
     depth = _smr.depth(result)
-    return np.hstack(
+    return np.hstack([
         _smr.merged_partition(result, limit + 1).reshape(-1, 1)
         for limit in range(depth)
-    )
+    ])
 
 
 def save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):

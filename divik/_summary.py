@@ -74,7 +74,7 @@ def _merged_partition(partition: u.IntLabels,
             for cluster in np.unique(local_partition):
                 paths[cluster + known_clusters] = (
                     cluster_number, *down_paths[cluster])
-            known_clusters += np.max(local_partition) + 1
+            known_clusters += int(np.max(local_partition)) + 1
     return result, paths
 
 

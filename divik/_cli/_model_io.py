@@ -44,7 +44,7 @@ def save_divik(model, destination, **kwargs):
     with open(os.path.join(destination, 'result.pkl'), 'wb') as pkl:
         pickle.dump(model.result_, pkl)
     logging.info("Saving DiviK partitions.")
-    merged = make_merged(model.result_)
+    merged = make_merged(model.result_).astype(np.int64)
     assert merged.shape[0] == model.result_.clustering.labels_.size
     xy = kwargs.get('xy', None)
     save_merged(destination, merged, xy)
