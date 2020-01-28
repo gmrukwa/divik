@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+import inspect
 # RawArray exists, but PyCharm goes crazy
 # noinspection PyUnresolvedReferences
 from multiprocessing import Pool, RawArray
@@ -35,3 +36,10 @@ def context_if(condition, context, *args, **kwargs):
             yield c
     else:
         yield None
+
+
+def build(klass, **kwargs):
+    """Build instance of klass using matching kwargs"""
+    known_param_names = list(inspect.signature(klass).parameters.keys())
+    known_params = {n: kwargs[n] for n in known_param_names if n in kwargs}
+    return klass(**known_params)

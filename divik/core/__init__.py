@@ -8,7 +8,7 @@ from ._types import (
     IntLabels,
     SegmentationMethod,
 )
-from ._utils import context_if, normalize_rows, visualize
+from ._utils import build, context_if, normalize_rows, visualize
 
 
 __all__ = [
@@ -17,6 +17,7 @@ __all__ = [
     'DivikResult',
     'IntLabels',
     'SegmentationMethod',
+    'build',
     'context_if',
     'normalize_rows',
     'visualize',
