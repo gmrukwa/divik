@@ -8,8 +8,9 @@ import numpy as np
 import pandas as pd
 import skimage.io as sio
 
+from divik.core import build
 from divik._cli._data_io import DIVIK_RESULT_FNAME
-from divik.cluster import DiviK
+from divik.cluster import DiviK, GAPSearch, KMeans
 import divik._summary as _smr
 import divik._cli._utils as sc
 import divik.core as u
@@ -79,11 +80,37 @@ def save(data: u.Data, divik: DiviK, destination: str, xy: np.ndarray=None):
         logging.info("Skipping partition save. Cause: result is None")
 
 
+def _full_kmeans(**config):
+    distance = config.get('distance', 'correlation')
+    normalize_rows = config.get('normalize_rows', None)
+    single_kmeans = KMeans(
+        n_clusters=2,
+        distance=distance,
+        init='kdtree',
+        leaf_size=config.get('leaf_size', 0.01),
+        max_iter=config.get('max_iter', 100),
+        normalize_rows=normalize_rows,
+    )
+    kmeans = GAPSearch(
+        single_kmeans,
+        max_clusters=config.get('k_max', 50),
+        n_jobs=config.get('n_jobs', None),
+        seed=config.get('random_seed', 0),
+        n_trials=config.get('gap_trials', 10),
+        sample_size=config.get('sample_size', 10000),
+        verbose=config.get('verbose', False),
+    )
+    return kmeans
+
+
 def main():
     data, config, destination, xy = sc.initialize()
     logging.info('Workspace initialized.')
     logging.info('Scenario configuration: {0}'.format(config))
-    divik = DiviK(**config)
+    fast = None
+    full = _full_kmeans(**config)
+    divik_config = {'kmeans': full, 'fast_kmeans': fast, **config}
+    divik = build(DiviK, **divik_config)
     logging.info("Launching experiment.")
     try:
         divik.fit(data)

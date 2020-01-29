@@ -6,12 +6,10 @@ from ._kmeans import (
 )
 from ._divik import (
     DiviK,
-    DunnDiviK,
 )
 
 __all__ = [
     'DiviK',
-    'DunnDiviK',
     'DunnSearch',
     'GAPSearch',
     'KMeans',
