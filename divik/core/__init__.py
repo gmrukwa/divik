@@ -1,4 +1,4 @@
-from ._gin_compat import configurable, parse_gin_args
+from ._gin_compat import configurable, dump_gin_args, parse_gin_args
 from ._parallel import get_n_jobs, maybe_pool, share
 from ._seed import seed, seeded
 from ._types import (
@@ -27,5 +27,6 @@ __all__ = [
     'seed',
     'seeded',
     'configurable',
+    'dump_gin_args',
     'parse_gin_args',
 ]
