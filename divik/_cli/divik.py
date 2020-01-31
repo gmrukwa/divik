@@ -86,8 +86,8 @@ def _full_kmeans(**config):
     single_kmeans = KMeans(
         n_clusters=2,
         distance=distance,
-        init='kdtree',
-        leaf_size=config.get('leaf_size', 0.01),
+        init='percentile',
+        percentile=config.get('distance_percentile', 99.0),
         max_iter=config.get('max_iter', 100),
         normalize_rows=normalize_rows,
     )
