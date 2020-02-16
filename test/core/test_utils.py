@@ -21,3 +21,25 @@ class NJobsTest(unittest.TestCase):
 
     def test_gets_all_for_zero(self):
         self.assertEqual(u.get_n_jobs(0), 4)
+
+
+class Dummy:
+    def __init__(self, a, b = 5):
+        self.a = a
+        self.b = b
+
+
+class BuildTest(unittest.TestCase):
+    def test_builds_instance_with_proper_args(self):
+        dummy = u.build(Dummy, a=3, b=6)
+        self.assertEqual(dummy.a, 3)
+        self.assertEqual(dummy.b, 6)
+
+        dummy = u.build(Dummy, a=3)
+        self.assertEqual(dummy.a, 3)
+        self.assertEqual(dummy.b, 5)
+    
+    def test_builds_with_too_many_args(self):
+        dummy = u.build(Dummy, a=3, c=4)
+        self.assertEqual(dummy.a, 3)
+        self.assertEqual(dummy.b, 5)

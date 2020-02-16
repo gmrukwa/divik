@@ -12,15 +12,18 @@ from divik.core import configurable
 def knee(explained_variance) -> int:
     """Find empirical knee point for explained variance"""
     xaxis = np.arange(explained_variance.size, dtype=int)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        limit = KneeLocator(x=xaxis,
-                            y=explained_variance,
-                            S=1.,
-                            direction='increasing',
-                            curve='concave')
-    if limit.knee is not None:
-        return limit.knee
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            limit = KneeLocator(x=xaxis,
+                                y=explained_variance,
+                                S=1.,
+                                direction='increasing',
+                                curve='concave').knee
+    except IndexError:  # This is needed for kneed >= 0.5.3
+        limit = None
+    if limit is not None:
+        return limit
     return explained_variance.size
 
 

@@ -1,4 +1,4 @@
-from ._gin_compat import configurable, parse_gin_args
+from ._gin_compat import configurable, dump_gin_args, parse_gin_args
 from ._parallel import get_n_jobs, maybe_pool, share
 from ._seed import seed, seeded
 from ._types import (
@@ -8,7 +8,7 @@ from ._types import (
     IntLabels,
     SegmentationMethod,
 )
-from ._utils import context_if, normalize_rows, visualize
+from ._utils import build, context_if, normalize_rows, visualize
 
 
 __all__ = [
@@ -17,6 +17,7 @@ __all__ = [
     'DivikResult',
     'IntLabels',
     'SegmentationMethod',
+    'build',
     'context_if',
     'normalize_rows',
     'visualize',
@@ -26,5 +27,6 @@ __all__ = [
     'seed',
     'seeded',
     'configurable',
+    'dump_gin_args',
     'parse_gin_args',
 ]

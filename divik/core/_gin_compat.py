@@ -1,4 +1,5 @@
 """gin-config compatibility"""
+import os
 import sys
 
 try:
@@ -41,6 +42,20 @@ def parse_gin_args():
     FLAGS = flags.FLAGS
     FLAGS(sys.argv)
     gin.parse_config_files_and_bindings(FLAGS.config, FLAGS.param)
+
+
+def dump_gin_args(destination):
+    """Dump gin-config effective configuration
+
+    If you have `gin` extras installed, you can call `dump_gin_args`
+    save effective gin configuration to a file.
+    """
+    try:
+        import gin
+    except ImportError as ex:
+        raise ImportError(MISSING_GIN_ERROR) from ex
+    with open(os.path.join(destination, 'config.gin'), 'w') as outfile:
+        outfile.write(gin.operative_config_str)
 
 
 if _HAS_GIN:

@@ -2,7 +2,7 @@ import logging
 
 import gin
 
-from divik.core import parse_gin_args
+from divik.core import dump_gin_args, parse_gin_args
 from ._model_io import save
 from ._utils import (
     prepare_destination,
@@ -30,6 +30,7 @@ def experiment(
     verbose: bool = False,
 ):
     destination = prepare_destination(destination, omit_datetime)
+    dump_gin_args(destination)
     setup_logger(destination, verbose)
     logging.info(str(model))
     data = load_data()
