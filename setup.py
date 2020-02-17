@@ -1,10 +1,28 @@
 """A setuptools based setup module for DiviK algorithm."""
 
 from glob import glob
+import os
 from setuptools import setup, find_packages, Extension
 import numpy
 
 __version__ = '2.4.3'
+
+POSIX_OPTS = {
+    'extra_link_args': [
+        '-fopenmp',
+    ],
+    'extra_compile_args': [
+        '-fopenmp',
+        '-Wno-strict-prototypes',
+        '-Wno-maybe-uninitialized',
+    ],
+}
+
+
+if os.name == 'posix':
+    OPTS = POSIX_OPTS
+else:
+    OPTS = {}
 
 with open('README.md') as infile:
     readme = infile.read()
@@ -80,7 +98,6 @@ setup(
                   define_macros=[
                       ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),
                   ],
-                  extra_link_args=['-fopenmp'],
-                  extra_compile_args=['-fopenmp']),
+                  **OPTS),
     ],
 )

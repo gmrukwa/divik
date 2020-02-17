@@ -48,7 +48,26 @@ docker pull gmrukwa/divik:2.4.3
 Prerequisites for installation of base package:
 
 - Python 3.6 / 3.7
-- compiler capable of compiling the native C code
+- compiler capable of compiling the native C code and OpenMP support
+
+#### Installation of OpenMP for Ubuntu / Debian
+
+You should have it already installed with GCC compiler, but if somehow
+not, try the following:
+
+```bash
+sudo apt-get install libgomp1
+```
+
+#### Installation of OpenMP for Mac
+
+OpenMP is available as part of LLVM. You may need to install in with:
+
+```bash
+brew install llvm
+```
+
+#### DiviK Installation
 
 Having prerequisites installed, one can install latest base version of the
 package:

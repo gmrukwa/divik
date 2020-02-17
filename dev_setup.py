@@ -1,8 +1,26 @@
 """This just builds the native extension for testing purposes"""
 
 from glob import glob
+import os
 from setuptools import setup, Extension
 import numpy
+
+POSIX_OPTS = {
+    'extra_link_args': [
+        '-fopenmp',
+    ],
+    'extra_compile_args': [
+        '-fopenmp',
+        '-Wno-strict-prototypes',
+        '-Wno-maybe-uninitialized',
+    ],
+}
+
+
+if os.name == 'posix':
+    OPTS = POSIX_OPTS
+else:
+    OPTS = {}
 
 setup(
     name='gamred_native',
@@ -23,7 +41,6 @@ setup(
                   define_macros=[
                       ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),
                   ],
-                  extra_link_args=['-fopenmp'],
-                  extra_compile_args=['-fopenmp']),
+                  **OPTS),
     ],
 )
