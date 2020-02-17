@@ -1,25 +1,30 @@
 /*
- * File: rtGetInf.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * rtGetInf.h
+ *
+ * Code generation for function 'fetch_thresholds'
+ *
  */
 
 #ifndef RTGETINF_H
 #define RTGETINF_H
-#include <stddef.h>
 #include "rtwtypes.h"
 #include "rt_nonfinite.h"
+#ifdef __cplusplus
 
-extern real_T rtGetInf(void);
-extern real32_T rtGetInfF(void);
-extern real_T rtGetMinusInf(void);
-extern real32_T rtGetMinusInfF(void);
+extern "C" {
 
 #endif
 
-/*
- * File trailer for rtGetInf.h
- *
- * [EOF]
- */
+  extern real_T rtGetInf(void);
+  extern real32_T rtGetInfF(void);
+  extern real_T rtGetMinusInf(void);
+  extern real32_T rtGetMinusInfF(void);
+
+#ifdef __cplusplus
+
+}
+#endif
+#endif
+
+/* End of code generation (rtGetInf.h) */

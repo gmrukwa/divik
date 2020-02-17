@@ -1,17 +1,19 @@
 /*
- * File: histcounts.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * histcounts.h
+ *
+ * Code generation for function 'histcounts'
+ *
  */
 
 #ifndef HISTCOUNTS_H
 #define HISTCOUNTS_H
 
-/* Include Files */
+/* Include files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
+#include "omp.h"
 #include "fetch_thresholds_types.h"
 
 /* Function Declarations */
@@ -20,8 +22,4 @@ extern void histcounts(const emxArray_real_T *x, double varargin_1,
 
 #endif
 
-/*
- * File trailer for histcounts.h
- *
- * [EOF]
- */
+/* End of code generation (histcounts.h) */

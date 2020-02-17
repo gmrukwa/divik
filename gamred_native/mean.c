@@ -1,22 +1,21 @@
 /*
- * File: mean.c
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * mean.c
+ *
+ * Code generation for function 'mean'
+ *
  */
 
-/* Include Files */
-#include "rt_nonfinite.h"
-#include "fetch_thresholds.h"
+/* Include files */
 #include "mean.h"
+#include "fetch_thresholds.h"
 #include "fetch_thresholds_emxutil.h"
+#include "rt_nonfinite.h"
 
 /* Function Definitions */
 
 /*
- * Arguments    : const emxArray_real_T *x
- *                emxArray_real_T *y
- * Return Type  : void
+ *
  */
 void mean(const emxArray_real_T *x, emxArray_real_T *y)
 {
@@ -34,8 +33,7 @@ void mean(const emxArray_real_T *x, emxArray_real_T *y)
     emxEnsureCapacity_real_T(y, xpageoffset);
     for (i = 0; i < npages; i++) {
       xpageoffset = i << 1;
-      y->data[i] = x->data[xpageoffset];
-      y->data[i] += x->data[xpageoffset + 1];
+      y->data[i] = x->data[xpageoffset] + x->data[xpageoffset + 1];
     }
   }
 
@@ -49,8 +47,4 @@ void mean(const emxArray_real_T *x, emxArray_real_T *y)
   }
 }
 
-/*
- * File trailer for mean.c
- *
- * [EOF]
- */
+/* End of code generation (mean.c) */

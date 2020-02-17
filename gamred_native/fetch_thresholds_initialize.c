@@ -1,28 +1,23 @@
 /*
- * File: fetch_thresholds_initialize.c
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * fetch_thresholds_initialize.c
+ *
+ * Code generation for function 'fetch_thresholds_initialize'
+ *
  */
 
-/* Include Files */
-#include "rt_nonfinite.h"
-#include "fetch_thresholds.h"
+/* Include files */
 #include "fetch_thresholds_initialize.h"
+#include "fetch_thresholds.h"
+#include "fetch_thresholds_data.h"
+#include "rt_nonfinite.h"
 
 /* Function Definitions */
-
-/*
- * Arguments    : void
- * Return Type  : void
- */
 void fetch_thresholds_initialize(void)
 {
-  rt_InitInfAndNaN(8U);
+  rt_InitInfAndNaN();
+  omp_init_nest_lock(&emlrtNestLockGlobal);
+  isInitialized_fetch_thresholds = true;
 }
 
-/*
- * File trailer for fetch_thresholds_initialize.c
- *
- * [EOF]
- */
+/* End of code generation (fetch_thresholds_initialize.c) */

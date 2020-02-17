@@ -1,12 +1,16 @@
 /*
- * File: rtwtypes.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * rtwtypes.h
+ *
+ * Code generation for function 'fetch_thresholds'
+ *
  */
 
 #ifndef RTWTYPES_H
 #define RTWTYPES_H
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 
 /*=======================================================================*
  * Target hardware information
@@ -42,7 +46,7 @@ typedef double real64_T;
  *===========================================================================*/
 typedef double real_T;
 typedef double time_T;
-typedef unsigned char boolean_T;
+typedef bool boolean_T;
 typedef int int_T;
 typedef unsigned int uint_T;
 typedef unsigned long ulong_T;
@@ -143,8 +147,4 @@ typedef struct {
 #endif
 #endif
 
-/*
- * File trailer for rtwtypes.h
- *
- * [EOF]
- */
+/* End of code generation (rtwtypes.h) */

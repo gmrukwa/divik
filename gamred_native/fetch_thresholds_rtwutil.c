@@ -1,36 +1,32 @@
 /*
- * File: fetch_thresholds_rtwutil.c
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * fetch_thresholds_rtwutil.c
+ *
+ * Code generation for function 'fetch_thresholds_rtwutil'
+ *
  */
 
-/* Include Files */
-#include <math.h>
-#include "rt_nonfinite.h"
+/* Include files */
 #include "fetch_thresholds_rtwutil.h"
+#include "fetch_thresholds.h"
+#include "rt_nonfinite.h"
+#include <math.h>
 
 /* Function Definitions */
-
-/*
- * Arguments    : double u0
- *                double u1
- * Return Type  : double
- */
 double rt_powd_snf(double u0, double u1)
 {
   double y;
+  double d;
   double d1;
-  double d2;
   if (rtIsNaN(u0) || rtIsNaN(u1)) {
     y = rtNaN;
   } else {
-    d1 = fabs(u0);
-    d2 = fabs(u1);
+    d = fabs(u0);
+    d1 = fabs(u1);
     if (rtIsInf(u1)) {
-      if (d1 == 1.0) {
+      if (d == 1.0) {
         y = 1.0;
-      } else if (d1 > 1.0) {
+      } else if (d > 1.0) {
         if (u1 > 0.0) {
           y = rtInf;
         } else {
@@ -41,9 +37,9 @@ double rt_powd_snf(double u0, double u1)
       } else {
         y = rtInf;
       }
-    } else if (d2 == 0.0) {
+    } else if (d1 == 0.0) {
       y = 1.0;
-    } else if (d2 == 1.0) {
+    } else if (d1 == 1.0) {
       if (u1 > 0.0) {
         y = u0;
       } else {
@@ -63,8 +59,4 @@ double rt_powd_snf(double u0, double u1)
   return y;
 }
 
-/*
- * File trailer for fetch_thresholds_rtwutil.c
- *
- * [EOF]
- */
+/* End of code generation (fetch_thresholds_rtwutil.c) */

@@ -1,27 +1,25 @@
 /*
- * File: fminbnd.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * fminbnd.h
+ *
+ * Code generation for function 'fminbnd'
+ *
  */
 
 #ifndef FMINBND_H
 #define FMINBND_H
 
-/* Include Files */
+/* Include files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
+#include "omp.h"
 #include "fetch_thresholds_types.h"
 
 /* Function Declarations */
-extern double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment
-                      [3], double ax, double bx);
+extern double fminbnd(const cell_wrap_2 funfcnInput_tunableEnvironment[3],
+                      double ax, double bx);
 
 #endif
 
-/*
- * File trailer for fminbnd.h
- *
- * [EOF]
- */
+/* End of code generation (fminbnd.h) */

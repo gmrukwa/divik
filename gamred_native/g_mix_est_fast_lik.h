@@ -1,17 +1,19 @@
 /*
- * File: g_mix_est_fast_lik.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * g_mix_est_fast_lik.h
+ *
+ * Code generation for function 'g_mix_est_fast_lik'
+ *
  */
 
 #ifndef G_MIX_EST_FAST_LIK_H
 #define G_MIX_EST_FAST_LIK_H
 
-/* Include Files */
+/* Include files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
+#include "omp.h"
 #include "fetch_thresholds_types.h"
 
 /* Function Declarations */
@@ -22,8 +24,4 @@ extern void g_mix_est_fast_lik(const emxArray_real_T *raw_sample, double KS,
 
 #endif
 
-/*
- * File trailer for g_mix_est_fast_lik.h
- *
- * [EOF]
- */
+/* End of code generation (g_mix_est_fast_lik.h) */
