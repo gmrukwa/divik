@@ -1,8 +1,9 @@
 /*
- * File: rtGetNaN.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * rtGetNaN.h
+ *
+ * Code generation for function 'fetch_thresholds'
+ *
  */
 
 #ifndef RTGETNAN_H
@@ -10,14 +11,19 @@
 #include <stddef.h>
 #include "rtwtypes.h"
 #include "rt_nonfinite.h"
+#ifdef __cplusplus
 
-extern real_T rtGetNaN(void);
-extern real32_T rtGetNaNF(void);
+extern "C" {
 
 #endif
 
-/*
- * File trailer for rtGetNaN.h
- *
- * [EOF]
- */
+  extern real_T rtGetNaN(void);
+  extern real32_T rtGetNaNF(void);
+
+#ifdef __cplusplus
+
+}
+#endif
+#endif
+
+/* End of code generation (rtGetNaN.h) */

@@ -1,22 +1,22 @@
 /*
- * File: std.c
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * std.c
+ *
+ * Code generation for function 'std'
+ *
  */
 
-/* Include Files */
-#include <math.h>
-#include "rt_nonfinite.h"
-#include "fetch_thresholds.h"
+/* Include files */
 #include "std.h"
+#include "fetch_thresholds.h"
 #include "fetch_thresholds_emxutil.h"
+#include "rt_nonfinite.h"
+#include <math.h>
 
 /* Function Definitions */
 
 /*
- * Arguments    : const emxArray_real_T *x
- * Return Type  : double
+ *
  */
 double b_std(const emxArray_real_T *x)
 {
@@ -26,7 +26,6 @@ double b_std(const emxArray_real_T *x)
   int k;
   emxArray_real_T *absdiff;
   int kend;
-  double absxk;
   double t;
   n = x->size[0];
   if (x->size[0] == 0) {
@@ -56,13 +55,12 @@ double b_std(const emxArray_real_T *x)
     xbar = 3.3121686421112381E-170;
     kend = x->size[0];
     for (k = 0; k < kend; k++) {
-      absxk = absdiff->data[k];
-      if (absxk > xbar) {
-        t = xbar / absxk;
-        y = 1.0 + y * t * t;
-        xbar = absxk;
+      if (absdiff->data[k] > xbar) {
+        t = xbar / absdiff->data[k];
+        y = y * t * t + 1.0;
+        xbar = absdiff->data[k];
       } else {
-        t = absxk / xbar;
+        t = absdiff->data[k] / xbar;
         y += t * t;
       }
     }
@@ -75,8 +73,4 @@ double b_std(const emxArray_real_T *x)
   return y;
 }
 
-/*
- * File trailer for std.c
- *
- * [EOF]
- */
+/* End of code generation (std.c) */

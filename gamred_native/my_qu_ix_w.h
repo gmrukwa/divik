@@ -1,17 +1,19 @@
 /*
- * File: my_qu_ix_w.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * my_qu_ix_w.h
+ *
+ * Code generation for function 'my_qu_ix_w'
+ *
  */
 
 #ifndef MY_QU_IX_W_H
 #define MY_QU_IX_W_H
 
-/* Include Files */
+/* Include files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
+#include "omp.h"
 #include "fetch_thresholds_types.h"
 
 /* Function Declarations */
@@ -20,8 +22,4 @@ extern double my_qu_ix_w(const emxArray_real_T *invec, const emxArray_real_T
 
 #endif
 
-/*
- * File trailer for my_qu_ix_w.h
- *
- * [EOF]
- */
+/* End of code generation (my_qu_ix_w.h) */

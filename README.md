@@ -40,7 +40,7 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.4.2
+docker pull gmrukwa/divik:2.4.3
 ```
 
 ## Python package
@@ -48,7 +48,26 @@ docker pull gmrukwa/divik:2.4.2
 Prerequisites for installation of base package:
 
 - Python 3.6 / 3.7
-- compiler capable of compiling the native C code
+- compiler capable of compiling the native C code and OpenMP support
+
+#### Installation of OpenMP for Ubuntu / Debian
+
+You should have it already installed with GCC compiler, but if somehow
+not, try the following:
+
+```bash
+sudo apt-get install libgomp1
+```
+
+#### Installation of OpenMP for Mac
+
+OpenMP is available as part of LLVM. You may need to install in with:
+
+```bash
+brew install llvm libomp
+```
+
+#### DiviK Installation
 
 Having prerequisites installed, one can install latest base version of the
 package:
@@ -60,7 +79,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.4.2
+pip install divik==2.4.3
 ```
 
 If you want to have compatibility with

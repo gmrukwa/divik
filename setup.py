@@ -1,10 +1,50 @@
 """A setuptools based setup module for DiviK algorithm."""
 
 from glob import glob
+import os
 from setuptools import setup, find_packages, Extension
+import sys
 import numpy
 
-__version__ = '2.4.2'
+__version__ = '2.4.3'
+
+LINUX_OPTS = {
+    'extra_link_args': [
+        '-fopenmp',
+    ],
+    'extra_compile_args': [
+        '-fopenmp',
+        '-Wno-strict-prototypes',
+        '-Wno-maybe-uninitialized',
+        '-O3',
+    ],
+}
+OSX_OPTS = {
+    'extra_link_args': [
+        '-L/usr/local/opt/libomp/lib',
+        '-fopenmp',
+    ],
+    'extra_compile_args': [
+        '-Wno-strict-prototypes',
+        '-Wno-uninitialized',
+        '-fopenmp',
+        '-O3',
+    ],
+}
+WINDOWS_OPTS = {
+    'extra_compile_args': [
+        '/Ox',
+    ]
+}
+
+
+if os.name == 'posix':
+    if sys.platform.startswith('darwin'):
+        OPTS = OSX_OPTS
+    else:
+        OPTS = LINUX_OPTS
+else:
+    OPTS = WINDOWS_OPTS
 
 with open('README.md') as infile:
     readme = infile.read()
@@ -79,6 +119,7 @@ setup(
                   include_dirs=['gamred_native', numpy.get_include()],
                   define_macros=[
                       ('NPY_NO_DEPRECATED_API', 'NPY_1_7_API_VERSION'),
-                  ]),
+                  ],
+                  **OPTS),
     ],
 )

@@ -12,11 +12,11 @@ on:
 env:
   MAJOR: ${{ 2 }}
   MINOR: ${{ 4 }}
-  FIXUP: ${{ 2 }}
+  FIXUP: ${{ 3 }}
   PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
   PACKAGE_INIT_FILE_VERSION_LINE: ${{ 1 }}
   PACKAGE_SETUP_FILE: ${{ 'setup.py' }}
-  PACKAGE_SETUP_FILE_VERSION_LINE: ${{ 7 }}
+  PACKAGE_SETUP_FILE_VERSION_LINE: ${{ 8 }}
   DOCKER_REPO: ${{ 'gmrukwa/divik' }}
   IS_ALPHA: ${{ github.event_name == 'pull_request' }}
   IS_BETA: ${{ github.event_name == 'push' && endsWith(github.event.ref, 'heads/develop') }}
@@ -198,7 +198,18 @@ jobs:
         run: pip install wheel twine
       - name: Install dependencies
         run: pip install -r requirements-base.txt
+      - name: Install OpenMP
+        run: brew install libomp
       - name: Build Python package
-        run: pip wheel . -w dist
+        run: |
+          echo "::add-path::/usr/local/opt/llvm/bin"
+          echo "::set-env name=C_INCLUDE_PATH::/usr/local/opt/llvm/include:$C_INCLUDE_PATH"
+          echo "::set-env name=CPLUS_INCLUDE_PATH::/usr/local/opt/llvm/include:$CPLUS_INCLUDE_PATH"
+          echo "::set-env name=LIBRARY_PATH::/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$LIBRARY_PATH"
+          echo "::set-env name=DYLD_LIBRARY_PATH::/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$DYLD_LIBRARY_PATH"
+          pip wheel . -w dist
+        env:
+          CC: /usr/local/opt/llvm/bin/clang
+          CXX: /usr/local/opt/llvm/bin/clang++
       - name: Publish Python package
         run: twine upload dist/divik*whl

@@ -1,82 +1,73 @@
 /*
- * File: fetch_thresholds.c
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * fetch_thresholds.c
+ *
+ * Code generation for function 'fetch_thresholds'
+ *
  */
 
-/* Include Files */
-#include <math.h>
-#include "rt_nonfinite.h"
+/* Include files */
 #include "fetch_thresholds.h"
+#include "fetch_thresholds_data.h"
 #include "fetch_thresholds_emxutil.h"
-#include "sort1.h"
-#include "unaryMinOrMax.h"
-#include "gmm_uborder_fun.h"
+#include "fetch_thresholds_initialize.h"
 #include "fminbnd.h"
 #include "gaussian_mixture_simple.h"
+#include "gmm_uborder_fun.h"
+#include "rt_nonfinite.h"
+#include "sort.h"
+#include <math.h>
 
 /* Function Definitions */
 
 /*
  * function [ thresholds ] = fetch_thresholds( vals, max_components_number )
- * FETCH_THRESHOLDS Decomposes parameters into Gaussian peaks and finds
- * crossings
- *    thresholds = FETCH_THRESHOLDS(vals, max_components_number) - returns
- *    cell containing all thresholds. If no crossings are present,
- *    no threshold will be returned.
- * Arguments    : const emxArray_real_T *vals
- *                unsigned long max_components_number
- *                emxArray_real_T *thresholds
- * Return Type  : void
  */
 void fetch_thresholds(const emxArray_real_T *vals, unsigned long
                       max_components_number, emxArray_real_T *thresholds)
 {
-  coder_internal_ref_1 lobj_2;
-  coder_internal_ref_1 lobj_1;
-  coder_internal_ref_1 lobj_0;
+  emxArray_cell_wrap_0 *a;
   emxArray_real_T *BIC;
   int n;
-  int i0;
+  int i;
+  int loop_ub;
+  emxArray_real_T *param;
   int idx;
-  emxArray_cell_wrap_0 *a;
   emxArray_cell_wrap_0 *mu;
   emxArray_cell_wrap_0 *sig;
   emxArray_real_T *TIC;
-  emxArray_real_T *best_mu;
   int compnum;
+  emxArray_real_T *r;
+  double l_lik;
   double t;
   int k;
-  boolean_T exitg1;
+  bool exitg1;
+  double d;
+  int i1;
   emxArray_boolean_T *x;
-  int ii_data[1];
+  int i_data[1];
   unsigned int best_compnum__data[1];
   int best_compnum_tmp;
-  coder_internal_ref_1 *iobj_0;
-  coder_internal_ref_1 *iobj_1;
-  coder_internal_ref_1 *iobj_2;
-  emxArray_real_T *out_;
   int j;
-  int i1;
-  unsigned int b_k;
-  double mu_idx_0;
+  int i2;
+  double y;
+  double b_mu[2];
+  double b_sig[2];
+  double amp[2];
+  cell_wrap_2 g_tunableEnvironment[3];
   double crossing;
-  double sig_idx_1;
-  double amp_idx_0;
-  double amp_idx_1;
-  coder_internal_ref *b_iobj_0;
-  coder_internal_ref lobj_3;
-  coder_internal_ref *b_iobj_1;
-  coder_internal_ref lobj_4;
-  coder_internal_ref *b_iobj_2;
-  coder_internal_ref lobj_5;
-  coder_internal_ref *g_tunableEnvironment[3];
-  c_emxInitStruct_coder_internal_(&lobj_2);
-  c_emxInitStruct_coder_internal_(&lobj_1);
-  c_emxInitStruct_coder_internal_(&lobj_0);
+  if (isInitialized_fetch_thresholds == false) {
+    fetch_thresholds_initialize();
+  }
+
+  emxInit_cell_wrap_0(&a, 2);
   emxInit_real_T(&BIC, 2);
 
+  /* FETCH_THRESHOLDS Decomposes parameters into Gaussian peaks and finds */
+  /* crossings */
+  /*    thresholds = FETCH_THRESHOLDS(vals, max_components_number) - returns */
+  /*    cell containing all thresholds. If no crossings are present, */
+  /*    no threshold will be returned. */
   /* 'fetch_thresholds:8' n = size(vals(:), 1); */
   n = vals->size[0];
 
@@ -85,58 +76,80 @@ void fetch_thresholds(const emxArray_real_T *vals, unsigned long
 
   /* 'fetch_thresholds:12' max_components_number = double(max_components_number); */
   /* 'fetch_thresholds:14' a = cell(1,max_components_number); */
+  i = a->size[0] * a->size[1];
+  a->size[0] = 1;
+  loop_ub = (int)(double)max_components_number;
+  a->size[1] = loop_ub;
+  emxEnsureCapacity_cell_wrap_0(a, i);
+
   /* 'fetch_thresholds:15' mu = cell(1,max_components_number); */
   /* 'fetch_thresholds:16' sig = cell(1,max_components_number); */
   /* 'fetch_thresholds:17' TIC = cell(1,max_components_number); */
   /* 'fetch_thresholds:18' BIC = Inf*ones(1,max_components_number); */
-  i0 = BIC->size[0] * BIC->size[1];
+  i = BIC->size[0] * BIC->size[1];
   BIC->size[0] = 1;
-  idx = (int)(double)max_components_number;
-  BIC->size[1] = idx;
-  emxEnsureCapacity_real_T(BIC, i0);
-  for (i0 = 0; i0 < idx; i0++) {
-    BIC->data[i0] = rtInf;
+  BIC->size[1] = loop_ub;
+  emxEnsureCapacity_real_T(BIC, i);
+  for (i = 0; i < loop_ub; i++) {
+    BIC->data[i] = rtInf;
   }
 
-  emxInit_cell_wrap_0(&a, 2);
+  emxInit_real_T(&param, 1);
+
+  /* 'fetch_thresholds:19' param = vals(:); */
+  i = param->size[0];
+  param->size[0] = vals->size[0];
+  emxEnsureCapacity_real_T(param, i);
+  idx = vals->size[0];
+  for (i = 0; i < idx; i++) {
+    param->data[i] = vals->data[i];
+  }
+
   emxInit_cell_wrap_0(&mu, 2);
   emxInit_cell_wrap_0(&sig, 2);
   emxInit_real_T(&TIC, 2);
-
-  /* 'fetch_thresholds:19' param = vals(:); */
-  i0 = sig->size[0] * sig->size[1];
+  i = sig->size[0] * sig->size[1];
   sig->size[0] = 1;
-  sig->size[1] = idx;
-  emxEnsureCapacity_cell_wrap_0(sig, i0);
-  i0 = mu->size[0] * mu->size[1];
+  sig->size[1] = loop_ub;
+  emxEnsureCapacity_cell_wrap_0(sig, i);
+  i = mu->size[0] * mu->size[1];
   mu->size[0] = 1;
-  mu->size[1] = idx;
-  emxEnsureCapacity_cell_wrap_0(mu, i0);
-  i0 = a->size[0] * a->size[1];
-  a->size[0] = 1;
-  a->size[1] = idx;
-  emxEnsureCapacity_cell_wrap_0(a, i0);
-  i0 = TIC->size[0] * TIC->size[1];
+  mu->size[1] = loop_ub;
+  emxEnsureCapacity_cell_wrap_0(mu, i);
+  i = TIC->size[0] * TIC->size[1];
   TIC->size[0] = 1;
-  TIC->size[1] = idx;
-  emxEnsureCapacity_real_T(TIC, i0);
-  emxInit_real_T(&best_mu, 1);
-  for (compnum = 0; compnum < idx; compnum++) {
-    /* 'fetch_thresholds:21' [a{compnum},mu{compnum},sig{compnum},TIC{compnum},l_lik]=gaussian_mixture_simple(param,ones(n,1),compnum); */
-    i0 = best_mu->size[0];
-    best_mu->size[0] = n;
-    emxEnsureCapacity_real_T(best_mu, i0);
-    for (i0 = 0; i0 < n; i0++) {
-      best_mu->data[i0] = 1.0;
+  TIC->size[1] = loop_ub;
+  emxEnsureCapacity_real_T(TIC, i);
+  loop_ub--;
+
+#pragma omp parallel \
+ num_threads(omp_get_max_threads()) \
+ private(r,l_lik,i1)
+
+  {
+    emxInit_real_T(&r, 1);
+
+#pragma omp for nowait
+
+    for (compnum = 0; compnum <= loop_ub; compnum++) {
+      /* 'fetch_thresholds:21' [a{compnum},mu{compnum},sig{compnum},TIC{compnum},l_lik]=gaussian_mixture_simple(param,ones(n,1),compnum); */
+      i1 = r->size[0];
+      r->size[0] = n;
+      emxEnsureCapacity_real_T(r, i1);
+      for (i1 = 0; i1 < n; i1++) {
+        r->data[i1] = 1.0;
+      }
+
+      gaussian_mixture_simple(param, r, (double)compnum + 1.0, a->data[compnum].
+        f1, mu->data[compnum].f1, sig->data[compnum].f1, &TIC->data[compnum],
+        &l_lik);
+
+      /* 'fetch_thresholds:22' BIC(compnum) = -2*l_lik+(3*compnum-1)*log(n); */
+      BIC->data[compnum] = -2.0 * l_lik + (3.0 * ((double)compnum + 1.0) - 1.0) *
+        log(n);
     }
 
-    gaussian_mixture_simple(vals, best_mu, 1.0 + (double)compnum, a->
-      data[compnum].f1, mu->data[compnum].f1, sig->data[compnum].f1, &TIC->
-      data[compnum], &t);
-
-    /* 'fetch_thresholds:22' BIC(compnum) = -2*l_lik+(3*compnum-1)*log(n); */
-    BIC->data[compnum] = -2.0 * t + (3.0 * (1.0 + (double)compnum) - 1.0) * log
-      (n);
+    emxFree_real_T(&r);
   }
 
   emxFree_real_T(&TIC);
@@ -173,10 +186,11 @@ void fetch_thresholds(const emxArray_real_T *vals, unsigned long
       t = BIC->data[0];
     } else {
       t = BIC->data[idx - 1];
-      i0 = idx + 1;
-      for (k = i0; k <= n; k++) {
-        if (t > BIC->data[k - 1]) {
-          t = BIC->data[k - 1];
+      i = idx + 1;
+      for (k = i; k <= n; k++) {
+        d = BIC->data[k - 1];
+        if (t > d) {
+          t = d;
         }
       }
     }
@@ -215,36 +229,37 @@ void fetch_thresholds(const emxArray_real_T *vals, unsigned long
         t = BIC->data[0];
       } else {
         t = BIC->data[idx - 1];
-        i0 = idx + 1;
-        for (k = i0; k <= n; k++) {
-          if (t > BIC->data[k - 1]) {
-            t = BIC->data[k - 1];
+        i = idx + 1;
+        for (k = i; k <= n; k++) {
+          d = BIC->data[k - 1];
+          if (t > d) {
+            t = d;
           }
         }
       }
     }
 
     emxInit_boolean_T(&x, 2);
-    i0 = x->size[0] * x->size[1];
+    i = x->size[0] * x->size[1];
     x->size[0] = 1;
     x->size[1] = BIC->size[1];
-    emxEnsureCapacity_boolean_T(x, i0);
-    idx = BIC->size[0] * BIC->size[1];
-    for (i0 = 0; i0 < idx; i0++) {
-      x->data[i0] = (BIC->data[i0] == t);
+    emxEnsureCapacity_boolean_T(x, i);
+    loop_ub = BIC->size[0] * BIC->size[1];
+    for (i = 0; i < loop_ub; i++) {
+      x->data[i] = (BIC->data[i] == t);
     }
 
     k = (1 <= x->size[1]);
     idx = 0;
-    compnum = 0;
+    loop_ub = 0;
     exitg1 = false;
-    while ((!exitg1) && (compnum <= x->size[1] - 1)) {
-      if (x->data[compnum]) {
+    while ((!exitg1) && (loop_ub <= x->size[1] - 1)) {
+      if (x->data[loop_ub]) {
         idx = 1;
-        ii_data[0] = compnum + 1;
+        i_data[0] = loop_ub + 1;
         exitg1 = true;
       } else {
-        compnum++;
+        loop_ub++;
       }
     }
 
@@ -257,243 +272,181 @@ void fetch_thresholds(const emxArray_real_T *vals, unsigned long
       k = (1 <= idx);
     }
 
-    for (i0 = 0; i0 < k; i0++) {
-      best_compnum__data[0] = (unsigned int)ii_data[0];
+    if (0 <= k - 1) {
+      best_compnum__data[0] = (unsigned int)i_data[0];
     }
 
     /* 'fetch_thresholds:30' best_compnum = best_compnum_(1); */
     best_compnum_tmp = (int)best_compnum__data[0] - 1;
 
     /* 'fetch_thresholds:31' best_mu = mu{best_compnum}; */
-    i0 = best_mu->size[0];
-    best_mu->size[0] = mu->data[best_compnum_tmp].f1->size[0];
-    emxEnsureCapacity_real_T(best_mu, i0);
-    idx = mu->data[best_compnum_tmp].f1->size[0];
-    for (i0 = 0; i0 < idx; i0++) {
-      best_mu->data[i0] = mu->data[best_compnum_tmp].f1->data[i0];
-    }
-
     /* 'fetch_thresholds:32' best_sig = sig{best_compnum}; */
     /* 'fetch_thresholds:33' best_a = a{best_compnum}; */
     /* FIX */
     /* 'fetch_thresholds:35' TIC = TIC{best_compnum}; */
     /* 'fetch_thresholds:37' f = gmm_uborder_fun(best_mu, best_sig, best_a); */
-    iobj_0 = &lobj_0;
-    iobj_1 = &lobj_1;
-    iobj_2 = &lobj_2;
-
     /* GMM_UBORDER_FUN Finds the function which represents GMM. */
     /*    f = GMM_UBORDER_FUN(mu,sig,amp) - returns a handle to function (f) */
     /*    which calculates value of the upper border of peaks specified by its */
-    /*    mean (mu), standard deviation (sig) and amplitude (amp). Parameters: */
-    /* 	mu, sig, amp can be at max two dimensional. */
-    /* 'gmm_uborder_fun:8' if sum(size(mu)==size(sig))<length(size(mu)) || sum(size(mu)==size(amp))<length(size(mu)) */
-    /* 'gmm_uborder_fun:12' mu_ = mu(:); */
-    i0 = lobj_0.contents->size[0];
-    lobj_0.contents->size[0] = mu->data[best_compnum_tmp].f1->size[0];
-    emxEnsureCapacity_real_T(lobj_0.contents, i0);
-    idx = mu->data[best_compnum_tmp].f1->size[0];
-    for (i0 = 0; i0 < idx; i0++) {
-      lobj_0.contents->data[i0] = mu->data[best_compnum_tmp].f1->data[i0];
-    }
-
-    /* 'gmm_uborder_fun:13' sig_ = sig(:); */
-    i0 = lobj_1.contents->size[0];
-    lobj_1.contents->size[0] = sig->data[best_compnum_tmp].f1->size[0];
-    emxEnsureCapacity_real_T(lobj_1.contents, i0);
-    idx = sig->data[best_compnum_tmp].f1->size[0];
-    for (i0 = 0; i0 < idx; i0++) {
-      lobj_1.contents->data[i0] = sig->data[best_compnum_tmp].f1->data[i0];
-    }
-
-    /* 'gmm_uborder_fun:14' amp_ = amp(:); */
-    i0 = lobj_2.contents->size[0];
-    lobj_2.contents->size[0] = a->data[best_compnum_tmp].f1->size[0];
-    emxEnsureCapacity_real_T(lobj_2.contents, i0);
-    idx = a->data[best_compnum_tmp].f1->size[0];
-    for (i0 = 0; i0 < idx; i0++) {
-      lobj_2.contents->data[i0] = a->data[best_compnum_tmp].f1->data[i0];
-    }
-
-    /* 'gmm_uborder_fun:28' f = @fun; */
-    /*  	[n,m] = size(mu); */
-    /*  	 */
-    /*  	f = @(x) -Inf; */
-    /*  	for i=1:n */
-    /*  		for j=1:m */
-    /*  			f = @(x) max(cat(3,amp(i,j)*normpdf(x,mu(i,j),sig(i,j)),f(x)),[],3); */
-    /*  		end */
-    /*  	end */
+    /*    mean (mu), standard deviation (sig) and amplitude (amp). */
+    /* 'gmm_uborder_fun:7' f = @(x) max(normpdfs(x, mu(:), sig(:), amp(:)), [], 1); */
     /* if there are few components */
     /* 'fetch_thresholds:40' if best_compnum>1 */
     if ((int)best_compnum__data[0] > 1) {
       /* they are picked pairwise */
       /* 'fetch_thresholds:42' for j=1:(best_compnum-1) */
-      i0 = (int)best_compnum__data[0];
-      emxInit_real_T(&out_, 1);
-      for (j = 0; j <= i0 - 2; j++) {
+      i = (int)best_compnum__data[0];
+      for (j = 0; j <= i - 2; j++) {
         /* 'fetch_thresholds:43' for k=(j+1):best_compnum */
-        i1 = best_compnum_tmp - j;
-        for (k = 0; k < i1; k++) {
-          b_k = ((unsigned int)j + k) + 2U;
-
-          /* their upper bound */
-          /* 'fetch_thresholds:45' g = gmm_uborder_fun(best_mu([j,k]), best_sig([j,k]), best_a([j,k])); */
-          mu_idx_0 = mu->data[best_compnum_tmp].f1->data[j];
-          t = mu->data[best_compnum_tmp].f1->data[(int)b_k - 1];
-          crossing = sig->data[best_compnum_tmp].f1->data[j];
-          sig_idx_1 = sig->data[best_compnum_tmp].f1->data[(int)b_k - 1];
-          amp_idx_0 = a->data[best_compnum_tmp].f1->data[j];
-          amp_idx_1 = a->data[best_compnum_tmp].f1->data[(int)b_k - 1];
-          b_iobj_0 = &lobj_3;
-          b_iobj_1 = &lobj_4;
-          b_iobj_2 = &lobj_5;
-
-          /* GMM_UBORDER_FUN Finds the function which represents GMM. */
-          /*    f = GMM_UBORDER_FUN(mu,sig,amp) - returns a handle to function (f) */
-          /*    which calculates value of the upper border of peaks specified by its */
-          /*    mean (mu), standard deviation (sig) and amplitude (amp). Parameters: */
-          /* 	mu, sig, amp can be at max two dimensional. */
-          /* 'gmm_uborder_fun:8' if sum(size(mu)==size(sig))<length(size(mu)) || sum(size(mu)==size(amp))<length(size(mu)) */
-          /* 'gmm_uborder_fun:12' mu_ = mu(:); */
-          lobj_3.contents[0] = mu_idx_0;
-          lobj_3.contents[1] = t;
-
-          /* 'gmm_uborder_fun:13' sig_ = sig(:); */
-          lobj_4.contents[0] = crossing;
-          lobj_4.contents[1] = sig_idx_1;
-
-          /* 'gmm_uborder_fun:14' amp_ = amp(:); */
-          lobj_5.contents[0] = amp_idx_0;
-          lobj_5.contents[1] = amp_idx_1;
-
-          /* 'gmm_uborder_fun:28' f = @fun; */
-          g_tunableEnvironment[0] = &lobj_3;
-          g_tunableEnvironment[1] = &lobj_5;
-          g_tunableEnvironment[2] = &lobj_4;
-
-          /*  	[n,m] = size(mu); */
-          /*  	 */
-          /*  	f = @(x) -Inf; */
-          /*  	for i=1:n */
-          /*  		for j=1:m */
-          /*  			f = @(x) max(cat(3,amp(i,j)*normpdf(x,mu(i,j),sig(i,j)),f(x)),[],3); */
-          /*  		end */
-          /*  	end */
-          /* the disjunction condition & weight condition is checked */
-          /* 'fetch_thresholds:47' if g(best_mu(j))==best_a(j)*normpdf(best_mu(j),best_mu(j),best_sig(j)) && ... */
-          /* 'fetch_thresholds:48'                         g(best_mu(k))==best_a(k)*normpdf(best_mu(k),best_mu(k),best_sig(k)) */
-          mu_idx_0 = fun(b_iobj_0, b_iobj_2, b_iobj_1, mu->data[(int)
-                         best_compnum__data[0] - 1].f1->data[j]);
+        i2 = best_compnum_tmp - j;
+        if (0 <= i2 - 1) {
           if (sig->data[best_compnum_tmp].f1->data[j] > 0.0) {
             t = (mu->data[best_compnum_tmp].f1->data[j] - mu->
                  data[best_compnum_tmp].f1->data[j]) / sig->
               data[best_compnum_tmp].f1->data[j];
-            t = exp(-0.5 * t * t) / (2.5066282746310002 * sig->
+            y = exp(-0.5 * t * t) / (2.5066282746310002 * sig->
               data[best_compnum_tmp].f1->data[j]);
           } else {
-            t = rtNaN;
+            y = rtNaN;
           }
+        }
 
-          if (mu_idx_0 == a->data[best_compnum_tmp].f1->data[j] * t) {
-            mu_idx_0 = fun(b_iobj_0, b_iobj_2, b_iobj_1, mu->data[(int)
-                           best_compnum__data[0] - 1].f1->data[(int)b_k - 1]);
-            if (sig->data[best_compnum_tmp].f1->data[(int)b_k - 1] > 0.0) {
-              t = (mu->data[best_compnum_tmp].f1->data[(int)b_k - 1] - mu->
-                   data[best_compnum_tmp].f1->data[(int)b_k - 1]) / sig->
-                data[best_compnum_tmp].f1->data[(int)b_k - 1];
-              t = exp(-0.5 * t * t) / (2.5066282746310002 * sig->
-                data[best_compnum_tmp].f1->data[(int)b_k - 1]);
+        for (k = 0; k < i2; k++) {
+          /* their upper bound */
+          /* 'fetch_thresholds:45' g = gmm_uborder_fun(best_mu([j,k]), best_sig([j,k]), best_a([j,k])); */
+          loop_ub = (int)((unsigned int)j + k) + 1;
+          b_mu[0] = mu->data[best_compnum_tmp].f1->data[j];
+          b_mu[1] = mu->data[best_compnum_tmp].f1->data[loop_ub];
+          b_sig[0] = sig->data[best_compnum_tmp].f1->data[j];
+          b_sig[1] = sig->data[best_compnum_tmp].f1->data[loop_ub];
+
+          /* GMM_UBORDER_FUN Finds the function which represents GMM. */
+          /*    f = GMM_UBORDER_FUN(mu,sig,amp) - returns a handle to function (f) */
+          /*    which calculates value of the upper border of peaks specified by its */
+          /*    mean (mu), standard deviation (sig) and amplitude (amp). */
+          /* 'gmm_uborder_fun:7' f = @(x) max(normpdfs(x, mu(:), sig(:), amp(:)), [], 1); */
+          amp[0] = a->data[best_compnum_tmp].f1->data[j];
+          g_tunableEnvironment[0].f1[0] = mu->data[best_compnum_tmp].f1->data[j];
+          g_tunableEnvironment[1].f1[0] = sig->data[best_compnum_tmp].f1->data[j];
+          g_tunableEnvironment[2].f1[0] = a->data[best_compnum_tmp].f1->data[j];
+          amp[1] = a->data[best_compnum_tmp].f1->data[loop_ub];
+          g_tunableEnvironment[0].f1[1] = mu->data[best_compnum_tmp].f1->
+            data[loop_ub];
+          g_tunableEnvironment[1].f1[1] = sig->data[best_compnum_tmp].f1->
+            data[loop_ub];
+          g_tunableEnvironment[2].f1[1] = a->data[best_compnum_tmp].f1->
+            data[loop_ub];
+
+          /* the disjunction condition & weight condition is checked */
+          /* 'fetch_thresholds:47' if g(best_mu(j))==best_a(j)*normpdf(best_mu(j),best_mu(j),best_sig(j)) && ... */
+          /* 'fetch_thresholds:48'                         g(best_mu(k))==best_a(k)*normpdf(best_mu(k),best_mu(k),best_sig(k)) */
+          if (__anon_fcn(b_mu, b_sig, amp, mu->data[best_compnum_tmp].f1->data[j])
+              == a->data[best_compnum_tmp].f1->data[j] * y) {
+            d = sig->data[(int)best_compnum__data[0] - 1].f1->data[loop_ub];
+            if (d > 0.0) {
+              t = (mu->data[(int)best_compnum__data[0] - 1].f1->data[loop_ub] -
+                   mu->data[(int)best_compnum__data[0] - 1].f1->data[loop_ub]) /
+                d;
+              t = exp(-0.5 * t * t) / (2.5066282746310002 * d);
             } else {
               t = rtNaN;
             }
 
-            if (mu_idx_0 == a->data[best_compnum_tmp].f1->data[(int)b_k - 1] * t)
-            {
+            if (__anon_fcn(b_mu, b_sig, amp, mu->data[best_compnum_tmp].f1->
+                           data[loop_ub]) == a->data[best_compnum_tmp].f1->
+                data[loop_ub] * t) {
               /* their crossing is found */
               /* 'fetch_thresholds:50' crossing = fminbnd(g,min(best_mu([j,k])),max((best_mu([j,k])))); */
-              if ((best_mu->data[j] > best_mu->data[(int)b_k - 1]) || (rtIsNaN
-                   (best_mu->data[j]) && (!rtIsNaN(best_mu->data[(int)b_k - 1]))))
-              {
-                t = best_mu->data[(int)b_k - 1];
+              if ((mu->data[best_compnum_tmp].f1->data[j] > mu->
+                   data[best_compnum_tmp].f1->data[loop_ub]) || (rtIsNaN
+                   (mu->data[best_compnum_tmp].f1->data[j]) && (!rtIsNaN
+                    (mu->data[best_compnum_tmp].f1->data[loop_ub])))) {
+                t = mu->data[best_compnum_tmp].f1->data[loop_ub];
               } else {
-                t = best_mu->data[j];
+                t = mu->data[best_compnum_tmp].f1->data[j];
               }
 
-              if ((best_mu->data[j] < best_mu->data[(int)b_k - 1]) || (rtIsNaN
-                   (best_mu->data[j]) && (!rtIsNaN(best_mu->data[(int)b_k - 1]))))
-              {
-                mu_idx_0 = best_mu->data[(int)b_k - 1];
+              if ((mu->data[best_compnum_tmp].f1->data[j] < mu->
+                   data[best_compnum_tmp].f1->data[loop_ub]) || (rtIsNaN
+                   (mu->data[best_compnum_tmp].f1->data[j]) && (!rtIsNaN
+                    (mu->data[best_compnum_tmp].f1->data[loop_ub])))) {
+                crossing = mu->data[best_compnum_tmp].f1->data[loop_ub];
               } else {
-                mu_idx_0 = best_mu->data[j];
+                crossing = mu->data[best_compnum_tmp].f1->data[j];
               }
 
-              crossing = fminbnd(g_tunableEnvironment, t, mu_idx_0);
+              crossing = fminbnd(g_tunableEnvironment, t, crossing);
 
               /* and it is checked to be on the upper border */
               /* 'fetch_thresholds:52' if f(crossing)==g(crossing) */
-              /* 'gmm_uborder_fun:18' in_ = in(:); */
-              /* 'gmm_uborder_fun:19' n_comp = size(mu_, 1); */
-              idx = lobj_0.contents->size[0] - 1;
-
-              /* 'gmm_uborder_fun:20' out_ = NaN(n_comp, size(in_, 1)); */
-              n = out_->size[0];
-              out_->size[0] = idx + 1;
-              emxEnsureCapacity_real_T(out_, n);
-              for (n = 0; n <= idx; n++) {
-                out_->data[n] = rtNaN;
-              }
-
-              /* 'gmm_uborder_fun:21' for i=1:n_comp */
-              for (compnum = 0; compnum <= idx; compnum++) {
-                /* 'gmm_uborder_fun:22' out_(i, :) = amp_(i) * normpdf(in_, mu_(i), sig_(i)); */
-                t = iobj_0->contents->data[compnum];
-                mu_idx_0 = iobj_1->contents->data[compnum];
-                if (mu_idx_0 > 0.0) {
-                  t = (crossing - t) / mu_idx_0;
-                  t = exp(-0.5 * t * t) / (2.5066282746310002 * mu_idx_0);
+              b_normpdfs(crossing, mu->data[(int)best_compnum__data[0] - 1].f1,
+                         sig->data[(int)best_compnum__data[0] - 1].f1, a->data
+                         [(int)best_compnum__data[0] - 1].f1, param);
+              n = param->size[0];
+              if (param->size[0] <= 2) {
+                if (param->size[0] == 1) {
+                  t = param->data[0];
+                } else if ((param->data[0] < param->data[1]) || (rtIsNaN
+                            (param->data[0]) && (!rtIsNaN(param->data[1])))) {
+                  t = param->data[1];
                 } else {
-                  t = rtNaN;
+                  t = param->data[0];
+                }
+              } else {
+                if (!rtIsNaN(param->data[0])) {
+                  idx = 1;
+                } else {
+                  idx = 0;
+                  loop_ub = 2;
+                  exitg1 = false;
+                  while ((!exitg1) && (loop_ub <= param->size[0])) {
+                    if (!rtIsNaN(param->data[loop_ub - 1])) {
+                      idx = loop_ub;
+                      exitg1 = true;
+                    } else {
+                      loop_ub++;
+                    }
+                  }
                 }
 
-                out_->data[compnum] = iobj_2->contents->data[compnum] * t;
+                if (idx == 0) {
+                  t = param->data[0];
+                } else {
+                  t = param->data[idx - 1];
+                  idx++;
+                  for (loop_ub = idx; loop_ub <= n; loop_ub++) {
+                    d = param->data[loop_ub - 1];
+                    if (t < d) {
+                      t = d;
+                    }
+                  }
+                }
               }
 
-              /* 'gmm_uborder_fun:24' out = max(out_, [], 1); */
-              mu_idx_0 = fun(b_iobj_0, b_iobj_2, b_iobj_1, crossing);
-              if (minOrMaxRealFloatVector(out_) == mu_idx_0) {
+              if (t == __anon_fcn(b_mu, b_sig, amp, crossing)) {
                 /* if it truly is, then it is saved */
                 /* 'fetch_thresholds:54' thresholds = [thresholds; crossing]; */
-                n = thresholds->size[0];
-                compnum = thresholds->size[0];
-                thresholds->size[0] = n + 1;
-                emxEnsureCapacity_real_T(thresholds, compnum);
-                thresholds->data[n] = crossing;
+                idx = thresholds->size[0];
+                loop_ub = thresholds->size[0];
+                thresholds->size[0]++;
+                emxEnsureCapacity_real_T(thresholds, loop_ub);
+                thresholds->data[idx] = crossing;
               }
             }
           }
         }
       }
 
-      emxFree_real_T(&out_);
-
       /* 'fetch_thresholds:59' thresholds = sort(thresholds,'ascend'); */
       b_sort(thresholds);
     }
   }
 
-  emxFree_real_T(&best_mu);
+  emxFree_real_T(&param);
   emxFree_real_T(&BIC);
   emxFree_cell_wrap_0(&sig);
   emxFree_cell_wrap_0(&mu);
   emxFree_cell_wrap_0(&a);
-  c_emxFreeStruct_coder_internal_(&lobj_0);
-  c_emxFreeStruct_coder_internal_(&lobj_1);
-  c_emxFreeStruct_coder_internal_(&lobj_2);
 }
 
-/*
- * File trailer for fetch_thresholds.c
- *
- * [EOF]
- */
+/* End of code generation (fetch_thresholds.c) */

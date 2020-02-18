@@ -1,17 +1,19 @@
 /*
- * File: std.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * std.h
+ *
+ * Code generation for function 'std'
+ *
  */
 
 #ifndef STD_H
 #define STD_H
 
-/* Include Files */
+/* Include files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
+#include "omp.h"
 #include "fetch_thresholds_types.h"
 
 /* Function Declarations */
@@ -19,8 +21,4 @@ extern double b_std(const emxArray_real_T *x);
 
 #endif
 
-/*
- * File trailer for std.h
- *
- * [EOF]
- */
+/* End of code generation (std.h) */
