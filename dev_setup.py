@@ -14,6 +14,7 @@ LINUX_OPTS = {
         '-fopenmp',
         '-Wno-strict-prototypes',
         '-Wno-maybe-uninitialized',
+        '-O3',
     ],
 }
 OSX_OPTS = {
@@ -23,7 +24,13 @@ OSX_OPTS = {
         '-Wno-strict-prototypes',
         '-Wno-maybe-uninitialized',
         '-fgomp',
+        '-O3',
     ],
+}
+WINDOWS_OPTS = {
+    'extra_compile_args': [
+        '/Ox',
+    ]
 }
 
 
@@ -33,7 +40,7 @@ if os.name == 'posix':
     else:
         OPTS = LINUX_OPTS
 else:
-    OPTS = {}
+    OPTS = WINDOWS_OPTS
 
 setup(
     name='gamred_native',
