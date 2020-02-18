@@ -3,9 +3,6 @@ ENV PYTHONUNBUFFERED TRUE
 RUN mkdir -p /root/.config/matplotlib &&\
   echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 WORKDIR /app
-RUN apt-get update &&\
-    apt-get install -y libgomp1 &&\
-    rm -rf /var/lib/apt/lists/*
 
 
 FROM base as builder

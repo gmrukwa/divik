@@ -8,11 +8,13 @@ import numpy
 POSIX_OPTS = {
     'extra_link_args': [
         '-fopenmp',
+        '-static',
     ],
     'extra_compile_args': [
-        '-fopenmp',
         '-Wno-strict-prototypes',
         '-Wno-maybe-uninitialized',
+        '-fopenmp',
+        '-static',
     ],
 }
 
