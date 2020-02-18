@@ -9,24 +9,20 @@ import numpy
 LINUX_OPTS = {
     'extra_link_args': [
         '-fopenmp',
-        '-static',
     ],
     'extra_compile_args': [
+        '-fopenmp',
         '-Wno-strict-prototypes',
         '-Wno-maybe-uninitialized',
-        '-fopenmp',
-        '-static',
     ],
 }
 OSX_OPTS = {
     'extra_link_args': [
-        '-static',
     ],
     'extra_compile_args': [
         '-Wno-strict-prototypes',
         '-Wno-maybe-uninitialized',
         '-fgomp',
-        '-static',
     ],
 }
 
