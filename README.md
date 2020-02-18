@@ -64,7 +64,7 @@ sudo apt-get install libgomp1
 OpenMP is available as part of LLVM. You may need to install in with:
 
 ```bash
-brew install llvm
+brew install llvm libomp
 ```
 
 #### DiviK Installation

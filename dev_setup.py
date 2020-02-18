@@ -19,11 +19,13 @@ LINUX_OPTS = {
 }
 OSX_OPTS = {
     'extra_link_args': [
+        '-L/usr/local/opt/libomp/lib',
+        '-fopenmp',
     ],
     'extra_compile_args': [
         '-Wno-strict-prototypes',
-        '-Wno-maybe-uninitialized',
-        '-fgomp',
+        '-Wno-uninitialized',
+        '-fopenmp',
         '-O3',
     ],
 }
