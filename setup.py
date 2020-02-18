@@ -3,11 +3,12 @@
 from glob import glob
 import os
 from setuptools import setup, find_packages, Extension
+import sys
 import numpy
 
 __version__ = '2.4.3'
 
-POSIX_OPTS = {
+LINUX_OPTS = {
     'extra_link_args': [
         '-fopenmp',
         '-static',
@@ -19,10 +20,24 @@ POSIX_OPTS = {
         '-static',
     ],
 }
+OSX_OPTS = {
+    'extra_link_args': [
+        '-static',
+    ],
+    'extra_compile_args': [
+        '-Wno-strict-prototypes',
+        '-Wno-maybe-uninitialized',
+        '-fgomp',
+        '-static',
+    ],
+}
 
 
 if os.name == 'posix':
-    OPTS = POSIX_OPTS
+    if sys.platform.startswith('darwin'):
+        OPTS = OSX_OPTS
+    else:
+        OPTS = LINUX_OPTS
 else:
     OPTS = {}
 
