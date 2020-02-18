@@ -1,25 +1,20 @@
 /*
- * File: fetch_thresholds_emxAPI.c
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * fetch_thresholds_emxAPI.c
+ *
+ * Code generation for function 'fetch_thresholds_emxAPI'
+ *
  */
 
-/* Include Files */
-#include <stdlib.h>
-#include "rt_nonfinite.h"
-#include "fetch_thresholds.h"
+/* Include files */
 #include "fetch_thresholds_emxAPI.h"
+#include "fetch_thresholds.h"
 #include "fetch_thresholds_emxutil.h"
+#include "rt_nonfinite.h"
+#include <stdlib.h>
 
 /* Function Definitions */
-
-/*
- * Arguments    : int numDimensions
- *                int *size
- * Return Type  : emxArray_real_T *
- */
-emxArray_real_T *emxCreateND_real_T(int numDimensions, int *size)
+emxArray_real_T *emxCreateND_real_T(int numDimensions, const int *size)
 {
   emxArray_real_T *emx;
   int numEl;
@@ -37,14 +32,8 @@ emxArray_real_T *emxCreateND_real_T(int numDimensions, int *size)
   return emx;
 }
 
-/*
- * Arguments    : double *data
- *                int numDimensions
- *                int *size
- * Return Type  : emxArray_real_T *
- */
-emxArray_real_T *emxCreateWrapperND_real_T(double *data, int numDimensions, int *
-  size)
+emxArray_real_T *emxCreateWrapperND_real_T(double *data, int numDimensions,
+  const int *size)
 {
   emxArray_real_T *emx;
   int numEl;
@@ -63,12 +52,6 @@ emxArray_real_T *emxCreateWrapperND_real_T(double *data, int numDimensions, int 
   return emx;
 }
 
-/*
- * Arguments    : double *data
- *                int rows
- *                int cols
- * Return Type  : emxArray_real_T *
- */
 emxArray_real_T *emxCreateWrapper_real_T(double *data, int rows, int cols)
 {
   emxArray_real_T *emx;
@@ -82,11 +65,6 @@ emxArray_real_T *emxCreateWrapper_real_T(double *data, int rows, int cols)
   return emx;
 }
 
-/*
- * Arguments    : int rows
- *                int cols
- * Return Type  : emxArray_real_T *
- */
 emxArray_real_T *emxCreate_real_T(int rows, int cols)
 {
   emxArray_real_T *emx;
@@ -101,27 +79,14 @@ emxArray_real_T *emxCreate_real_T(int rows, int cols)
   return emx;
 }
 
-/*
- * Arguments    : emxArray_real_T *emxArray
- * Return Type  : void
- */
 void emxDestroyArray_real_T(emxArray_real_T *emxArray)
 {
   emxFree_real_T(&emxArray);
 }
 
-/*
- * Arguments    : emxArray_real_T **pEmxArray
- *                int numDimensions
- * Return Type  : void
- */
 void emxInitArray_real_T(emxArray_real_T **pEmxArray, int numDimensions)
 {
   emxInit_real_T(pEmxArray, numDimensions);
 }
 
-/*
- * File trailer for fetch_thresholds_emxAPI.c
- *
- * [EOF]
- */
+/* End of code generation (fetch_thresholds_emxAPI.c) */

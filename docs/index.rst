@@ -27,6 +27,8 @@ Here you can find a list of documentation topics covered by this page.
    :caption: Packages:
 
    modules/divik
+   modules/divik.core
+   modules/divik.core.gin_sklearn_configurables
    modules/divik.cluster
    modules/divik.feature_selection
    modules/divik.feature_extraction

@@ -1,5 +1,5 @@
-from abc import ABCMeta, abstractmethod
 from functools import partial
+import sys
 from typing import Tuple
 
 import numpy as np
@@ -11,47 +11,165 @@ from sklearn.utils.validation import check_is_fitted
 
 from divik import _summary as summary, feature_selection as fs
 from divik.core import context_if, DivikResult, normalize_rows, maybe_pool
+from ._backend import divik
+from ._report import DivikReporter
 
 
-class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta):
+# TODO: Describe the kmeans and fast_kmeans parameters
+class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
+    """DiviK clustering
+
+    Parameters
+    ----------
+
+    distance: str, optional, default: 'correlation'
+        The distance metric between points, centroids and for GAP index
+        estimation. One of the distances supported by scipy package.
+
+    minimal_size: int, optional, default: None
+        The minimum size of the region (the number of observations) to be
+        considered for any further divisions. When left None, defaults to
+        0.1% of the training dataset size.
+
+    rejection_size: int, optional, default: None
+        Size under which split will be rejected - if a cluster appears in the
+        split that is below rejection_size, the split is considered improper
+        and discarded. This may be useful for some domains (like there is no
+        justification for a 3-cells cluster in biological data). By default,
+        no segmentation is discarded, as careful post-processing provides the
+        same advantage.
+
+    rejection_percentage: float, optional, default: None
+        An alternative to ``rejection_size``, with the same behavior, but this
+        parameter is related to the training data size percentage. By default,
+        no segmentation is discarded.
+
+    minimal_features_percentage: float, optional, default: 0.01
+        The minimal percentage of features that must be preserved after
+        GMM-based feature selection. By default at least 1% of features is
+        preserved in the filtration process.
+
+    features_percentage: float, optional, default: 0.05
+        The target percentage of features that are used by fallback percentage
+        filter for 'outlier' filter.
+
+    normalize_rows: bool, optional, default: None
+        Whether to normalize each row of the data to the norm of 1. By default,
+        it normalizes rows for correlation metric, does no normalization
+        otherwise.
+
+    use_logfilters: bool, optional, default: False
+        Whether to compute logarithm of feature characteristic instead of the
+        characteristic itself. This may improve feature filtering performance,
+        depending on the distribution of features, however all the
+        characteristics (mean, variance) have to be positive for that -
+        filtering will fail otherwise. This is useful for specific cases in
+        biology where the distribution of data may actually require this option
+        for any efficient filtering.
+
+    filter_type: {'gmm', 'outlier', 'auto', 'none'}, default: 'gmm'
+        - 'gmm' - usual Gaussian Mixture Model-based filtering, useful for high
+        dimensional cases
+        - 'outlier' - robust outlier detection-based filtering, useful for low
+        dimensional cases. In the case of no outliers, percentage-based
+        filtering is applied.
+        - 'auto' - automatically selects between 'gmm' and 'outlier' based on
+        the dimensionality. When more than 250 features are present, 'gmm'
+        is chosen.
+        - 'none' - feature selection is disabled
+
+    n_jobs: int, optional, default: None
+        The number of jobs to use for the computation. This works by computing
+        each of the GAP index evaluations in parallel and by making predictions
+        in parallel.
+
+    verbose: bool, optional, default: False
+        Whether to report the progress of the computations.
+
+    Attributes
+    ----------
+
+    result_: divik.DivikResult
+        Hierarchical structure describing all the consecutive segmentations.
+
+    labels_:
+        Labels of each point
+
+    centroids_: array, [n_clusters, n_features]
+        Coordinates of cluster centers. If the algorithm stops before fully
+        converging, these will not be consistent with ``labels_``. Also, the
+        distance between points and respective centroids must be captured
+        in appropriate features subspace. This is realized by the ``transform``
+        method.
+
+    filters_: array, [n_clusters, n_features]
+        Filters that were applied to the feature space on the level that was
+        the final segmentation for a subset.
+
+    depth_: int
+        The number of hierarchy levels in the segmentation.
+
+    n_clusters_: int
+        The final number of clusters in the segmentation, on the tree leaf
+        level.
+
+    paths_: Dict[int, Tuple[int]]
+        Describes how the cluster number corresponds to the path in the tree.
+        Element of the tuple indicates the sub-segment number on each tree
+        level.
+
+    reverse_paths_: Dict[Tuple[int], int]
+        Describes how the path in the tree corresponds to the cluster number.
+        For more details see ``paths_``.
+
+    Examples
+    --------
+
+    >>> from divik.cluster import DunnDiviK
+    >>> from sklearn.datasets import make_blobs
+    >>> X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
+    ...                   random_state=42)
+    >>> divik = DiviK(distance='euclidean').fit(X)
+    >>> divik.labels_
+    array([1, 1, 1, 0, ..., 0, 0], dtype=int32)
+    >>> divik.predict([[0, ..., 0], [12, ..., 3]])
+    array([1, 0], dtype=int32)
+    >>> divik.cluster_centers_
+    array([[10., ...,  2.],
+           ...,
+           [ 1, ...,  2.]])
+
+    """
     def __init__(self,
-                 gap_trials: int = 10,
-                 distance_percentile: float = 99.,
-                 max_iter: int = 100,
+                 kmeans,
+                 fast_kmeans=None,
                  distance: str = 'correlation',
                  minimal_size: int = None,
                  rejection_size: int = None,
                  rejection_percentage: float = None,
                  minimal_features_percentage: float = .01,
                  features_percentage: float = 0.05,
-                 k_max: int = 10,
-                 sample_size: int = 10000,
                  normalize_rows: bool = None,
                  use_logfilters: bool = False,
                  filter_type='gmm',
                  n_jobs: int = None,
-                 random_seed: int = 0,  # TODO: Rework to use RandomState
                  verbose: bool = False):
-        self.gap_trials = gap_trials
-        self.distance_percentile = distance_percentile
-        self.max_iter = max_iter
+        self.kmeans = kmeans
+        self.fast_kmeans = fast_kmeans
         self.distance = distance
         self.minimal_size = minimal_size
         self.rejection_size = rejection_size
         self.rejection_percentage = rejection_percentage
         self.minimal_features_percentage = minimal_features_percentage
         self.features_percentage = features_percentage
-        self.k_max = k_max
-        self.sample_size = sample_size
         self.normalize_rows = normalize_rows
         self.use_logfilters = use_logfilters
         self.filter_type = filter_type
         self.n_jobs = n_jobs
-        self.random_seed = random_seed
         self.verbose = verbose
         self._validate_arguments()
 
-    def _validate_feature_selection(self):
+    def _validate_arguments(self):
         if self.minimal_features_percentage < 0 \
                 or self.minimal_features_percentage > 1:
             raise ValueError('minimal_features_percentage must be in range'
@@ -64,20 +182,6 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
         if self.filter_type not in ['gmm', 'outlier', 'auto', 'none']:
             raise ValueError(
                 "filter_type must be in ['gmm', 'outlier', 'auto', 'none']")
-
-    def _validate_clustering(self):
-        if self.gap_trials <= 0:
-            raise ValueError('gap_trials must be greater than 0')
-        if self.distance_percentile < 0 or self.distance_percentile > 100:
-            raise ValueError('distance_percentile must be in range [0, 100]')
-        if self.max_iter <= 0:
-            raise ValueError('max_iter must be greater than 0')
-        if self.minimal_size is not None and self.minimal_size < 0:
-            raise ValueError('minimal_size must be greater or equal to 0')
-
-    def _validate_arguments(self):
-        self._validate_clustering()
-        self._validate_feature_selection()
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
@@ -94,7 +198,8 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
         if np.isnan(X).any():
             raise ValueError("NaN values are not supported.")
 
-        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0]) as progress:
+        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0],
+                        file=sys.stdout, smoothing=0) as progress:
             self.result_ = self._divik(X, progress)
 
         if self.result_ is None:
@@ -108,7 +213,7 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
             value: key for key, value in self.paths_.items()}
 
         if self.result_ is None:
-            self.filters_ = np.ones([X.shape[0], 1])
+            self.filters_ = np.ones([1, X.shape[1]], dtype=bool)
         else:
             self.filters_ = np.array(
                 [self._get_filter(path) for path in self.reverse_paths_],
@@ -141,30 +246,30 @@ class DiviKBase(BaseEstimator, ClusterMixin, TransformerMixin, metaclass=ABCMeta
             return self.distance == 'correlation'
         return self.normalize_rows
 
-    def _gmm_filter(self):
-        return fs.HighAbundanceAndVarianceSelector(
-            use_log=self.use_logfilters,
-            min_features_rate=self.minimal_features_percentage)
-
-    def _outlier_filter(self):
-        return fs.OutlierAbundanceAndVarianceSelector(
-            use_log=self.use_logfilters,
-            min_features_rate=self.minimal_features_percentage,
-            p=self.features_percentage)
-
     def _feature_selector(self, n_features):
-        if (self.filter_type == 'auto' and n_features > 250) \
-                or self.filter_type == 'gmm':
-            return self._gmm_filter()
-        if self.filter_type == 'auto' or self.filter_type == 'outlier':
-            return self._outlier_filter()
-        if self.filter_type == 'none':
-            return fs.NoSelector()
-        raise ValueError("Unknown filter type: %s" % self.filter_type)
+        return fs.make_specialized_selector(
+            self.filter_type, n_features, use_log=self.use_logfilters,
+            min_features_rate=self.minimal_features_percentage,
+            p=self.features_percentage
+        )
 
-    @abstractmethod
     def _divik(self, X, progress):
-        pass
+        full = self.kmeans
+        fast = self.fast_kmeans
+        if fast is None:
+            warn_const = full.kmeans.normalize_rows
+        else:
+            warn_const = fast.kmeans.normalize_rows or full.kmeans.normalize_rows
+        report = DivikReporter(progress, warn_const=warn_const)
+        select_all = np.ones(shape=(X.shape[0],), dtype=bool)
+        minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
+            else self.minimal_size
+        rejection_size = self._get_rejection_size(X)
+        return divik(
+            X, selection=select_all, kmeans=full, fast_kmeans=fast,
+            feature_selector=self._feature_selector(X.shape[1]),
+            minimal_size=minimal_size, rejection_size=rejection_size,
+            report=report)
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.

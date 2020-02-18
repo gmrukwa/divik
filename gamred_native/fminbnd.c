@@ -1,27 +1,25 @@
 /*
- * File: fminbnd.c
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * fminbnd.c
+ *
+ * Code generation for function 'fminbnd'
+ *
  */
 
-/* Include Files */
-#include <math.h>
-#include "rt_nonfinite.h"
-#include "fetch_thresholds.h"
+/* Include files */
 #include "fminbnd.h"
+#include "fetch_thresholds.h"
 #include "gmm_uborder_fun.h"
+#include "rt_nonfinite.h"
+#include <math.h>
 
 /* Function Definitions */
 
 /*
- * Arguments    : coder_internal_ref * const funfcnInput_tunableEnvironment[3]
- *                double ax
- *                double bx
- * Return Type  : double
+ *
  */
-double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
-               double ax, double bx)
+double fminbnd(const cell_wrap_2 funfcnInput_tunableEnvironment[3], double ax,
+               double bx)
 {
   double xf;
   int iter;
@@ -31,6 +29,7 @@ double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
   double w;
   double d;
   double e;
+  double varargin_1[2];
   double fx;
   int funccount;
   double fv;
@@ -38,18 +37,15 @@ double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
   double xm;
   double tol1;
   double tol2;
-  boolean_T exitg1;
-  int gs;
+  bool exitg1;
+  bool guard1 = false;
   double p;
   double r;
   double x;
   double q;
-  double b_p;
   iter = 0;
   if (ax > bx) {
     xf = rtNaN;
-    fun(funfcnInput_tunableEnvironment[0], funfcnInput_tunableEnvironment[1],
-        funfcnInput_tunableEnvironment[2], rtNaN);
   } else {
     a = ax;
     b = bx;
@@ -58,8 +54,16 @@ double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
     xf = v;
     d = 0.0;
     e = 0.0;
-    fx = fun(funfcnInput_tunableEnvironment[0], funfcnInput_tunableEnvironment[1],
-             funfcnInput_tunableEnvironment[2], v);
+    normpdfs(v, funfcnInput_tunableEnvironment[0].f1,
+             funfcnInput_tunableEnvironment[1].f1,
+             funfcnInput_tunableEnvironment[2].f1, varargin_1);
+    if ((varargin_1[0] < varargin_1[1]) || (rtIsNaN(varargin_1[0]) && (!rtIsNaN
+          (varargin_1[1])))) {
+      fx = varargin_1[1];
+    } else {
+      fx = varargin_1[0];
+    }
+
     funccount = 1;
     fv = fx;
     fw = fx;
@@ -68,9 +72,8 @@ double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
     tol2 = 2.0 * tol1;
     exitg1 = false;
     while ((!exitg1) && (fabs(xf - xm) > tol2 - 0.5 * (b - a))) {
-      gs = 1;
+      guard1 = false;
       if (fabs(e) > tol1) {
-        gs = 0;
         p = xf - w;
         r = p * (fx - fv);
         x = xf - v;
@@ -104,11 +107,13 @@ double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
             d = tol1 * (x + (double)(p == 0.0));
           }
         } else {
-          gs = 1;
+          guard1 = true;
         }
+      } else {
+        guard1 = true;
       }
 
-      if (gs != 0) {
+      if (guard1) {
         if (xf >= xm) {
           e = a - xf;
         } else {
@@ -129,16 +134,17 @@ double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
         }
       }
 
-      p = fabs(d);
-      if ((p > tol1) || rtIsNaN(tol1)) {
-        b_p = p;
+      x = xf + (x + (double)(d == 0.0)) * fmax(fabs(d), tol1);
+      normpdfs(x, funfcnInput_tunableEnvironment[0].f1,
+               funfcnInput_tunableEnvironment[1].f1,
+               funfcnInput_tunableEnvironment[2].f1, varargin_1);
+      if ((varargin_1[0] < varargin_1[1]) || (rtIsNaN(varargin_1[0]) &&
+           (!rtIsNaN(varargin_1[1])))) {
+        p = varargin_1[1];
       } else {
-        b_p = tol1;
+        p = varargin_1[0];
       }
 
-      x = xf + (x + (double)(d == 0.0)) * b_p;
-      p = fun(funfcnInput_tunableEnvironment[0], funfcnInput_tunableEnvironment
-              [1], funfcnInput_tunableEnvironment[2], x);
       funccount++;
       iter++;
       if (p <= fx) {
@@ -186,8 +192,4 @@ double fminbnd(coder_internal_ref * const funfcnInput_tunableEnvironment[3],
   return xf;
 }
 
-/*
- * File trailer for fminbnd.c
- *
- * [EOF]
- */
+/* End of code generation (fminbnd.c) */

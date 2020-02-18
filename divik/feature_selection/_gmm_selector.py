@@ -1,10 +1,12 @@
 import numpy as np
 from sklearn.base import BaseEstimator
 
+from divik.core import configurable
 import divik._matlab_legacy as ml
 from ._stat_selector_mixin import StatSelectorMixin
 
 
+@configurable
 class GMMSelector(BaseEstimator, StatSelectorMixin):
     """Feature selector that removes low- or high- mean or variance features
 

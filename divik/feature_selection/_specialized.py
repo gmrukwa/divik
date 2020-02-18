@@ -1,11 +1,14 @@
 import numpy as np
 from sklearn.base import BaseEstimator
-from ._stat_selector_mixin import SelectorMixin
+
+from divik.core import build, configurable
+from ._stat_selector_mixin import SelectorMixin, NoSelector
 from ._gmm_selector import GMMSelector
 from ._outlier import OutlierSelector
 from ._percentage_selector import PercentageSelector
 
 
+@configurable
 class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
     """Feature selector that removes low-mean and low-variance features
 
@@ -126,6 +129,7 @@ EPS = 10e-6
 
 
 # noinspection PyAttributeOutsideInit
+@configurable
 class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
     def __init__(self, use_log: bool = False, min_features_rate: float = 0.01,
                  p: float = 0.2):
@@ -200,3 +204,15 @@ class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
             retention.
         """
         return self.selected_
+
+
+def make_specialized_selector(name, n_features, **kwargs):
+    """Create a selector by name (gmm, outlier or auto)"""
+    if name == 'auto':
+        name = 'gmm' if n_features > 250 else 'outlier'
+    filter_cls = {
+        'gmm': HighAbundanceAndVarianceSelector,
+        'outlier': OutlierAbundanceAndVarianceSelector,
+        'none': NoSelector,
+    }[name]
+    return build(filter_cls, **kwargs)

@@ -1,17 +1,19 @@
 /*
- * File: gaussian_mixture_simple.h
  *
- * MATLAB Coder version            : 4.2
- * C/C++ source code generated on  : 23-Dec-2019 23:16:52
+ * gaussian_mixture_simple.h
+ *
+ * Code generation for function 'gaussian_mixture_simple'
+ *
  */
 
 #ifndef GAUSSIAN_MIXTURE_SIMPLE_H
 #define GAUSSIAN_MIXTURE_SIMPLE_H
 
-/* Include Files */
+/* Include files */
 #include <stddef.h>
 #include <stdlib.h>
 #include "rtwtypes.h"
+#include "omp.h"
 #include "fetch_thresholds_types.h"
 
 /* Function Declarations */
@@ -21,8 +23,4 @@ extern void gaussian_mixture_simple(const emxArray_real_T *x, const
 
 #endif
 
-/*
- * File trailer for gaussian_mixture_simple.h
- *
- * [EOF]
- */
+/* End of code generation (gaussian_mixture_simple.h) */

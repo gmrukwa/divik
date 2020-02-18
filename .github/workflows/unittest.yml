@@ -14,6 +14,18 @@ jobs:
         run: docker build . --file docker/unittest.dockerfile --tag unittest
         env:
           ENABLE_SLOW_TESTS: True
+
+  docker_conda_tests:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Run unit tests
+        run: docker build . --file docker/conda_test.dockerfile --tag conda_test
+        env:
+          ENABLE_SLOW_TESTS: True
   
   windows_tests:
 
@@ -58,8 +70,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Install OpenMP
+        run: brew install libomp
       - name: Install native lib
-        run: python dev_setup.py install
+        run: |
+          echo "::add-path::/usr/local/opt/llvm/bin"
+          echo "::set-env name=C_INCLUDE_PATH::/usr/local/opt/llvm/include:$C_INCLUDE_PATH"
+          echo "::set-env name=CPLUS_INCLUDE_PATH::/usr/local/opt/llvm/include:$CPLUS_INCLUDE_PATH"
+          echo "::set-env name=LIBRARY_PATH::/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$LIBRARY_PATH"
+          echo "::set-env name=DYLD_LIBRARY_PATH::/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$DYLD_LIBRARY_PATH"
+          python dev_setup.py install
+        env:
+          CC: /usr/local/opt/llvm/bin/clang
+          CXX: /usr/local/opt/llvm/bin/clang++
       - name: Test library
         run: python -m unittest discover
         env:

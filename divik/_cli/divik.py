@@ -8,8 +8,9 @@ import numpy as np
 import pandas as pd
 import skimage.io as sio
 
+from divik.core import build
 from divik._cli._data_io import DIVIK_RESULT_FNAME
-from divik.cluster import DiviK
+from divik.cluster import DiviK, GAPSearch, KMeans
 import divik._summary as _smr
 import divik._cli._utils as sc
 import divik.core as u
@@ -28,15 +29,15 @@ def _make_summary(result: typing.Optional[u.DivikResult]):
     }
 
 
-def _make_merged(result: typing.Optional[u.DivikResult]) -> np.ndarray:
+def make_merged(result: typing.Optional[u.DivikResult]) -> np.ndarray:
     depth = _smr.depth(result)
-    return np.hstack(
+    return np.hstack([
         _smr.merged_partition(result, limit + 1).reshape(-1, 1)
         for limit in range(depth)
-    )
+    ])
 
 
-def _save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
+def save_merged(destination: str, merged: np.ndarray, xy: np.ndarray=None):
     np.savetxt(os.path.join(destination, 'partitions.csv'),
                merged, delimiter=', ', fmt='%i')
     np.save(os.path.join(destination, 'partitions.npy'), merged)
@@ -67,9 +68,9 @@ def save(data: u.Data, divik: DiviK, destination: str, xy: np.ndarray=None):
         json.dump(_make_summary(divik.result_), smr)
     if divik.result_ is not None:
         logging.info("Saving partitions.")
-        merged = _make_merged(divik.result_)
+        merged = make_merged(divik.result_)
         assert merged.shape[0] == divik.result_.clustering.labels_.size
-        _save_merged(destination, merged, xy)
+        save_merged(destination, merged, xy)
         logging.info("Saving centroids.")
         centroids = pd.DataFrame(data).groupby(merged[:, -1]).mean().values
         np.save(os.path.join(destination, 'centroids.npy'), centroids)
@@ -79,11 +80,37 @@ def save(data: u.Data, divik: DiviK, destination: str, xy: np.ndarray=None):
         logging.info("Skipping partition save. Cause: result is None")
 
 
+def _full_kmeans(**config):
+    distance = config.get('distance', 'correlation')
+    normalize_rows = config.get('normalize_rows', None)
+    single_kmeans = KMeans(
+        n_clusters=2,
+        distance=distance,
+        init='percentile',
+        percentile=config.get('distance_percentile', 99.0),
+        max_iter=config.get('max_iter', 100),
+        normalize_rows=normalize_rows,
+    )
+    kmeans = GAPSearch(
+        single_kmeans,
+        max_clusters=config.get('k_max', 50),
+        n_jobs=config.get('n_jobs', None),
+        seed=config.get('random_seed', 0),
+        n_trials=config.get('gap_trials', 10),
+        sample_size=config.get('sample_size', 10000),
+        verbose=config.get('verbose', False),
+    )
+    return kmeans
+
+
 def main():
     data, config, destination, xy = sc.initialize()
     logging.info('Workspace initialized.')
     logging.info('Scenario configuration: {0}'.format(config))
-    divik = DiviK(**config)
+    fast = None
+    full = _full_kmeans(**config)
+    divik_config = {'kmeans': full, 'fast_kmeans': fast, **config}
+    divik = build(DiviK, **divik_config)
     logging.info("Launching experiment.")
     try:
         divik.fit(data)

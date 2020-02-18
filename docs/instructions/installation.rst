@@ -14,14 +14,14 @@ To install latest stable version use::
 
 To install specific version, you can specify it in the command, e.g.::
 
-    docker pull gmrukwa/divik:2.3.20
+    docker pull gmrukwa/divik:2.4.3
 
 Python package
 --------------
 
 Prerequisites for installation of base package:
 
-- Python 3.6 / 3.7 / 3.8
+- Python 3.6 / 3.7
 - compiler capable of compiling the native C code
 
 Having prerequisites installed, one can install latest base version of the
@@ -31,7 +31,7 @@ package::
 
 or any stable tagged version, e.g.::
 
-    pip install divik==2.3.20
+    pip install divik==2.4.3
 
 If you want to have compatibility with
 `gin-config <https://github.com/google/gin-config>`_, you can install
