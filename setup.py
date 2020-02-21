@@ -17,6 +17,7 @@ LINUX_OPTS = {
         '-Wno-strict-prototypes',
         '-Wno-maybe-uninitialized',
         '-O3',
+        '-std=c99',
     ],
 }
 OSX_OPTS = {
