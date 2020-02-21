@@ -214,3 +214,49 @@ class KDTreeInitialization(Initialization):
             centroids[i] = box_centroids[np.argmax(distances)]
 
         return centroids
+
+
+class KDTreePercentileInitialization(Initialization):
+    """Initializes k-means by picking extreme KDTree box"""
+    def __init__(self, distance: str, leaf_size: Union[int, float] = 0.01,
+                 percentile: float=99.):
+        assert 0 <= percentile <= 100, percentile
+        self.distance = distance
+        self.leaf_size = leaf_size
+        self.percentile = percentile
+
+    def _get_percentile_idx(self, distances, weights) -> int:
+        idx = np.argsort(distances)
+        over_percentile = np.cumsum(weights[idx]) >= self.percentile
+        first_over = np.flatnonzero(over_percentile)[0]
+        return idx[first_over]
+
+    def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
+        """Generate initial centroids for k-means algorithm"""
+        _validate(data, number_of_centroids)
+        leaf_size = self.leaf_size
+        if isinstance(leaf_size, float):
+            if 0 <= leaf_size <= 1:
+                leaf_size = max(int(leaf_size * data.shape[0]), 1)
+            else:
+                raise ValueError('leaf_size must be between 0 and 1 when float')
+        tree = make_tree(data, leaf_size=leaf_size)
+        leaves = get_leaves(tree)
+        box_centroids = np.vstack([l.centroid for l in leaves])
+        box_weights = np.array([l.count for l in leaves])
+        normalized_weights = box_weights / np.sum(box_weights)
+
+        residuals = _find_residuals(box_centroids, box_weights)
+        centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
+        idx = self._get_percentile_idx(residuals, normalized_weights)
+        centroids[0] = box_centroids[idx]
+
+        distances = np.inf * np.ones((box_centroids.shape[0], ))
+        for i in range(1, number_of_centroids):
+            current_distance = dist.cdist(
+                box_centroids, centroids[np.newaxis, i - 1], self.distance)
+            distances[:] = np.minimum(current_distance.ravel(), distances)
+            idx = self._get_percentile_idx(distances, normalized_weights)
+            centroids[i] = box_centroids[idx]
+
+        return centroids
