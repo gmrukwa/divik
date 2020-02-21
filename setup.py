@@ -76,6 +76,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'fit-clusters=divik._cli.fit_clusters:main',
             'dunn-divik=divik._cli.dunn_divik:main',
             'divik=divik._cli.divik:main',
             'inspect=divik._cli.inspect:main',
