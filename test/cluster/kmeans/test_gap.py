@@ -41,6 +41,19 @@ class GAPSearchTest(unittest.TestCase):
         self.assertLessEqual(kmeans.n_clusters_ - 1, n_clusters)
         self.assertGreater(rand, 0.75)
 
+    def test_works_with_unfit_removal(self):
+        n_clusters = 3
+        X, y = data(n_clusters)
+        single_kmeans = KMeans(n_clusters=2)
+        kmeans = GAPSearch(
+            single_kmeans, max_clusters=10, drop_unfit=True).fit(X)
+        rand = adjusted_rand_score(y, kmeans.labels_)
+        # allow for misidentification of 1 cluster
+        self.assertGreaterEqual(kmeans.n_clusters_ + 1, n_clusters)
+        self.assertLessEqual(kmeans.n_clusters_ - 1, n_clusters)
+        self.assertGreater(rand, 0.75)
+        self.assertIsNone(kmeans.estimators_)
+
 
 if __name__ == '__main__':
     unittest.main()

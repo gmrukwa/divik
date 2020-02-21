@@ -25,6 +25,17 @@ class DunnSearchTest(unittest.TestCase):
         rand = adjusted_rand_score(y, kmeans.labels_)
         self.assertEqual(kmeans.n_clusters_, n_clusters)
         self.assertGreater(rand, 0.75)
+    
+    def test_works_with_unfit_removal(self):
+        n_clusters = 3
+        X, y = data(n_clusters)
+        single_kmeans = KMeans(n_clusters=2)
+        kmeans = DunnSearch(
+            single_kmeans, max_clusters=10, drop_unfit=True).fit(X)
+        rand = adjusted_rand_score(y, kmeans.labels_)
+        self.assertEqual(kmeans.n_clusters_, n_clusters)
+        self.assertGreater(rand, 0.75)
+        self.assertIsNone(kmeans.estimators_)
 
 
 if __name__ == '__main__':
