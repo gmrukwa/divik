@@ -55,7 +55,7 @@ def dump_gin_args(destination):
     except ImportError as ex:
         raise ImportError(MISSING_GIN_ERROR) from ex
     with open(os.path.join(destination, 'config.gin'), 'w') as outfile:
-        outfile.write(gin.operative_config_str)
+        outfile.write(gin.operative_config_str())
 
 
 if _HAS_GIN:
