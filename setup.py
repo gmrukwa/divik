@@ -6,7 +6,7 @@ from setuptools import setup, find_packages, Extension
 import sys
 import numpy
 
-__version__ = '2.4.5'
+__version__ = '2.4.6'
 
 LINUX_OPTS = {
     'extra_link_args': [
@@ -76,6 +76,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'fit-clusters=divik._cli.fit_clusters:main',
             'dunn-divik=divik._cli.dunn_divik:main',
             'divik=divik._cli.divik:main',
             'inspect=divik._cli.inspect:main',
