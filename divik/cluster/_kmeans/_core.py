@@ -12,6 +12,7 @@ from divik.cluster._kmeans._initialization import (
     ExtremeInitialization,
     PercentileInitialization,
     KDTreeInitialization,
+    KDTreePercentileInitialization,
 )
 from divik.core import (
     normalize_rows,
@@ -157,6 +158,8 @@ def _parse_initialization(name: str, distance: str,
         return ExtremeInitialization(distance)
     if name == 'kdtree':
         return KDTreeInitialization(distance, leaf_size)
+    if name == 'kdtree_percentile':
+        return KDTreePercentileInitialization(distance, leaf_size, percentile)
     raise ValueError('Unknown initialization: {0}'.format(name))
 
 
@@ -174,7 +177,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
     distance : str, optional, default: 'euclidean'
         Distance measure. One of the distances supported by scipy package.
 
-    init : {'percentile', 'extreme' or 'kdtree'}
+    init : {'percentile', 'extreme', 'kdtree', 'kdtree_percentile'}
         Method for initialization, defaults to 'percentile':
 
         'percentile' : selects initial cluster centers for k-mean
@@ -187,6 +190,10 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
         'kdtree': selects initial cluster centers for k-mean clustering
         starting from centroids of KD-Tree boxes
+
+        'kdtree_percentile': selects initial cluster centers for k-means
+        clustering starting from centroids of KD-Tree boxes containing
+        specified percentile. This should be more robust against outliers.
 
     percentile : float, default: 95.0
         Specifies the starting percentile for 'percentile' initialization.
