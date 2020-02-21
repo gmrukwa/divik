@@ -43,6 +43,9 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         Size of the sample used for GAP statistic computation. Used only if
         introduces speedup.
 
+    drop_unfit: bool, default: False
+        If True, drops the estimators that did not fit the data.
+
     verbose: bool, default: False
         If True, shows progress with tqdm.
 
@@ -73,7 +76,8 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     def __init__(self, kmeans: KMeans,
                  max_clusters: int, min_clusters: int = 1,
                  n_jobs: int = 1, seed: int = 0, n_trials: int = 10,
-                 sample_size: int = 1000, verbose: bool = False):
+                 sample_size: int = 1000, drop_unfit: bool = False,
+                 verbose: bool = False):
         super().__init__()
         assert min_clusters <= max_clusters
         self.kmeans = kmeans
@@ -83,6 +87,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         self.seed = seed
         self.n_trials = n_trials
         self.sample_size = sample_size
+        self.drop_unfit = drop_unfit
         self.verbose = verbose
 
     def _should_sample(self, data):
@@ -148,6 +153,8 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             self.n_clusters_ = self.best_.n_clusters
             self.labels_ = self.best_.labels_
             self.cluster_centers_ = self.best_.cluster_centers_
+            if self.drop_unfit:
+                self.estimators_ = None
         else:
             self.best_ = None
             self.best_score_ = None
