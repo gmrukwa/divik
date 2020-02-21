@@ -174,7 +174,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
     distance : str, optional, default: 'euclidean'
         Distance measure. One of the distances supported by scipy package.
 
-    init : {'percentile' or 'extreme'}
+    init : {'percentile', 'extreme' or 'kdtree'}
         Method for initialization, defaults to 'percentile':
 
         'percentile' : selects initial cluster centers for k-mean
@@ -184,6 +184,9 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         'extreme': selects initial cluster centers for k-mean
         clustering starting from the furthest points to already specified
         clusters
+
+        'kdtree': selects initial cluster centers for k-mean clustering
+        starting from centroids of KD-Tree boxes
 
     percentile : float, default: 95.0
         Specifies the starting percentile for 'percentile' initialization.

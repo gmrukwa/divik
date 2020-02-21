@@ -39,6 +39,9 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         The number of jobs to use for the computation. This works by computing
         each of the clustering & scoring runs in parallel.
 
+    drop_unfit: bool, default: False
+        If True, drops the estimators that did not fit the data.
+
     verbose: bool, default: False
         If True, shows progress with tqdm.
 
@@ -68,13 +71,15 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     """
     def __init__(self, kmeans: KMeans,
                  max_clusters: int, min_clusters: int = 2,
-                 n_jobs: int = 1, verbose: bool = False):
+                 n_jobs: int = 1, drop_unfit: bool = False,
+                 verbose: bool = False):
         super().__init__()
         assert min_clusters <= max_clusters
         self.kmeans = kmeans
         self.min_clusters = min_clusters
         self.max_clusters = max_clusters
         self.n_jobs = n_jobs
+        self.drop_unfit = drop_unfit
         self.verbose = verbose
 
     def _fit_kmeans(self, n_clusters, data_ref):
@@ -121,6 +126,8 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         self.best_ = self.estimators_[best]
         self.labels_ = self.best_.labels_
         self.cluster_centers_ = self.best_.cluster_centers_
+        if self.drop_unfit:
+            self.estimators_ = None
 
         return self
 

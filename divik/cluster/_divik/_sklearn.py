@@ -10,17 +10,30 @@ from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
 from sklearn.utils.validation import check_is_fitted
 
 from divik import _summary as summary, feature_selection as fs
-from divik.core import context_if, DivikResult, normalize_rows, maybe_pool
+from divik.core import (
+    configurable,
+    context_if,
+    DivikResult,
+    normalize_rows,
+    maybe_pool,
+)
 from ._backend import divik
 from ._report import DivikReporter
 
 
-# TODO: Describe the kmeans and fast_kmeans parameters
+@configurable
 class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     """DiviK clustering
 
     Parameters
     ----------
+    kmeans: AutoKMeans
+        A self-tuning KMeans estimator for the purpose of clustering
+
+    fast_kmeans: GAPSearch, optional, default: None
+        A self-tuning KMeans estimator for the purpose of stop condition
+        check. If None, the `kmeans` parameter is assumed to be the
+        `GAPSearch` instance.
 
     distance: str, optional, default: 'correlation'
         The distance metric between points, centroids and for GAP index
