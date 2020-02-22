@@ -244,7 +244,7 @@ class KDTreePercentileInitialization(Initialization):
         leaves = get_leaves(tree)
         box_centroids = np.vstack([l.centroid for l in leaves])
         box_weights = np.array([l.count for l in leaves])
-        normalized_weights = box_weights / np.sum(box_weights)
+        normalized_weights = 100 * box_weights / np.sum(box_weights)
 
         residuals = _find_residuals(box_centroids, box_weights)
         centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
