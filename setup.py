@@ -6,7 +6,7 @@ from setuptools import setup, find_packages, Extension
 import sys
 import numpy
 
-__version__ = '2.4.8'
+__version__ = '2.5.0'
 
 LINUX_OPTS = {
     'extra_link_args': [
