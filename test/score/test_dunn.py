@@ -66,7 +66,8 @@ class TestSamplingDunn(unittest.TestCase):
         score = sampled_dunn(self.kmeans_3, self.X)
         self.assertFalse(np.isnan(score))
 
-    def test_good_labeling_has_greater_score(self):
-        better = sampled_dunn(self.kmeans_3, self.X)
-        worse = sampled_dunn(self.kmeans_7, self.X)
-        self.assertGreater(better, worse)
+    def test_good_labeling_has_top_score(self):
+        kmeans = [km.KMeans(n_clusters=k).fit(self.X) for k in range(2, 11)]
+        dunn_ = [sampled_dunn(mdl, self.X) for mdl in kmeans]
+        best = int(np.argmax(dunn_))
+        self.assertEqual(kmeans[best].n_clusters, self.kmeans_3.n_clusters)
