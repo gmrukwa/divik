@@ -24,7 +24,7 @@ def _inter_closest(kmeans: KMeans, data: Data, labels=None):
     d = np.inf
     for label in np.arange(kmeans.n_clusters - 1):
         grp = label == labels
-        non_grp = label < kmeans.labels_
+        non_grp = label < labels
         dst = dist.cdist(data[grp], data[non_grp], metric=kmeans.distance)
         d = np.minimum(d, dst.min())
     return d
@@ -116,7 +116,7 @@ def sampled_dunn(kmeans: KMeans, data: Data,
                  n_jobs: int = None,
                  seed: int = 0,
                  n_trials: int = 10,
-                 inter='centroid', intra='avg') -> float:
+                 inter='closest', intra='furthest') -> float:
     data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
                               ).fit(data, kmeans.labels_)
     seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
