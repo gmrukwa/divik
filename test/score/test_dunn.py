@@ -1,13 +1,16 @@
 import unittest
 
 import numpy as np
+from sklearn.datasets import make_blobs
 
+import divik.cluster as km
 from divik.score._dunn import (
     _inter_centroid,
     _inter_closest,
     _intra_avg,
     _intra_furthest,
     dunn,
+    sampled_dunn,
 )
 
 
@@ -50,3 +53,20 @@ class TestDunn(unittest.TestCase):
         data = np.array([[1], [3], [4], [6]])
         dunn_ = dunn(DummyKMeans(), data, inter='closest', intra='furthest')
         self.assertAlmostEqual(dunn_, .5)
+
+
+class TestSamplingDunn(unittest.TestCase):
+    def setUp(self):
+        self.X, _ = make_blobs(n_samples=10000, n_features=2, centers=3,
+                               random_state=0)
+        self.kmeans_3 = km.KMeans(n_clusters=3).fit(self.X)
+        self.kmeans_7 = km.KMeans(n_clusters=7).fit(self.X)
+
+    def test_computes_score(self):
+        score = sampled_dunn(self.kmeans_3, self.X)
+        self.assertFalse(np.isnan(score))
+
+    def test_good_labeling_has_greater_score(self):
+        better = sampled_dunn(self.kmeans_3, self.X)
+        worse = sampled_dunn(self.kmeans_7, self.X)
+        self.assertGreater(better, worse)

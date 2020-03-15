@@ -9,7 +9,7 @@ from divik.sampler import UniformSampler, StratifiedSampler
 from divik.score._gap import _sampled_dispersion as _dispersion
 
 
-KMeans = 'divik.KMeans'
+KMeans = 'divik.cluster.KMeans'
 _BIG_PRIME = 40013
 
 

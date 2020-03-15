@@ -1,42 +1,53 @@
+from functools import partial
+from typing import Union
+
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance as dist
 
-from divik.core import configurable, Data
+from divik.core import configurable, Data, maybe_pool
+from divik.sampler import BaseSampler, StratifiedSampler
 
 
 KMeans = 'divik.cluster.KMeans'
+_BIG_PRIME = 49277
 
 
-def _inter_centroid(kmeans: KMeans, data: Data):
+def _inter_centroid(kmeans: KMeans, data: Data, labels=None):
     d = dist.pdist(kmeans.cluster_centers_, kmeans.distance)
     return np.min(d[d != 0])
 
 
-def _inter_closest(kmeans: KMeans, data: Data):
+def _inter_closest(kmeans: KMeans, data: Data, labels=None):
+    if labels is None:
+        labels = kmeans.labels_
     d = np.inf
     for label in np.arange(kmeans.n_clusters - 1):
-        grp = label == kmeans.labels_
+        grp = label == labels
         non_grp = label < kmeans.labels_
         dst = dist.cdist(data[grp], data[non_grp], metric=kmeans.distance)
         d = np.minimum(d, dst.min())
     return d
 
 
-def _intra_avg(kmeans: KMeans, data: Data):
-    clusters = pd.DataFrame(data).groupby(kmeans.labels_).apply(np.asarray)
+def _intra_avg(kmeans: KMeans, data: Data, labels=None):
+    if labels is None:
+        labels = kmeans.labels_
+    clusters = pd.DataFrame(data).groupby(labels).apply(np.asarray)
     return np.max([
         np.mean(dist.cdist(cluster, centroid.reshape(1, -1), kmeans.distance))
         for cluster, centroid in zip(clusters, kmeans.cluster_centers_)
     ])
 
 
-def _intra_furthest(kmeans: KMeans, data: Data):
+def _intra_furthest(kmeans: KMeans, data: Data, labels=None):
     def max_distance(group):
         group = np.asarray(group)
         d = dist.pdist(group, metric=kmeans.distance)
         return np.max(d)
-    return pd.DataFrame(data).groupby(kmeans.labels_).apply(max_distance).max()
+    if labels is None:
+        labels = kmeans.labels_
+    return pd.DataFrame(data).groupby(labels).apply(max_distance).max()
 
 
 _INTER = {
@@ -88,3 +99,32 @@ def dunn(kmeans: KMeans, data: Data, inter='centroid', intra='avg') -> float:
     intracluster = _INTRA[intra](kmeans, data)
     score = intercluster / intracluster
     return score
+
+
+def _sample_distances(seed: int, sampler: BaseSampler, kmeans: KMeans,
+                      inter='centroid', intra='avg'):
+    data = sampler.get_sample(seed)
+    labels = kmeans.predict(data)
+    inter_ = _INTER[inter](kmeans, data, labels)
+    intra_ = _INTRA[intra](kmeans, data, labels)
+    return inter_, intra_
+
+
+@configurable
+def sampled_dunn(kmeans: KMeans, data: Data,
+                 sample_size: Union[int, float] = 1000,
+                 n_jobs: int = None,
+                 seed: int = 0,
+                 n_trials: int = 100,
+                 inter='centroid', intra='avg') -> float:
+    data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
+                              ).fit(data, kmeans.labels_)
+    seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
+    with data_.parallel() as d, maybe_pool(n_jobs, initializer=d.initializer,
+                                           initargs=d.initargs) as pool:
+        distances = partial(_sample_distances, sampler=d, kmeans=kmeans,
+                            inter=inter, intra=intra)
+        inter_, intra_ = np.array(pool.map(distances, seeds)).T
+    v_inter = inter_.var()
+    v_intra = intra_.var()
+    return (inter_.min() - v_inter) / (intra_.max() + v_intra)
