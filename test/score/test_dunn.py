@@ -67,7 +67,8 @@ class TestSamplingDunn(unittest.TestCase):
         self.assertFalse(np.isnan(score))
 
     def test_good_labeling_has_top_score(self):
-        kmeans = [km.KMeans(n_clusters=k).fit(self.X) for k in range(2, 11)]
+        kmeans = [km.KMeans(n_clusters=k, init='kdtree').fit(self.X)
+                  for k in range(2, 11)]
         dunn_ = [sampled_dunn(mdl, self.X) for mdl in kmeans]
         best = int(np.argmax(dunn_))
         self.assertEqual(kmeans[best].n_clusters, self.kmeans_3.n_clusters)

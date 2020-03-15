@@ -115,7 +115,7 @@ def sampled_dunn(kmeans: KMeans, data: Data,
                  sample_size: Union[int, float] = 1000,
                  n_jobs: int = None,
                  seed: int = 0,
-                 n_trials: int = 100,
+                 n_trials: int = 10,
                  inter='centroid', intra='avg') -> float:
     data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
                               ).fit(data, kmeans.labels_)
