@@ -14,7 +14,7 @@ To install latest stable version use::
 
 To install specific version, you can specify it in the command, e.g.::
 
-    docker pull gmrukwa/divik:2.5.0
+    docker pull gmrukwa/divik:2.5.1
 
 Python package
 --------------
@@ -31,7 +31,7 @@ package::
 
 or any stable tagged version, e.g.::
 
-    pip install divik==2.5.0
+    pip install divik==2.5.1
 
 If you want to have compatibility with
 `gin-config <https://github.com/google/gin-config>`_, you can install
