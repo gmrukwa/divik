@@ -40,14 +40,14 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.4.5
+docker pull gmrukwa/divik:2.5.0
 ```
 
 ## Python package
 
 Prerequisites for installation of base package:
 
-- Python 3.6 / 3.7
+- Python 3.6 / 3.7 / 3.8
 - compiler capable of compiling the native C code and OpenMP support
 
 #### Installation of OpenMP for Ubuntu / Debian
@@ -79,7 +79,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.4.5
+pip install divik==2.5.0
 ```
 
 If you want to have compatibility with
@@ -91,14 +91,6 @@ pip install divik[gin]
 ```
 
 **Note:** Remember about `\` before `[` and `]` in `zsh` shell.
-
-## Known Issues
-
-### Mac OS & Numba
-
-Certain code compilation is not supported for Mac OS, as it started to
-freeze. Therefore it is disabled and slower. You can try yourself by
-installation of `numba` package, but I had no luck up to this point.
 
 # References
 

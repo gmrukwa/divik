@@ -39,6 +39,10 @@ def experiment(
     save(model, destination, xy=xy)
 
 
-if __name__ == '__main__':
+def main():
     parse_gin_args()
     experiment()
+
+
+if __name__ == '__main__':
+    main()

@@ -9,7 +9,10 @@ import tqdm
 
 from divik.core import configurable
 from ._core import KMeans
-from divik.score import dunn
+from divik.score import (
+    dunn,
+    sampled_dunn,
+)
 from divik.core import maybe_pool, share
 
 
@@ -35,6 +38,33 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     min_clusters: int, default: 1
         The minimal number of clusters to form and score.
 
+    method: {'full', 'sampled', 'auto'}, default: 'full'
+        Whether to run full computations or approximate.
+        - full - always computes full Dunn's index, without sampling
+        - sampled - samples the clusters to reduce computational overhead
+        - auto - switches the above methods to provide best performance-quality
+        trade-off.
+
+    inter : {'centroid', 'closest'}, default: 'centroid'
+        How the distance between clusters is computed. For more details see
+        `dunn`.
+
+    intra : {'avg', 'furthest'}, default: 'avg'
+        How the cluster internal distance is computed. For more details see
+        `dunn`.
+
+    sample_size : int, default: 1000
+        Size of the sample used to compute Dunn index in `auto` or `sampled`
+        scenario.
+
+    n_trials : int, default: 10
+        Number of trials to use when computing Dunn index in `auto` or
+        `sampled` scenario.
+
+    seed : int, default: 42
+        Random seed for the reproducibility of subset draws in Dunn `auto`
+        or `sampled` scenario.
+
     n_jobs: int, default: 1
         The number of jobs to use for the computation. This works by computing
         each of the clustering & scoring runs in parallel.
@@ -56,8 +86,8 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     estimators_: List[KMeans]
         KMeans instances for n_clusters in range [min_clusters, max_clusters].
 
-    scores_: array, [max_clusters - min_clusters + 1, ?]
-        Array with scores for each estimator in each row.
+    scores_: array, [max_clusters - min_clusters + 1,]
+        Array with scores for each estimator.
 
     n_clusters_: int
         Estimated optimal number of clusters.
@@ -69,25 +99,68 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         The optimal estimator.
 
     """
-    def __init__(self, kmeans: KMeans,
-                 max_clusters: int, min_clusters: int = 2,
-                 n_jobs: int = 1, drop_unfit: bool = False,
+    def __init__(self,
+                 kmeans: KMeans,
+                 max_clusters: int,
+                 min_clusters: int = 2,
+                 method='full',
+                 inter='centroid',
+                 intra='avg',
+                 sample_size=1000,
+                 n_trials=10,
+                 seed=42,
+                 n_jobs: int = 1,
+                 drop_unfit: bool = False,
                  verbose: bool = False):
         super().__init__()
         assert min_clusters <= max_clusters
         self.kmeans = kmeans
         self.min_clusters = min_clusters
         self.max_clusters = max_clusters
+        self.method = method
+        self.inter = inter
+        self.intra = intra
+        self.sample_size = sample_size
+        self.n_trials = n_trials
+        self.seed = seed
         self.n_jobs = n_jobs
         self.drop_unfit = drop_unfit
         self.verbose = verbose
+
+    def _n_ops(self, data):
+        if self.inter == 'closest' or self.intra == 'furthest':
+            n_ops_full = data.shape[0] ** 2
+            n_ops_sampled = self.n_trials * self.sample_size ** 2
+        else:
+            n_ops_full = data.shape[0]
+            n_ops_sampled = self.n_trials * self.sample_size
+        return n_ops_full, n_ops_sampled
+
+    def _sampled_dunn(self, kmeans, data, inter, intra):
+        return sampled_dunn(kmeans, data, inter=inter, intra=intra,
+                            sample_size=self.sample_size, n_jobs=self.n_jobs,
+                            seed=self.seed, n_trials=self.n_trials)
+
+    def _dunn(self, kmeans, data):
+        n_ops_full, n_ops_sampled = self._n_ops(data)
+        if self.method == 'full':
+            dunn_ = dunn
+        elif self.method == 'sampled':
+            dunn_ = self._sampled_dunn
+        elif self.method == 'auto' and n_ops_full <= n_ops_sampled:
+            dunn_ = dunn
+        elif self.method == 'auto' and n_ops_full > n_ops_sampled:
+            dunn_ = self._sampled_dunn
+        else:
+            raise ValueError(f"Unknown Dunn method {self.method}")
+        return dunn_(kmeans, data, inter=self.inter, intra=self.intra)
 
     def _fit_kmeans(self, n_clusters, data_ref):
         data = _DATA[data_ref].value
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
         kmeans.fit(data)
-        d = dunn(kmeans, data)
+        d = self._dunn(kmeans, data)
         return kmeans, d
 
     def fit(self, X, y=None):

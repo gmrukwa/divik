@@ -47,3 +47,13 @@ class PercentileInitializationTest(ExtremeInitializationTest):
     def setUp(self):
         self.number_of_clusters = 2
         self.initialize = km.PercentileInitialization('euclidean')
+
+
+class KDTreePercentileInitializationTest(unittest.TestCase):
+    def setUp(self):
+        self.number_of_clusters = 2
+        self.initialize = km.KDTreePercentileInitialization(
+            'euclidean', 0.1, 99.)
+
+    def test_works_for_sample_data(self):
+        self.initialize(data, self.number_of_clusters)
