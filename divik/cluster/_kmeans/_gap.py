@@ -1,4 +1,5 @@
 from functools import partial
+import logging
 import sys
 
 import numpy as np
@@ -108,7 +109,9 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
         kmeans.fit(data)
+        logging.debug("Fitted KMeans")
         idx, std = self._gap(data, kmeans)
+        logging.debug("Computed GAP")
         return kmeans, idx, std
 
     def fit(self, X, y=None):
@@ -148,6 +151,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         self.scores_ = np.array(self.scores_)
 
         if self.fitted_:
+            logging.debug("Fitted GAPSearch")
             self.best_ = self.estimators_[-1]
             self.best_score_ = self.scores_[-1]
             self.n_clusters_ = self.best_.n_clusters
@@ -156,6 +160,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             if self.drop_unfit:
                 self.estimators_ = None
         else:
+            logging.debug("Failed to fit GAPSearch")
             self.best_ = None
             self.best_score_ = None
             self.n_clusters_ = None

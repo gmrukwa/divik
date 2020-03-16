@@ -39,9 +39,10 @@ class Labeling(object):
         @return: vector of labels of centroids closest to points
         """
         if data.shape[1] != centroids.shape[1]:
-            raise ValueError("Dimensionality of data and centroids must be "
-                             "equal. Was %i and %i"
-                             % (data.shape[1], centroids.shape[1]))
+            msg = "Dimensionality of data and centroids must be equal. " + \
+                f"Was {data.shape[1]} and {centroids.shape[1]}"
+            logging.error(msg)
+            raise ValueError(msg)
         distances = dst.cdist(data, centroids, self.distance_metric)
         return np.argmin(distances, axis=1)
 
@@ -56,9 +57,11 @@ def redefine_centroids(data: Data, labeling: IntLabels,
     @return: centroids
     """
     if data.shape[0] != labeling.size:
-        raise ValueError("Each observation must have label specified. Number "
-                         "of labels: %i, number of observations: %i."
-                         % (labeling.size, data.shape[0]))
+        msg = "Each observation must have label specified. Number " + \
+            f"of labels: {labeling.size}, " + \
+            f"number of observations: {data.shape[0]}."
+        logging.error(msg)
+        raise ValueError(msg)
     centroids = np.nan * np.zeros((len(label_set), data.shape[1]))
     for label in label_set:
         centroids[label] = np.mean(data[labeling == label], axis=0)
@@ -67,10 +70,12 @@ def redefine_centroids(data: Data, labeling: IntLabels,
 
 def _validate_kmeans_input(data: Data, number_of_clusters: int):
     if not isinstance(data, np.ndarray) or len(data.shape) != 2:
+        logging.error("data is expected to be 2D np.array")
         raise ValueError("data is expected to be 2D np.array")
     if number_of_clusters < 1:
-        raise ValueError("number_of_clusters({0}) < 1".format(
-            number_of_clusters))
+        msg = "number_of_clusters({0}) < 1".format(number_of_clusters)
+        logging.error(msg)
+        raise ValueError(msg)
 
 
 def _validate_normalizable(data):
@@ -78,6 +83,7 @@ def _validate_normalizable(data):
     if is_constant.any():
         constant_rows = np.where(is_constant)[0]
         msg = "Constant rows {0} are not allowed for normalization."
+        logging.error(msg.format(constant_rows))
         raise ValueError(msg.format(constant_rows))
 
 
@@ -160,6 +166,7 @@ def _parse_initialization(name: str, distance: str,
         return KDTreeInitialization(distance, leaf_size)
     if name == 'kdtree_percentile':
         return KDTreePercentileInitialization(distance, leaf_size, percentile)
+    logging.error('Unknown initialization: {0}'.format(name))
     raise ValueError('Unknown initialization: {0}'.format(name))
 
 

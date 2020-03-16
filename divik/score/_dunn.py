@@ -1,4 +1,5 @@
 from functools import partial
+import logging
 from typing import Union
 
 import numpy as np
@@ -90,13 +91,23 @@ def dunn(kmeans: KMeans, data: Data, inter='centroid', intra='avg') -> float:
     if kmeans.cluster_centers_.shape[0] == 1:
         return -np.inf
     if inter not in _INTER:
-        raise ValueError(f'Unsupported intercluster distance {inter}. '
-                         f'Supported: {list(_INTER.keys())}')
+        msg = f'Unsupported intercluster distance {inter}. ' + \
+            f'Supported: {list(_INTER.keys())}'
+        logging.error(msg)
+        raise ValueError(msg)
     if intra not in _INTRA:
-        raise ValueError(f'Unsupported intracluster distance {intra}. '
-                         f'Supported: {list(_INTRA.keys())}')
-    intercluster = _INTER[inter](kmeans, data)
-    intracluster = _INTRA[intra](kmeans, data)
+        msg = f'Unsupported intracluster distance {intra}. ' + \
+            f'Supported: {list(_INTRA.keys())}'
+        logging.error(msg)
+        raise ValueError(msg)
+    logging.debug(f"Dunn - inter: {inter} - intra: {intra}")
+    try:
+        intercluster = _INTER[inter](kmeans, data)
+        intracluster = _INTRA[intra](kmeans, data)
+    except ValueError as ex:
+        logging.error(repr(ex))
+        raise
+    logging.debug(f"Dunn - inter: {intercluster} - intra: {intracluster}")
     score = intercluster / intracluster
     return score
 
