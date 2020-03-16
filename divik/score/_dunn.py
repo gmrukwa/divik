@@ -45,7 +45,8 @@ def _intra_furthest(kmeans: KMeans, data: Data, labels=None):
     def max_distance(group):
         group = np.asarray(group)
         d = dist.pdist(group, metric=kmeans.distance)
-        return np.max(d)
+        # 0 is intracluster distance for cluster with one observation
+        return np.max(d, initial=0.0)
     if labels is None:
         labels = kmeans.labels_
     return pd.DataFrame(data).groupby(labels).apply(max_distance).max()
