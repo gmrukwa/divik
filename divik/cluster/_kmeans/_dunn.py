@@ -138,7 +138,7 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _sampled_dunn(self, kmeans, data, inter, intra):
         return sampled_dunn(kmeans, data, inter=inter, intra=intra,
-                            sample_size=self.sample_size, n_jobs=self.n_jobs,
+                            sample_size=self.sample_size, n_jobs=1,
                             seed=self.seed, n_trials=self.n_trials)
 
     def _dunn(self, kmeans, data):
