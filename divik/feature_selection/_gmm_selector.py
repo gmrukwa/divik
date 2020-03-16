@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from sklearn.base import BaseEstimator
 
@@ -90,6 +92,7 @@ import divik._utils    >>> import numpy as np
                  min_features_rate: float = .0, preserve_high: bool = True,
                  max_components: int = 10):
         if stat not in {'mean', 'var'}:
+            logging.error('stat must be one of {"mean", "var"}')
             raise ValueError('stat must be one of {"mean", "var"}')
         self.stat = stat
         self.use_log = use_log

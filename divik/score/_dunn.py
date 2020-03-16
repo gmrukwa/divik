@@ -1,4 +1,5 @@
 from functools import partial
+import logging
 from typing import Union
 
 import numpy as np
@@ -44,7 +45,8 @@ def _intra_furthest(kmeans: KMeans, data: Data, labels=None):
     def max_distance(group):
         group = np.asarray(group)
         d = dist.pdist(group, metric=kmeans.distance)
-        return np.max(d)
+        # 0 is intracluster distance for cluster with one observation
+        return np.max(d, initial=0.0)
     if labels is None:
         labels = kmeans.labels_
     return pd.DataFrame(data).groupby(labels).apply(max_distance).max()
@@ -90,11 +92,15 @@ def dunn(kmeans: KMeans, data: Data, inter='centroid', intra='avg') -> float:
     if kmeans.cluster_centers_.shape[0] == 1:
         return -np.inf
     if inter not in _INTER:
-        raise ValueError(f'Unsupported intercluster distance {inter}. '
-                         f'Supported: {list(_INTER.keys())}')
+        msg = f'Unsupported intercluster distance {inter}. ' + \
+            f'Supported: {list(_INTER.keys())}'
+        logging.error(msg)
+        raise ValueError(msg)
     if intra not in _INTRA:
-        raise ValueError(f'Unsupported intracluster distance {intra}. '
-                         f'Supported: {list(_INTRA.keys())}')
+        msg = f'Unsupported intracluster distance {intra}. ' + \
+            f'Supported: {list(_INTRA.keys())}'
+        logging.error(msg)
+        raise ValueError(msg)
     intercluster = _INTER[inter](kmeans, data)
     intracluster = _INTRA[intra](kmeans, data)
     score = intercluster / intracluster

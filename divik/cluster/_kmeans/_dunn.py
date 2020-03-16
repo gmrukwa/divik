@@ -1,4 +1,5 @@
 from functools import partial
+import logging
 import sys
 import uuid
 
@@ -138,7 +139,7 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _sampled_dunn(self, kmeans, data, inter, intra):
         return sampled_dunn(kmeans, data, inter=inter, intra=intra,
-                            sample_size=self.sample_size, n_jobs=self.n_jobs,
+                            sample_size=self.sample_size, n_jobs=1,
                             seed=self.seed, n_trials=self.n_trials)
 
     def _dunn(self, kmeans, data):
@@ -149,9 +150,14 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             dunn_ = self._sampled_dunn
         elif self.method == 'auto' and n_ops_full <= n_ops_sampled:
             dunn_ = dunn
+            logging.debug('DunnSearch.method="auto" resolved to "full"')
         elif self.method == 'auto' and n_ops_full > n_ops_sampled:
             dunn_ = self._sampled_dunn
+            logging.debug('DunnSearch.method="auto" resolved to "sampled"')
         else:
+            logging.error(f'Failed to select Dunn method {self.method}.')
+            logging.debug(f'n_ops_full={n_ops_full}, '
+                          f'n_ops_sampled={n_ops_sampled}')
             raise ValueError(f"Unknown Dunn method {self.method}")
         return dunn_(kmeans, data, inter=self.inter, intra=self.intra)
 
@@ -189,6 +195,7 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
                 fit_kmeans = partial(self._fit_kmeans, data_ref=ref)
                 kmeans_and_scores = pool.map(fit_kmeans, n_clusters)
             del _DATA[ref]
+        logging.debug("Fitted DunnSearch")
 
         self.estimators_, self.scores_ = zip(*kmeans_and_scores)
         self.scores_ = np.array(self.scores_)

@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from functools import partial
+import logging
 from typing import List, NamedTuple, Union
 
 import numpy as np
@@ -36,12 +37,14 @@ def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
 
 def _validate(data: Data, number_of_centroids: int):
     if number_of_centroids > data.shape[0]:
-        raise ValueError("Number of centroids (%i) greater than number of "
-                         "observations (%i)."
-                         % (number_of_centroids, data.shape[0]))
+        msg = f"Number of centroids ({number_of_centroids}) greater than " + \
+            f"number of observations ({data.shape[0]})"
+        logging.error(msg)
+        raise ValueError(msg)
     if number_of_centroids < 1:
-        raise ValueError(
-            'number_of_centroids({0}) < 1'.format(number_of_centroids))
+        msg = f'number_of_centroids({number_of_centroids}) < 1'
+        logging.error(msg)
+        raise ValueError(msg)
 
 
 class ExtremeInitialization(Initialization):
@@ -102,13 +105,13 @@ class PercentileInitialization(Initialization):
             nans = np.isnan(current_distance)
             if np.any(nans):
                 locations_of_nans = np.array(list(zip(*np.nonzero(nans))))
-                raise ValueError('Distances between points cannot be NaN. '
-                                 + 'This indicates that your data is probably'
-                                 + ' corrupted and analysis cannot be '
-                                 + 'continued in this setting. '
-                                 + 'Amount of NaNs: {0}. '.format(nans.sum())
-                                 + 'At positions described by [spot, '
-                                 + 'centroid]: {0}'.format(locations_of_nans))
+                msg = 'Distances between points cannot be NaN. This ' + \
+                    'indicates that your data is probably corrupted and ' + \
+                    'analysis cannot be continued in this setting. Amount' + \
+                    f' of NaNs: {nans.sum()}. At positions described by ' + \
+                    f'[spot, centroid]: {locations_of_nans}'
+                logging.error(msg)
+                raise ValueError(msg)
             distances[:] = np.minimum(current_distance.ravel(), distances)
             selected = self._get_percentile_element(distances)
             centroids[i] = data[selected]
@@ -196,6 +199,7 @@ class KDTreeInitialization(Initialization):
             if 0 <= leaf_size <= 1:
                 leaf_size = max(int(leaf_size * data.shape[0]), 1)
             else:
+                logging.error('leaf_size must be between 0 and 1 when float')
                 raise ValueError('leaf_size must be between 0 and 1 when float')
         tree = make_tree(data, leaf_size=leaf_size)
         leaves = get_leaves(tree)
@@ -239,6 +243,7 @@ class KDTreePercentileInitialization(Initialization):
             if 0 <= leaf_size <= 1:
                 leaf_size = max(int(leaf_size * data.shape[0]), 1)
             else:
+                logging.error('leaf_size must be between 0 and 1 when float')
                 raise ValueError('leaf_size must be between 0 and 1 when float')
         tree = make_tree(data, leaf_size=leaf_size)
         leaves = get_leaves(tree)
