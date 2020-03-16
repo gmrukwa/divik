@@ -109,9 +109,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
         kmeans.fit(data)
-        logging.debug("Fitted KMeans")
         idx, std = self._gap(data, kmeans)
-        logging.debug("Computed GAP")
         return kmeans, idx, std
 
     def fit(self, X, y=None):

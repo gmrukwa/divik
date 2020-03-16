@@ -101,14 +101,8 @@ def dunn(kmeans: KMeans, data: Data, inter='centroid', intra='avg') -> float:
             f'Supported: {list(_INTRA.keys())}'
         logging.error(msg)
         raise ValueError(msg)
-    logging.debug(f"Dunn - inter: {inter} - intra: {intra}")
-    try:
-        intercluster = _INTER[inter](kmeans, data)
-        intracluster = _INTRA[intra](kmeans, data)
-    except ValueError as ex:
-        logging.error(repr(ex))
-        raise
-    logging.debug(f"Dunn - inter: {intercluster} - intra: {intracluster}")
+    intercluster = _INTER[inter](kmeans, data)
+    intracluster = _INTRA[intra](kmeans, data)
     score = intercluster / intracluster
     return score
 

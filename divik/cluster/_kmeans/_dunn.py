@@ -166,9 +166,7 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
         kmeans.fit(data)
-        logging.debug("Fitted KMeans")
         d = self._dunn(kmeans, data)
-        logging.debug("Computed Dunn")
         return kmeans, d
 
     def fit(self, X, y=None):
