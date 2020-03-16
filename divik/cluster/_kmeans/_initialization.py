@@ -38,7 +38,7 @@ def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
 def _validate(data: Data, number_of_centroids: int):
     if number_of_centroids > data.shape[0]:
         msg = f"Number of centroids ({number_of_centroids}) greater than " + \
-            "number of observations ({data.shape[0]})"
+            f"number of observations ({data.shape[0]})"
         logging.error(msg)
         raise ValueError(msg)
     if number_of_centroids < 1:
