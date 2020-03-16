@@ -1,4 +1,5 @@
 from abc import ABCMeta
+import logging
 
 import numpy as np
 from sklearn.base import BaseEstimator
@@ -28,10 +29,13 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
         elif self.stat == 'var':
             vals = np.var(X, axis=0)
         else:
+            logging.error('stat must be one of {"mean", "var"}')
             raise ValueError('stat must be one of {"mean", "var"}')
 
         if hasattr(self, 'use_log') and self.use_log:
             if np.any(vals < 0):
+                logging.error("Feature characteristic cannot be negative "
+                              "with log filtering")
                 raise ValueError("Feature characteristic cannot be negative "
                                  "with log filtering")
             vals = np.log(vals)

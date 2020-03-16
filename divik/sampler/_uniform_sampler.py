@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
@@ -128,6 +130,7 @@ class UniformPCASampler(BaseSampler):
             return PCA(n_components=None, copy=True, whiten=self.whiten,
                        svd_solver='full', tol=0.0, iterated_power='auto',
                        random_state=None)
+        logging.error("Unsupported pca value: {}".format(self.pca))
         raise ValueError("Unsupported pca value: {}".format(self.pca))
 
     def fit(self, X, y=None):
