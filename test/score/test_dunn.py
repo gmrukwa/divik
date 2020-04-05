@@ -58,7 +58,7 @@ class TestDunn(unittest.TestCase):
 class TestSamplingDunn(unittest.TestCase):
     def setUp(self):
         self.X, _ = make_blobs(n_samples=10000, n_features=2, centers=3,
-                               random_state=0)
+                               random_state=0, cluster_std=0.1)
         self.kmeans_3 = km.KMeans(n_clusters=3).fit(self.X)
         self.kmeans_7 = km.KMeans(n_clusters=7).fit(self.X)
 

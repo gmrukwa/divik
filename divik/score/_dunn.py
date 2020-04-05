@@ -131,6 +131,6 @@ def sampled_dunn(kmeans: KMeans, data: Data,
         distances = partial(_sample_distances, sampler=d, kmeans=kmeans,
                             inter=inter, intra=intra)
         inter_, intra_ = np.array(pool.map(distances, seeds)).T
-    v_inter = inter_.var()
-    v_intra = intra_.var()
-    return (inter_.min() - v_inter) / (intra_.max() + v_intra)
+    s_inter = inter_.std()
+    s_intra = intra_.std()
+    return (inter_.min() - s_inter) / (intra_.max() + s_intra)
