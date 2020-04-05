@@ -28,8 +28,10 @@ def experiment(
     destination: str = 'result',
     omit_datetime: bool = False,
     verbose: bool = False,
+    exist_ok: bool = False,
 ):
-    destination = prepare_destination(destination, omit_datetime)
+    destination = prepare_destination(
+        destination, omit_datetime, exist_ok=exist_ok)
     dump_gin_args(destination)
     setup_logger(destination, verbose)
     logging.info(str(model))

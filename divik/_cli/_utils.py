@@ -40,11 +40,12 @@ def parse_args():
     return parser.parse_args()
 
 
-def prepare_destination(destination: str, omit_datetime: bool = False) -> str:
+def prepare_destination(destination: str, omit_datetime: bool = False,
+                        exist_ok: bool = False) -> str:
     if not omit_datetime:
         datetime = time.strftime("%Y%m%d-%H%M%S")
         destination = os.path.join(destination, datetime)
-    os.makedirs(destination)
+    os.makedirs(destination, exist_ok=exist_ok)
     return destination
 
 
