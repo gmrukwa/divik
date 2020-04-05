@@ -35,6 +35,8 @@ def experiment(
     logging.info(str(model))
     data = load_data()
     xy = load_xy()
+    # repeated dump just because the dataset locations are not tracked
+    dump_gin_args(destination)
     model.fit(data)
     save(model, destination, xy=xy)
 
