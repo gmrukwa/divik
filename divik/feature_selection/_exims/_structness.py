@@ -4,11 +4,11 @@ from typing import Callable, List, Tuple
 import numpy as np
 from skimage import feature as ft
 
-import divik.feature_selection._exims._matlab_alike as stats
+from ._matlab_alike import n_quantiles
 
 
 _DISCRETIZATION_LEVELS = 8
-_quantile_thresholds = partial(stats.n_quantiles,
+_quantile_thresholds = partial(n_quantiles,
                                N=_DISCRETIZATION_LEVELS - 1)
 _greycomatrix_backend = partial(ft.greycomatrix,
                                 distances=[1, np.sqrt(2), 1, np.sqrt(2)],
