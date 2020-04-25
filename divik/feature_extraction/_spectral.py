@@ -9,47 +9,6 @@ from sklearn.utils.validation import check_is_fitted
 from divik.core import configurable, Data
 
 
-def locally_adjusted_affinity(X: Data, d: str, neighbors: int = 7) -> Data:
-    """Calculate affinity with local density correction
-
-    Calculate affinity matrix based on input coordinates matrix and the number
-    of nearest neighbors.
-
-    Apply local scaling based on the k nearest neighbor
-
-    Parameters
-    ----------
-    X : array-like or sparse matrix, shape=(n_samples, n_features)
-        Training instances to cluster.
-
-    d : str
-        Measure of distance between points.
-
-    neighbors : int
-        The number of neighbors considered a local neighborhood.
-
-    Returns
-    -------
-
-    affinity : array, shape [n_samples, n_samples]
-        Adjusted affinity matrix.
-
-    References:
-    ----------
-    https://towardsdatascience.com/spectral-graph-clustering-and-optimal-number-of-clusters-estimation-32704189afbe
-    https://papers.nips.cc/paper/2619-self-tuning-spectral-clustering.pdf
-
-    """
-    distances = dist.pdist(X, metric=d)
-    knn_distances = np.sort(distances, axis=0)[neighbors].reshape(-1, 1)
-    local_scale = knn_distances.dot(knn_distances.T)
-    affinity = - distances ** 2 / local_scale
-    affinity[np.isnan(affinity)] = 0
-    affinity = np.exp(affinity)
-    np.fill_diagonal(affinity, 0)
-    return affinity
-
-
 @configurable
 class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
     """Spectral embedding for non-linear dimensionality reduction.
@@ -143,18 +102,22 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
             Returns the instance itself.
         """
         logging.debug('Computing locally adjusted affinities.')
-        affinity_matrix_ = locally_adjusted_affinity(
-            X, self.distance, self.n_neighbors)
+        d = dist.squareform(dist.pdist(X, metric=self.distance))
+
+        if 0 <= self.n_components <= 1:
+            n_components = max(int(self.n_components * X.shape[1]), 1)
+        else:
+            n_components = self.n_components
 
         logging.debug('Computing embedding of affinities.')
-        embedder = SpectralEmbedding(n_components=self.n_components,
-                                     affinity='precomputed',
-                                     gamma=None,
-                                     random_state=self.random_state,
-                                     eigen_solver=self.eigen_solver,
-                                     n_neighbors=self.n_neighbors,
-                                     n_jobs=self.n_jobs)
-        self.embedding_ = embedder.fit_transform(affinity_matrix_)
+        embedder = SpectralEmbedding(n_components=n_components,
+                                    affinity='precomputed_nearest_neighbors',
+                                    gamma=None,
+                                    random_state=self.random_state,
+                                    eigen_solver=self.eigen_solver,
+                                    n_neighbors=self.n_neighbors,
+                                    n_jobs=self.n_jobs)
+        self.embedding_ = embedder.fit_transform(d)
         return self
 
     def fit_transform(self, X, y=None):
@@ -173,6 +136,12 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         X_new : array-like, shape (n_samples, n_components)
         """
         return self.fit(X).embedding_
+    
+    def transform(self, X, y=None):
+        if not hasattr(self, 'embedding_') \
+                or self.embedding_.shape[0] != X.shape[0]:
+            self.fit(X, y)
+        return self.embedding_
 
     def save(self, destination: str):
         """Save embedding to a directory

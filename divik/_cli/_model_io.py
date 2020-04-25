@@ -5,6 +5,7 @@ import pickle
 
 import numpy as np
 import pandas as pd
+from sklearn.pipeline import Pipeline
 
 from divik.core import configurable, DivikResult
 
@@ -104,3 +105,40 @@ def save_cluster_paths(model, destination, **kwargs):
         'path': rev,
         'cluster_number': list(model.reverse_paths_.values())
     }).to_csv(os.path.join(destination, 'paths.csv'))
+
+@saver
+def save_pipeline(model, destination, **kwargs):
+    if not isinstance(model, Pipeline):
+        return
+    feature_selector = model[:-1]
+    clustering = model[-1]
+    if isinstance(clustering, Pipeline):
+        logging.info('Saving pre-extractor pickle.')
+        with open(os.path.join(destination, 'feature_pre_extractor.pkl'), 'wb') as pkl:
+            pickle.dump(feature_selector, pkl)
+        return save(clustering, destination, **kwargs)
+    logging.info('Saving model pickle.')
+    with open(os.path.join(destination, 'feature_selector.pkl'), 'wb') as pkl:
+        pickle.dump(feature_selector, pkl)
+    save(clustering, destination, **kwargs)
+    if not os.path.exists(os.path.join(destination, 'summary.json')):
+        logging.info("Saving JSON summary.")
+        with open(os.path.join(destination, 'summary.json'), 'w') as smr:
+            json.dump({
+                "depth": 1,
+                "number_of_clusters": int(clustering.n_clusters_),
+                "mean_cluster_size": \
+                    clustering.labels_.size / float(clustering.n_clusters_)
+            }, smr)
+    if not os.path.exists(os.path.join(destination, 'final_partition.npy')):
+        logging.info("Saving final partition.")
+        np.save(os.path.join(destination, 'final_partition.npy'), clustering.labels_)
+        np.savetxt(os.path.join(destination, 'final_partition.csv'), clustering.labels_,
+                delimiter=', ', fmt='%i')
+    if not os.path.exists(os.path.join(destination, 'partition-0.png')):
+        from .divik import save_merged
+        save_merged(
+            destination,
+            clustering.labels_.reshape(-1, 1),
+            xy=kwargs.get('xy', None)
+        )
