@@ -25,6 +25,7 @@ def load_xy(path=None):
 @gin.configurable
 def experiment(
     model=gin.REQUIRED,
+    steps_that_require_xy = None,
     destination: str = 'result',
     omit_datetime: bool = False,
     verbose: bool = False,
@@ -39,7 +40,10 @@ def experiment(
     xy = load_xy()
     # repeated dump just because the dataset locations are not tracked
     dump_gin_args(destination)
-    model.fit(data)
+    if steps_that_require_xy is None:
+        steps_that_require_xy = []
+    kwargs = {f'{step}__xy': xy for step in steps_that_require_xy}
+    model.fit(data, **kwargs)
     save(model, destination, xy=xy)
 
 
