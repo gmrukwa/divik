@@ -69,6 +69,9 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
 @configurable
 class NoSelector(BaseEstimator, StatSelectorMixin):
     """Dummy selector to use when no selection is supposed to be made."""
+    def __init__(self):
+        pass
+
     def fit(self, X, y=None):
         """Pass data forward
 
