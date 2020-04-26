@@ -27,7 +27,7 @@ def _greycomatrix(discrete_image: np.ndarray, mask: np.ndarray) -> np.ndarray:
     gcm = _greycomatrix_backend(discrete_image, levels=levels)
     if not all_allowed:
         gcm = gcm[:-1, :-1, :, :]
-    return np.dstack(gcm[:, :, i, i] for i in range(gcm.shape[2]))
+    return np.dstack([gcm[:, :, i, i] for i in range(gcm.shape[2])])
 
 
 def _ignorance_mask(image: np.ndarray, ignored: List) -> np.ndarray:
