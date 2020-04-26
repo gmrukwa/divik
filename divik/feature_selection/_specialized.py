@@ -95,6 +95,10 @@ import divik._utils    >>> import numpy as np
         min_features = max(
             self.min_features, self.min_features_rate * X.shape[1])
 
+        if min_features == X.shape[1]:
+            self.selected_ = np.ones((X.shape[1],), dtype=bool)
+            return self
+
         self.abundance_selector_ = GMMSelector(
             'mean', use_log=self.use_log, n_candidates=1,
             min_features=min_features, preserve_high=True,

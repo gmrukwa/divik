@@ -1,5 +1,10 @@
 """Unsupervised feature selection methods"""
-from ._stat_selector_mixin import StatSelectorMixin, NoSelector
+from ._stat_selector_mixin import (
+    SelectorMixin,
+    StatSelectorMixin,
+    NoSelector,
+)
+from ._exims import EximsSelector
 from ._gmm_selector import GMMSelector
 from ._outlier import (
     huberta_outliers,
@@ -14,8 +19,10 @@ from ._specialized import (
 
 
 __all__ = [
+    'SelectorMixin',
     'StatSelectorMixin',
     'NoSelector',
+    'EximsSelector',
     'GMMSelector',
     'huberta_outliers',
     'OutlierSelector',
