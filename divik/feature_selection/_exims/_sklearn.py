@@ -24,6 +24,18 @@ class EximsSelector(BaseEstimator, SelectorMixin):
     def __init__(self):
         super(EximsSelector, self).__init__()
 
+    def _get_support_mask(self):
+        """
+        Get the boolean mask indicating which features are selected
+
+        Returns
+        -------
+        support : boolean array of shape [# input features]
+            An element is True iff its corresponding feature is selected for
+            retention.
+        """
+        return self.selected_
+
     def fit(self, X, y=None, xy=None):
         """Learn data-driven feature thresholds from X.
 

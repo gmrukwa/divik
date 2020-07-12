@@ -6,7 +6,7 @@ from setuptools import setup, find_packages, Extension
 import sys
 import numpy
 
-__version__ = '2.5.5'
+__version__ = '2.5.8'
 
 LINUX_OPTS = {
     'extra_link_args': [
@@ -101,7 +101,6 @@ setup(
         'scikit-image>=0.14.1',
         'scikit-learn>=0.19.1',
         'tqdm>=4.11.2',
-        'typing>=3.6.2'
     ],
     setup_requires=[
         'numpy>=0.12.1',
