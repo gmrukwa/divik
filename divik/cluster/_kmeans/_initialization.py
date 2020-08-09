@@ -130,7 +130,8 @@ class Node(NamedTuple):
     right: KDTree = None
 
 
-def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) -> KDTree:
+def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) \
+        -> KDTree:
     """Make KDTree out of the data
 
     Construct a KDTree out of data using mean as a pivoting element.
@@ -154,7 +155,7 @@ def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) -> KDTree
     if selector is None:
         selector = np.ones((X.shape[0],), dtype=bool)
     if selector.sum() < 2 * leaf_size:
-        centroid = X[selector,:].mean(axis=0, keepdims=True)
+        centroid = X[selector, :].mean(axis=0, keepdims=True)
         return Leaf(centroid, X.shape[0])
     feature = X[selector, _feature_idx]
     thr = np.mean(feature)
@@ -164,8 +165,10 @@ def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) -> KDTree
     right_idx[selector] = np.logical_not(left_idx[selector])
     next_feature = (_feature_idx + 1) % X.shape[1]
     return Node(
-        left=make_tree(X, leaf_size=leaf_size, _feature_idx=next_feature, selector=left_idx),
-        right=make_tree(X, leaf_size=leaf_size, _feature_idx=next_feature, selector=right_idx),
+        left=make_tree(X, leaf_size=leaf_size,
+            _feature_idx=next_feature, selector=left_idx),
+        right=make_tree(X, leaf_size=leaf_size,
+            _feature_idx=next_feature, selector=right_idx),
     )
 
 
