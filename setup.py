@@ -94,6 +94,7 @@ setup(
         'dash-core-components==0.42.0',
         'dash-table==3.1.11',
         'dask[dataframe]>=2.14.0',
+        'dask-distance>=0.2.0',
         'h5py>=2.8.0',
         'kneed>=0.5.1',
         'numpy>=0.12.1',

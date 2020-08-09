@@ -8,6 +8,8 @@ dash-core-components==0.42.0
 dash-html-components==0.13.4
 dash-renderer==0.17.0
 dash-table==3.1.11
+dask-distance==0.2.0
+dask[dataframe]==2.14.0
 decorator==4.4.1
 Flask==1.1.1
 Flask-Compress==1.4.0
