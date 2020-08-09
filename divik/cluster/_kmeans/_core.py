@@ -1,6 +1,9 @@
 import logging
 from typing import Tuple, Union
 
+import dask_distance as ddst
+import dask.array as da
+import dask.dataframe as dd
 import numpy as np
 import scipy.spatial.distance as dst
 from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
@@ -43,8 +46,16 @@ class Labeling(object):
                 f"Was {data.shape[1]} and {centroids.shape[1]}"
             logging.error(msg)
             raise ValueError(msg)
-        distances = dst.cdist(data, centroids, self.distance_metric)
-        return np.argmin(distances, axis=1)
+
+        if data.shape[0] > 10000 or data.shape[1] > 1000:
+            X1 = da.from_array(data)
+            X2 = da.from_array(centroids)
+            distances = ddst.cdist(X1, X2, self.distance_metric)
+            labels = da.argmin(distances, axis=1).compute()
+        else:
+            distances = dst.cdist(data, centroids, self.distance_metric)
+            labels = np.argmin(distances, axis=1)
+        return labels
 
 
 def redefine_centroids(data: Data, labeling: IntLabels,
@@ -62,9 +73,14 @@ def redefine_centroids(data: Data, labeling: IntLabels,
             f"number of observations: {data.shape[0]}."
         logging.error(msg)
         raise ValueError(msg)
-    centroids = np.nan * np.zeros((len(label_set), data.shape[1]))
-    for label in label_set:
-        centroids[label] = np.mean(data[labeling == label], axis=0)
+    if data.shape[0] > 10000 or data.shape[1] > 1000:
+        X = dd.from_array(data)
+        y = dd.from_array(labeling)
+        centroids = X.groupby(y).mean().compute().values
+    else:
+        centroids = np.nan * np.zeros((len(label_set), data.shape[1]))
+        for label in label_set:
+            centroids[label] = np.mean(data[labeling == label], axis=0)
     return centroids
 
 
@@ -139,14 +155,18 @@ class _KMeans(SegmentationMethod):
             _validate_normalizable(data)
             data = normalize_rows(data)
         label_set = np.arange(number_of_clusters)
+        logging.debug('Initializing KMeans centroids.')
         centroids = self.initialize(data, number_of_clusters)
+        logging.debug('First centroids found.')
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
+        logging.debug('Labels assigned.')
         for _ in range(self.number_of_iterations):
             if np.unique(labels).size != number_of_clusters:
                 centroids, labels = self._fix_labels(
                     data, centroids, labels, number_of_clusters)
             if np.all(labels == old_labels):
+                logging.debug('Stability achieved.')
                 break
             old_labels = labels
             centroids = redefine_centroids(data, old_labels, label_set)

@@ -4,6 +4,8 @@ dash-html-components==0.13.4
 dash-core-components==0.42.0
 dash-renderer==0.17.0
 dash-table==3.1.11
+dask-distance
+dask[dataframe]
 gin-config
 h5py
 kneed
