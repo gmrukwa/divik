@@ -46,10 +46,15 @@ class Labeling(object):
                 f"Was {data.shape[1]} and {centroids.shape[1]}"
             logging.error(msg)
             raise ValueError(msg)
-        X1 = da.from_array(data)
-        X2 = da.from_array(centroids)
-        distances = ddst.cdist(X1, X2, self.distance_metric)
-        labels = da.argmin(distances, axis=1).compute()
+
+        if data.shape[0] > 10000 or data.shape[1] > 1000:
+            X1 = da.from_array(data)
+            X2 = da.from_array(centroids)
+            distances = ddst.cdist(X1, X2, self.distance_metric)
+            labels = da.argmin(distances, axis=1).compute()
+        else:
+            distances = dst.cdist(data, centroids, self.distance_metric)
+            labels = np.argmin(distances, axis=1)
         return labels
 
 
@@ -68,9 +73,14 @@ def redefine_centroids(data: Data, labeling: IntLabels,
             f"number of observations: {data.shape[0]}."
         logging.error(msg)
         raise ValueError(msg)
-    X = dd.from_array(data)
-    y = dd.from_array(labeling)
-    centroids = X.groupby(y).mean().compute().values
+    if data.shape[0] > 10000 or data.shape[1] > 1000:
+        X = dd.from_array(data)
+        y = dd.from_array(labeling)
+        centroids = X.groupby(y).mean().compute().values
+    else:
+        centroids = np.nan * np.zeros((len(label_set), data.shape[1]))
+        for label in label_set:
+            centroids[label] = np.mean(data[labeling == label], axis=0)
     return centroids
 
 
@@ -159,11 +169,8 @@ class _KMeans(SegmentationMethod):
                 logging.debug('Stability achieved.')
                 break
             old_labels = labels
-            logging.debug('Computing centroids update.')
             centroids = redefine_centroids(data, old_labels, label_set)
-            logging.debug('Centroids adjusted.')
             labels = self.labeling(data, centroids)
-            logging.debug('Labels re-assigned.')
         return labels, centroids
 
 
