@@ -6,7 +6,7 @@ from setuptools import setup, find_packages, Extension
 import sys
 import numpy
 
-__version__ = '2.5.8'
+__version__ = '2.5.9'
 
 LINUX_OPTS = {
     'extra_link_args': [
@@ -93,6 +93,7 @@ setup(
         'dash-html-components==0.13.4',
         'dash-core-components==0.42.0',
         'dash-table==3.1.11',
+        'dask[dataframe]>=2.14.0',
         'h5py>=2.8.0',
         'kneed>=0.5.1',
         'numpy>=0.12.1',

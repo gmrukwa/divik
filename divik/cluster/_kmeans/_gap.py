@@ -98,8 +98,10 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _gap(self, data, kmeans):
         if self._should_sample(data):
+            logging.debug("Selecting sampled GAP.")
             score = partial(sampled_gap, sample_size=self.sample_size)
         else:
+            logging.debug("Selecting full GAP.")
             score = gap
         return score(data, kmeans, n_jobs=self.n_jobs,
                      seed=self.seed + _BIG_PRIME * kmeans.n_clusters,
@@ -108,8 +110,11 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
     def _fit_kmeans(self, n_clusters, data):
         kmeans = clone(self.kmeans)
         kmeans.n_clusters = n_clusters
+        logging.debug(f"Fitting kmeans for {n_clusters} clusters.")
         kmeans.fit(data)
+        logging.debug(f"Fitted kmeans for {n_clusters} clusters.")
         idx, std = self._gap(data, kmeans)
+        logging.debug(f"GAP index: {idx}; std: {std}.")
         return kmeans, idx, std
 
     def fit(self, X, y=None):

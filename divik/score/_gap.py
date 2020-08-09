@@ -1,4 +1,5 @@
 from functools import partial
+import logging
 
 import numpy as np
 import pandas as pd
@@ -25,12 +26,18 @@ def _dispersion(data: Data, kmeans: KMeans) -> float:
     ]))
 
 
-def _sampled_dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans) \
-        -> float:
+def _sampled_dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans,
+                        fit: bool=True) -> float:
+    logging.debug(f"Sampling with seed {seed}.")
     X = sampler.get_sample(seed)
-    if kmeans.normalize_rows:
-        X = normalize_rows(X)
-    y = kmeans.fit_predict(X)
+    logging.debug(f"Sample shape {X.shape}")
+    if fit:
+        logging.debug("Fitting kmeans for sample.")
+        y = kmeans.fit_predict(X)
+    else:
+        logging.debug("Predicting labels for sample.")
+        y = kmeans.predict(X)
+    logging.debug("Computing dispersion for clustered sample.")
     clusters = pd.DataFrame(X).groupby(y)
     return float(np.mean([
         np.mean(dist.pdist(cluster_members.values, kmeans.distance))
