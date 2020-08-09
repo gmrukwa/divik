@@ -31,6 +31,9 @@ def _sampled_dispersion(seed: int, sampler: BaseSampler, kmeans: KMeans,
     logging.debug(f"Sampling with seed {seed}.")
     X = sampler.get_sample(seed)
     logging.debug(f"Sample shape {X.shape}")
+    if kmeans.normalize_rows:
+        logging.debug("Normalizing rows.")
+        X = normalize_rows(X)
     if fit:
         logging.debug("Fitting kmeans for sample.")
         y = kmeans.fit_predict(X)
