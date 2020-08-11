@@ -156,13 +156,16 @@ def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) \
         selector = np.ones((X.shape[0],), dtype=bool)
     if selector.sum() < 2 * leaf_size:
         centroid = X[selector, :].mean(axis=0, keepdims=True)
-        return Leaf(centroid, X.shape[0])
+        return Leaf(centroid, int(selector.sum()))
     feature = X[selector, _feature_idx]
     thr = np.mean(feature)
     left_idx = selector.copy()
     left_idx[selector] = feature < thr
     right_idx = selector.copy()
     right_idx[selector] = np.logical_not(left_idx[selector])
+    if left_idx[selector].all() or right_idx[selector].all():
+        centroid = X[selector, :].mean(axis=0, keepdims=True)
+        return Leaf(centroid, int(selector.sum()))
     next_feature = (_feature_idx + 1) % X.shape[1]
     return Node(
         left=make_tree(X, leaf_size=leaf_size,

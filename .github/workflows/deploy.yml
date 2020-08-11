@@ -12,7 +12,7 @@ on:
 env:
   MAJOR: ${{ 2 }}
   MINOR: ${{ 5 }}
-  FIXUP: ${{ 9 }}
+  FIXUP: ${{ 10 }}
   PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
   PACKAGE_INIT_FILE_VERSION_LINE: ${{ 1 }}
   PACKAGE_SETUP_FILE: ${{ 'setup.py' }}
