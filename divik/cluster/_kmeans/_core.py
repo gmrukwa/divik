@@ -28,11 +28,13 @@ from divik.core import (
 
 class Labeling(object):
     """Labels observations by closest centroids"""
-    def __init__(self, distance_metric: str):
+    def __init__(self, distance_metric: str, allow_dask: bool=False):
         """
         @param distance_metric: distance metric for estimation of closest
+        @param allow_dask: should be False if `multiprocessing.Pool` is spawned
         """
         self.distance_metric = distance_metric
+        self.allow_dask = allow_dask
 
     def __call__(self, data: Data, centroids: Centroids) -> IntLabels:
         """Find closest centroids
@@ -47,7 +49,7 @@ class Labeling(object):
             logging.error(msg)
             raise ValueError(msg)
 
-        if data.shape[0] > 10000 or data.shape[1] > 1000:
+        if self.allow_dask and (data.shape[0] > 10000 or data.shape[1] > 1000):
             X1 = da.from_array(data)
             X2 = da.from_array(centroids)
             distances = ddst.cdist(X1, X2, self.distance_metric)
@@ -59,12 +61,13 @@ class Labeling(object):
 
 
 def redefine_centroids(data: Data, labeling: IntLabels,
-                       label_set: IntLabels) -> Centroids:
+                       label_set: IntLabels, allow_dask: bool=False) -> Centroids:
     """Recompute centroids in data for given labeling
 
     @param data: observations
     @param labeling: partition of dataset into groups
     @param label_set: set of labels used for partitioning
+    @param allow_dask: should be False if `multiprocessing.Pool` is spawned
     @return: centroids
     """
     if data.shape[0] != labeling.size:
@@ -73,7 +76,7 @@ def redefine_centroids(data: Data, labeling: IntLabels,
             f"number of observations: {data.shape[0]}."
         logging.error(msg)
         raise ValueError(msg)
-    if data.shape[0] > 10000 or data.shape[1] > 1000:
+    if allow_dask and (data.shape[0] > 10000 or data.shape[1] > 1000):
         X = dd.from_array(data)
         y = dd.from_array(labeling)
         centroids = X.groupby(y).mean().compute().values
@@ -106,17 +109,20 @@ def _validate_normalizable(data):
 class _KMeans(SegmentationMethod):
     """K-means clustering"""
     def __init__(self, labeling: Labeling, initialize: Initialization,
-                 number_of_iterations: int=100, normalize_rows: bool=False):
+                 number_of_iterations: int=100, normalize_rows: bool=False,
+                 allow_dask: bool = False):
         """
         @param labeling: labeling method
         @param initialize: initialization method
         @param number_of_iterations: number of iterations
         @param normalize_rows: sets mean of row to 0 and norm to 1
+        @param allow_dask: should be False if `multiprocessing.Pool` is spawned
         """
         self.labeling = labeling
         self.initialize = initialize
         self.number_of_iterations = number_of_iterations
         self.normalize_rows = normalize_rows
+        self.allow_dask = allow_dask
 
     def _fix_labels(self, data, centroids, labels, n_clusters, retries=10):
         logging.debug('A label vanished - fixing')
@@ -169,7 +175,8 @@ class _KMeans(SegmentationMethod):
                 logging.debug('Stability achieved.')
                 break
             old_labels = labels
-            centroids = redefine_centroids(data, old_labels, label_set)
+            centroids = redefine_centroids(
+                data, old_labels, label_set, self.allow_dask)
             labels = self.labeling(data, centroids)
         return labels, centroids
 
@@ -238,6 +245,11 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
     normalize_rows : bool, default: False
         If True, rows are translated to mean of 0.0 and scaled to norm of 1.0.
+    
+    allow_dask : bool, default: False
+        If True, automatically selects dask as computations backend whenever
+        reasonable. Default `False` since it cannot be used together with
+        `multiprocessing.Pool` and everywhere `n_jobs` must be set to `1`.
 
     Attributes
     ----------
@@ -253,7 +265,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
     def __init__(self, n_clusters: int, distance: str = 'euclidean',
                  init: str = 'percentile', percentile: float = 95.,
                  leaf_size : Union[int, float] = 0.01,
-                 max_iter: int = 100, normalize_rows: bool = False):
+                 max_iter: int = 100, normalize_rows: bool = False,
+                 allow_dask: bool = False):
         super().__init__()
         self.n_clusters = n_clusters
         self.distance = distance
@@ -262,6 +275,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         self.leaf_size = leaf_size
         self.max_iter = max_iter
         self.normalize_rows = normalize_rows
+        self.allow_dask = allow_dask
 
     def fit(self, X, y=None):
         """Compute k-means clustering.
@@ -280,10 +294,11 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         initialize = _parse_initialization(
             self.init, self.distance, self.percentile, self.leaf_size)
         kmeans = _KMeans(
-            labeling=Labeling(self.distance),
+            labeling=Labeling(self.distance, allow_dask=self.allow_dask),
             initialize=initialize,
             number_of_iterations=self.max_iter,
-            normalize_rows=self.normalize_rows
+            normalize_rows=self.normalize_rows,
+            allow_dask=self.allow_dask,
         )
         X = np.asanyarray(X)
         self.labels_, self.cluster_centers_ = kmeans(

@@ -1,4 +1,4 @@
-__version__ = '2.5.10'
+__version__ = '2.5.11'
 
 from ._summary import plot, reject_split
 

@@ -4,3 +4,4 @@ languages:
 exclude:
 - /divik/core/gin_sklearn_configurables\.py
 - /divik/core/_gin_bugfix\.py
+- /gamred_native

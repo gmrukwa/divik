@@ -40,7 +40,7 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.5.10
+docker pull gmrukwa/divik:2.5.11
 ```
 
 ## Python package
@@ -79,7 +79,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.5.10
+pip install divik==2.5.11
 ```
 
 If you want to have compatibility with
@@ -92,27 +92,26 @@ pip install divik[gin]
 
 **Note:** Remember about `\` before `[` and `]` in `zsh` shell.
 
+# High-Volume Data Considerations
+
+If you are using DiviK to run the analysis that could fail to fit RAM of your
+computer, consider disabling the default parallelism and switch to
+[dask](https://dask.org/). It's easy to achieve through configuration:
+
+- set all parameters named `n_jobs` to `1`;
+- set all parameters named `allow_dask` to `True`.
+
+Never set `n_jobs>1` and `allow_dask=True` at the same time, the computations
+will freeze due to how `multiprocessing` and `dask` handle parallelism.
+
 # References
 
 This software is part of contribution made by [Data Mining Group of Silesian
 University of Technology](http://www.zaed.polsl.pl/), rest of which is
 published [here](https://github.com/ZAEDPolSl).
 
-+ [P. Widlak, G. Mrukwa, M. Kalinowska, M. Pietrowska, M. Chekan, J. Wierzgon, M.
-Gawin, G. Drazek and J. Polanska, "Detection of molecular signatures of oral
-squamous cell carcinoma and normal epithelium - application of a novel
-methodology for unsupervised segmentation of imaging mass spectrometry data,"
-Proteomics, vol. 16, no. 11-12, pp. 1613-21, 2016][1]
-+ [M. Pietrowska, H. C. Diehl, G. Mrukwa, M. Kalinowska-Herok, M. Gawin, M.
-Chekan, J. Elm, G. Drazek, A. Krawczyk, D. Lange, H. E. Meyer, J. Polanska, C.
-Henkel, P. Widlak, "Molecular profiles of thyroid cancer subtypes:
-Classification based on features of tissue revealed by mass spectrometry
-imaging," Biochimica et Biophysica Acta (BBA)-Proteins and Proteomics, 2016][2]
-+ [G. Mrukwa, G. Drazek, M. Pietrowska, P. Widlak and J. Polanska, "A Novel
-Divisive iK-Means Algorithm with Region-Driven Feature Selection as a Tool for
-Automated Detection of Tumour Heterogeneity in MALDI IMS Experiments," in
-International Conference on Bioinformatics and Biomedical Engineering, 2016][3]
++ [Mrukwa, G. and Polanska, J., 2020. DiviK: Divisive intelligent K-means for
+hands-free unsupervised clustering in biological big data. *arXiv preprint
+arXiv:2009.10706.*][1]
 
-[1]: http://onlinelibrary.wiley.com/doi/10.1002/pmic.201500458/pdf
-[2]: http://www.sciencedirect.com/science/article/pii/S1570963916302175
-[3]: http://link.springer.com/chapter/10.1007/978-3-319-31744-1_11
+[1]: https://arxiv.org/abs/2009.10706
