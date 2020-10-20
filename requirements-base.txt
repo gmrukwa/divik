@@ -14,7 +14,7 @@ networkx
 numpy
 pandas
 parameterized
-polyaxon=1.1.9
+polyaxon==1.1.9
 pylint
 scikit-image
 scikit-learn
