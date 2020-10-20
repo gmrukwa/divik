@@ -6,7 +6,7 @@ from setuptools import setup, find_packages, Extension
 import sys
 import numpy
 
-__version__ = '2.5.10'
+__version__ = '2.5.11'
 
 LINUX_OPTS = {
     'extra_link_args': [
@@ -108,9 +108,17 @@ setup(
         'numpy>=0.12.1',
     ],
     extras_require={
+        'all': [
+            'absl-py',
+            'gin-config',
+            'polyaxon',
+        ],
         'gin': [
             "absl-py",
             "gin-config",
+        ],
+        'polyaxon': [
+            "polyaxon",
         ],
     },
     python_requires='>=3.6',
