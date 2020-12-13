@@ -1,9 +1,6 @@
-from itertools import chain
-import glob
 import logging
 import os
 from functools import partial
-from typing import List
 
 import h5py
 import numpy as np
@@ -55,38 +52,3 @@ def load_data(path: str) -> u.Data:
         logging.error(message)
         raise IOError(message)
     return loader(path)
-
-
-DIVIK_RESULT_FNAME = 'result.pkl'
-
-
-def _result_path_patterns(slug: str) -> List[str]:
-    slug_pattern = '*{0}*'.format(slug)
-    direct = os.path.join(slug_pattern, DIVIK_RESULT_FNAME)
-    prefixed = os.path.join('**', slug_pattern, DIVIK_RESULT_FNAME)
-    suffixed = os.path.join(slug_pattern, '**', DIVIK_RESULT_FNAME)
-    bothfixed = os.path.join('**', slug_pattern, '**', DIVIK_RESULT_FNAME)
-    return list((direct, prefixed, suffixed, bothfixed))
-
-
-def _find_possible_directories(patterns: List[str]) -> List[str]:
-    possible_locations = chain.from_iterable(
-        glob.glob(pattern, recursive=True) for pattern in patterns)
-    possible_paths = list({
-        os.path.split(fname)[0] for fname in possible_locations
-    })
-    return possible_paths
-
-
-def as_divik_result_path(path_or_slug: str):
-    possible_location = os.path.join(path_or_slug, DIVIK_RESULT_FNAME)
-    if os.path.exists(possible_location):
-        return path_or_slug
-    patterns = _result_path_patterns(path_or_slug)
-    possible_paths = _find_possible_directories(patterns)
-    if not possible_paths:
-        raise FileNotFoundError(path_or_slug)
-    if len(possible_paths) > 1:
-        msg = 'Multiple possible result directories: {0}. Selecting {1}.'
-        logging.warning(msg.format(possible_paths, possible_paths[0]))
-    return possible_paths[0]

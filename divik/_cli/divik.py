@@ -9,7 +9,7 @@ import pandas as pd
 import skimage.io as sio
 
 from divik.core import build
-from divik._cli._data_io import DIVIK_RESULT_FNAME
+from divik.core.io import DIVIK_RESULT_FNAME
 from divik.cluster import DiviK, GAPSearch, KMeans
 import divik._summary as _smr
 import divik._cli._utils as sc

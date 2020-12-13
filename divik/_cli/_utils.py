@@ -12,7 +12,7 @@ import tqdm
 
 import divik.core as u
 from divik import __version__
-from divik._cli._data_io import load_data
+from divik.core.io import load_data
 
 
 def parse_args():

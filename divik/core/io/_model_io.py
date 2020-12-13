@@ -39,7 +39,7 @@ def save_divik(model, destination, **kwargs):
     if not isinstance(model.result_, DivikResult):
         logging.info("Skipping DiviK details save. Cause: result is None")
         return
-    from .divik import make_merged, save_merged
+    from divik._cli.divik import make_merged, save_merged
     logging.info('Saving DiviK details.')
     logging.info('Saving DivikResult pickle.')
     with open(os.path.join(destination, 'result.pkl'), 'wb') as pkl:
@@ -106,6 +106,7 @@ def save_cluster_paths(model, destination, **kwargs):
         'cluster_number': list(model.reverse_paths_.values())
     }).to_csv(os.path.join(destination, 'paths.csv'))
 
+
 @saver
 def save_pipeline(model, destination, **kwargs):
     if not isinstance(model, Pipeline):
@@ -136,7 +137,7 @@ def save_pipeline(model, destination, **kwargs):
         np.savetxt(os.path.join(destination, 'final_partition.csv'), clustering.labels_,
                 delimiter=', ', fmt='%i')
     if not os.path.exists(os.path.join(destination, 'partition-0.png')):
-        from .divik import save_merged
+        from divik._cli.divik import save_merged
         save_merged(
             destination,
             clustering.labels_.reshape(-1, 1),
