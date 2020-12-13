@@ -28,9 +28,17 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
             vals = np.mean(X, axis=0)
         elif self.stat == 'var':
             vals = np.var(X, axis=0)
+        elif self.stat == 'cv':
+            vals = np.std(X, axis=0) / np.mean(X, axis=0)
+        elif callable(self.stat):
+            vals = self.stat(X)
+            if vals.size != X.shape[1]:
+                raise RuntimeError(
+                    'Computed statistic shape mismatch {0}'.format(vals.shape))
         else:
-            logging.error('stat must be one of {"mean", "var"}')
-            raise ValueError('stat must be one of {"mean", "var"}')
+            msg = 'stat must be one of {"cv", "mean", "var"} or callable'
+            logging.error(msg)
+            raise ValueError(msg)
 
         if hasattr(self, 'use_log') and self.use_log:
             if np.any(vals < 0):
