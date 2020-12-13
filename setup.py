@@ -6,7 +6,7 @@ from setuptools import setup, find_packages, Extension
 import sys
 import numpy
 
-__version__ = '2.5.11'
+__version__ = '2.5.12'
 
 LINUX_OPTS = {
     'extra_link_args': [
@@ -89,10 +89,6 @@ setup(
     packages=find_packages(exclude=['test']),
     # @gmrukwa: https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=[
-        'dash==0.34.0',
-        'dash-html-components==0.13.4',
-        'dash-core-components==0.42.0',
-        'dash-table==3.1.11',
         'dask[dataframe]>=2.14.0',
         'dask-distance>=0.2.0',
         'h5py>=2.8.0',
@@ -111,14 +107,24 @@ setup(
         'all': [
             'absl-py',
             'gin-config',
+            'dash==0.34.0',
+            'dash-html-components==0.13.4',
+            'dash-core-components==0.42.0',
+            'dash-table==3.1.11',
             'polyaxon',
         ],
         'gin': [
-            "absl-py",
-            "gin-config",
+            'absl-py',
+            'gin-config',
+        ],
+        'inspect': [
+            'dash==0.34.0',
+            'dash-html-components==0.13.4',
+            'dash-core-components==0.42.0',
+            'dash-table==3.1.11',
         ],
         'polyaxon': [
-            "polyaxon",
+            'polyaxon',
         ],
     },
     python_requires='>=3.6',

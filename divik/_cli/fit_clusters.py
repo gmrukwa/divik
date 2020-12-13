@@ -3,7 +3,7 @@ import logging
 import gin
 
 from divik.core import dump_gin_args, parse_gin_args
-from ._model_io import save
+from divik.core.io import save
 from ._utils import (
     prepare_destination,
     setup_logger,

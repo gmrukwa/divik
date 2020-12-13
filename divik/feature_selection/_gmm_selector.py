@@ -91,9 +91,10 @@ import divik._utils    >>> import numpy as np
                  n_candidates: int = None, min_features: int = 1,
                  min_features_rate: float = .0, preserve_high: bool = True,
                  max_components: int = 10):
-        if stat not in {'mean', 'var'}:
-            logging.error('stat must be one of {"mean", "var"}')
-            raise ValueError('stat must be one of {"mean", "var"}')
+        if stat not in {'cv', 'mean', 'var'} and not callable(stat):
+            msg = 'stat must be one of {"cv", "mean", "var"} or callable'
+            logging.error(msg)
+            raise ValueError(msg)
         self.stat = stat
         self.use_log = use_log
         self.n_candidates = n_candidates
