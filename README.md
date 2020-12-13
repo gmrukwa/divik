@@ -92,6 +92,18 @@ pip install divik[gin]
 
 **Note:** Remember about `\` before `[` and `]` in `zsh` shell.
 
+If you want to launch `inspect` tool, you need to install extras with:
+
+```bash
+pip install divik[inspect]
+```
+
+You can install all extras with:
+
+```bash
+pip install divik[all]
+```
+
 # High-Volume Data Considerations
 
 If you are using DiviK to run the analysis that could fail to fit RAM of your
