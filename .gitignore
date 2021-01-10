@@ -107,3 +107,6 @@ ENV/
 data.csv
 xy.csv
 result
+
+# VS Code
+.vscode/settings.json

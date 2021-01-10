@@ -9,7 +9,7 @@
 
 Python implementation of Divisive iK-means (DiviK) algorithm.
 
-# Tools within this package
+## Tools within this package
 
 > This section will be further developed soon.
 
@@ -23,9 +23,9 @@ maps
 6) [`spectral`](divik/_cli/spectral.md) - generates spectral embedding of a
 dataset
 
-# Installation
+## Installation
 
-## Docker
+### Docker
 
 The recommended way to use this software is through
 [Docker](https://www.docker.com/). This is the most convenient way, if you want
@@ -40,10 +40,10 @@ docker pull gmrukwa/divik
 To install specific version, you can specify it in the command, e.g.:
 
 ```bash
-docker pull gmrukwa/divik:2.5.12
+docker pull gmrukwa/divik:3.0.0
 ```
 
-## Python package
+### Python package
 
 Prerequisites for installation of base package:
 
@@ -64,7 +64,7 @@ sudo apt-get install libgomp1
 OpenMP is available as part of LLVM. You may need to install in with:
 
 ```bash
-brew install llvm libomp
+conda install -c conda-forge "compilers>=1.0.4,!=1.1.0" llvm-openmp
 ```
 
 #### DiviK Installation
@@ -79,7 +79,7 @@ pip install divik
 or any stable tagged version, e.g.:
 
 ```bash
-pip install divik==2.5.12
+pip install divik==3.0.0
 ```
 
 If you want to have compatibility with
@@ -92,19 +92,13 @@ pip install divik[gin]
 
 **Note:** Remember about `\` before `[` and `]` in `zsh` shell.
 
-If you want to launch `inspect` tool, you need to install extras with:
-
-```bash
-pip install divik[inspect]
-```
-
 You can install all extras with:
 
 ```bash
 pip install divik[all]
 ```
 
-# High-Volume Data Considerations
+## High-Volume Data Considerations
 
 If you are using DiviK to run the analysis that could fail to fit RAM of your
 computer, consider disabling the default parallelism and switch to
@@ -113,16 +107,32 @@ computer, consider disabling the default parallelism and switch to
 - set all parameters named `n_jobs` to `1`;
 - set all parameters named `allow_dask` to `True`.
 
-Never set `n_jobs>1` and `allow_dask=True` at the same time, the computations
-will freeze due to how `multiprocessing` and `dask` handle parallelism.
+**Note:** Never set `n_jobs>1` and `allow_dask=True` at the same time, the
+computations will freeze due to how `multiprocessing` and `dask` handle
+parallelism.
 
-# References
+## Known Issues
+
+### Segmentation Fault
+
+It can happen if the he `gamred_native` package (part of `divik` package) was
+compiled with different numpy ABI than scikit-learn. This could happen if you
+used different set of compilers than the developers of the scikit-learn
+package.
+
+In such a case, a handler is defined to display the stack trace. If the trace
+comes from `_matlab_legacy.py`, the most probably this is the issue.
+
+To resolve the issue, consider following the installation instructions once
+again. The exact versions get updated to avoid the issue.
+
+## References
 
 This software is part of contribution made by [Data Mining Group of Silesian
 University of Technology](http://www.zaed.polsl.pl/), rest of which is
 published [here](https://github.com/ZAEDPolSl).
 
-+ [Mrukwa, G. and Polanska, J., 2020. DiviK: Divisive intelligent K-means for
+- [Mrukwa, G. and Polanska, J., 2020. DiviK: Divisive intelligent K-means for
 hands-free unsupervised clustering in biological big data. *arXiv preprint
 arXiv:2009.10706.*][1]
 
