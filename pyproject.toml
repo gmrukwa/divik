@@ -61,11 +61,8 @@ requires = [
 build-backend = "poetry.core.masonry.api"
 
 # TODO:
-# - add missing commit hook
 # - adjust CI process
 # - remove dev_setup.py
 # - drop support for Python 3.6
-# - update packages
-# - put gin params parsing to exposed module
 # - promote tested classes from other projects
 # - update docs
