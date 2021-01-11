@@ -4,6 +4,7 @@ from functools import partial
 
 import h5py
 import numpy as np
+import pandas as pd
 from scipy import io as scio
 
 import divik.core as u
@@ -52,3 +53,32 @@ def load_data(path: str) -> u.Data:
         logging.error(message)
         raise IOError(message)
     return loader(path)
+
+
+def try_load_data(path):
+    try:
+        data = load_data(path)
+        logging.debug('Data loaded successfully.')
+    except Exception as ex:
+        logging.error("Data loading failed with an exception.")
+        logging.error(repr(ex))
+        raise
+    return data
+
+
+def try_load_xy(path):
+    if path is not None:
+        try:
+            xy = load_data(path).astype(int)
+            logging.debug('Coordinates loaded successfully.')
+        except Exception as ex:
+            logging.error('Coordinates loading failed with an exception.')
+            logging.error(repr(ex))
+            raise
+    else:
+        xy = None
+    return xy
+
+
+def save_csv(array: np.ndarray, fname: str):
+    pd.DataFrame(array).to_csv(fname, header=False, index=False)

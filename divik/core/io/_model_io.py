@@ -2,12 +2,13 @@ import json
 import logging
 import os
 import pickle
+from functools import partial
 
 import numpy as np
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
-from divik.core import configurable, DivikResult
+from divik.core import configurable, visualize
 
 
 _SAVERS = set()
@@ -18,128 +19,114 @@ def saver(fn):
 
 
 def save(model, destination, **kwargs):
+    fname_fn = partial(os.path.join, destination)
     for save_fn in _SAVERS:
-        save_fn(model, destination, **kwargs)
+        save_fn(model, fname_fn, **kwargs)
 
 
 @saver
 @configurable(whitelist=['enabled'])
-def save_pickle(model, destination, enabled=True, **kwargs):
+def save_pickle(model, fname_fn, enabled=True, **kwargs):
     if not enabled:
         return
     logging.info('Saving model pickle.')
-    with open(os.path.join(destination, 'model.pkl'), 'wb') as pkl:
+    with open(fname_fn('model.pkl'), 'wb') as pkl:
         pickle.dump(model, pkl)
 
 
 @saver
-def save_divik(model, destination, **kwargs):
-    if not hasattr(model, 'result_'):
-        return
-    if not isinstance(model.result_, DivikResult):
-        logging.info("Skipping DiviK details save. Cause: result is None")
-        return
-    from divik._cli.divik import make_merged, save_merged
-    logging.info('Saving DiviK details.')
-    logging.info('Saving DivikResult pickle.')
-    with open(os.path.join(destination, 'result.pkl'), 'wb') as pkl:
-        pickle.dump(model.result_, pkl)
-    logging.info("Saving DiviK partitions.")
-    merged = make_merged(model.result_).astype(np.int64)
-    assert merged.shape[0] == model.result_.clustering.labels_.size
-    xy = kwargs.get('xy', None)
-    save_merged(destination, merged, xy)
-
-
-@saver
-def save_summary(model, destination, **kwargs):
-    if not hasattr(model, 'labels_') or \
-            not hasattr(model, 'n_clusters_') or \
-            not hasattr(model, 'depth_'):
+def save_summary(model, fname_fn, **kwargs):
+    if not hasattr(model, 'labels_'):
         return
     logging.info("Saving JSON summary.")
-    with open(os.path.join(destination, 'summary.json'), 'w') as smr:
+    n_clusters = getattr(model, 'n_clusters_', np.unique(model.label_).size)
+    with open(fname_fn('summary.json'), 'w') as smr:
         json.dump({
-            "depth": model.depth_,
-            "number_of_clusters": model.n_clusters_,
-            "mean_cluster_size": model.labels_.size / float(model.n_clusters_)
+            "depth": getattr(model, 'depth_', 1),
+            "number_of_clusters": n_clusters,
+            "mean_cluster_size": model.labels_.size / float(n_clusters)
         }, smr)
 
 
 @saver
-def save_labels(model, destination, **kwargs):
+def save_labels(model, fname_fn, **kwargs):
     if not hasattr(model, 'labels_'):
         return
     logging.info("Saving final partition.")
-    np.save(os.path.join(destination, 'final_partition.npy'), model.labels_)
-    np.savetxt(os.path.join(destination, 'final_partition.csv'), model.labels_,
+    np.save(fname_fn('final_partition.npy'), model.labels_)
+    np.savetxt(fname_fn('final_partition.csv'), model.labels_,
                delimiter=', ', fmt='%i')
+    if 'xy' in kwargs:
+        import skimage.io
+        visualization = visualize(model.labels_, xy=kwargs['xy'])
+        skimage.io.imsave(fname_fn('final_partition.png'), visualization)
 
 
 @saver
-def save_centroids(model, destination, **kwargs):
+def save_multiple_labels(model, fname_fn, **kwargs):
+    if not hasattr(model, 'estimators_') or \
+            not hasattr(model.estimators[0], 'labels_'):
+        return
+    logging.info("Saving all considered partitions.")
+    part = np.hstack([e.labels_.reshape(-1, 1) for e in model.estimators_])
+    np.save(fname_fn('partitions.npy'), part)
+    np.savetxt(fname_fn('partitions.csv'), part, delimiter=', ', fmt='%i')
+
+    import skimage.io
+
+    for i in range(part.shape[1]):
+        np.savetxt(fname_fn('partitions.{0}.csv').format(i),
+                   part[:, i].reshape(-1, 1), delimiter=', ', fmt='%i')
+        if 'xy' in kwargs:
+            visualization = visualize(part, xy=kwargs['xy'])
+            skimage.io.imsave(
+                fname_fn('partitions.{0}.png').format(i), visualization
+            )
+
+
+@saver
+def save_centroids(model, fname_fn, **kwargs):
     if not hasattr(model, 'centroids_'):
         return
     logging.info("Saving centroids.")
-    np.save(os.path.join(destination, 'centroids.npy'), model.centroids_)
-    np.savetxt(os.path.join(destination, 'centroids.csv'), model.centroids_,
+    np.save(fname_fn('centroids.npy'), model.centroids_)
+    np.savetxt(fname_fn('centroids.csv'), model.centroids_,
                delimiter=', ')
 
 
 @saver
-def save_filters(model, destination, **kwargs):
+def save_filters(model, fname_fn, **kwargs):
     if not hasattr(model, 'filters_'):
         return
     logging.info("Saving filters.")
-    np.save(os.path.join(destination, 'filters.npy'), model.filters_)
-    np.savetxt(os.path.join(destination, 'filters.csv'), model.filters_,
+    np.save(fname_fn('filters.npy'), model.filters_)
+    np.savetxt(fname_fn('filters.csv'), model.filters_,
                delimiter=', ', fmt='%i')
 
 
 @saver
-def save_cluster_paths(model, destination, **kwargs):
+def save_cluster_paths(model, fname_fn, **kwargs):
     if not hasattr(model, 'reverse_paths_'):
         return
     rev = ['_'.join(map(str, p)) for p in model.reverse_paths_]
     pd.DataFrame({
         'path': rev,
         'cluster_number': list(model.reverse_paths_.values())
-    }).to_csv(os.path.join(destination, 'paths.csv'))
+    }).to_csv(fname_fn('paths.csv'))
 
 
 @saver
-def save_pipeline(model, destination, **kwargs):
+def save_pipeline(model, fname_fn, **kwargs):
     if not isinstance(model, Pipeline):
         return
     feature_selector = model[:-1]
     clustering = model[-1]
     if isinstance(clustering, Pipeline):
         logging.info('Saving pre-extractor pickle.')
-        with open(os.path.join(destination, 'feature_pre_extractor.pkl'), 'wb') as pkl:
+        with open(fname_fn('feature_pre_extractor.pkl'), 'wb') as pkl:
             pickle.dump(feature_selector, pkl)
-        return save(clustering, destination, **kwargs)
+        return save(clustering, fname_fn, **kwargs)
     logging.info('Saving model pickle.')
-    with open(os.path.join(destination, 'feature_selector.pkl'), 'wb') as pkl:
+    with open(fname_fn('feature_selector.pkl'), 'wb') as pkl:
         pickle.dump(feature_selector, pkl)
-    save(clustering, destination, **kwargs)
-    if not os.path.exists(os.path.join(destination, 'summary.json')):
-        logging.info("Saving JSON summary.")
-        with open(os.path.join(destination, 'summary.json'), 'w') as smr:
-            json.dump({
-                "depth": 1,
-                "number_of_clusters": int(clustering.n_clusters_),
-                "mean_cluster_size": \
-                    clustering.labels_.size / float(clustering.n_clusters_)
-            }, smr)
-    if not os.path.exists(os.path.join(destination, 'final_partition.npy')):
-        logging.info("Saving final partition.")
-        np.save(os.path.join(destination, 'final_partition.npy'), clustering.labels_)
-        np.savetxt(os.path.join(destination, 'final_partition.csv'), clustering.labels_,
-                delimiter=', ', fmt='%i')
-    if not os.path.exists(os.path.join(destination, 'partition-0.png')):
-        from divik._cli.divik import save_merged
-        save_merged(
-            destination,
-            clustering.labels_.reshape(-1, 1),
-            xy=kwargs.get('xy', None)
-        )
+    save(clustering, fname_fn, **kwargs)

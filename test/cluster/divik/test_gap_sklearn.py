@@ -3,8 +3,30 @@ import numpy as np
 import numpy.testing as npt
 from sklearn.datasets import make_blobs
 
-from divik.cluster._divik._sklearn import DiviK
-from divik._cli.divik import _full_kmeans
+from divik.cluster import DiviK, GAPSearch, KMeans
+
+
+def _full_kmeans(**config):
+    distance = config.get('distance', 'correlation')
+    normalize_rows = config.get('normalize_rows', None)
+    single_kmeans = KMeans(
+        n_clusters=2,
+        distance=distance,
+        init='percentile',
+        percentile=config.get('distance_percentile', 99.0),
+        max_iter=config.get('max_iter', 100),
+        normalize_rows=normalize_rows,
+    )
+    kmeans = GAPSearch(
+        single_kmeans,
+        max_clusters=config.get('k_max', 50),
+        n_jobs=config.get('n_jobs', None),
+        seed=config.get('random_seed', 0),
+        n_trials=config.get('gap_trials', 10),
+        sample_size=config.get('sample_size', 10000),
+        verbose=config.get('verbose', False),
+    )
+    return kmeans
 
 
 full = _full_kmeans(distance='euclidean', max_iter=10)

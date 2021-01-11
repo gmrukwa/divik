@@ -3,12 +3,14 @@ import logging
 import gin
 
 from divik.core import dump_gin_args, parse_gin_args
-from divik.core.io import save
-from ._utils import (
-    prepare_destination,
-    setup_logger,
+from divik.core.io import (
+    save,
     try_load_data,
     try_load_xy,
+)
+from divik.core._utils import (
+    prepare_destination,
+    setup_logger,
 )
 
 

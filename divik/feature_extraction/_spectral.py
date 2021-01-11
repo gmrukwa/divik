@@ -6,7 +6,8 @@ from sklearn.base import BaseEstimator
 from sklearn.manifold import SpectralEmbedding
 from sklearn.utils.validation import check_is_fitted
 
-from divik.core import configurable, Data
+from divik.core import configurable
+from divik.core.io import save_csv
 
 
 @configurable
@@ -156,7 +157,6 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         from functools import partial
         import os
         import pickle
-        import divik._cli._utils as scr
         fname = partial(os.path.join, destination)
 
         logging.debug('Saving model.')
@@ -164,5 +164,5 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
             pickle.dump(self, pkl)
 
         logging.debug('Saving embedding.')
-        scr.save_csv(self.embedding_, fname('embedding.csv'))
+        save_csv(self.embedding_, fname('embedding.csv'))
         np.save(fname('embedding.npy'), self.embedding_)

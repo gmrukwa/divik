@@ -61,7 +61,6 @@ requires = [
 build-backend = "poetry.core.masonry.api"
 
 # TODO:
-# - remove unused scripts
 # - update gin fix
 # - add missing commit hook
 # - adjust CI process

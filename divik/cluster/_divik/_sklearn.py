@@ -1,6 +1,6 @@
 from functools import partial
 import sys
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,9 @@ from divik.core import (
     DivikResult,
     normalize_rows,
     maybe_pool,
+    visualize,
 )
+from divik.core.io import saver
 from ._backend import divik
 from ._report import DivikReporter
 
@@ -138,7 +140,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     Examples
     --------
 
-    >>> from divik.cluster import DunnDiviK
+    >>> from divik.cluster import DiviK
     >>> from sklearn.datasets import make_blobs
     >>> X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
     ...                   random_state=42)
@@ -398,3 +400,41 @@ def _predict_path(observation: np.ndarray, result: DivikResult) -> Tuple[int]:
         division = division.subregions[label]
     path = tuple(path) if len(path) else (0,)
     return path
+
+
+def make_merged(result: Optional[DivikResult]) -> np.ndarray:
+    depth = summary.depth(result)
+    return np.hstack([
+        summary.merged_partition(result, limit + 1).reshape(-1, 1)
+        for limit in range(depth)
+    ])
+
+
+def save_merged(fname_fn, merged: np.ndarray, xy: np.ndarray=None):
+    np.savetxt(fname_fn('partitions.csv'), merged, delimiter=', ', fmt='%i')
+    np.save(fname_fn('partitions.npy'), merged)
+    import skimage.io
+    if xy is not None:
+        for level in range(merged.shape[1]):
+            np.save(
+                fname_fn('partitions.{0}.npy'.format(level)),
+                merged[:, level]
+            )
+            visualization = visualize(merged[:, level], xy=xy)
+            image_name = fname_fn('partitions.{0}.png'.format(level))
+            skimage.io.imsave(image_name, visualization)
+
+
+@saver
+def save_divik(model, fname_fn, **kwargs):
+    if not hasattr(model, 'result_'):
+        return
+    import logging
+    if not isinstance(model.result_, DivikResult):
+        logging.info("Skipping DiviK details save. Cause: result is None")
+        return
+    logging.info("Saving DiviK partitions.")
+    merged = make_merged(model.result_).astype(np.int64)
+    assert merged.shape[0] == model.result_.clustering.labels_.size
+    xy = kwargs.get('xy', None)
+    save_merged(fname_fn, merged, xy)
