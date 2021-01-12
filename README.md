@@ -27,12 +27,6 @@ To install latest stable version use:
 docker pull gmrukwa/divik
 ```
 
-To install specific version, you can specify it in the command, e.g.:
-
-```bash
-docker pull gmrukwa/divik:3.0.0
-```
-
 ### Python package
 
 Prerequisites for installation of base package:
@@ -64,12 +58,6 @@ package:
 
 ```bash
 pip install divik
-```
-
-or any stable tagged version, e.g.:
-
-```bash
-pip install divik==3.0.0
 ```
 
 If you want to have compatibility with

@@ -5,22 +5,14 @@ on:
     branches:
       - master
       - develop
+      - 3.0-rc
   schedule:
     - cron: '0 17 * * *'
 
 
 env:
-  MAJOR: ${{ 2 }}
-  MINOR: ${{ 5 }}
-  FIXUP: ${{ 12 }}
-  PACKAGE_INIT_FILE: ${{ 'divik/__init__.py' }}
-  PACKAGE_INIT_FILE_VERSION_LINE: ${{ 1 }}
-  PACKAGE_SETUP_FILE: ${{ 'setup.py' }}
-  PACKAGE_SETUP_FILE_VERSION_LINE: ${{ 9 }}
   DOCKER_REPO: ${{ 'gmrukwa/divik' }}
-  IS_ALPHA: ${{ github.event_name == 'pull_request' }}
-  IS_BETA: ${{ github.event_name == 'push' && endsWith(github.event.ref, 'heads/develop') }}
-
+  
 
 jobs:
   push_images:
@@ -30,22 +22,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Embed version to divik.__version__
-        uses: ./.github/actions/patch-version
+      - name: Setup Python
+        uses: actions/setup-python@v1
         with:
-          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
-      - name: Embed version to setup.py
-        uses: ./.github/actions/patch-version
-        with:
-          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
+          python-version: '3.8'
+      - name: Setup poetry
+        uses: abatilo/actions-poetry@v2.1.0
       - name: Authenticate to Docker Hub
         run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
         env:
@@ -59,72 +41,54 @@ jobs:
             .
       - name: Push annotated images
         run: |
-          if $IS_ALPHA; then
-            STAGE=alpha
-          elif $IS_BETA; then
-            STAGE=beta
-          fi
-          echo "STAGE=$STAGE"
-          docker tag deployment $DOCKER_REPO:$MAJOR.$MINOR.$FIXUP${STAGE:+-$STAGE}
-          docker tag deployment $DOCKER_REPO:$MAJOR.$MINOR${STAGE:+-$STAGE}
-          docker tag deployment $DOCKER_REPO:$MAJOR${STAGE:+-$STAGE}
-          docker push $DOCKER_REPO:$MAJOR.$MINOR.$FIXUP${STAGE:+-$STAGE}
-          docker push $DOCKER_REPO:$MAJOR.$MINOR${STAGE:+-$STAGE}
-          docker push $DOCKER_REPO:$MAJOR${STAGE:+-$STAGE}
+          VERSION=$(poetry version -s)
+          echo "VERSION=$VERSION"
+          docker tag deployment $DOCKER_REPO:$VERSION
+          docker push $DOCKER_REPO:$VERSION
       - name: Push latest image for master branch
         if: github.event_name == 'push' && endsWith(github.event.ref, 'heads/master')
         run: |
           docker tag deployment $DOCKER_REPO:latest
           docker push $DOCKER_REPO:latest
 
-  push_manylinux_pypi_package:
+  push_sdist:
 
     if: github.event_name != 'schedule'
 
-    runs-on: ubuntu-latest
-
+    name: Source distribution
+    runs-on: 'ubuntu-latest'
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-      - name: Embed version to divik.__version__
-        uses: ./.github/actions/patch-version
+      - name: Setup Python
+        uses: actions/setup-python@v1
         with:
-          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
-      - name: Embed version to setup.py
-        uses: ./.github/actions/patch-version
-        with:
-          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
-      # TODO: Parallelize this as a matrix
+          python-version: '3.8'
+      - name: Setup poetry
+        uses: abatilo/actions-poetry@v2.1.0
       - name: Build Python package
-        uses: ./.github/actions/build-python-dist
+        run: |
+          poetry install
+          poetry build -f sdist
       - name: Publish Python package
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
 
-  push_windows_pypi_package:
+  push_wheels:
 
     if: github.event_name != 'schedule'
 
-    runs-on: windows-latest
     strategy:
       matrix:
         python-version: [ '3.6', '3.7', '3.8' ]
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
       fail-fast: false
-    name: Python ${{ matrix.python-version }} Windows build
-    env:
-      TWINE_USERNAME: __token__
-      TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-
+    name: Python ${{ matrix.python-version }} ${{ matrix.os }} wheel
+    runs-on: ${{ matrix.os }}
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -132,84 +96,21 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Embed version to divik.__version__
-        uses: ./.github/actions/patch-version
-        with:
-          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
-      - name: Embed version to setup.py
-        uses: ./.github/actions/patch-version
-        with:
-          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
-      - name: Install build dependencies
-        run: pip install wheel twine
-      - name: Install dependencies
-        run: pip install -r requirements-base.txt
-      - name: Build Python package
-        run: pip wheel . -w dist
-      - name: Publish Python package
-        run: twine upload dist/divik*whl
-
-  push_macos_pypi_package:
-
-    if: github.event_name != 'schedule'
-
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        python-version: [ '3.6', '3.7', '3.8' ]
-      fail-fast: false
-    name: Python ${{ matrix.python-version }} MacOS build
-    env:
-      TWINE_USERNAME: __token__
-      TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-      - name: Setup Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Embed version to divik.__version__
-        uses: ./.github/actions/patch-version
-        with:
-          packageInitFile: ${{ env.PACKAGE_INIT_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_INIT_FILE_VERSION_LINE }}
-      - name: Embed version to setup.py
-        uses: ./.github/actions/patch-version
-        with:
-          packageInitFile: ${{ env.PACKAGE_SETUP_FILE }}
-          isAlpha: ${{ env.IS_ALPHA }}
-          isBeta: ${{ env.IS_BETA }}
-          version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.FIXUP }}
-          line: ${{ env.PACKAGE_SETUP_FILE_VERSION_LINE }}
-      - name: Install build dependencies
-        run: pip install wheel twine
-      - name: Install dependencies
-        run: pip install -r requirements-base.txt
-      - name: Install OpenMP
-        run: brew install libomp
-      - name: Build Python package
+      - name: Setup poetry
+        uses: abatilo/actions-poetry@v2.1.0
+      - name: Setup C++ env
         run: |
           echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH
           echo "C_INCLUDE_PATH=/usr/local/opt/llvm/include:$C_INCLUDE_PATH" >> $GITHUB_ENV
           echo "CPLUS_INCLUDE_PATH=/usr/local/opt/llvm/include:$CPLUS_INCLUDE_PATH" >> $GITHUB_ENV
           echo "LIBRARY_PATH=/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$LIBRARY_PATH" >> $GITHUB_ENV
           echo "DYLD_LIBRARY_PATH=/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-          pip wheel . -w dist
-        env:
-          CC: /usr/local/opt/llvm/bin/clang
-          CXX: /usr/local/opt/llvm/bin/clang++
+          echo "CC=/usr/local/opt/llvm/bin/clang" >> $GITHUB_ENV
+          echo "CXX=/usr/local/opt/llvm/bin/clang++" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
+      - name: Build Python package
+        run: |
+          poetry install
+          poetry build -f wheel
       - name: Publish Python package
-        run: twine upload dist/divik*whl
+        run: poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}

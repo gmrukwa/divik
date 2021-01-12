@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "divik"
-version = "3.0.0"
+version = "3.0.0-alpha.0"
 description = "Divisive iK-means algorithm implementation"
 authors = ["Grzegorz Mrukwa <g.mrukwa@gmail.com>"]
 license = "Apache-2.0"
@@ -33,6 +33,7 @@ python = "^3.6"
 dask = {extras = ["dataframe"], version = ">=2.14.0"}
 dask-distance = "^0.2.0"
 h5py = ">=2.8.0"
+importlib-metadata = {version = "^1.0", python = "<3.8"}
 kneed = ">=0.5.1"
 matplotlib = "^3.3.3"
 numpy = ">=0.12.1"
