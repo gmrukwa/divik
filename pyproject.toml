@@ -62,7 +62,6 @@ build-backend = "poetry.core.masonry.api"
 
 # TODO:
 # - adjust CI process
-# - remove dev_setup.py
 # - drop support for Python 3.6
 # - promote tested classes from other projects
 # - update docs
