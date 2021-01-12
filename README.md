@@ -45,7 +45,7 @@ sudo apt-get install libgomp1
 
 #### Installation of OpenMP for Mac
 
-OpenMP is available as part of LLVM. You may need to install in with:
+OpenMP is available as part of LLVM. You may need to install it with conda:
 
 ```bash
 conda install -c conda-forge "compilers>=1.0.4,!=1.1.0" llvm-openmp

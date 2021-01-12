@@ -50,6 +50,8 @@ all = ["gin-config", "polyaxon"]
 
 [tool.poetry.dev-dependencies]
 parameterized = "^0.8.1"
+polyaxon = "^1.5.0"
+gin-config = "^0.4.0"
 
 [tool.poetry.scripts]
 fit-clusters = "divik._cli.fit_clusters:main"
