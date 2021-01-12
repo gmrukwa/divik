@@ -1,12 +1,12 @@
+import uuid
 from contextlib import contextmanager
 from typing import Union
-import uuid
 
 from sklearn.model_selection import StratifiedShuffleSplit
 
-from ._core import BaseSampler, ParallelSampler
 from divik.core import configurable, share
 
+from ._core import BaseSampler, ParallelSampler
 
 _DATA = {}
 
@@ -34,8 +34,8 @@ class StratifiedSampler(BaseSampler):
     y_ : array_like, shape (n_rows,)
         Group labels
     """
-    def __init__(self, n_rows: Union[int, float] = 100,
-                 n_samples: int = None):
+
+    def __init__(self, n_rows: Union[int, float] = 100, n_samples: int = None):
         self.n_rows = n_rows
         self.n_samples = n_samples
 
@@ -79,7 +79,8 @@ class StratifiedSampler(BaseSampler):
             Returns the drawn sample
         """
         split = StratifiedShuffleSplit(
-            n_splits=1, train_size=self.n_rows, random_state=seed)
+            n_splits=1, train_size=self.n_rows, random_state=seed
+        )
         for idx, _ in split.split(self.X_, self.y_):
             return self.X_[idx]
 

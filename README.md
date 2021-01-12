@@ -104,6 +104,15 @@ comes from `_matlab_legacy.py`, the most probably this is the issue.
 To resolve the issue, consider following the installation instructions once
 again. The exact versions get updated to avoid the issue.
 
+## Contributing
+
+Contribution guide will be developed soon.
+
+```bash
+isort -m 3 --fgw 3 --tc .
+black -t py36 .
+```
+
 ## References
 
 This software is part of contribution made by [Data Mining Group of Silesian

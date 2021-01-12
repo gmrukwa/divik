@@ -1,8 +1,9 @@
-from abc import ABCMeta
 import logging
+from abc import ABCMeta
 
 import numpy as np
 from sklearn.base import BaseEstimator
+
 try:
     from sklearn.feature_selection._base import SelectorMixin
 except ModuleNotFoundError:
@@ -22,42 +23,46 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
     Additionally, provides a `_to_characteristics` and `_to_raw` implementations
     given `stat`, optionally `use_log` and `preserve_high`.
     """
+
     def _to_characteristics(self, X):
         """Extract & normalize characteristics from data"""
-        if self.stat == 'mean':
+        if self.stat == "mean":
             vals = np.mean(X, axis=0)
-        elif self.stat == 'var':
+        elif self.stat == "var":
             vals = np.var(X, axis=0)
-        elif self.stat == 'cv':
+        elif self.stat == "cv":
             vals = np.std(X, axis=0) / np.mean(X, axis=0)
         elif callable(self.stat):
             vals = self.stat(X)
             if vals.size != X.shape[1]:
                 raise RuntimeError(
-                    'Computed statistic shape mismatch {0}'.format(vals.shape))
+                    "Computed statistic shape mismatch {0}".format(vals.shape)
+                )
         else:
             msg = 'stat must be one of {"cv", "mean", "var"} or callable'
             logging.error(msg)
             raise ValueError(msg)
 
-        if hasattr(self, 'use_log') and self.use_log:
+        if hasattr(self, "use_log") and self.use_log:
             if np.any(vals < 0):
-                logging.error("Feature characteristic cannot be negative "
-                              "with log filtering")
-                raise ValueError("Feature characteristic cannot be negative "
-                                 "with log filtering")
+                logging.error(
+                    "Feature characteristic cannot be negative with log filtering"
+                )
+                raise ValueError(
+                    "Feature characteristic cannot be negative with log filtering"
+                )
             vals = np.log(vals)
 
-        if hasattr(self, 'preserve_high') and not self.preserve_high:
+        if hasattr(self, "preserve_high") and not self.preserve_high:
             vals = -vals
 
         return vals
 
     def _to_raw(self, threshold):
         """Convert threshold to the feature characteristic space"""
-        if hasattr(self, 'preserve_high') and not self.preserve_high:
+        if hasattr(self, "preserve_high") and not self.preserve_high:
             threshold = -threshold
-        if hasattr(self, 'use_log') and self.use_log:
+        if hasattr(self, "use_log") and self.use_log:
             threshold = np.exp(threshold)
         return threshold
 
@@ -77,6 +82,7 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
 @configurable
 class NoSelector(BaseEstimator, StatSelectorMixin):
     """Dummy selector to use when no selection is supposed to be made."""
+
     def __init__(self):
         pass
 

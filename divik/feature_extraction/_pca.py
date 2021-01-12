@@ -1,8 +1,8 @@
 """Implementation of PCA with data-driven variance explanation limit"""
 import warnings
 
-from kneed import KneeLocator
 import numpy as np
+from kneed import KneeLocator
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.decomposition import PCA
 
@@ -15,11 +15,13 @@ def knee(explained_variance) -> int:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            limit = KneeLocator(x=xaxis,
-                                y=explained_variance,
-                                S=1.,
-                                direction='increasing',
-                                curve='concave').knee
+            limit = KneeLocator(
+                x=xaxis,
+                y=explained_variance,
+                S=1.0,
+                direction="increasing",
+                curve="concave",
+            ).knee
     except IndexError:  # This is needed for kneed >= 0.5.3
         limit = None
     if limit is not None:
@@ -61,6 +63,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
     n_components_ : int
         The number of selected components.
     """
+
     def __init__(self, whiten: bool = False, refit: bool = False):
         self.whiten = whiten
         self.refit = refit
@@ -82,15 +85,26 @@ class KneePCA(BaseEstimator, TransformerMixin):
             Returns the instance itself.
         """
         # Note: random_state is not used in this config!
-        self.pca_ = PCA(n_components=None, copy=True, whiten=self.whiten,
-                        svd_solver='full', tol=0.0, iterated_power='auto',
-                        random_state=None).fit(X)
-        self.n_components_ = knee(
-            np.cumsum(self.pca_.explained_variance_ratio_))
+        self.pca_ = PCA(
+            n_components=None,
+            copy=True,
+            whiten=self.whiten,
+            svd_solver="full",
+            tol=0.0,
+            iterated_power="auto",
+            random_state=None,
+        ).fit(X)
+        self.n_components_ = knee(np.cumsum(self.pca_.explained_variance_ratio_))
         if self.refit:
-            self.pca_ = PCA(n_components=self.n_components_, copy=True,
-                            whiten=self.whiten, svd_solver='full', tol=0.0,
-                            iterated_power='auto', random_state=None).fit(X)
+            self.pca_ = PCA(
+                n_components=self.n_components_,
+                copy=True,
+                whiten=self.whiten,
+                svd_solver="full",
+                tol=0.0,
+                iterated_power="auto",
+                random_state=None,
+            ).fit(X)
         return self
 
     def transform(self, X, y=None):
@@ -121,7 +135,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
         >>> pca.transform(X) # doctest: +SKIP
         """
         loads = self.pca_.transform(X)
-        return loads[:, :self.n_components_]
+        return loads[:, : self.n_components_]
 
     def inverse_transform(self, X):
         """Transform data back to its original space.

@@ -28,9 +28,10 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
     If you need the original sampler, you can get a clone (not fit to
     the data).
     """
+
     def __iter__(self):
         """Iter through `n_samples` samples or infinitely if unspecified"""
-        if hasattr(self, 'n_samples') and self.n_samples is not None:
+        if hasattr(self, "n_samples") and self.n_samples is not None:
             samples = range(self.n_samples)
         else:
             samples = count()
@@ -72,6 +73,7 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
 
 class ParallelSampler:
     """Helper class for sharing the sampler functionality"""
+
     def __init__(self, sampler: BaseSampler):
         self.sampler = sampler
 

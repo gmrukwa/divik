@@ -44,12 +44,12 @@ class BaseSamplerTest(unittest.TestCase):
             cloned = sampler_.clone()
             self.assertIsInstance(cloned, DummySampler)
             self.assertEqual(sampler.whatever, cloned.whatever)
-    
+
     def test_parallel_sampler_is_not_iterable(self):
         sampler = DummySampler(1)
         with sampler.parallel() as sampler_, self.assertRaises(TypeError):
             iter(sampler_)
-    
+
     def test_parallel_sampler_is_not_fittable(self):
         sampler = DummySampler(1)
         with sampler.parallel() as sampler_, self.assertRaises(AttributeError):

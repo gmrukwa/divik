@@ -3,14 +3,11 @@ import logging
 import gin
 
 from divik.core import dump_gin_args, parse_gin_args
+from divik.core._utils import prepare_destination, setup_logger
 from divik.core.io import (
     save,
     try_load_data,
     try_load_xy,
-)
-from divik.core._utils import (
-    prepare_destination,
-    setup_logger,
 )
 
 
@@ -27,14 +24,13 @@ def load_xy(path=None):
 @gin.configurable
 def experiment(
     model=gin.REQUIRED,
-    steps_that_require_xy = None,
-    destination: str = 'result',
+    steps_that_require_xy=None,
+    destination: str = "result",
     omit_datetime: bool = False,
     verbose: bool = False,
     exist_ok: bool = False,
 ):
-    destination = prepare_destination(
-        destination, omit_datetime, exist_ok=exist_ok)
+    destination = prepare_destination(destination, omit_datetime, exist_ok=exist_ok)
     dump_gin_args(destination)
     setup_logger(destination, verbose)
     logging.info(str(model))
@@ -44,7 +40,7 @@ def experiment(
     dump_gin_args(destination)
     if steps_that_require_xy is None:
         steps_that_require_xy = []
-    kwargs = {f'{step}__xy': xy for step in steps_that_require_xy}
+    kwargs = {f"{step}__xy": xy for step in steps_that_require_xy}
     model.fit(data, **kwargs)
     save(model, destination, xy=xy)
 
@@ -54,5 +50,5 @@ def main():
     experiment()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

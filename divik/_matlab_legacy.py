@@ -2,8 +2,9 @@
 import faulthandler
 from contextlib import contextmanager
 
-import gamred_native as gn
 import numpy as np
+
+import gamred_native as gn
 
 
 @contextmanager
@@ -15,8 +16,7 @@ def sigsegv_handler():
         faulthandler.disable()
 
 
-def find_thresholds(values: np.ndarray, max_components: int = 10) \
-        -> np.ndarray:
+def find_thresholds(values: np.ndarray, max_components: int = 10) -> np.ndarray:
     """Find candidate thresholds for decomposition of values by GMM.
 
     Parameters

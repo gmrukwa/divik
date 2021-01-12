@@ -15,5 +15,5 @@ class HubertaTest(unittest.TestCase):
         self.assertEqual(data[outliers][2], 16.3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -38,5 +38,5 @@ class StratifiedSamplerTest(unittest.TestCase):
             self.assertTrue((row[np.newaxis, :] == X).all(axis=1).any(axis=0))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

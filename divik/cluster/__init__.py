@@ -1,16 +1,14 @@
 """Clustering methods"""
+from ._divik import DiviK
 from ._kmeans import (
     DunnSearch,
     GAPSearch,
     KMeans,
 )
-from ._divik import (
-    DiviK,
-)
 
 __all__ = [
-    'DiviK',
-    'DunnSearch',
-    'GAPSearch',
-    'KMeans',
+    "DiviK",
+    "DunnSearch",
+    "GAPSearch",
+    "KMeans",
 ]

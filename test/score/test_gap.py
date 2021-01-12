@@ -8,8 +8,12 @@ import divik.score as sc
 
 
 def dummy_kmeans(labels, cluster_centers):
-    kmeans = km.KMeans(n_clusters=len(cluster_centers), distance='euclidean',
-                       init='extreme', max_iter=10)
+    kmeans = km.KMeans(
+        n_clusters=len(cluster_centers),
+        distance="euclidean",
+        init="extreme",
+        max_iter=10,
+    )
     kmeans.labels_ = labels
     kmeans.cluster_centers_ = cluster_centers
     return kmeans
@@ -17,8 +21,7 @@ def dummy_kmeans(labels, cluster_centers):
 
 class TestGap(unittest.TestCase):
     def setUp(self):
-        self.X, _ = make_blobs(n_samples=10000, n_features=2, centers=3,
-                               random_state=0)
+        self.X, _ = make_blobs(n_samples=10000, n_features=2, centers=3, random_state=0)
         self.kmeans_3 = km.KMeans(n_clusters=3).fit(self.X)
         self.kmeans_7 = km.KMeans(n_clusters=7).fit(self.X)
 

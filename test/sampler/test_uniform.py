@@ -3,7 +3,7 @@ import unittest
 from scipy.spatial.distance import cdist
 from sklearn.datasets import make_blobs
 
-from divik.sampler._uniform_sampler import UniformSampler, UniformPCASampler
+from divik.sampler._uniform_sampler import UniformPCASampler, UniformSampler
 
 
 def data():
@@ -38,10 +38,9 @@ class UniformPCASamplerTest(unittest.TestCase):
         X, _ = data()
         sampler = UniformPCASampler().fit(X)
         X_rand = sampler.get_sample(0)
-        d = float(cdist([X.mean(axis=0)], [X_rand.mean(axis=0)],
-                        metric='correlation'))
+        d = float(cdist([X.mean(axis=0)], [X_rand.mean(axis=0)], metric="correlation"))
         self.assertLess(d, 0.15)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

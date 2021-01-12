@@ -1,5 +1,13 @@
-from ._gin_compat import configurable, dump_gin_args, parse_args
-from ._parallel import get_n_jobs, maybe_pool, share
+from ._gin_compat import (
+    configurable,
+    dump_gin_args,
+    parse_args,
+)
+from ._parallel import (
+    get_n_jobs,
+    maybe_pool,
+    share,
+)
 from ._seed import seed, seeded
 from ._types import (
     Centroids,
@@ -15,23 +23,22 @@ from ._utils import (
     visualize,
 )
 
-
 __all__ = [
-    'Centroids',
-    'Data',
-    'DivikResult',
-    'IntLabels',
-    'SegmentationMethod',
-    'build',
-    'context_if',
-    'normalize_rows',
-    'visualize',
-    'get_n_jobs',
-    'maybe_pool',
-    'share',
-    'seed',
-    'seeded',
-    'configurable',
-    'dump_gin_args',
-    'parse_args',
+    "Centroids",
+    "Data",
+    "DivikResult",
+    "IntLabels",
+    "SegmentationMethod",
+    "build",
+    "context_if",
+    "normalize_rows",
+    "visualize",
+    "get_n_jobs",
+    "maybe_pool",
+    "share",
+    "seed",
+    "seeded",
+    "configurable",
+    "dump_gin_args",
+    "parse_args",
 ]

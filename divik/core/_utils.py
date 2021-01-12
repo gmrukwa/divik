@@ -1,9 +1,10 @@
+import inspect
 import logging
 import os
 import sys
 import time
 from contextlib import contextmanager
-import inspect
+
 # RawArray exists, but PyCharm goes crazy
 # noinspection PyUnresolvedReferences
 from multiprocessing import Pool, RawArray
@@ -12,13 +13,13 @@ import numpy as np
 import tqdm
 from skimage.color import label2rgb
 
-from ._types import Data
 from .. import __version__
+from ._types import Data
 
 
 def normalize_rows(data: Data) -> Data:
     normalized = data - data.mean(axis=1)[:, np.newaxis]
-    norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True)**(1./2)
+    norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True) ** (1.0 / 2)
     normalized /= norms
     return normalized
 
@@ -51,8 +52,9 @@ def build(klass, **kwargs):
     return klass(**known_params)
 
 
-def prepare_destination(destination: str, omit_datetime: bool = False,
-                        exist_ok: bool = False) -> str:
+def prepare_destination(
+    destination: str, omit_datetime: bool = False, exist_ok: bool = False
+) -> str:
     if not omit_datetime:
         datetime = time.strftime("%Y%m%d-%H%M%S")
         destination = os.path.join(destination, datetime)
@@ -60,14 +62,16 @@ def prepare_destination(destination: str, omit_datetime: bool = False,
     return destination
 
 
-_PRECISE_FORMAT = '%(asctime)s [%(levelname)s] %(filename)40s:%(lineno)3s' \
-    + ' - %(funcName)40s\t%(message)s'
-_INFO_FORMAT = '%(asctime)s [%(levelname)s]\t%(message)s'
+_PRECISE_FORMAT = (
+    "%(asctime)s [%(levelname)s] %(filename)40s:%(lineno)3s"
+    + " - %(funcName)40s\t%(message)s"
+)
+_INFO_FORMAT = "%(asctime)s [%(levelname)s]\t%(message)s"
 
 
 def _file_handler(destination: str):
-    log_destination = os.path.join(destination, 'logs.txt')
-    handler = logging.FileHandler(filename=log_destination, mode='a')
+    log_destination = os.path.join(destination, "logs.txt")
+    handler = logging.FileHandler(filename=log_destination, mode="a")
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(logging.Formatter(_PRECISE_FORMAT))
     return handler
@@ -93,6 +97,5 @@ def setup_logger(destination: str, verbose: bool = False):
     ]
     del logging.root.handlers[:]
     logging.basicConfig(level=logging.DEBUG, handlers=handlers)
-    version_notice = "Using " + sys.argv[0] + \
-                     " (divik, version " + __version__ + ")"
+    version_notice = "Using " + sys.argv[0] + " (divik, version " + __version__ + ")"
     logging.info(version_notice)

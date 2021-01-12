@@ -6,24 +6,27 @@ import numpy as np
 from sklearn import clone
 
 from divik.core import Data, DivikResult
+
 from ._report import DivikReporter
 
 
-def _recursive_selection(current_selection: np.ndarray, partition: np.ndarray,
-                         cluster_number: int) -> np.ndarray:
+def _recursive_selection(
+    current_selection: np.ndarray, partition: np.ndarray, cluster_number: int
+) -> np.ndarray:
     selection = np.zeros(shape=current_selection.shape, dtype=bool)
     selection[current_selection] = partition == cluster_number
     return selection
 
 
-StatSelector = 'divik.feature_selection.StatSelectorMixin'
-DunnSearch = 'divik.cluster._kmeans._dunn.DunnSearch'
-GAPSearch = 'divik.cluster._kmeans._gap.GAPSearch'
+StatSelector = "divik.feature_selection.StatSelectorMixin"
+DunnSearch = "divik.cluster._kmeans._dunn.DunnSearch"
+GAPSearch = "divik.cluster._kmeans._gap.GAPSearch"
 AutoKMeans = Union[DunnSearch, GAPSearch]
 
 
-def check_stop_and_split(kmeans: AutoKMeans, fast_kmeans: GAPSearch,
-                         X: Data, report: DivikReporter):
+def check_stop_and_split(
+    kmeans: AutoKMeans, fast_kmeans: GAPSearch, X: Data, report: DivikReporter
+):
     if fast_kmeans is None:  # running GapSearch only
         report.processing(X)
         report.stop_check()
@@ -43,11 +46,16 @@ def check_stop_and_split(kmeans: AutoKMeans, fast_kmeans: GAPSearch,
 
 
 # @gmrukwa: I could not find more readable solution than recursion for now.
-def divik(data: Data, selection: np.ndarray,
-          kmeans: AutoKMeans, fast_kmeans: GAPSearch,
-          feature_selector: StatSelector,
-          minimal_size: int, rejection_size: int, report: DivikReporter) \
-        -> Optional[DivikResult]:
+def divik(
+    data: Data,
+    selection: np.ndarray,
+    kmeans: AutoKMeans,
+    fast_kmeans: GAPSearch,
+    feature_selector: StatSelector,
+    minimal_size: int,
+    rejection_size: int,
+    report: DivikReporter,
+) -> Optional[DivikResult]:
     subset = data[selection]
 
     if subset.shape[0] <= max(kmeans.max_clusters, minimal_size):
@@ -73,12 +81,15 @@ def divik(data: Data, selection: np.ndarray,
 
     report.recurring(len(counts))
     recurse = partial(
-        divik, data=data,
-        kmeans=kmeans, fast_kmeans=fast_kmeans,
+        divik,
+        data=data,
+        kmeans=kmeans,
+        fast_kmeans=fast_kmeans,
         feature_selector=feature_selector,
         minimal_size=minimal_size,
         rejection_size=rejection_size,
-        report=report)
+        report=report,
+    )
     del subset
     del filtered_data
     gc.collect()
@@ -88,5 +99,9 @@ def divik(data: Data, selection: np.ndarray,
     ]
 
     report.assemble()
-    return DivikResult(clustering=kmeans_, feature_selector=feature_selector,
-                       merged=partition, subregions=subregions)
+    return DivikResult(
+        clustering=kmeans_,
+        feature_selector=feature_selector,
+        merged=partition,
+        subregions=subregions,
+    )

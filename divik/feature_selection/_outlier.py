@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from divik.core import configurable
+
 from ._stat_selector_mixin import StatSelectorMixin
 
 
@@ -116,7 +117,7 @@ def huberta_outliers(v):
     -------
     Binary vector indicating all the outliers.
     """
-    q1, q3 = np.quantile(v, q=[.25, .75])
+    q1, q3 = np.quantile(v, q=[0.25, 0.75])
     iqr = q3 - q1
     MC = medcouple(v)
     if MC >= 0:
@@ -164,8 +165,8 @@ class OutlierSelector(BaseEstimator, StatSelectorMixin):
     selected_: array, shape (n_features,)
         Vector of binary selections of the informative features.
     """
-    def __init__(self, stat: str, use_log: bool = False,
-                 keep_outliers: bool = False):
+
+    def __init__(self, stat: str, use_log: bool = False, keep_outliers: bool = False):
         self.stat = stat
         self.use_log = use_log
         self.keep_outliers = keep_outliers

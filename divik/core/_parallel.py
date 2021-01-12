@@ -1,12 +1,13 @@
 """multiprocessing.Pool helpers"""
+import ctypes
+import os
+import uuid
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-import ctypes
+
 # RawArray exists, but PyCharm goes crazy
 # noinspection PyUnresolvedReferences
 from multiprocessing import Pool, RawArray
-import os
-import uuid
 
 import numpy as np
 
@@ -68,8 +69,7 @@ class WinSharedArrayWrapper(SharedArrayWrapper):
 
     @property
     def value(self):
-        return np.frombuffer(self._array, dtype=self._dtype
-                             ).reshape(self._shape)
+        return np.frombuffer(self._array, dtype=self._dtype).reshape(self._shape)
 
 
 class WinSharedArray(SharedArray):
@@ -109,7 +109,7 @@ class WinSharedArray(SharedArray):
 
 
 def _make_shared_array() -> SharedArray:
-    if os.name == 'posix':
+    if os.name == "posix":
         return PosixSharedArray()
     return WinSharedArray()
 
@@ -135,8 +135,7 @@ def get_n_jobs(n_jobs):
 
 
 class DummyPool:
-    def __init__(self, processes, initializer=None, initargs=None,
-                 *args, **kwargs):
+    def __init__(self, processes, initializer=None, initargs=None, *args, **kwargs):
         if initargs is None:
             initargs = ()
         if initializer is not None:

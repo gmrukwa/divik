@@ -8,9 +8,8 @@ import divik.feature_selection as fs
 class HighAbundanceAndVarianceSelectorTest(unittest.TestCase):
     def setUp(self):
         np.random.seed(42)
-        self.labels = np.concatenate(
-            [30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
-        self.data = np.vstack(100 * [self.labels * 10.])
+        self.labels = np.concatenate([30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
+        self.data = np.vstack(100 * [self.labels * 10.0])
         self.data += np.random.randn(*self.data.shape)
         sub = self.data[:, :-40]
         sub += 5 * np.random.randn(*sub.shape)
@@ -36,8 +35,9 @@ class OutlierAbundanceAndVarianceSelectorTest(unittest.TestCase):
     def setUp(self):
         np.random.seed(42)
         self.labels = np.concatenate(
-            [6 * [0] + 5 * [1] + 25 * [2] + 50 * [3] + 3 * [4] + 4 * [5]])
-        self.data = np.vstack(1000 * [self.labels * 10.])
+            [6 * [0] + 5 * [1] + 25 * [2] + 50 * [3] + 3 * [4] + 4 * [5]]
+        )
+        self.data = np.vstack(1000 * [self.labels * 10.0])
         self.data += np.random.randn(*self.data.shape)
         self.outlier_mean = np.logical_or(self.labels == 4, self.labels == 5)
         self.high_var = np.zeros_like(self.outlier_mean)
@@ -57,9 +57,9 @@ class OutlierAbundanceAndVarianceSelectorTest(unittest.TestCase):
 
     def test_selects_percentage_of_features(self):
         N = self.labels.size
-        p = 5. / N
+        p = 5.0 / N
         selector = fs.OutlierAbundanceAndVarianceSelector(p=p).fit(self.data)
         self.assertAlmostEqual(selector.selected_.mean(), p, places=2)
-        p = 20. / N
+        p = 20.0 / N
         selector = fs.OutlierAbundanceAndVarianceSelector(p=p).fit(self.data)
         self.assertAlmostEqual(selector.selected_.mean(), p, places=2)

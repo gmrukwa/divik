@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.base import BaseEstimator
 
 from divik.core import configurable
+
 from ._stat_selector_mixin import StatSelectorMixin
 
 
@@ -44,8 +45,10 @@ class PercentageSelector(BaseEstimator, StatSelectorMixin):
     selected_: array, shape (n_features,)
         Vector of binary selections of the informative features.
     """
-    def __init__(self, stat: str, use_log: bool = False, keep_top: bool = True,
-                 p: float = 0.2):
+
+    def __init__(
+        self, stat: str, use_log: bool = False, keep_top: bool = True, p: float = 0.2
+    ):
         self.stat = stat
         self.use_log = use_log
         self.keep_top = keep_top

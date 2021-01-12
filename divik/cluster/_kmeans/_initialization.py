@@ -1,7 +1,11 @@
+import logging
 from abc import ABCMeta, abstractmethod
 from functools import partial
-import logging
-from typing import List, NamedTuple, Union
+from typing import (
+    List,
+    NamedTuple,
+    Union,
+)
 
 import numpy as np
 import scipy.spatial.distance as dist
@@ -12,6 +16,7 @@ from divik.core import Centroids, Data
 
 class Initialization(object, metaclass=ABCMeta):
     """Initializes k-means algorithm"""
+
     @abstractmethod
     def __call__(self, data: Data, number_of_centroids: int) -> Centroids:
         """Generate initial centroids for k-means algorithm
@@ -20,35 +25,35 @@ class Initialization(object, metaclass=ABCMeta):
         @param number_of_centroids: number of centroids to be generated
         @return: centroids, in rows
         """
-        raise NotImplementedError(self.__class__.__name__
-                                  + " must implement __call__.")
+        raise NotImplementedError(self.__class__.__name__ + " must implement __call__.")
 
 
 def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
     features = data.T
     assumed_ys = features[0]
-    modelled_xs = np.hstack([np.ones((data.shape[0], 1)),
-                            features[1:].T])
-    lr = LinearRegression().fit(modelled_xs, assumed_ys,
-                                sample_weight=sample_weight)
+    modelled_xs = np.hstack([np.ones((data.shape[0], 1)), features[1:].T])
+    lr = LinearRegression().fit(modelled_xs, assumed_ys, sample_weight=sample_weight)
     residuals = np.abs(lr.predict(modelled_xs) - assumed_ys)
     return residuals
 
 
 def _validate(data: Data, number_of_centroids: int):
     if number_of_centroids > data.shape[0]:
-        msg = f"Number of centroids ({number_of_centroids}) greater than " + \
-            f"number of observations ({data.shape[0]})"
+        msg = (
+            f"Number of centroids ({number_of_centroids}) greater than "
+            + f"number of observations ({data.shape[0]})"
+        )
         logging.error(msg)
         raise ValueError(msg)
     if number_of_centroids < 1:
-        msg = f'number_of_centroids({number_of_centroids}) < 1'
+        msg = f"number_of_centroids({number_of_centroids}) < 1"
         logging.error(msg)
         raise ValueError(msg)
 
 
 class ExtremeInitialization(Initialization):
     """Initializes k-means by picking extreme points"""
+
     def __init__(self, distance: str):
         self.distance = distance
 
@@ -64,10 +69,11 @@ class ExtremeInitialization(Initialization):
         centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
         centroids[0] = data[np.argmax(residuals)]
 
-        distances = np.inf * np.ones((data.shape[0], ))
+        distances = np.inf * np.ones((data.shape[0],))
         for i in range(1, number_of_centroids):
             current_distance = dist.cdist(
-                data, centroids[np.newaxis, i - 1], self.distance)
+                data, centroids[np.newaxis, i - 1], self.distance
+            )
             distances[:] = np.minimum(current_distance.ravel(), distances)
             centroids[i] = data[np.argmax(distances)]
 
@@ -75,14 +81,13 @@ class ExtremeInitialization(Initialization):
 
 
 class PercentileInitialization(Initialization):
-    def __init__(self, distance: str, percentile: float=99.):
+    def __init__(self, distance: str, percentile: float = 99.0):
         assert 0 <= percentile <= 100, percentile
         self.distance = distance
         self.percentile = percentile
 
     def _get_percentile_element(self, values: np.ndarray) -> int:
-        value = np.percentile(values, q=self.percentile,
-                              interpolation='nearest')
+        value = np.percentile(values, q=self.percentile, interpolation="nearest")
         assert values.size > 0
         assert not np.isnan(values).any()
         matches = values == value
@@ -101,15 +106,18 @@ class PercentileInitialization(Initialization):
         for i in range(1, number_of_centroids):
             assert not np.any(np.isnan(centroids[np.newaxis, i - 1]))
             current_distance = dist.cdist(
-                data, centroids[np.newaxis, i - 1], self.distance)
+                data, centroids[np.newaxis, i - 1], self.distance
+            )
             nans = np.isnan(current_distance)
             if np.any(nans):
                 locations_of_nans = np.array(list(zip(*np.nonzero(nans))))
-                msg = 'Distances between points cannot be NaN. This ' + \
-                    'indicates that your data is probably corrupted and ' + \
-                    'analysis cannot be continued in this setting. Amount' + \
-                    f' of NaNs: {nans.sum()}. At positions described by ' + \
-                    f'[spot, centroid]: {locations_of_nans}'
+                msg = (
+                    "Distances between points cannot be NaN. This "
+                    + "indicates that your data is probably corrupted and "
+                    + "analysis cannot be continued in this setting. Amount"
+                    + f" of NaNs: {nans.sum()}. At positions described by "
+                    + f"[spot, centroid]: {locations_of_nans}"
+                )
                 logging.error(msg)
                 raise ValueError(msg)
             distances[:] = np.minimum(current_distance.ravel(), distances)
@@ -123,15 +131,16 @@ class Leaf(NamedTuple):
     centroid: np.ndarray
     count: int = 0
 
-KDTree = Union['Node', Leaf]
-        
+
+KDTree = Union["Node", Leaf]
+
+
 class Node(NamedTuple):
     left: KDTree = None
     right: KDTree = None
 
 
-def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) \
-        -> KDTree:
+def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) -> KDTree:
     """Make KDTree out of the data
 
     Construct a KDTree out of data using mean as a pivoting element.
@@ -142,11 +151,11 @@ def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) \
     ==========
     X : array_like, (n_samples, n_features)
         Set of observations to divide into boxes
-        
+
     leaf_size : int
         Desired leaf size. It should more than `leaf_size` and
         will be up to `2 * leaf_size`
-    
+
     Returns
     =======
     tree : KDTree
@@ -168,21 +177,23 @@ def make_tree(X, leaf_size: int, _feature_idx: int = 0, selector=None) \
         return Leaf(centroid, int(selector.sum()))
     next_feature = (_feature_idx + 1) % X.shape[1]
     return Node(
-        left=make_tree(X, leaf_size=leaf_size,
-            _feature_idx=next_feature, selector=left_idx),
-        right=make_tree(X, leaf_size=leaf_size,
-            _feature_idx=next_feature, selector=right_idx),
+        left=make_tree(
+            X, leaf_size=leaf_size, _feature_idx=next_feature, selector=left_idx
+        ),
+        right=make_tree(
+            X, leaf_size=leaf_size, _feature_idx=next_feature, selector=right_idx
+        ),
     )
 
 
 def get_leaves(tree: KDTree) -> List[Leaf]:
     """Extract leaves of the KDTree
-    
+
     Parameters
     ==========
     tree : KDTree
         KDTree constructed on the data
-        
+
     Returns
     =======
     leaves : list of Leaf
@@ -195,6 +206,7 @@ def get_leaves(tree: KDTree) -> List[Leaf]:
 
 class KDTreeInitialization(Initialization):
     """Initializes k-means by picking extreme KDTree box"""
+
     def __init__(self, distance: str, leaf_size: Union[int, float] = 0.01):
         self.distance = distance
         self.leaf_size = leaf_size
@@ -207,8 +219,8 @@ class KDTreeInitialization(Initialization):
             if 0 <= leaf_size <= 1:
                 leaf_size = max(int(leaf_size * data.shape[0]), 1)
             else:
-                logging.error('leaf_size must be between 0 and 1 when float')
-                raise ValueError('leaf_size must be between 0 and 1 when float')
+                logging.error("leaf_size must be between 0 and 1 when float")
+                raise ValueError("leaf_size must be between 0 and 1 when float")
         tree = make_tree(data, leaf_size=leaf_size)
         leaves = get_leaves(tree)
         box_centroids = np.vstack([l.centroid for l in leaves])
@@ -218,10 +230,11 @@ class KDTreeInitialization(Initialization):
         centroids = np.nan * np.zeros((number_of_centroids, data.shape[1]))
         centroids[0] = box_centroids[np.argmax(residuals)]
 
-        distances = np.inf * np.ones((box_centroids.shape[0], ))
+        distances = np.inf * np.ones((box_centroids.shape[0],))
         for i in range(1, number_of_centroids):
             current_distance = dist.cdist(
-                box_centroids, centroids[np.newaxis, i - 1], self.distance)
+                box_centroids, centroids[np.newaxis, i - 1], self.distance
+            )
             distances[:] = np.minimum(current_distance.ravel(), distances)
             centroids[i] = box_centroids[np.argmax(distances)]
 
@@ -230,8 +243,13 @@ class KDTreeInitialization(Initialization):
 
 class KDTreePercentileInitialization(Initialization):
     """Initializes k-means by picking extreme KDTree box"""
-    def __init__(self, distance: str, leaf_size: Union[int, float] = 0.01,
-                 percentile: float=99.):
+
+    def __init__(
+        self,
+        distance: str,
+        leaf_size: Union[int, float] = 0.01,
+        percentile: float = 99.0,
+    ):
         assert 0 <= percentile <= 100, percentile
         self.distance = distance
         self.leaf_size = leaf_size
@@ -251,8 +269,8 @@ class KDTreePercentileInitialization(Initialization):
             if 0 <= leaf_size <= 1:
                 leaf_size = max(int(leaf_size * data.shape[0]), 1)
             else:
-                logging.error('leaf_size must be between 0 and 1 when float')
-                raise ValueError('leaf_size must be between 0 and 1 when float')
+                logging.error("leaf_size must be between 0 and 1 when float")
+                raise ValueError("leaf_size must be between 0 and 1 when float")
         tree = make_tree(data, leaf_size=leaf_size)
         leaves = get_leaves(tree)
         box_centroids = np.vstack([l.centroid for l in leaves])
@@ -264,10 +282,11 @@ class KDTreePercentileInitialization(Initialization):
         idx = self._get_percentile_idx(residuals, normalized_weights)
         centroids[0] = box_centroids[idx]
 
-        distances = np.inf * np.ones((box_centroids.shape[0], ))
+        distances = np.inf * np.ones((box_centroids.shape[0],))
         for i in range(1, number_of_centroids):
             current_distance = dist.cdist(
-                box_centroids, centroids[np.newaxis, i - 1], self.distance)
+                box_centroids, centroids[np.newaxis, i - 1], self.distance
+            )
             distances[:] = np.minimum(current_distance.ravel(), distances)
             idx = self._get_percentile_idx(distances, normalized_weights)
             centroids[i] = box_centroids[idx]

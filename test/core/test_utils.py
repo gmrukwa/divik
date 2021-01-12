@@ -1,6 +1,6 @@
+import os
 import unittest
 from unittest.mock import patch
-import os
 
 import divik.core as u
 
@@ -24,7 +24,7 @@ class NJobsTest(unittest.TestCase):
 
 
 class Dummy:
-    def __init__(self, a, b = 5):
+    def __init__(self, a, b=5):
         self.a = a
         self.b = b
 
@@ -38,7 +38,7 @@ class BuildTest(unittest.TestCase):
         dummy = u.build(Dummy, a=3)
         self.assertEqual(dummy.a, 3)
         self.assertEqual(dummy.b, 5)
-    
+
     def test_builds_with_too_many_args(self):
         dummy = u.build(Dummy, a=3, c=4)
         self.assertEqual(dummy.a, 3)

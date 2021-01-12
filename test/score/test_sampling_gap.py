@@ -9,8 +9,7 @@ import divik.score as sc
 
 class TestSamplingGap(unittest.TestCase):
     def setUp(self):
-        self.X, _ = make_blobs(n_samples=10000, n_features=2, centers=3,
-                               random_state=0)
+        self.X, _ = make_blobs(n_samples=10000, n_features=2, centers=3, random_state=0)
         self.kmeans_3 = km.KMeans(n_clusters=3).fit(self.X)
         self.kmeans_7 = km.KMeans(n_clusters=7).fit(self.X)
 
