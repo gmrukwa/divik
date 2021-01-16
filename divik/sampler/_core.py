@@ -16,10 +16,10 @@ class BaseSampler(BaseEstimator, metaclass=ABCMeta):
     variable. To simplify that process a contract has been prepared.
     You open a context and operate within a context:
 
-    with sampler.parallel() as sampler_
-        with Pool(initializer=sampler_.initializer,
-                  initargs=sampler_.initargs) as pool:
-            pool.map(sampler_.get_sample, range(10))
+    >>> with sampler.parallel() as sampler_,
+    ...         Pool(initializer=sampler_.initializer,
+    ...              initargs=sampler_.initargs) as pool:
+    ...     pool.map(sampler_.get_sample, range(10))
 
     Keep in mind, that __iter__ and fit are not accessible in parallel
     context. __iter__ would yield the same values independently in

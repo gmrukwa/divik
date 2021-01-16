@@ -11,7 +11,27 @@ Python implementation of Divisive iK-means (DiviK) algorithm.
 
 ## Tools within this package
 
-> This section will be further developed soon.
+- Clustering at your command line with fit-clusters
+- Set of algorithm implementations for unsupervised analyses
+  - Clustering
+    - DiviK - hands-free clustering method with built-in feature selection
+    - K-Means with Dunn method for selecting the number of clusters
+    - K-Means with GAP index for selecting the number of clusters
+    - Modular K-Means implementation with custom distance metrics and initializations
+  - Feature extraction
+    - PCA with knee-based components selection
+    - Locally Adjusted RBF Spectral Embedding
+  - Feature selection
+    - EXIMS
+    - Gaussian Mixture Model based data-driven feature selection
+      - High Abundance And Variance Selector - allows you to select highly variant features above noise level, based on GMM-decomposition
+    - Outlier based Selector
+      - Outlier Abundance And Variance Selector - allows you to select highly variant features above noise level, based on outlier detection
+    - Percentage based Selector - allows you to select highly variant features above noise level with your predefined thresholds for each
+  - Sampling
+    - StratifiedSampler - generates samples of fixed number of rows from given dataset
+    - UniformPCASampler - generates samples of random observations within boundaries of an original dataset, and preserving the rotation of the data
+    - UniformSampler - generates samples of random observations within boundaries of an original dataset
 
 ## Installation
 
@@ -107,6 +127,8 @@ again. The exact versions get updated to avoid the issue.
 ## Contributing
 
 Contribution guide will be developed soon.
+
+Format the code with:
 
 ```bash
 isort -m 3 --fgw 3 --tc .

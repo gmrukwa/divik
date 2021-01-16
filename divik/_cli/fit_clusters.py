@@ -2,7 +2,7 @@ import logging
 
 import gin
 
-from divik.core import dump_gin_args, parse_gin_args
+from divik.core import dump_gin_args, parse_args
 from divik.core._utils import prepare_destination, setup_logger
 from divik.core.io import (
     save,
@@ -46,7 +46,7 @@ def experiment(
 
 
 def main():
-    parse_gin_args()
+    parse_args()
     experiment()
 
 

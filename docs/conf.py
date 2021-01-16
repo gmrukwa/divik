@@ -6,6 +6,7 @@
 
 # -- Path setup --------------------------------------------------------------
 
+import datetime
 import os
 import sys
 
@@ -15,7 +16,7 @@ from divik import __version__
 # -- Project information -----------------------------------------------------
 
 project = "DiviK"
-copyright = "2019, Grzegorz Mrukwa"
+copyright = "{0}, Grzegorz Mrukwa".format(datetime.date.today().year)
 author = "Grzegorz Mrukwa"
 
 # The full version, including alpha/beta/rc tags
@@ -29,9 +30,11 @@ release = __version__
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx_rtd_theme",
+    "sphinx_autodoc_typehints",
     "numpydoc",  # required for numpy-style docstrings interpretation
 ]
 
@@ -65,6 +68,12 @@ html_static_path = ["_static"]
 
 
 # -- Extension configuration -------------------------------------------------
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "inherited-members": True,
+}
 
 # -- Options for todo extension ----------------------------------------------
 

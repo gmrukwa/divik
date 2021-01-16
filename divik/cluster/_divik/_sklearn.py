@@ -167,6 +167,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         kmeans,
         fast_kmeans=None,
         distance: str = "correlation",
+        # TODO: Allow percentage
         minimal_size: int = None,
         rejection_size: int = None,
         rejection_percentage: float = None,
