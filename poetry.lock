@@ -1232,7 +1232,7 @@ polyaxon = []
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "926258cd16d841a7fc71062c4193eb7af38f9630a5aae9772811328152a7a24d"
+content-hash = "1b0611bdffb8014106ab29372f159f92908f28b19f516b861224b5c5d04a1f0d"
 
 [metadata.files]
 alabaster = [

@@ -1,5 +1,6 @@
 """Reusable utilities used for building divik library"""
 
+from ._cache import cached_fit
 from ._gin_compat import (
     configurable,
     dump_gin_args,
@@ -11,6 +12,7 @@ from ._parallel import (
     share,
 )
 from ._seed import seed, seeded
+from ._subsets import Subsets
 from ._types import (
     Centroids,
     Data,
@@ -26,6 +28,7 @@ from ._utils import (
 )
 
 __all__ = [
+    "cached_fit",
     "Centroids",
     "Data",
     "DivikResult",
@@ -40,6 +43,7 @@ __all__ = [
     "share",
     "seed",
     "seeded",
+    "Subsets",
     "configurable",
     "dump_gin_args",
     "parse_args",

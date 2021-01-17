@@ -173,8 +173,9 @@ class _KMeans(SegmentationMethod):
     ) -> Tuple[IntLabels, Centroids]:
         _validate_kmeans_input(data, number_of_clusters)
         if number_of_clusters == 1:
-            return np.zeros((data.shape[0], 1), dtype=int), np.mean(
-                data, axis=0, keepdims=True
+            return (
+                np.zeros((data.shape[0], 1), dtype=int),
+                np.mean(data, axis=0, keepdims=True),
             )
         data = data.reshape(data.shape, order="C")
         if self.normalize_rows:

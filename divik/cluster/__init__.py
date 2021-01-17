@@ -5,10 +5,12 @@ from ._kmeans import (
     GAPSearch,
     KMeans,
 )
+from ._two_step import TwoStep
 
 __all__ = [
     "DiviK",
     "DunnSearch",
     "GAPSearch",
     "KMeans",
+    "TwoStep",
 ]
