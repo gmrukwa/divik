@@ -59,6 +59,7 @@ sphinx-markdown-builder = "^0.5.4"
 sphinx-autodoc-typehints = "^1.11.1"
 sphinx-rtd-theme = "^0.5.1"
 numpydoc = "^1.1.0"
+pytest = "^6.2.1"
 
 [tool.poetry.scripts]
 fit-clusters = "divik._cli.fit_clusters:main"
@@ -71,6 +72,4 @@ requires = [
 build-backend = "poetry.core.masonry.api"
 
 # TODO:
-# - drop support for Python 3.6
 # - promote tested classes from other projects
-# - update docs
