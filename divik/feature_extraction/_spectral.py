@@ -6,7 +6,8 @@ from sklearn.base import BaseEstimator
 from sklearn.manifold import SpectralEmbedding
 from sklearn.utils.validation import check_is_fitted
 
-from divik.core import configurable, Data
+from divik.core import configurable
+from divik.core.io import save_csv
 
 
 @configurable
@@ -26,7 +27,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
     'correlation', 'cosine', 'dice', 'euclidean', 'hamming', 'jaccard',
     'kulsinski', 'mahalanobis', 'atching', 'minkowski', 'rogerstanimoto',
     'russellrao', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'}
-        Distance measure, defaults to 'euclidean'. These are the distances
+        Distance measure, defaults to ``euclidean``. These are the distances
         supported by scipy package.
 
 
@@ -38,8 +39,8 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         lobpcg eigenvectors.  If int, random_state is the seed used by the
         random number generator; If RandomState instance, random_state is the
         random number generator; If None, the random number generator is the
-        RandomState instance used by `np.random`. Used when ``solver`` ==
-        'amg'.
+        RandomState instance used by ``np.random``. Used when ``solver`` ==
+        ``amg``.
 
     eigen_solver : {None, 'arpack', 'lobpcg', or 'amg'}
         The eigenvalue decomposition strategy to use. AMG requires pyamg
@@ -74,9 +75,16 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
       Jianbo Shi, Jitendra Malik
       http://citeseer.ist.psu.edu/viewdoc/summary?doi=10.1.1.160.2324
     """
-    def __init__(self, distance: str = 'euclidean', n_components=2,
-                 random_state=None, eigen_solver: str = None,
-                 n_neighbors: int = None, n_jobs: int = 1):
+
+    def __init__(
+        self,
+        distance: str = "euclidean",
+        n_components=2,
+        random_state=None,
+        eigen_solver: str = None,
+        n_neighbors: int = None,
+        n_jobs: int = 1,
+    ):
         self.distance = distance
         self.n_components = n_components
         self.random_state = random_state
@@ -101,7 +109,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         self : object
             Returns the instance itself.
         """
-        logging.debug('Computing locally adjusted affinities.')
+        logging.debug("Computing locally adjusted affinities.")
         d = dist.squareform(dist.pdist(X, metric=self.distance))
 
         if 0 <= self.n_components <= 1:
@@ -109,14 +117,16 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         else:
             n_components = self.n_components
 
-        logging.debug('Computing embedding of affinities.')
-        embedder = SpectralEmbedding(n_components=n_components,
-                                    affinity='precomputed_nearest_neighbors',
-                                    gamma=None,
-                                    random_state=self.random_state,
-                                    eigen_solver=self.eigen_solver,
-                                    n_neighbors=self.n_neighbors,
-                                    n_jobs=self.n_jobs)
+        logging.debug("Computing embedding of affinities.")
+        embedder = SpectralEmbedding(
+            n_components=n_components,
+            affinity="precomputed_nearest_neighbors",
+            gamma=None,
+            random_state=self.random_state,
+            eigen_solver=self.eigen_solver,
+            n_neighbors=self.n_neighbors,
+            n_jobs=self.n_jobs,
+        )
         self.embedding_ = embedder.fit_transform(d)
         return self
 
@@ -136,10 +146,9 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         X_new : array-like, shape (n_samples, n_components)
         """
         return self.fit(X).embedding_
-    
+
     def transform(self, X, y=None):
-        if not hasattr(self, 'embedding_') \
-                or self.embedding_.shape[0] != X.shape[0]:
+        if not hasattr(self, "embedding_") or self.embedding_.shape[0] != X.shape[0]:
             self.fit(X, y)
         return self.embedding_
 
@@ -151,18 +160,18 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         destination : str
             Directory to save the embedding.
         """
-        logging.info('Saving embedding to {0}.'.format(destination))
+        logging.info("Saving embedding to {0}.".format(destination))
         check_is_fitted(self)
-        from functools import partial
         import os
         import pickle
-        import divik._cli._utils as scr
+        from functools import partial
+
         fname = partial(os.path.join, destination)
 
-        logging.debug('Saving model.')
-        with open(fname('model.pkl'), 'wb') as pkl:
+        logging.debug("Saving model.")
+        with open(fname("model.pkl"), "wb") as pkl:
             pickle.dump(self, pkl)
 
-        logging.debug('Saving embedding.')
-        scr.save_csv(self.embedding_, fname('embedding.csv'))
-        np.save(fname('embedding.npy'), self.embedding_)
+        logging.debug("Saving embedding.")
+        save_csv(self.embedding_, fname("embedding.csv"))
+        np.save(fname("embedding.npy"), self.embedding_)

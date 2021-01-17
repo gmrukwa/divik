@@ -1,11 +1,13 @@
 import logging
 
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import MinMaxScaler
 
-from divik.core import configurable, seed as seed_
+from divik.core import configurable
+from divik.core import seed as seed_
 from divik.feature_extraction import KneePCA
+
 from ._core import BaseSampler
 
 
@@ -29,6 +31,7 @@ class UniformSampler(BaseSampler):
     scaler_ : MinMaxScaler
         Scaler ensuring the proper ranges
     """
+
     def __init__(self, n_rows: int = None, n_samples: int = None):
         self.n_rows = n_rows
         self.n_samples = n_samples
@@ -114,8 +117,15 @@ class UniformPCASampler(BaseSampler):
     sampler_ : UniformSampler
         Sampler from the transformed distribution
     """
-    def __init__(self, n_rows: int = None, n_samples: int = None,
-                 whiten: bool = False, refit: bool = False, pca: str = 'knee'):
+
+    def __init__(
+        self,
+        n_rows: int = None,
+        n_samples: int = None,
+        whiten: bool = False,
+        refit: bool = False,
+        pca: str = "knee",
+    ):
         self.n_rows = n_rows
         self.n_samples = n_samples
         self.whiten = whiten
@@ -123,13 +133,19 @@ class UniformPCASampler(BaseSampler):
         self.pca = pca
 
     def _make_pca(self):
-        if self.pca == 'knee':
+        if self.pca == "knee":
             return KneePCA(whiten=self.whiten, refit=self.refit)
-        if self.pca == 'full':
+        if self.pca == "full":
             # Note: random_state is not used in this config!
-            return PCA(n_components=None, copy=True, whiten=self.whiten,
-                       svd_solver='full', tol=0.0, iterated_power='auto',
-                       random_state=None)
+            return PCA(
+                n_components=None,
+                copy=True,
+                whiten=self.whiten,
+                svd_solver="full",
+                tol=0.0,
+                iterated_power="auto",
+                random_state=None,
+            )
         logging.error("Unsupported pca value: {}".format(self.pca))
         raise ValueError("Unsupported pca value: {}".format(self.pca))
 

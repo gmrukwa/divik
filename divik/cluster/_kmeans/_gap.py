@@ -1,16 +1,20 @@
-from functools import partial
 import logging
 import sys
+from functools import partial
 
 import numpy as np
-from sklearn.base import clone, BaseEstimator, ClusterMixin, TransformerMixin
-from sklearn.utils.validation import check_is_fitted
 import tqdm
+from sklearn.base import (
+    BaseEstimator,
+    ClusterMixin,
+    TransformerMixin,
+    clone,
+)
+from sklearn.utils.validation import check_is_fitted
 
-from divik.core import configurable
 from divik.cluster._kmeans._core import KMeans
+from divik.core import configurable
 from divik.score import gap, sampled_gap
-
 
 _BIG_PRIME = 32801
 
@@ -74,11 +78,19 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         The optimal estimator.
 
     """
-    def __init__(self, kmeans: KMeans,
-                 max_clusters: int, min_clusters: int = 1,
-                 n_jobs: int = 1, seed: int = 0, n_trials: int = 10,
-                 sample_size: int = 1000, drop_unfit: bool = False,
-                 verbose: bool = False):
+
+    def __init__(
+        self,
+        kmeans: KMeans,
+        max_clusters: int,
+        min_clusters: int = 1,
+        n_jobs: int = 1,
+        seed: int = 0,
+        n_trials: int = 10,
+        sample_size: int = 1000,
+        drop_unfit: bool = False,
+        verbose: bool = False,
+    ):
         super().__init__()
         assert min_clusters <= max_clusters
         self.kmeans = kmeans
@@ -103,9 +115,14 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         else:
             logging.debug("Selecting full GAP.")
             score = gap
-        return score(data, kmeans, n_jobs=self.n_jobs,
-                     seed=self.seed + _BIG_PRIME * kmeans.n_clusters,
-                     n_trials=self.n_trials, return_deviation=True)
+        return score(
+            data,
+            kmeans,
+            n_jobs=self.n_jobs,
+            seed=self.seed + _BIG_PRIME * kmeans.n_clusters,
+            n_trials=self.n_trials,
+            return_deviation=True,
+        )
 
     def _fit_kmeans(self, n_clusters, data):
         kmeans = clone(self.kmeans)

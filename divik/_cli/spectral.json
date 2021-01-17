@@ -1,8 +1,0 @@
-{
-  "distance": "euclidean",
-  "n_components": 2,
-  "random_state": 0,
-  "eigen_solver": null,
-  "n_neighbors": 7,
-  "n_jobs": -1
-}

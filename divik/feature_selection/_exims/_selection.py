@@ -1,18 +1,20 @@
 from typing import NamedTuple
 
-from kneed import KneeLocator
 import numpy as np
+from kneed import KneeLocator
+
+FeaturesSelection = NamedTuple(
+    "FeaturesSelection",
+    [
+        ("score", np.ndarray),
+        ("index", np.ndarray),
+        ("selection", np.ndarray),
+        ("threshold", float),
+    ],
+)
 
 
-FeaturesSelection = NamedTuple('FeaturesSelection', [
-    ('score', np.ndarray),
-    ('index', np.ndarray),
-    ('selection', np.ndarray),
-    ('threshold', float)
-])
-
-
-def _gradient(values: np.ndarray, order: int=1) -> np.ndarray:
+def _gradient(values: np.ndarray, order: int = 1) -> np.ndarray:
     result = values
     for _ in range(order):
         result = np.gradient(result)
@@ -27,11 +29,13 @@ def _plateau_point(sorted_scores) -> int:
 
 
 def _knee_point(decreasing_segment: np.ndarray) -> int:
-    locator = KneeLocator(x=np.arange(decreasing_segment.size, dtype=int),
-                          y=decreasing_segment,
-                          S=1.,
-                          curve='convex',
-                          direction='decreasing')
+    locator = KneeLocator(
+        x=np.arange(decreasing_segment.size, dtype=int),
+        y=decreasing_segment,
+        S=1.0,
+        curve="convex",
+        direction="decreasing",
+    )
     assert locator.knee is not None
     return locator.knee
 

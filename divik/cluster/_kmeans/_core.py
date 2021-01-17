@@ -1,34 +1,39 @@
 import logging
 from typing import Tuple, Union
 
-import dask_distance as ddst
 import dask.array as da
 import dask.dataframe as dd
+import dask_distance as ddst
 import numpy as np
 import scipy.spatial.distance as dst
-from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
+from sklearn.base import (
+    BaseEstimator,
+    ClusterMixin,
+    TransformerMixin,
+)
 from sklearn.utils.validation import check_is_fitted
 
-from divik.core import configurable
 from divik.cluster._kmeans._initialization import (
-    Initialization,
     ExtremeInitialization,
-    PercentileInitialization,
+    Initialization,
     KDTreeInitialization,
     KDTreePercentileInitialization,
+    PercentileInitialization,
 )
 from divik.core import (
-    normalize_rows,
     Centroids,
-    IntLabels,
     Data,
+    IntLabels,
     SegmentationMethod,
+    configurable,
+    normalize_rows,
 )
 
 
 class Labeling(object):
     """Labels observations by closest centroids"""
-    def __init__(self, distance_metric: str, allow_dask: bool=False):
+
+    def __init__(self, distance_metric: str, allow_dask: bool = False):
         """
         @param distance_metric: distance metric for estimation of closest
         @param allow_dask: should be False if `multiprocessing.Pool` is spawned
@@ -44,8 +49,10 @@ class Labeling(object):
         @return: vector of labels of centroids closest to points
         """
         if data.shape[1] != centroids.shape[1]:
-            msg = "Dimensionality of data and centroids must be equal. " + \
-                f"Was {data.shape[1]} and {centroids.shape[1]}"
+            msg = (
+                "Dimensionality of data and centroids must be equal. "
+                + f"Was {data.shape[1]} and {centroids.shape[1]}"
+            )
             logging.error(msg)
             raise ValueError(msg)
 
@@ -60,8 +67,9 @@ class Labeling(object):
         return labels
 
 
-def redefine_centroids(data: Data, labeling: IntLabels,
-                       label_set: IntLabels, allow_dask: bool=False) -> Centroids:
+def redefine_centroids(
+    data: Data, labeling: IntLabels, label_set: IntLabels, allow_dask: bool = False
+) -> Centroids:
     """Recompute centroids in data for given labeling
 
     @param data: observations
@@ -71,9 +79,11 @@ def redefine_centroids(data: Data, labeling: IntLabels,
     @return: centroids
     """
     if data.shape[0] != labeling.size:
-        msg = "Each observation must have label specified. Number " + \
-            f"of labels: {labeling.size}, " + \
-            f"number of observations: {data.shape[0]}."
+        msg = (
+            "Each observation must have label specified. Number "
+            + f"of labels: {labeling.size}, "
+            + f"number of observations: {data.shape[0]}."
+        )
         logging.error(msg)
         raise ValueError(msg)
     if allow_dask and (data.shape[0] > 10000 or data.shape[1] > 1000):
@@ -108,9 +118,15 @@ def _validate_normalizable(data):
 
 class _KMeans(SegmentationMethod):
     """K-means clustering"""
-    def __init__(self, labeling: Labeling, initialize: Initialization,
-                 number_of_iterations: int=100, normalize_rows: bool=False,
-                 allow_dask: bool = False):
+
+    def __init__(
+        self,
+        labeling: Labeling,
+        initialize: Initialization,
+        number_of_iterations: int = 100,
+        normalize_rows: bool = False,
+        allow_dask: bool = False,
+    ):
         """
         @param labeling: labeling method
         @param initialize: initialization method
@@ -125,76 +141,83 @@ class _KMeans(SegmentationMethod):
         self.allow_dask = allow_dask
 
     def _fix_labels(self, data, centroids, labels, n_clusters, retries=10):
-        logging.debug('A label vanished - fixing')
+        logging.debug("A label vanished - fixing")
         new_labels = labels.copy()
         known_labels = np.unique(labels)
         expected_labels = np.arange(n_clusters)
         missing_labels = np.setdiff1d(expected_labels, known_labels)
-        logging.debug('Missing labels ({0} were expected): {1}'.format(
-                      n_clusters, missing_labels))
+        logging.debug(
+            "Missing labels ({0} were expected): {1}".format(n_clusters, missing_labels)
+        )
         new_centroids = np.nan * np.zeros((n_clusters, centroids.shape[1]))
         for known in known_labels:
             new_centroids[known] = centroids[known]
         for missing in missing_labels:
-            logging.debug('Fixing label: {0}'.format(missing))
-            new_center = np.nanmin(dst.cdist(
-                data, new_centroids, metric=self.labeling.distance_metric
-            ), axis=1).argmax()
-            logging.debug('Assigning to label: {0}'.format(labels[new_center]))
+            logging.debug("Fixing label: {0}".format(missing))
+            new_center = np.nanmin(
+                dst.cdist(data, new_centroids, metric=self.labeling.distance_metric),
+                axis=1,
+            ).argmax()
+            logging.debug("Assigning to label: {0}".format(labels[new_center]))
             new_labels[new_center] = missing
             new_centroids[missing] = data[new_center]
         if np.unique(new_labels).size != n_clusters and retries > 0:
-            logging.debug('fixed but lost another: {0}'.format(
-                np.unique(new_labels)))
+            logging.debug("fixed but lost another: {0}".format(np.unique(new_labels)))
             return self._fix_labels(
-                data, new_centroids, new_labels, n_clusters, retries-1)
+                data, new_centroids, new_labels, n_clusters, retries - 1
+            )
         return new_centroids, new_labels
 
-    def __call__(self, data: Data, number_of_clusters: int) \
-            -> Tuple[IntLabels, Centroids]:
+    def __call__(
+        self, data: Data, number_of_clusters: int
+    ) -> Tuple[IntLabels, Centroids]:
         _validate_kmeans_input(data, number_of_clusters)
         if number_of_clusters == 1:
-            return np.zeros((data.shape[0], 1), dtype=int), \
-                   np.mean(data, axis=0, keepdims=True)
-        data = data.reshape(data.shape, order='C')
+            return (
+                np.zeros((data.shape[0], 1), dtype=int),
+                np.mean(data, axis=0, keepdims=True),
+            )
+        data = data.reshape(data.shape, order="C")
         if self.normalize_rows:
             _validate_normalizable(data)
             data = normalize_rows(data)
         label_set = np.arange(number_of_clusters)
-        logging.debug('Initializing KMeans centroids.')
+        logging.debug("Initializing KMeans centroids.")
         centroids = self.initialize(data, number_of_clusters)
-        logging.debug('First centroids found.')
+        logging.debug("First centroids found.")
         old_labels = np.nan * np.zeros((data.shape[0],))
         labels = self.labeling(data, centroids)
-        logging.debug('Labels assigned.')
+        logging.debug("Labels assigned.")
         for _ in range(self.number_of_iterations):
             if np.unique(labels).size != number_of_clusters:
                 centroids, labels = self._fix_labels(
-                    data, centroids, labels, number_of_clusters)
+                    data, centroids, labels, number_of_clusters
+                )
             if np.all(labels == old_labels):
-                logging.debug('Stability achieved.')
+                logging.debug("Stability achieved.")
                 break
             old_labels = labels
-            centroids = redefine_centroids(
-                data, old_labels, label_set, self.allow_dask)
+            centroids = redefine_centroids(data, old_labels, label_set, self.allow_dask)
             labels = self.labeling(data, centroids)
         return labels, centroids
 
 
-def _parse_initialization(name: str, distance: str,
-                          percentile: float=None,
-                          leaf_size: Union[int, float] = 0.01) \
-        -> Initialization:
-    if name == 'percentile':
+def _parse_initialization(
+    name: str,
+    distance: str,
+    percentile: float = None,
+    leaf_size: Union[int, float] = 0.01,
+) -> Initialization:
+    if name == "percentile":
         return PercentileInitialization(distance, percentile)
-    if name == 'extreme':
+    if name == "extreme":
         return ExtremeInitialization(distance)
-    if name == 'kdtree':
+    if name == "kdtree":
         return KDTreeInitialization(distance, leaf_size)
-    if name == 'kdtree_percentile':
+    if name == "kdtree_percentile":
         return KDTreePercentileInitialization(distance, leaf_size, percentile)
-    logging.error('Unknown initialization: {0}'.format(name))
-    raise ValueError('Unknown initialization: {0}'.format(name))
+    logging.error("Unknown initialization: {0}".format(name))
+    raise ValueError("Unknown initialization: {0}".format(name))
 
 
 @configurable
@@ -233,7 +256,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         Specifies the starting percentile for 'percentile' initialization.
         Must be within range [0.0, 100.0]. At 100.0 it is equivalent to
         'extreme' initialization.
-    
+
     leaf_size : int or float, optional (default 0.01)
         Desired leaf size in kdtree initialization. When int, the box size
         will be between `leaf_size` and `2 * leaf_size`. When float, it will
@@ -245,7 +268,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
 
     normalize_rows : bool, default: False
         If True, rows are translated to mean of 0.0 and scaled to norm of 1.0.
-    
+
     allow_dask : bool, default: False
         If True, automatically selects dask as computations backend whenever
         reasonable. Default `False` since it cannot be used together with
@@ -261,12 +284,19 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         Labels of each point
 
     """
+
     # TODO: Add example of usage.
-    def __init__(self, n_clusters: int, distance: str = 'euclidean',
-                 init: str = 'percentile', percentile: float = 95.,
-                 leaf_size : Union[int, float] = 0.01,
-                 max_iter: int = 100, normalize_rows: bool = False,
-                 allow_dask: bool = False):
+    def __init__(
+        self,
+        n_clusters: int,
+        distance: str = "euclidean",
+        init: str = "percentile",
+        percentile: float = 95.0,
+        leaf_size: Union[int, float] = 0.01,
+        max_iter: int = 100,
+        normalize_rows: bool = False,
+        allow_dask: bool = False,
+    ):
         super().__init__()
         self.n_clusters = n_clusters
         self.distance = distance
@@ -292,7 +322,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
             not used, present here for API consistency by convention.
         """
         initialize = _parse_initialization(
-            self.init, self.distance, self.percentile, self.leaf_size)
+            self.init, self.distance, self.percentile, self.leaf_size
+        )
         kmeans = _KMeans(
             labeling=Labeling(self.distance, allow_dask=self.allow_dask),
             initialize=initialize,
@@ -302,7 +333,8 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         )
         X = np.asanyarray(X)
         self.labels_, self.cluster_centers_ = kmeans(
-            X, number_of_clusters=self.n_clusters)
+            X, number_of_clusters=self.n_clusters
+        )
         self.labels_ = self.labels_.ravel()
         return self
 
@@ -328,8 +360,7 @@ class KMeans(BaseEstimator, ClusterMixin, TransformerMixin):
         check_is_fitted(self)
         if self.normalize_rows:
             X = normalize_rows(X)
-        labels = dst.cdist(
-            X, self.cluster_centers_, self.distance).argmin(axis=1)
+        labels = dst.cdist(X, self.cluster_centers_, self.distance).argmin(axis=1)
         return labels
 
     def transform(self, X):

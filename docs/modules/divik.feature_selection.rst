@@ -1,7 +1,4 @@
-`feature\_selection` module
-===========================
+``divik.feature_selection`` module
+==================================
 
 .. automodule:: divik.feature_selection
-   :members:
-   :undoc-members:
-   :inherited-members:

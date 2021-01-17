@@ -29,19 +29,21 @@ SELECT_ALL = np.ones((10,), dtype=bool)
 
 class RecursiveSelectionTest(unittest.TestCase):
     def setUp(self):
-        self.selection = np.array([0, 0, 0, 1, 1, 0, 1, 0, 0, 1],
-                                  dtype=bool)
+        self.selection = np.array([0, 0, 0, 1, 1, 0, 1, 0, 0, 1], dtype=bool)
         self.partition = np.array([1, 2, 2, 1], dtype=int)
 
     def test_selects_subset_of_elements_by_cluster_number(self):
         npt.assert_equal(
             dv._recursive_selection(self.selection, self.partition, 1),
-            np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 1], dtype=bool))
+            np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 1], dtype=bool),
+        )
         npt.assert_equal(
             dv._recursive_selection(self.selection, self.partition, 2),
-            np.array([0, 0, 0, 0, 1, 0, 1, 0, 0, 0], dtype=bool))
+            np.array([0, 0, 0, 0, 1, 0, 1, 0, 0, 0], dtype=bool),
+        )
 
     def test_selects_nothing_for_nonexistent_label(self):
         npt.assert_equal(
             dv._recursive_selection(self.selection, self.partition, 3),
-            np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool))
+            np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=bool),
+        )

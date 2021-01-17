@@ -19,7 +19,7 @@ class pipe:
         return result
 
 
-def progress_bar(description: str=None):
+def progress_bar(description: str = None):
     return partial(tqdm, desc=description)
 
 
@@ -32,7 +32,7 @@ def apply(func, collection):
     return [func(element) for element in collection]
 
 
-def for_each(func, lazy: bool=True, parallel: bool=False, **kwargs):
+def for_each(func, lazy: bool = True, parallel: bool = False, **kwargs):
     if parallel:
         return partial(pmap, func, **kwargs)
     if lazy:
@@ -41,8 +41,7 @@ def for_each(func, lazy: bool=True, parallel: bool=False, **kwargs):
         return partial(apply, func)
 
 
-def as_image(data: np.ndarray, x: np.ndarray, y: np.ndarray, default=-1) -> \
-        np.ndarray:
+def as_image(data: np.ndarray, x: np.ndarray, y: np.ndarray, default=-1) -> np.ndarray:
     x, y = x.astype(int), y.astype(int)
     translated_x, translated_y = x - np.min(x), y - np.min(y)
     rows, columns = int(np.max(translated_y) + 1), int(np.max(translated_x) + 1)
@@ -65,7 +64,7 @@ def _feature_processor(x: np.ndarray, y: np.ndarray) -> _FeatureProcessor:
     return pipe(
         partial(as_image, x=x, y=y, default=_IGNORED),
         _remove_channel_dimension,
-        partial(structness, ignored=[_IGNORED])
+        partial(structness, ignored=[_IGNORED]),
     )
 
 
@@ -87,10 +86,10 @@ def _estimator(structness_: _FeatureProcessor) -> _StructnessEstimator:
     # noinspection PyTypeChecker
     return pipe(
         _as_features,
-        progress_bar('feature structness'),
+        progress_bar("feature structness"),
         for_each(structness_, parallel=True),
         _normalize_structness_by_kind,
-        _sumarize_structness_by_feature
+        _sumarize_structness_by_feature,
     )
 
 

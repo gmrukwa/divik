@@ -1,7 +1,4 @@
-`feature\_extraction` module
-===========================
+``divik.feature_extraction`` module
+====================================
 
 .. automodule:: divik.feature_extraction
-   :members:
-   :undoc-members:
-   :inherited-members:

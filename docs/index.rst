@@ -8,31 +8,56 @@ Welcome to divik's documentation!
 
 Here you can find a list of documentation topics covered by this page.
 
-.. toctree::
-   :maxdepth: 4
-   :caption: Topics:
-
-   instructions/installation
-   instructions/running_in_docker
-   instructions/simple_windows
 
 .. toctree::
    :maxdepth: 4
-   :caption: Command Line Interface:
+   :caption: Command Line Interface
 
-   cli/divik
+   cli/fit-clusters
+
+
+Computational Modules
+---------------------
 
 .. toctree::
    :maxdepth: 4
-   :caption: Packages:
+   :caption: Computational Modules
+   :hidden:
+   
+   modules/divik.cluster
+   modules/divik.feature_extraction
+   modules/divik.feature_selection
+   modules/divik.sampler
+
+.. autosummary::
+   :recursive:
+
+   divik.cluster
+   divik.feature_extraction
+   divik.feature_selection
+   divik.sampler
+
+
+Utility Packages
+----------------
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Utility Packages
+   :hidden:
 
    modules/divik
    modules/divik.core
+   modules/divik.core.io
    modules/divik.core.gin_sklearn_configurables
-   modules/divik.cluster
-   modules/divik.feature_selection
-   modules/divik.feature_extraction
-   modules/divik.sampler
+
+.. autosummary::
+   :recursive:
+
+   divik
+   divik.core
+   divik.core.io
+   divik.core.gin_sklearn_configurables
 
 
 Indices and tables

@@ -15,7 +15,7 @@ class StratifiedSamplerTest(unittest.TestCase):
     def test_keeps_shapes(self):
         X, y = data()
         sampler = StratifiedSampler(n_rows=10).fit(X, y)
-        self.assertEqual(sampler.get_sample(0).shape, (10, X.shape[1]))
+        assert sampler.get_sample(0).shape == (10, X.shape[1])
 
     def test_keeps_proportion(self):
         X, y = data()
@@ -28,15 +28,15 @@ class StratifiedSamplerTest(unittest.TestCase):
         orig_prop = orig_count / np.linalg.norm(orig_count)
         rand_prop = rand_count / np.linalg.norm(rand_count)
         # This is equivalent to up to 1% of samples moved between labels
-        self.assertLess(np.abs(orig_prop - rand_prop).max(), 0.01)
+        assert np.abs(orig_prop - rand_prop).max() < 0.01
 
     def test_samples_exact_rows(self):
         X, y = data()
         sampler = StratifiedSampler().fit(X, y)
         X_rand = sampler.get_sample(0)
         for row in X_rand:
-            self.assertTrue((row[np.newaxis, :] == X).all(axis=1).any(axis=0))
+            assert (row[np.newaxis, :] == X).all(axis=1).any(axis=0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

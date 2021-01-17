@@ -1,7 +1,16 @@
-`divik` package
-===============
+``divik`` package
+=================
 
 .. automodule:: divik
-   :members:
-   :undoc-members:
-   :inherited-members:
+
+.. rubric:: Modules
+
+.. autosummary::
+   :recursive:
+
+   divik.cluster
+   divik.core
+   divik.feature_extraction
+   divik.feature_selection
+   divik.sampler
+   divik.score

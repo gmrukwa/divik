@@ -3,8 +3,9 @@ import logging
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from divik.core import configurable
 import divik._matlab_legacy as ml
+from divik.core import configurable
+
 from ._stat_selector_mixin import StatSelectorMixin
 
 
@@ -75,9 +76,9 @@ class GMMSelector(BaseEstimator, StatSelectorMixin):
 
     Examples
     --------
-import divik._utils    >>> import numpy as np
+    >>> import numpy as np
     >>> import divik.feature_selection as fs
-    >>> divik._utils.seed(42)
+    >>> np.random.seed(42)
     >>> labels = np.concatenate([30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
     >>> data = labels * 5 + np.random.randn(*labels.shape)
     >>> fs.GMMSelector('mean').fit_transform(data)
@@ -87,11 +88,18 @@ import divik._utils    >>> import numpy as np
     >>> fs.GMMSelector('mean', n_discard=-1).fit_transform(data)
     array([[10.32408397  9.61491772 ... 15.75193303]])
     """
-    def __init__(self, stat: str, use_log: bool = False,
-                 n_candidates: int = None, min_features: int = 1,
-                 min_features_rate: float = .0, preserve_high: bool = True,
-                 max_components: int = 10):
-        if stat not in {'cv', 'mean', 'var'} and not callable(stat):
+
+    def __init__(
+        self,
+        stat: str,
+        use_log: bool = False,
+        n_candidates: int = None,
+        min_features: int = 1,
+        min_features_rate: float = 0.0,
+        preserve_high: bool = True,
+        max_components: int = 10,
+    ):
+        if stat not in {"cv", "mean", "var"} and not callable(stat):
             msg = 'stat must be one of {"cv", "mean", "var"} or callable'
             logging.error(msg)
             raise ValueError(msg)
@@ -120,13 +128,10 @@ import divik._utils    >>> import numpy as np
         self
         """
         self.vals_ = self._to_characteristics(X)
-        thrs = ml.find_thresholds(
-            self.vals_, max_components=self.max_components)
-        n_candidates = len(thrs) if self.n_candidates is None \
-            else self.n_candidates
+        thrs = ml.find_thresholds(self.vals_, max_components=self.max_components)
+        n_candidates = len(thrs) if self.n_candidates is None else self.n_candidates
         desired_thrs = thrs[:n_candidates]
-        min_features = max(
-            self.min_features, self.min_features_rate * X.shape[1])
+        min_features = max(self.min_features, self.min_features_rate * X.shape[1])
         for thr in reversed(desired_thrs):
             selected = self.vals_ >= thr
             if selected.sum() >= min_features:
