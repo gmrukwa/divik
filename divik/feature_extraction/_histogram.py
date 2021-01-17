@@ -13,8 +13,8 @@ class HistogramEqualization(BaseEstimator, TransformerMixin):
     
     Based on https://github.com/scikit-image/scikit-image/blob/master/skimage/exposure/exposure.py#L187-L223
 
-    Arguments
-    ---------
+    Parameters
+    ----------
 
     n_bins : int, default 256
         Number of bins for histogram equalization.

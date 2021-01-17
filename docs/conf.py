@@ -10,8 +10,9 @@ import datetime
 import os
 import sys
 
+import toml
+
 sys.path.insert(0, os.path.abspath(".."))
-from divik import __version__
 
 # -- Project information -----------------------------------------------------
 
@@ -20,7 +21,9 @@ copyright = "{0}, Grzegorz Mrukwa".format(datetime.date.today().year)
 author = "Grzegorz Mrukwa"
 
 # The full version, including alpha/beta/rc tags
-release = __version__
+dirname = os.path.dirname(__file__)
+with open(os.path.join(dirname, '../pyproject.toml')) as f:
+    release = toml.load(f)['tool']['poetry']['version']
 
 
 # -- General configuration ---------------------------------------------------
