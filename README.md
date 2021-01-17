@@ -9,23 +9,33 @@
 
 Python implementation of Divisive iK-means (DiviK) algorithm.
 
-# Tools within this package
+## Tools within this package
 
-> This section will be further developed soon.
+- Clustering at your command line with fit-clusters
+- Set of algorithm implementations for unsupervised analyses
+  - Clustering
+    - DiviK - hands-free clustering method with built-in feature selection
+    - K-Means with Dunn method for selecting the number of clusters
+    - K-Means with GAP index for selecting the number of clusters
+    - Modular K-Means implementation with custom distance metrics and initializations
+  - Feature extraction
+    - PCA with knee-based components selection
+    - Locally Adjusted RBF Spectral Embedding
+  - Feature selection
+    - EXIMS
+    - Gaussian Mixture Model based data-driven feature selection
+      - High Abundance And Variance Selector - allows you to select highly variant features above noise level, based on GMM-decomposition
+    - Outlier based Selector
+      - Outlier Abundance And Variance Selector - allows you to select highly variant features above noise level, based on outlier detection
+    - Percentage based Selector - allows you to select highly variant features above noise level with your predefined thresholds for each
+  - Sampling
+    - StratifiedSampler - generates samples of fixed number of rows from given dataset
+    - UniformPCASampler - generates samples of random observations within boundaries of an original dataset, and preserving the rotation of the data
+    - UniformSampler - generates samples of random observations within boundaries of an original dataset
 
-1) [`divik`](divik/_cli/divik.md) - runs DiviK in GAP-only scenario
-2) [`dunn-divik`](dunn-divik/_cli/dunn_divik.md) - runs DiviK in GAP & Dunn scenario
-2) [`kmeans`](divik/_cli/auto_kmeans.md) - runs K-means with GAP statistic
-3) `linkage` - runs agglomerative clustering
-4) [`inspect`](divik/_cli/inspect.md) - visualizes DiviK result
-5) `visualize` - generates `.png` file with visualization of clusters for 2D
-maps
-6) [`spectral`](divik/_cli/spectral.md) - generates spectral embedding of a
-dataset
+## Installation
 
-# Installation
-
-## Docker
+### Docker
 
 The recommended way to use this software is through
 [Docker](https://www.docker.com/). This is the most convenient way, if you want
@@ -37,13 +47,7 @@ To install latest stable version use:
 docker pull gmrukwa/divik
 ```
 
-To install specific version, you can specify it in the command, e.g.:
-
-```bash
-docker pull gmrukwa/divik:2.5.12
-```
-
-## Python package
+### Python package
 
 Prerequisites for installation of base package:
 
@@ -61,10 +65,10 @@ sudo apt-get install libgomp1
 
 #### Installation of OpenMP for Mac
 
-OpenMP is available as part of LLVM. You may need to install in with:
+OpenMP is available as part of LLVM. You may need to install it with conda:
 
 ```bash
-brew install llvm libomp
+conda install -c conda-forge "compilers>=1.0.4,!=1.1.0" llvm-openmp
 ```
 
 #### DiviK Installation
@@ -74,12 +78,6 @@ package:
 
 ```bash
 pip install divik
-```
-
-or any stable tagged version, e.g.:
-
-```bash
-pip install divik==2.5.12
 ```
 
 If you want to have compatibility with
@@ -92,19 +90,13 @@ pip install divik[gin]
 
 **Note:** Remember about `\` before `[` and `]` in `zsh` shell.
 
-If you want to launch `inspect` tool, you need to install extras with:
-
-```bash
-pip install divik[inspect]
-```
-
 You can install all extras with:
 
 ```bash
 pip install divik[all]
 ```
 
-# High-Volume Data Considerations
+## High-Volume Data Considerations
 
 If you are using DiviK to run the analysis that could fail to fit RAM of your
 computer, consider disabling the default parallelism and switch to
@@ -113,16 +105,43 @@ computer, consider disabling the default parallelism and switch to
 - set all parameters named `n_jobs` to `1`;
 - set all parameters named `allow_dask` to `True`.
 
-Never set `n_jobs>1` and `allow_dask=True` at the same time, the computations
-will freeze due to how `multiprocessing` and `dask` handle parallelism.
+**Note:** Never set `n_jobs>1` and `allow_dask=True` at the same time, the
+computations will freeze due to how `multiprocessing` and `dask` handle
+parallelism.
 
-# References
+## Known Issues
+
+### Segmentation Fault
+
+It can happen if the he `gamred_native` package (part of `divik` package) was
+compiled with different numpy ABI than scikit-learn. This could happen if you
+used different set of compilers than the developers of the scikit-learn
+package.
+
+In such a case, a handler is defined to display the stack trace. If the trace
+comes from `_matlab_legacy.py`, the most probably this is the issue.
+
+To resolve the issue, consider following the installation instructions once
+again. The exact versions get updated to avoid the issue.
+
+## Contributing
+
+Contribution guide will be developed soon.
+
+Format the code with:
+
+```bash
+isort -m 3 --fgw 3 --tc .
+black -t py36 .
+```
+
+## References
 
 This software is part of contribution made by [Data Mining Group of Silesian
 University of Technology](http://www.zaed.polsl.pl/), rest of which is
 published [here](https://github.com/ZAEDPolSl).
 
-+ [Mrukwa, G. and Polanska, J., 2020. DiviK: Divisive intelligent K-means for
+- [Mrukwa, G. and Polanska, J., 2020. DiviK: Divisive intelligent K-means for
 hands-free unsupervised clustering in biological big data. *arXiv preprint
 arXiv:2009.10706.*][1]
 

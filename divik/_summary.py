@@ -18,44 +18,52 @@ limitations under the License.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import (
+    Dict,
+    List,
+    Optional,
+    Tuple,
+)
 
 import numpy as np
 
 import divik.core as u
 
 
-def depth(tree, children_collection_name='subregions'):
+def depth(tree, children_collection_name="subregions"):
     """Get tree depth."""
     if tree is None:
         return 1
-    return max(depth(subtree) for subtree
-               in getattr(tree, children_collection_name)) + 1
+    return (
+        max(depth(subtree) for subtree in getattr(tree, children_collection_name)) + 1
+    )
 
 
 def total_number_of_clusters(tree) -> int:
     """Get the number of leaves in the tree."""
     if tree is None:
         return 1
-    return sum(total_number_of_clusters(subtree)
-               for subtree in tree.subregions)
+    return sum(total_number_of_clusters(subtree) for subtree in tree.subregions)
 
 
-def merged_partition(tree: u.DivikResult, levels_limit: int = np.inf,
-                     return_paths: bool = False) -> u.IntLabels:
+def merged_partition(
+    tree: u.DivikResult, levels_limit: int = np.inf, return_paths: bool = False
+) -> u.IntLabels:
     """Compute merged segmentation labels."""
-    assert tree is not None, 'Nothing was segmented.'
+    assert tree is not None, "Nothing was segmented."
     merged, paths = _merged_partition(
-        tree.clustering.labels_, tree.subregions, levels_limit)
+        tree.clustering.labels_, tree.subregions, levels_limit
+    )
     if return_paths:
         return merged, paths
     return merged
 
 
-def _merged_partition(partition: u.IntLabels,
-                      subregions: List[Optional[u.DivikResult]],
-                      levels_limit: int = np.inf) \
-        -> Tuple[u.IntLabels, Dict[int, Tuple[int]]]:
+def _merged_partition(
+    partition: u.IntLabels,
+    subregions: List[Optional[u.DivikResult]],
+    levels_limit: int = np.inf,
+) -> Tuple[u.IntLabels, Dict[int, Tuple[int]]]:
     """Compute merged segmentation labels."""
     result = partition * 0 - 1
     known_clusters = 0
@@ -68,18 +76,16 @@ def _merged_partition(partition: u.IntLabels,
             known_clusters += 1
         else:
             local_partition, down_paths = _merged_partition(
-                subregion.clustering.labels_, subregion.subregions,
-                levels_limit-1)
+                subregion.clustering.labels_, subregion.subregions, levels_limit - 1
+            )
             result[current_cluster] = local_partition + known_clusters
             for cluster in np.unique(local_partition):
-                paths[cluster + known_clusters] = (
-                    cluster_number, *down_paths[cluster])
+                paths[cluster + known_clusters] = (cluster_number, *down_paths[cluster])
             known_clusters += int(np.max(local_partition)) + 1
     return result, paths
 
 
-def _update_graph(tree, size: int, graph: 'networkx.Graph' = None,
-                  parent=None):
+def _update_graph(tree, size: int, graph: "networkx.Graph" = None, parent=None):
     tree_node = len(graph)
     graph.add_node(tree_node, size=size)
     if parent is not None:
@@ -87,14 +93,17 @@ def _update_graph(tree, size: int, graph: 'networkx.Graph' = None,
     if tree is None:
         return
     for idx, subtree in enumerate(tree.subregions):
-        _update_graph(subtree,
-                      size=np.sum(tree.clustering.labels_ == idx),
-                      graph=graph,
-                      parent=tree_node)
+        _update_graph(
+            subtree,
+            size=np.sum(tree.clustering.labels_ == idx),
+            graph=graph,
+            parent=tree_node,
+        )
 
 
-def _as_graph(tree) -> 'networkx.DiGraph':
+def _as_graph(tree) -> "networkx.DiGraph":
     import networkx as nx
+
     graph = nx.DiGraph()
     _update_graph(tree, size=tree.partition.size, graph=graph, parent=None)
     return graph
@@ -102,28 +111,29 @@ def _as_graph(tree) -> 'networkx.DiGraph':
 
 def _make_labels(graph):
     import networkx as nx
-    attributes = nx.get_node_attributes(graph, 'size')
-    return {
-        idx: "{0} (size={1})".format(idx, attributes[idx])
-        for idx in graph
-    }
+
+    attributes = nx.get_node_attributes(graph, "size")
+    return {idx: "{0} (size={1})".format(idx, attributes[idx]) for idx in graph}
 
 
 def _make_sizes(graph):
     import networkx as nx
-    values = np.array(list(nx.get_node_attributes(graph, 'size').values()))
+
+    values = np.array(list(nx.get_node_attributes(graph, "size").values()))
     return list(np.sqrt(values))
 
 
 def scale_plot_size(factor=1.5):
     """Scale plot size in jupyter notebook."""
     import matplotlib as mpl
-    default_dpi = mpl.rcParamsDefault['figure.dpi']
-    mpl.rcParams['figure.dpi'] = default_dpi * factor
+
+    default_dpi = mpl.rcParamsDefault["figure.dpi"]
+    mpl.rcParams["figure.dpi"] = default_dpi * factor
 
 
 def _make_positions(graph):
     import networkx as nx
+
     intermediate = nx.spectral_layout(graph)
     return nx.spring_layout(graph, pos=intermediate, iterations=20)
 
@@ -132,23 +142,25 @@ def plot(tree, with_size=False):
     """Plot visualization of splits."""
     graph = _as_graph(tree)
     arguments = {
-        'G': graph,
-        'pos': _make_positions(graph),
-        'node_size': _make_sizes(graph),
-        'font_size': 3,
-        'width': .1  # lines width
+        "G": graph,
+        "pos": _make_positions(graph),
+        "node_size": _make_sizes(graph),
+        "font_size": 3,
+        "width": 0.1,  # lines width
     }
     if with_size:
-        arguments['labels'] = _make_labels(graph)
+        arguments["labels"] = _make_labels(graph)
     import networkx as nx
+
     nx.draw_networkx(**arguments)
     import matplotlib.pyplot as plt
-    plt.axis('off')
+
+    plt.axis("off")
 
 
-def reject_split(tree: Optional[u.DivikResult],
-                 rejection_size: int = 0) \
-        -> Optional[u.DivikResult]:
+def reject_split(
+    tree: Optional[u.DivikResult], rejection_size: int = 0
+) -> Optional[u.DivikResult]:
     """Re-apply rejection condition on known result tree."""
     if tree is None:
         logging.debug("Rejecting empty.")
@@ -166,5 +178,5 @@ def reject_split(tree: Optional[u.DivikResult],
         clustering=tree.clustering,
         feature_selector=tree.feature_selector,
         merged=merged,
-        subregions=allowed_subregions
+        subregions=allowed_subregions,
     )

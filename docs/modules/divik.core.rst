@@ -1,7 +1,12 @@
-`core` module
-================
+``divik.core`` module
+=====================
 
 .. automodule:: divik.core
-   :members:
-   :undoc-members:
-   :inherited-members:
+
+.. rubric:: Modules
+
+.. autosummary::
+   :recursive:
+
+   divik.core.gin_sklearn_configurables
+   divik.core.io

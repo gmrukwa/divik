@@ -1,21 +1,26 @@
-from functools import partial
 import logging
 import sys
 import uuid
+from functools import partial
 
 import numpy as np
-from sklearn.base import clone, BaseEstimator, ClusterMixin, TransformerMixin
-from sklearn.utils.validation import check_is_fitted
 import tqdm
-
-from divik.core import configurable
-from ._core import KMeans
-from divik.score import (
-    dunn,
-    sampled_dunn,
+from sklearn.base import (
+    BaseEstimator,
+    ClusterMixin,
+    TransformerMixin,
+    clone,
 )
-from divik.core import maybe_pool, share
+from sklearn.utils.validation import check_is_fitted
 
+from divik.core import (
+    configurable,
+    maybe_pool,
+    share,
+)
+from divik.score import dunn, sampled_dunn
+
+from ._core import KMeans
 
 _DATA = {}
 
@@ -100,19 +105,22 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         The optimal estimator.
 
     """
-    def __init__(self,
-                 kmeans: KMeans,
-                 max_clusters: int,
-                 min_clusters: int = 2,
-                 method='full',
-                 inter='centroid',
-                 intra='avg',
-                 sample_size=1000,
-                 n_trials=10,
-                 seed=42,
-                 n_jobs: int = 1,
-                 drop_unfit: bool = False,
-                 verbose: bool = False):
+
+    def __init__(
+        self,
+        kmeans: KMeans,
+        max_clusters: int,
+        min_clusters: int = 2,
+        method="full",
+        inter="centroid",
+        intra="avg",
+        sample_size=1000,
+        n_trials=10,
+        seed=42,
+        n_jobs: int = 1,
+        drop_unfit: bool = False,
+        verbose: bool = False,
+    ):
         super().__init__()
         assert min_clusters <= max_clusters
         self.kmeans = kmeans
@@ -129,7 +137,7 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         self.verbose = verbose
 
     def _n_ops(self, data):
-        if self.inter == 'closest' or self.intra == 'furthest':
+        if self.inter == "closest" or self.intra == "furthest":
             n_ops_full = data.shape[0] ** 2
             n_ops_sampled = self.n_trials * self.sample_size ** 2
         else:
@@ -138,26 +146,32 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         return n_ops_full, n_ops_sampled
 
     def _sampled_dunn(self, kmeans, data, inter, intra):
-        return sampled_dunn(kmeans, data, inter=inter, intra=intra,
-                            sample_size=self.sample_size, n_jobs=1,
-                            seed=self.seed, n_trials=self.n_trials)
+        return sampled_dunn(
+            kmeans,
+            data,
+            inter=inter,
+            intra=intra,
+            sample_size=self.sample_size,
+            n_jobs=1,
+            seed=self.seed,
+            n_trials=self.n_trials,
+        )
 
     def _dunn(self, kmeans, data):
         n_ops_full, n_ops_sampled = self._n_ops(data)
-        if self.method == 'full':
+        if self.method == "full":
             dunn_ = dunn
-        elif self.method == 'sampled':
+        elif self.method == "sampled":
             dunn_ = self._sampled_dunn
-        elif self.method == 'auto' and n_ops_full <= n_ops_sampled:
+        elif self.method == "auto" and n_ops_full <= n_ops_sampled:
             dunn_ = dunn
             logging.debug('DunnSearch.method="auto" resolved to "full"')
-        elif self.method == 'auto' and n_ops_full > n_ops_sampled:
+        elif self.method == "auto" and n_ops_full > n_ops_sampled:
             dunn_ = self._sampled_dunn
             logging.debug('DunnSearch.method="auto" resolved to "sampled"')
         else:
-            logging.error(f'Failed to select Dunn method {self.method}.')
-            logging.debug(f'n_ops_full={n_ops_full}, '
-                          f'n_ops_sampled={n_ops_sampled}')
+            logging.error(f"Failed to select Dunn method {self.method}.")
+            logging.debug(f"n_ops_full={n_ops_full}, " f"n_ops_sampled={n_ops_sampled}")
             raise ValueError(f"Unknown Dunn method {self.method}")
         return dunn_(kmeans, data, inter=self.inter, intra=self.intra)
 
@@ -190,8 +204,9 @@ class DunnSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         ref = str(uuid.uuid4())
         with share(X) as x:
             _DATA[ref] = x
-            with maybe_pool(self.n_jobs, initializer=_pool_initialize,
-                            initargs=(ref, x)) as pool:
+            with maybe_pool(
+                self.n_jobs, initializer=_pool_initialize, initargs=(ref, x)
+            ) as pool:
                 fit_kmeans = partial(self._fit_kmeans, data_ref=ref)
                 kmeans_and_scores = pool.map(fit_kmeans, n_clusters)
             del _DATA[ref]

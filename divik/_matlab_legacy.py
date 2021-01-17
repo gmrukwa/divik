@@ -1,10 +1,22 @@
 """Access to MATLAB legacy functionalities."""
-import gamred_native as gn
+import faulthandler
+from contextlib import contextmanager
+
 import numpy as np
 
+import gamred_native as gn
 
-def find_thresholds(values: np.ndarray, max_components: int = 10) \
-        -> np.ndarray:
+
+@contextmanager
+def sigsegv_handler():
+    was_enabled = faulthandler.is_enabled()
+    faulthandler.enable()
+    yield
+    if not was_enabled:
+        faulthandler.disable()
+
+
+def find_thresholds(values: np.ndarray, max_components: int = 10) -> np.ndarray:
     """Find candidate thresholds for decomposition of values by GMM.
 
     Parameters
@@ -31,4 +43,5 @@ def find_thresholds(values: np.ndarray, max_components: int = 10) \
     offset = np.min(values)
     if np.min(values) == np.max(values):
         return np.array([])
-    return gn.find_thresholds(values - offset, max_components) + offset
+    with sigsegv_handler():
+        return gn.find_thresholds(values - offset, max_components) + offset

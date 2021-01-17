@@ -1,22 +1,30 @@
-from functools import partial
 import sys
-from typing import Tuple
+from functools import partial
+from typing import Optional, Tuple
 
 import numpy as np
 import pandas as pd
 import tqdm
 from scipy.spatial import distance as dist
-from sklearn.base import BaseEstimator, ClusterMixin, TransformerMixin
+from sklearn.base import (
+    BaseEstimator,
+    ClusterMixin,
+    TransformerMixin,
+)
 from sklearn.utils.validation import check_is_fitted
 
-from divik import _summary as summary, feature_selection as fs
+from divik import _summary as summary
+from divik import feature_selection as fs
 from divik.core import (
+    DivikResult,
     configurable,
     context_if,
-    DivikResult,
-    normalize_rows,
     maybe_pool,
+    normalize_rows,
+    visualize,
 )
+from divik.core.io import saver
+
 from ._backend import divik
 from ._report import DivikReporter
 
@@ -39,10 +47,11 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         The distance metric between points, centroids and for GAP index
         estimation. One of the distances supported by scipy package.
 
-    minimal_size: int, optional, default: None
+    minimal_size: int or float, optional, default: None
         The minimum size of the region (the number of observations) to be
-        considered for any further divisions. When left None, defaults to
-        0.1% of the training dataset size.
+        considered for any further divisions. If provided number is between
+        0 and 1, it is considered a rate of training dataset size. When left
+        None, defaults to 0.1% of the training dataset size.
 
     rejection_size: int, optional, default: None
         Size under which split will be rejected - if a cluster appears in the
@@ -138,7 +147,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     Examples
     --------
 
-    >>> from divik.cluster import DunnDiviK
+    >>> from divik.cluster import DiviK
     >>> from sklearn.datasets import make_blobs
     >>> X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
     ...                   random_state=42)
@@ -153,20 +162,24 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
            [ 1, ...,  2.]])
 
     """
-    def __init__(self,
-                 kmeans,
-                 fast_kmeans=None,
-                 distance: str = 'correlation',
-                 minimal_size: int = None,
-                 rejection_size: int = None,
-                 rejection_percentage: float = None,
-                 minimal_features_percentage: float = .01,
-                 features_percentage: float = 0.05,
-                 normalize_rows: bool = None,
-                 use_logfilters: bool = False,
-                 filter_type='gmm',
-                 n_jobs: int = None,
-                 verbose: bool = False):
+
+    def __init__(
+        self,
+        kmeans,
+        fast_kmeans=None,
+        distance: str = "correlation",
+        # TODO: Allow percentage
+        minimal_size: int = None,
+        rejection_size: int = None,
+        rejection_percentage: float = None,
+        minimal_features_percentage: float = 0.01,
+        features_percentage: float = 0.05,
+        normalize_rows: bool = None,
+        use_logfilters: bool = False,
+        filter_type="gmm",
+        n_jobs: int = None,
+        verbose: bool = False,
+    ):
         self.kmeans = kmeans
         self.fast_kmeans = fast_kmeans
         self.distance = distance
@@ -183,18 +196,19 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self._validate_arguments()
 
     def _validate_arguments(self):
-        if self.minimal_features_percentage < 0 \
-                or self.minimal_features_percentage > 1:
-            raise ValueError('minimal_features_percentage must be in range'
-                             ' [0, 1]')
+        if self.minimal_features_percentage < 0 or self.minimal_features_percentage > 1:
+            raise ValueError("minimal_features_percentage must be in range" " [0, 1]")
         if self.features_percentage < 0 or self.features_percentage > 1:
-            raise ValueError('features_percentage must be in range [0, 1]')
+            raise ValueError("features_percentage must be in range [0, 1]")
         if self.features_percentage < self.minimal_features_percentage:
-            raise ValueError('features_percentage must be higher than or equal'
-                             ' to minimal_features_percentage')
-        if self.filter_type not in ['gmm', 'outlier', 'auto', 'none']:
             raise ValueError(
-                "filter_type must be in ['gmm', 'outlier', 'auto', 'none']")
+                "features_percentage must be higher than or equal"
+                " to minimal_features_percentage"
+            )
+        if self.filter_type not in ["gmm", "outlier", "auto", "none"]:
+            raise ValueError(
+                "filter_type must be in ['gmm', 'outlier', 'auto', 'none']"
+            )
 
     def fit(self, X, y=None):
         """Compute DiviK clustering.
@@ -211,8 +225,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         if np.isnan(X).any():
             raise ValueError("NaN values are not supported.")
 
-        with context_if(self.verbose, tqdm.tqdm, total=X.shape[0],
-                        file=sys.stdout, smoothing=0) as progress:
+        with context_if(
+            self.verbose, tqdm.tqdm, total=X.shape[0], file=sys.stdout, smoothing=0
+        ) as progress:
             self.result_ = self._divik(X, progress)
 
         if self.result_ is None:
@@ -220,19 +235,18 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             self.paths_ = {0: (0,)}
         else:
             self.labels_, self.paths_ = summary.merged_partition(
-                self.result_, return_paths=True)
+                self.result_, return_paths=True
+            )
 
-        self.reverse_paths_ = {
-            value: key for key, value in self.paths_.items()}
+        self.reverse_paths_ = {value: key for key, value in self.paths_.items()}
 
         if self.result_ is None:
             self.filters_ = np.ones([1, X.shape[1]], dtype=bool)
         else:
             self.filters_ = np.array(
-                [self._get_filter(path) for path in self.reverse_paths_],
-                dtype=bool)
-        self.centroids_ = pd.DataFrame(X).groupby(self.labels_, sort=True)\
-            .mean().values
+                [self._get_filter(path) for path in self.reverse_paths_], dtype=bool
+            )
+        self.centroids_ = pd.DataFrame(X).groupby(self.labels_, sort=True).mean().values
         self.depth_ = summary.depth(self.result_)
         self.n_clusters_ = summary.total_number_of_clusters(self.result_)
 
@@ -244,7 +258,8 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             rejection_size = max(rejection_size, self.rejection_size)
         if self.rejection_percentage is not None:
             rejection_size = max(
-                rejection_size, int(self.rejection_percentage * X.shape[0]))
+                rejection_size, int(self.rejection_percentage * X.shape[0])
+            )
         return rejection_size
 
     def _get_filter(self, path):
@@ -256,14 +271,16 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
 
     def _needs_normalization(self):
         if self.normalize_rows is None:
-            return self.distance == 'correlation'
+            return self.distance == "correlation"
         return self.normalize_rows
 
     def _feature_selector(self, n_features):
         return fs.make_specialized_selector(
-            self.filter_type, n_features, use_log=self.use_logfilters,
+            self.filter_type,
+            n_features,
+            use_log=self.use_logfilters,
             min_features_rate=self.minimal_features_percentage,
-            p=self.features_percentage
+            p=self.features_percentage,
         )
 
     def _divik(self, X, progress):
@@ -275,14 +292,23 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             warn_const = fast.kmeans.normalize_rows or full.kmeans.normalize_rows
         report = DivikReporter(progress, warn_const=warn_const)
         select_all = np.ones(shape=(X.shape[0],), dtype=bool)
-        minimal_size = int(X.shape[0] * 0.001) if self.minimal_size is None \
-            else self.minimal_size
+        if self.minimal_size is None:
+            minimal_size = int(X.shape[0] * 0.001)
+        elif 0 < self.minimal_size < 1:
+            minimal_size = int(X.shape[0] * self.minimal_size)
+        else:
+            minimal_size = self.minimal_size
         rejection_size = self._get_rejection_size(X)
         return divik(
-            X, selection=select_all, kmeans=full, fast_kmeans=fast,
+            X,
+            selection=select_all,
+            kmeans=full,
+            fast_kmeans=fast,
             feature_selector=self._feature_selector(X.shape[1]),
-            minimal_size=minimal_size, rejection_size=rejection_size,
-            report=report)
+            minimal_size=minimal_size,
+            rejection_size=rejection_size,
+            report=report,
+        )
 
     def fit_predict(self, X, y=None):
         """Compute cluster centers and predict cluster index for each sample.
@@ -329,11 +355,14 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         check_is_fitted(self)
         if self._needs_normalization():
             X = normalize_rows(X)
-        distances = np.hstack([
-            dist.cdist(
-                X[:, selector], centroid[np.newaxis, selector], self.distance)
-            for selector, centroid in zip(self.filters_, self.centroids_)
-        ])
+        distances = np.hstack(
+            [
+                dist.cdist(
+                    X[:, selector], centroid[np.newaxis, selector], self.distance
+                )
+                for selector, centroid in zip(self.filters_, self.centroids_)
+            ]
+        )
         return distances
 
     def fit_transform(self, X, y=None, **fit_params):
@@ -398,3 +427,42 @@ def _predict_path(observation: np.ndarray, result: DivikResult) -> Tuple[int]:
         division = division.subregions[label]
     path = tuple(path) if len(path) else (0,)
     return path
+
+
+def make_merged(result: Optional[DivikResult]) -> np.ndarray:
+    depth = summary.depth(result)
+    return np.hstack(
+        [
+            summary.merged_partition(result, limit + 1).reshape(-1, 1)
+            for limit in range(depth)
+        ]
+    )
+
+
+def save_merged(fname_fn, merged: np.ndarray, xy: np.ndarray = None):
+    np.savetxt(fname_fn("partitions.csv"), merged, delimiter=", ", fmt="%i")
+    np.save(fname_fn("partitions.npy"), merged)
+    import skimage.io
+
+    if xy is not None:
+        for level in range(merged.shape[1]):
+            np.save(fname_fn("partitions.{0}.npy".format(level)), merged[:, level])
+            visualization = visualize(merged[:, level], xy=xy)
+            image_name = fname_fn("partitions.{0}.png".format(level))
+            skimage.io.imsave(image_name, visualization)
+
+
+@saver
+def save_divik(model, fname_fn, **kwargs):
+    if not hasattr(model, "result_"):
+        return
+    import logging
+
+    if not isinstance(model.result_, DivikResult):
+        logging.info("Skipping DiviK details save. Cause: result is None")
+        return
+    logging.info("Saving DiviK partitions.")
+    merged = make_merged(model.result_).astype(np.int64)
+    assert merged.shape[0] == model.result_.clustering.labels_.size
+    xy = kwargs.get("xy", None)
+    save_merged(fname_fn, merged, xy)

@@ -1,9 +1,9 @@
 from typing import (
     Callable,
-    Tuple,
-    NamedTuple,
     List,
+    NamedTuple,
     Optional,
+    Tuple,
     Union,
 )
 
@@ -14,10 +14,17 @@ Data = Table
 Centroids = Table
 IntLabels = np.ndarray
 SegmentationMethod = Callable[[Data], Tuple[IntLabels, Centroids]]
-Clustering = Union['divik.cluster.GAPSearch', 'divik.cluster.DunnSearch']
-DivikResult = NamedTuple('DivikResult', [
-    ('clustering', Clustering),
-    ('feature_selector', 'divik.feature_selection.StatSelectorMixin'),
-    ('merged', IntLabels),
-    ('subregions', List[Optional['DivikResult']]),
-])
+Clustering = Union["divik.cluster.GAPSearch", "divik.cluster.DunnSearch"]
+
+
+class DivikResult(NamedTuple):
+    """Result of DiviK clustering"""
+
+    clustering: Clustering
+    """Fitted automated clustering estimator"""
+    feature_selector: "divik.feature_selection.StatSelectorMixin"
+    """Fitted feature selector"""
+    merged: IntLabels
+    """Recursively merged clustering labels"""
+    subregions: List[Optional["DivikResult"]]
+    """DivikResults for all obtained subregions"""

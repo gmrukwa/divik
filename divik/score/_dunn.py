@@ -1,16 +1,19 @@
-from functools import partial
 import logging
+from functools import partial
 from typing import Union
 
 import numpy as np
 import pandas as pd
 from scipy.spatial import distance as dist
 
-from divik.core import configurable, Data, maybe_pool
+from divik.core import (
+    Data,
+    configurable,
+    maybe_pool,
+)
 from divik.sampler import BaseSampler, StratifiedSampler
 
-
-KMeans = 'divik.cluster.KMeans'
+KMeans = "divik.cluster.KMeans"
 _BIG_PRIME = 49277
 
 
@@ -35,10 +38,12 @@ def _intra_avg(kmeans: KMeans, data: Data, labels=None):
     if labels is None:
         labels = kmeans.labels_
     clusters = pd.DataFrame(data).groupby(labels).apply(np.asarray)
-    return np.max([
-        np.mean(dist.cdist(cluster, centroid.reshape(1, -1), kmeans.distance))
-        for cluster, centroid in zip(clusters, kmeans.cluster_centers_)
-    ])
+    return np.max(
+        [
+            np.mean(dist.cdist(cluster, centroid.reshape(1, -1), kmeans.distance))
+            for cluster, centroid in zip(clusters, kmeans.cluster_centers_)
+        ]
+    )
 
 
 def _intra_furthest(kmeans: KMeans, data: Data, labels=None):
@@ -47,23 +52,24 @@ def _intra_furthest(kmeans: KMeans, data: Data, labels=None):
         d = dist.pdist(group, metric=kmeans.distance)
         # 0 is intracluster distance for cluster with one observation
         return np.max(d, initial=0.0)
+
     if labels is None:
         labels = kmeans.labels_
     return pd.DataFrame(data).groupby(labels).apply(max_distance).max()
 
 
 _INTER = {
-    'centroid': _inter_centroid,
-    'closest': _inter_closest,
+    "centroid": _inter_centroid,
+    "closest": _inter_closest,
 }
 _INTRA = {
-    'avg': _intra_avg,
-    'furthest': _intra_furthest,
+    "avg": _intra_avg,
+    "furthest": _intra_furthest,
 }
 
 
 @configurable
-def dunn(kmeans: KMeans, data: Data, inter='centroid', intra='avg') -> float:
+def dunn(kmeans: KMeans, data: Data, inter="centroid", intra="avg") -> float:
     """Compute Dunn's index for the clustering
 
     Parameters
@@ -92,13 +98,17 @@ def dunn(kmeans: KMeans, data: Data, inter='centroid', intra='avg') -> float:
     if kmeans.cluster_centers_.shape[0] == 1:
         return -np.inf
     if inter not in _INTER:
-        msg = f'Unsupported intercluster distance {inter}. ' + \
-            f'Supported: {list(_INTER.keys())}'
+        msg = (
+            f"Unsupported intercluster distance {inter}. "
+            + f"Supported: {list(_INTER.keys())}"
+        )
         logging.error(msg)
         raise ValueError(msg)
     if intra not in _INTRA:
-        msg = f'Unsupported intracluster distance {intra}. ' + \
-            f'Supported: {list(_INTRA.keys())}'
+        msg = (
+            f"Unsupported intracluster distance {intra}. "
+            + f"Supported: {list(_INTRA.keys())}"
+        )
         logging.error(msg)
         raise ValueError(msg)
     intercluster = _INTER[inter](kmeans, data)
@@ -107,8 +117,9 @@ def dunn(kmeans: KMeans, data: Data, inter='centroid', intra='avg') -> float:
     return score
 
 
-def _sample_distances(seed: int, sampler: BaseSampler, kmeans: KMeans,
-                      inter='centroid', intra='avg'):
+def _sample_distances(
+    seed: int, sampler: BaseSampler, kmeans: KMeans, inter="centroid", intra="avg"
+):
     data = sampler.get_sample(seed)
     labels = kmeans.predict(data)
     inter_ = _INTER[inter](kmeans, data, labels)
@@ -117,19 +128,26 @@ def _sample_distances(seed: int, sampler: BaseSampler, kmeans: KMeans,
 
 
 @configurable
-def sampled_dunn(kmeans: KMeans, data: Data,
-                 sample_size: Union[int, float] = 1000,
-                 n_jobs: int = None,
-                 seed: int = 0,
-                 n_trials: int = 10,
-                 inter='closest', intra='furthest') -> float:
-    data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials
-                              ).fit(data, kmeans.labels_)
+def sampled_dunn(
+    kmeans: KMeans,
+    data: Data,
+    sample_size: Union[int, float] = 1000,
+    n_jobs: int = None,
+    seed: int = 0,
+    n_trials: int = 10,
+    inter="closest",
+    intra="furthest",
+) -> float:
+    data_ = StratifiedSampler(n_rows=sample_size, n_samples=n_trials).fit(
+        data, kmeans.labels_
+    )
     seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
-    with data_.parallel() as d, maybe_pool(n_jobs, initializer=d.initializer,
-                                           initargs=d.initargs) as pool:
-        distances = partial(_sample_distances, sampler=d, kmeans=kmeans,
-                            inter=inter, intra=intra)
+    with data_.parallel() as d, maybe_pool(
+        n_jobs, initializer=d.initializer, initargs=d.initargs
+    ) as pool:
+        distances = partial(
+            _sample_distances, sampler=d, kmeans=kmeans, inter=inter, intra=intra
+        )
         inter_, intra_ = np.array(pool.map(distances, seeds)).T
     s_inter = inter_.std()
     s_intra = intra_.std()

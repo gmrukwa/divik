@@ -43,16 +43,16 @@ def quantile(values, quantiles):
     values = np.array(values)
     n = float(values.size)
     a = n / (n - 1)
-    b = - 0.5 / (n - 1)
+    b = -0.5 / (n - 1)
     quantiles = np.array(quantiles)
     matlab_alike_quantiles = np.clip(a * quantiles + b, a_min=0.0, a_max=1.0)
-    return np.percentile(values, q=100. * matlab_alike_quantiles)
+    return np.percentile(values, q=100.0 * matlab_alike_quantiles)
 
 
 def n_quantiles(values, N, unbiased=True, backend=quantile):
-    return backend(values, np.arange(1, N+1, dtype=float) / (N + int(unbiased)))
+    return backend(values, np.arange(1, N + 1, dtype=float) / (N + int(unbiased)))
 
 
 def iqr(values, rng=(25, 75)):
-    q1, q3 = quantile(values, .01 * np.array(rng))
+    q1, q3 = quantile(values, 0.01 * np.array(rng))
     return q3 - q1

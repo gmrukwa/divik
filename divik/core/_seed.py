@@ -7,7 +7,7 @@ import numpy as np
 
 @contextmanager
 def seed(seed_: int = 0):
-    """Crete seeded scope."""
+    """Context manager that creates a seeded scope."""
     state = np.random.get_state()
     np.random.seed(seed_)
     yield
@@ -27,9 +27,10 @@ def seeded(wrapped_requires_seed: bool = False):
     def _seeded_maker(func):
         @wraps(func)
         def _seeded(*args, **kwargs):
-            _seed = get(kwargs, 'seed', 0)
+            _seed = get(kwargs, "seed", 0)
             with seed(_seed):
                 return func(*args, **kwargs)
+
         return _seeded
 
     return _seeded_maker

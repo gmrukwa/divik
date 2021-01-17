@@ -1,10 +1,10 @@
 from sklearn.base import BaseEstimator
 
 from divik.core import configurable
+from divik.feature_selection._stat_selector_mixin import SelectorMixin
+
 from ._exims import exims
 from ._selection import select_features
-
-from divik.feature_selection._stat_selector_mixin import SelectorMixin
 
 
 @configurable
@@ -21,6 +21,7 @@ class EximsSelector(BaseEstimator, SelectorMixin):
     Mass Spectrometry data." Bioinformatics 31.19 (2015): 3198-3206.
     https://academic.oup.com/bioinformatics/article/31/19/3198/212150
     """
+
     def __init__(self):
         super(EximsSelector, self).__init__()
 
@@ -47,7 +48,7 @@ class EximsSelector(BaseEstimator, SelectorMixin):
         y : any
             Ignored. This parameter exists only for compatibility with
             sklearn.pipeline.Pipeline.
-        
+
         xy : array-like, shape (n_samples, 2)
             Spatial coordinates of the samples. Expects integers,
             indices over am image.
@@ -57,7 +58,7 @@ class EximsSelector(BaseEstimator, SelectorMixin):
         self
         """
         if xy is None:
-            raise ValueError('xy coordinates are required')
+            raise ValueError("xy coordinates are required")
         self.structness_ = exims(X, *xy.T)
         features_selection = select_features(self.structness_)
         self.threshold_ = features_selection.threshold

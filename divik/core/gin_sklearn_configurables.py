@@ -1,13 +1,14 @@
 """Mark scikit-learn classes as configurable"""
 import gin
 
+# Clustering
+import sklearn.cluster
+
 # TODO: Delete when https://github.com/google/gin-config/pull/49 gets merged
 
 # Most of the classes mentioned in the docs:
 # https://scikit-learn.org/stable/modules/classes.html
 
-# Clustering
-import sklearn.cluster
 gin.external_configurable(sklearn.cluster.AffinityPropagation)
 gin.external_configurable(sklearn.cluster.AgglomerativeClustering)
 gin.external_configurable(sklearn.cluster.Birch)
@@ -23,6 +24,7 @@ gin.external_configurable(sklearn.cluster.SpectralCoclustering)
 
 # Cross Decomposition
 import sklearn.cross_decomposition
+
 gin.external_configurable(sklearn.cross_decomposition.CCA)
 gin.external_configurable(sklearn.cross_decomposition.PLSCanonical)
 gin.external_configurable(sklearn.cross_decomposition.PLSRegression)
@@ -30,6 +32,7 @@ gin.external_configurable(sklearn.cross_decomposition.PLSSVD)
 
 # Decomposition
 import sklearn.decomposition
+
 gin.external_configurable(sklearn.decomposition.DictionaryLearning)
 gin.external_configurable(sklearn.decomposition.FactorAnalysis)
 gin.external_configurable(sklearn.decomposition.FastICA)
@@ -46,11 +49,13 @@ gin.external_configurable(sklearn.decomposition.TruncatedSVD)
 
 # Discriminant Analysis
 import sklearn.discriminant_analysis
+
 gin.external_configurable(sklearn.discriminant_analysis.LinearDiscriminantAnalysis)
 gin.external_configurable(sklearn.discriminant_analysis.QuadraticDiscriminantAnalysis)
 
 # Ensemble
 import sklearn.ensemble
+
 gin.external_configurable(sklearn.ensemble.AdaBoostClassifier)
 gin.external_configurable(sklearn.ensemble.AdaBoostRegressor)
 gin.external_configurable(sklearn.ensemble.BaggingClassifier)
@@ -69,6 +74,7 @@ gin.external_configurable(sklearn.ensemble.VotingRegressor)
 
 # Feature Extraction
 import sklearn.feature_extraction
+
 gin.external_configurable(sklearn.feature_extraction.DictVectorizer)
 gin.external_configurable(sklearn.feature_extraction.FeatureHasher)
 gin.external_configurable(sklearn.feature_extraction.image.extract_patches_2d)
@@ -83,6 +89,7 @@ gin.external_configurable(sklearn.feature_extraction.text.TfidfVectorizer)
 
 # Feature Selection
 import sklearn.feature_selection
+
 gin.external_configurable(sklearn.feature_selection.GenericUnivariateSelect)
 gin.external_configurable(sklearn.feature_selection.SelectPercentile)
 gin.external_configurable(sklearn.feature_selection.SelectKBest)
@@ -101,6 +108,7 @@ gin.external_configurable(sklearn.feature_selection.mutual_info_regression)
 
 # Gaussian Processes
 import sklearn.gaussian_process
+
 gin.external_configurable(sklearn.gaussian_process.GaussianProcessRegressor)
 gin.external_configurable(sklearn.gaussian_process.GaussianProcessClassifier)
 gin.external_configurable(sklearn.gaussian_process.kernels.CompoundKernel)
@@ -119,16 +127,19 @@ gin.external_configurable(sklearn.gaussian_process.kernels.WhiteKernel)
 
 # Impute
 import sklearn.impute
+
 gin.external_configurable(sklearn.impute.SimpleImputer)
 gin.external_configurable(sklearn.impute.MissingIndicator)
 gin.external_configurable(sklearn.impute.KNNImputer)
 
 # Isotonic
 import sklearn.isotonic
+
 gin.external_configurable(sklearn.isotonic.IsotonicRegression)
 
 # Kernel Approximation
 import sklearn.kernel_approximation
+
 gin.external_configurable(sklearn.kernel_approximation.AdditiveChi2Sampler)
 gin.external_configurable(sklearn.kernel_approximation.Nystroem)
 gin.external_configurable(sklearn.kernel_approximation.RBFSampler)
@@ -136,10 +147,12 @@ gin.external_configurable(sklearn.kernel_approximation.SkewedChi2Sampler)
 
 # Kernel Ridge Regression
 import sklearn.kernel_ridge
+
 gin.external_configurable(sklearn.kernel_ridge.KernelRidge)
 
 # Linear Classifiers
 import sklearn.linear_model
+
 gin.external_configurable(sklearn.linear_model.LogisticRegression)
 gin.external_configurable(sklearn.linear_model.LogisticRegressionCV)
 gin.external_configurable(sklearn.linear_model.PassiveAggressiveClassifier)
@@ -186,6 +199,7 @@ gin.external_configurable(sklearn.linear_model.PassiveAggressiveRegressor)
 
 # Manifold
 import sklearn.manifold
+
 gin.external_configurable(sklearn.manifold.Isomap)
 gin.external_configurable(sklearn.manifold.LocallyLinearEmbedding)
 gin.external_configurable(sklearn.manifold.MDS)
@@ -194,17 +208,20 @@ gin.external_configurable(sklearn.manifold.TSNE)
 
 # Mixture Models
 import sklearn.mixture
+
 gin.external_configurable(sklearn.mixture.GaussianMixture)
 gin.external_configurable(sklearn.mixture.BayesianGaussianMixture)
 
 # Multiclass
 import sklearn.multiclass
+
 gin.external_configurable(sklearn.multiclass.OneVsRestClassifier)
 gin.external_configurable(sklearn.multiclass.OneVsOneClassifier)
 gin.external_configurable(sklearn.multiclass.OutputCodeClassifier)
 
 # Multioutput
 import sklearn.multioutput
+
 gin.external_configurable(sklearn.multioutput.ClassifierChain)
 gin.external_configurable(sklearn.multioutput.MultiOutputRegressor)
 gin.external_configurable(sklearn.multioutput.MultiOutputClassifier)
@@ -212,6 +229,7 @@ gin.external_configurable(sklearn.multioutput.RegressorChain)
 
 # Naive Bayes
 import sklearn.naive_bayes
+
 gin.external_configurable(sklearn.naive_bayes.BernoulliNB)
 gin.external_configurable(sklearn.naive_bayes.CategoricalNB)
 gin.external_configurable(sklearn.naive_bayes.ComplementNB)
@@ -220,6 +238,7 @@ gin.external_configurable(sklearn.naive_bayes.MultinomialNB)
 
 # Nearest Neighbors
 import sklearn.neighbors
+
 gin.external_configurable(sklearn.neighbors.BallTree)
 gin.external_configurable(sklearn.neighbors.KDTree)
 gin.external_configurable(sklearn.neighbors.KNeighborsClassifier)
@@ -233,11 +252,13 @@ gin.external_configurable(sklearn.neighbors.NeighborhoodComponentsAnalysis)
 
 # Pipeline
 import sklearn.pipeline
+
 gin.external_configurable(sklearn.pipeline.FeatureUnion)
 gin.external_configurable(sklearn.pipeline.Pipeline)
 
 # Preprocessing
 import sklearn.preprocessing
+
 gin.external_configurable(sklearn.preprocessing.Binarizer)
 gin.external_configurable(sklearn.preprocessing.FunctionTransformer)
 gin.external_configurable(sklearn.preprocessing.KBinsDiscretizer)
@@ -258,11 +279,13 @@ gin.external_configurable(sklearn.preprocessing.StandardScaler)
 
 # Random Projection
 import sklearn.random_projection
+
 gin.external_configurable(sklearn.random_projection.GaussianRandomProjection)
 gin.external_configurable(sklearn.random_projection.SparseRandomProjection)
 
 # Support Vector Machines
 import sklearn.svm
+
 gin.external_configurable(sklearn.svm.LinearSVC)
 gin.external_configurable(sklearn.svm.LinearSVR)
 gin.external_configurable(sklearn.svm.NuSVC)
@@ -273,8 +296,8 @@ gin.external_configurable(sklearn.svm.SVR)
 
 # Decision Trees
 import sklearn.tree
+
 gin.external_configurable(sklearn.tree.DecisionTreeClassifier)
 gin.external_configurable(sklearn.tree.DecisionTreeRegressor)
 gin.external_configurable(sklearn.tree.ExtraTreeClassifier)
 gin.external_configurable(sklearn.tree.ExtraTreeRegressor)
-
