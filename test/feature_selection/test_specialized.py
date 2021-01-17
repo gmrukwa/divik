@@ -17,18 +17,18 @@ class HighAbundanceAndVarianceSelectorTest(unittest.TestCase):
     def test_discards_low_abundance(self):
         selector = fs.HighAbundanceAndVarianceSelector().fit(self.data)
         TNR = (selector.selected_[self.labels == 0] == False).mean()
-        self.assertGreaterEqual(TNR, 0.99)
+        assert TNR >= 0.99
 
     def test_discards_low_variance(self):
         selector = fs.HighAbundanceAndVarianceSelector().fit(self.data)
         TNR = (selector.selected_[self.labels == 3] == False).mean()
-        self.assertGreaterEqual(TNR, 0.99)
+        assert TNR >= 0.99
 
     def test_passes_informative(self):
         selector = fs.HighAbundanceAndVarianceSelector().fit(self.data)
         expected = np.logical_or(self.labels == 1, self.labels == 2)
         TPR = selector.selected_[expected].mean()
-        self.assertGreaterEqual(TPR, 0.99)
+        assert TPR >= 0.99
 
 
 class OutlierAbundanceAndVarianceSelectorTest(unittest.TestCase):
@@ -48,18 +48,18 @@ class OutlierAbundanceAndVarianceSelectorTest(unittest.TestCase):
     def test_discards_outlier_abundance(self):
         selector = fs.OutlierAbundanceAndVarianceSelector().fit(self.data)
         TNR = (selector.selected_[self.outlier_mean] == False).mean()
-        self.assertGreaterEqual(TNR, 0.95)
+        assert TNR >= 0.95
 
     def test_discards_outlier_variance(self):
         selector = fs.OutlierAbundanceAndVarianceSelector().fit(self.data)
         TNR = (selector.selected_[self.high_var] == False).mean()
-        self.assertGreaterEqual(TNR, 0.95)
+        assert TNR >= 0.95
 
     def test_selects_percentage_of_features(self):
         N = self.labels.size
         p = 5.0 / N
         selector = fs.OutlierAbundanceAndVarianceSelector(p=p).fit(self.data)
-        self.assertAlmostEqual(selector.selected_.mean(), p, places=2)
+        assert round(abs(selector.selected_.mean() - p), 2) == 0
         p = 20.0 / N
         selector = fs.OutlierAbundanceAndVarianceSelector(p=p).fit(self.data)
-        self.assertAlmostEqual(selector.selected_.mean(), p, places=2)
+        assert round(abs(selector.selected_.mean() - p), 2) == 0

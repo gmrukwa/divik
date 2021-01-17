@@ -56,7 +56,7 @@ class GapDivikTest(unittest.TestCase):
         X, _ = make_blobs(n_samples=2000, n_features=100, centers=20, random_state=42)
         model = DiviK(full, distance="euclidean")
         model.fit(X)
-        self.assertTrue(any(sub is not None for sub in model.result_.subregions))
+        assert any(sub is not None for sub in model.result_.subregions)
 
     def test_predict_works_for_numerous_clusters(self):
         X, _ = make_blobs(n_samples=600, n_features=100, centers=20, random_state=42)
@@ -89,7 +89,7 @@ class GapDivikTest(unittest.TestCase):
         X, _ = make_blobs(n_samples=600, n_features=100, centers=20, random_state=42)
         model = DiviK(full, distance="euclidean")
         X_trans = model.fit_transform(X)
-        self.assertEqual(X_trans.shape[1], model.n_clusters_)
+        assert X_trans.shape[1] == model.n_clusters_
 
     def test_is_closest_to_predicted(self):
         X, _ = make_blobs(n_samples=400, n_features=100, centers=20, random_state=42)

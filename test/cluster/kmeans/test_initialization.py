@@ -3,6 +3,7 @@ from test.cluster.kmeans import data
 from unittest.mock import create_autospec, patch
 
 import numpy as np
+import pytest
 
 from divik.cluster._kmeans import _initialization as km
 
@@ -18,17 +19,17 @@ class ExtremeInitializationTest(unittest.TestCase):
 
     def test_centroids_have_the_same_number_of_features_as_data(self):
         centroids = self.initialize(data, self.number_of_clusters)
-        self.assertEqual(centroids.shape[1], data.shape[1])
+        assert centroids.shape[1] == data.shape[1]
 
     def test_number_of_centroids_is_preserved(self):
         centroids = self.initialize(data, self.number_of_clusters)
-        self.assertEqual(centroids.shape[0], self.number_of_clusters)
+        assert centroids.shape[0] == self.number_of_clusters
 
     def test_works_without_error_for_ill_conditioned_problems(self):
         self.initialize(data[0:3], self.number_of_clusters)
 
     def test_throws_when_required_more_centroids_than_data(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.initialize(
                 data[0 : self.number_of_clusters - 1], self.number_of_clusters
             )

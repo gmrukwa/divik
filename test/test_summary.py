@@ -48,7 +48,7 @@ DUMMY_RESULT = u.DivikResult(
 
 class DepthTest(unittest.TestCase):
     def test_resolves_tree_depth(self):
-        self.assertEqual(sm.depth(DUMMY_RESULT), 3)
+        assert sm.depth(DUMMY_RESULT) == 3
 
 
 class MergeTest(unittest.TestCase):
@@ -60,21 +60,19 @@ class MergeTest(unittest.TestCase):
 
     def test_returns_paths_to_partitions(self):
         partition, paths = sm.merged_partition(DUMMY_RESULT, return_paths=True)
-        self.assertEqual(paths[0], (0,))
-        self.assertEqual(paths[1], (1, 0))
-        self.assertEqual(paths[4], (2, 1))
-        self.assertNotIn(6, paths)
+        assert paths[0] == (0,)
+        assert paths[1] == (1, 0)
+        assert paths[4] == (2, 1)
+        assert 6 not in paths
 
 
 class RejectionTest(unittest.TestCase):
     def test_without_rejection_updates_merged_and_nothing_else(self):
         filtered = sm.reject_split(DUMMY_RESULT, 0)
-        self.assertEqual(
-            filtered.clustering.best_score_, DUMMY_RESULT.clustering.best_score_
-        )
-        self.assertEqual(sm.depth(filtered), sm.depth(DUMMY_RESULT))
+        assert filtered.clustering.best_score_ == DUMMY_RESULT.clustering.best_score_
+        assert sm.depth(filtered) == sm.depth(DUMMY_RESULT)
         npt.assert_equal(filtered.merged, sm.merged_partition(DUMMY_RESULT))
 
     def test_rejects_splits(self):
         filtered = sm.reject_split(DUMMY_RESULT, 2)
-        self.assertIsNone(filtered.subregions[1])
+        assert filtered.subregions[1] is None

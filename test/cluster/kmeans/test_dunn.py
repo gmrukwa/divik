@@ -28,8 +28,8 @@ class DunnSearchTest(unittest.TestCase):
         single_kmeans = KMeans(n_clusters=2, init="kdtree")
         kmeans = DunnSearch(single_kmeans, max_clusters=10).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
-        self.assertEqual(n_clusters, kmeans.n_clusters_)
-        self.assertGreater(rand, 0.75)
+        assert n_clusters == kmeans.n_clusters_
+        assert rand > 0.75
 
     @parameterized.expand([("{}_clusters".format(k), k) for k in range(2, 9)])
     def test_works_with_full_exact_dunn(self, _, n_clusters):
@@ -42,8 +42,8 @@ class DunnSearchTest(unittest.TestCase):
             intra="furthest",
         ).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
-        self.assertEqual(n_clusters, kmeans.n_clusters_)
-        self.assertGreater(rand, 0.75)
+        assert n_clusters == kmeans.n_clusters_
+        assert rand > 0.75
 
     @parameterized.expand([("{}_clusters".format(k), k) for k in range(2, 9)])
     def test_works_with_sampled_exact_dunn(self, _, n_clusters):
@@ -58,8 +58,8 @@ class DunnSearchTest(unittest.TestCase):
             n_trials=10,
         ).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
-        self.assertEqual(n_clusters, kmeans.n_clusters_)
-        self.assertGreater(rand, 0.75)
+        assert n_clusters == kmeans.n_clusters_
+        assert rand > 0.75
 
     def test_works_with_unfit_removal(self):
         n_clusters = 3
@@ -67,9 +67,9 @@ class DunnSearchTest(unittest.TestCase):
         single_kmeans = KMeans(n_clusters=2)
         kmeans = DunnSearch(single_kmeans, max_clusters=10, drop_unfit=True).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
-        self.assertEqual(n_clusters, kmeans.n_clusters_)
-        self.assertGreater(rand, 0.75)
-        self.assertIsNone(kmeans.estimators_)
+        assert n_clusters == kmeans.n_clusters_
+        assert rand > 0.75
+        assert kmeans.estimators_ is None
 
 
 if __name__ == "__main__":

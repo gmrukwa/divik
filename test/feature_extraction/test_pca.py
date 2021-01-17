@@ -19,19 +19,19 @@ class KneePCATest(unittest.TestCase):
     def test_fit_transform_limits_dims(self):
         X, _ = data()
         X_trans = KneePCA().fit_transform(X)
-        self.assertLess(X_trans.shape[1], X.shape[1])
+        assert X_trans.shape[1] < X.shape[1]
 
     def test_fit_transform_preserves_all_observations(self):
         X, _ = data()
         X_trans = KneePCA().fit_transform(X)
-        self.assertEqual(X.shape[0], X_trans.shape[0])
+        assert X.shape[0] == X_trans.shape[0]
 
     def test_inverse_transform_preserves_shape(self):
         X, _ = data()
         pca = KneePCA()
         X_trans = pca.fit_transform(X)
         X_inv = pca.inverse_transform(X_trans)
-        self.assertEqual(X_inv.shape, X.shape)
+        assert X_inv.shape == X.shape
 
     def test_inverse_transform_preserves_most_values(self):
         X, _ = data()
@@ -41,7 +41,7 @@ class KneePCATest(unittest.TestCase):
         # rows should be at least correlated a bit
         d = cdist(X_inv, X, metric="correlation")
         d = d[np.eye(d.shape[0], dtype=bool)]
-        self.assertLess(d.max(), 0.2)
+        assert d.max() < 0.2
 
     def test_there_is_not_much_data_loss(self):
         X, _ = make_blobs(n_samples=100, n_features=3, centers=5, random_state=0)
@@ -55,7 +55,7 @@ class KneePCATest(unittest.TestCase):
         pca = KneePCA(refit=True)
         X_trans = pca.fit_transform(X)
         X_inv = pca.inverse_transform(X_trans)
-        self.assertEqual(X_inv.shape, X.shape)
+        assert X_inv.shape == X.shape
 
     def test_refit_does_not_introduce_data_loss(self):
         X, _ = make_blobs(n_samples=100, n_features=3, centers=5, random_state=0)

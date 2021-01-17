@@ -81,7 +81,7 @@ class DunnDivikTest(unittest.TestCase):
         X, _ = make_blobs(n_samples=200, n_features=100, centers=20, random_state=42)
         model = DiviK(full, fast, distance="euclidean")
         model.fit(X)
-        self.assertTrue(any(sub is not None for sub in model.result_.subregions))
+        assert any(sub is not None for sub in model.result_.subregions)
 
     def test_predict_works_for_numerous_clusters(self):
         X, _ = make_blobs(n_samples=200, n_features=100, centers=20, random_state=42)
@@ -115,13 +115,13 @@ class DunnDivikTest(unittest.TestCase):
         model = DiviK(full, fast, distance="euclidean")
         y_pred = model.fit_predict(X)
         score = adjusted_rand_score(y, y_pred)
-        self.assertGreaterEqual(score, 0.95)
+        assert score >= 0.95
 
     def test_transforms_to_n_clusters_dimensions(self):
         X, _ = make_blobs(n_samples=200, n_features=100, centers=20, random_state=42)
         model = DiviK(full, fast, distance="euclidean")
         X_trans = model.fit_transform(X)
-        self.assertEqual(X_trans.shape[1], model.n_clusters_)
+        assert X_trans.shape[1] == model.n_clusters_
 
     def test_is_closest_to_predicted(self):
         X, _ = make_blobs(n_samples=200, n_features=100, centers=20, random_state=42)

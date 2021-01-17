@@ -44,18 +44,18 @@ class TestFindThresholdsNative(unittest.TestCase):
     def test_separates_two_components(self):
         values = single_th_between_0_and_100()
         thresholds = ml.find_thresholds(values, max_components=2)
-        self.assertEqual(len(thresholds), 1)
-        self.assertLess(thresholds[0], 100)
-        self.assertGreater(thresholds[0], 0)
+        assert len(thresholds) == 1
+        assert thresholds[0] < 100
+        assert thresholds[0] > 0
 
     def test_separates_multiple_components(self):
         values = two_ths_between_minus_100_0_and_100()
         thresholds = ml.find_thresholds(values, max_components=3)
-        self.assertEqual(len(thresholds), 2)
-        self.assertLess(thresholds[0], 0)
-        self.assertGreater(thresholds[0], -100)
-        self.assertLess(thresholds[1], 100)
-        self.assertGreater(thresholds[1], 0)
+        assert len(thresholds) == 2
+        assert thresholds[0] < 0
+        assert thresholds[0] > -100
+        assert thresholds[1] < 100
+        assert thresholds[1] > 0
 
 
 quick_cases = [

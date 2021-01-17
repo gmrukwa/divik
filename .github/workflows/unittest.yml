@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Test library
-        run: poetry run python -m unittest discover
+        run: poetry run pytest
         env:
           ENABLE_SLOW_TESTS: True
 
@@ -72,6 +72,6 @@ jobs:
           CC: /usr/local/opt/llvm/bin/clang
           CXX: /usr/local/opt/llvm/bin/clang++
       - name: Test library
-        run: poetry run python -m unittest discover
+        run: poetry run pytest
         env:
           ENABLE_SLOW_TESTS: True

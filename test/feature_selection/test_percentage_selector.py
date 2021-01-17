@@ -18,16 +18,16 @@ class PercentageSelectorTest(unittest.TestCase):
         p = 1 - np.sum(self.labels == 0) / self.labels.size
         selector = fs.PercentageSelector("mean", p=p).fit(self.data)
         TNR = (selector.selected_[self.labels == 0] == False).mean()
-        self.assertGreaterEqual(TNR, 0.99)
+        assert TNR >= 0.99
 
     def test_discards_low_variance(self):
         p = np.sum(self.labels == 3) / self.labels.size
         selector = fs.PercentageSelector("var", p=p).fit(self.data)
         TNR = (selector.selected_[self.labels == 3] == False).mean()
-        self.assertGreaterEqual(TNR, 0.99)
+        assert TNR >= 0.99
 
     def test_allows_reverse(self):
         p = 1 - np.sum(self.labels == 0) / self.labels.size
         selector = fs.PercentageSelector("mean", p=p, keep_top=False).fit(self.data)
         TPR = selector.selected_[self.labels == 0].mean()
-        self.assertGreaterEqual(TPR, 0.99)
+        assert TPR >= 0.99

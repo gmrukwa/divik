@@ -20,9 +20,9 @@ class GAPSearchTest(unittest.TestCase):
         kmeans = GAPSearch(single_kmeans, max_clusters=10, sample_size=10000).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
         # allow for misidentification of 1 cluster
-        self.assertGreaterEqual(kmeans.n_clusters_ + 1, n_clusters)
-        self.assertLessEqual(kmeans.n_clusters_ - 1, n_clusters)
-        self.assertGreater(rand, 0.75)
+        assert kmeans.n_clusters_ + 1 >= n_clusters
+        assert kmeans.n_clusters_ - 1 <= n_clusters
+        assert rand > 0.75
 
     @parameterized.expand([("{}_clusters".format(k), k) for k in [1, 2, 3, 4, 7, 8]])
     def test_works_with_sampled_gap(self, _, n_clusters):
@@ -31,9 +31,9 @@ class GAPSearchTest(unittest.TestCase):
         kmeans = GAPSearch(single_kmeans, max_clusters=10).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
         # allow for misidentification of 1 cluster
-        self.assertGreaterEqual(kmeans.n_clusters_ + 1, n_clusters)
-        self.assertLessEqual(kmeans.n_clusters_ - 1, n_clusters)
-        self.assertGreater(rand, 0.75)
+        assert kmeans.n_clusters_ + 1 >= n_clusters
+        assert kmeans.n_clusters_ - 1 <= n_clusters
+        assert rand > 0.75
 
     def test_works_with_unfit_removal(self):
         n_clusters = 3
@@ -42,10 +42,10 @@ class GAPSearchTest(unittest.TestCase):
         kmeans = GAPSearch(single_kmeans, max_clusters=10, drop_unfit=True).fit(X)
         rand = adjusted_rand_score(y, kmeans.labels_)
         # allow for misidentification of 1 cluster
-        self.assertGreaterEqual(kmeans.n_clusters_ + 1, n_clusters)
-        self.assertLessEqual(kmeans.n_clusters_ - 1, n_clusters)
-        self.assertGreater(rand, 0.75)
-        self.assertIsNone(kmeans.estimators_)
+        assert kmeans.n_clusters_ + 1 >= n_clusters
+        assert kmeans.n_clusters_ - 1 <= n_clusters
+        assert rand > 0.75
+        assert kmeans.estimators_ is None
 
 
 if __name__ == "__main__":

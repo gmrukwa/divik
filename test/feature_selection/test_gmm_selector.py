@@ -2,6 +2,7 @@ import unittest
 
 import numpy as np
 import numpy.testing as npt
+import pytest
 from sklearn.metrics import accuracy_score
 
 import divik.feature_selection as fs
@@ -28,37 +29,29 @@ class GMMSelectorTest(unittest.TestCase):
 
     def test_can_preserve_more_components(self):
         selector = fs.GMMSelector("mean", n_candidates=-1).fit(self.data)
-        self.assertGreaterEqual(
-            accuracy_score(self.labels >= 2, selector.selected_), 0.99
-        )
+        assert accuracy_score(self.labels >= 2, selector.selected_) >= 0.99
         selector = fs.GMMSelector("mean", n_candidates=2).fit(self.data)
-        self.assertGreaterEqual(
-            accuracy_score(self.labels >= 2, selector.selected_), 0.99
-        )
+        assert accuracy_score(self.labels >= 2, selector.selected_) >= 0.99
         selector = fs.GMMSelector("mean", n_candidates=1).fit(self.data)
-        self.assertGreaterEqual(
-            accuracy_score(self.labels >= 1, selector.selected_), 0.99
-        )
+        assert accuracy_score(self.labels >= 1, selector.selected_) >= 0.99
         selector = fs.GMMSelector("mean", n_candidates=1, preserve_high=False)
         selector.fit(self.data)
-        self.assertGreaterEqual(
-            accuracy_score(self.labels < 3, selector.selected_), 0.99
-        )
+        assert accuracy_score(self.labels < 3, selector.selected_) >= 0.99
 
     def test_fails_log_with_negative_features(self):
         self.data[0, 1] = -1
         selector = fs.GMMSelector("mean", use_log=True)
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             selector.fit(self.data)
 
     def test_works_for_mean_and_var_only(self):
         fs.GMMSelector("mean")
         fs.GMMSelector("var")
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             fs.GMMSelector("yolo")
 
     def test_preserves_min_features_precisely_or_rate(self):
         selector = fs.GMMSelector("mean", min_features=50).fit(self.data)
-        self.assertGreaterEqual(selector.selected_.sum(), 50)
+        assert selector.selected_.sum() >= 50
         selector = fs.GMMSelector("mean", min_features_rate=0.5).fit(self.data)
-        self.assertGreaterEqual(selector.selected_.sum(), 0.5 * self.labels.size)
+        assert selector.selected_.sum() >= 0.5 * self.labels.size

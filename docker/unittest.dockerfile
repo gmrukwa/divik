@@ -43,4 +43,4 @@ FROM base
 ENV ENABLE_SLOW_TESTS True
 COPY --from=deps_install /install /usr/local
 COPY . /app
-RUN python -m unittest discover
+RUN pytest

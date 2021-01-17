@@ -1,13 +1,15 @@
 import unittest
 from itertools import cycle
-from test.cluster.kmeans import data
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 from divik.cluster import _kmeans as km
 from divik.cluster._kmeans import _core as cc
 from divik.cluster._kmeans._core import redefine_centroids
+
+from test.cluster.kmeans import data
 
 
 class LabelingTest(unittest.TestCase):
@@ -18,15 +20,15 @@ class LabelingTest(unittest.TestCase):
     def test_assigns_observations_to_closest_centroid(self):
         labels = self.label(data, self.centroids)
         np.testing.assert_equal(labels[:-1], 0)
-        self.assertEqual(labels[-1], 1)
+        assert labels[-1] == 1
 
     def test_throws_with_no_centroids(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.label(data, np.empty((0, data.shape[1])))
 
     def test_throws_on_centroids_and_data_dimensionality_mismatch(self):
         smaller = data[:, :-1]
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.label(smaller, self.centroids)
 
 
@@ -43,7 +45,7 @@ class CentroidRedefinitionTest(unittest.TestCase):
         np.testing.assert_equal(centroids, self.expected_centroids)
 
     def test_throws_on_labels_and_data_length_mismatch(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             redefine_centroids(self.simple_data[:-1], self.labeling, [0, 1])
 
 
@@ -66,28 +68,26 @@ class KMeansTest(unittest.TestCase):
         self.kmeans.number_of_iterations = 0
         with patch.object(km._core, "redefine_centroids") as mock_redefine:
             labeling, centroids = self.kmeans(data, 2)
-        self.assertEqual(0, mock_redefine.call_count)
-        self.assertEqual(1, self.mock_initialization.call_count)
-        self.assertEqual(1, self.mock_labeling.call_count)
+        assert 0 == mock_redefine.call_count
+        assert 1 == self.mock_initialization.call_count
+        assert 1 == self.mock_labeling.call_count
         np.testing.assert_equal(self.mocked_labels, labeling)
         np.testing.assert_equal(self.mocked_initial_centroids, centroids)
 
     def test_initializes_once(self):
         with patch.object(km._core, "redefine_centroids"):
             self.kmeans(data, 2)
-        self.assertEqual(1, self.mock_initialization.call_count)
+        assert 1 == self.mock_initialization.call_count
 
     def test_redefines_centroids_each_iteration(self):
         with patch.object(km._core, "redefine_centroids") as mock_redefine:
             self.kmeans(data, 2)
-        self.assertEqual(self.kmeans.number_of_iterations, mock_redefine.call_count)
+        assert self.kmeans.number_of_iterations == mock_redefine.call_count
 
     def test_recalculates_labels_on_init_and_each_iteration(self):
         with patch.object(km._core, "redefine_centroids"):
             self.kmeans(data, 2)
-        self.assertEqual(
-            self.kmeans.number_of_iterations + 1, self.mock_labeling.call_count
-        )
+        assert self.kmeans.number_of_iterations + 1 == self.mock_labeling.call_count
 
     def test_returns_final_labels_and_centroids(self):
         with patch.object(km._core, "redefine_centroids") as mock_redefine:
@@ -102,12 +102,12 @@ class KMeansTest(unittest.TestCase):
         self.mock_labeling.return_value = constant_labels
         with patch.object(km._core, "redefine_centroids") as mock_redefine:
             self.kmeans(data, 2)
-        self.assertEqual(1, mock_redefine.call_count)
+        assert 1 == mock_redefine.call_count
 
     def test_throws_for_non_2d_and_non_matrix_data(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.kmeans(data.ravel(), 2)
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             # noinspection PyTypeChecker
             self.kmeans([[1, 2, 3], [4, 5, 6]], 2)
 
@@ -135,4 +135,4 @@ class KMeansIntegrationTest(unittest.TestCase):
         labels_are_the_same = labels == expected_labels
         labels_are_opposite = labels != expected_labels
         labels_are_valid = np.logical_or(labels_are_the_same, labels_are_opposite)
-        self.assertTrue(np.all(labels_are_valid))
+        assert np.all(labels_are_valid)

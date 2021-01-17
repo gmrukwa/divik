@@ -110,3 +110,6 @@ result
 
 # VS Code
 .vscode/settings.json
+
+# pytest
+.pytest_cache

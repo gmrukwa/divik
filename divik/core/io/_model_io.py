@@ -22,7 +22,7 @@ def saver(fn):
 
     Examples
     --------
-    
+
     >>> from divik.core.io import saver
     >>> @saver
     ... def my_saver(model, destination, **kwargs):
