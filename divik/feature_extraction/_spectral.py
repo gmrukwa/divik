@@ -27,7 +27,7 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
     'correlation', 'cosine', 'dice', 'euclidean', 'hamming', 'jaccard',
     'kulsinski', 'mahalanobis', 'atching', 'minkowski', 'rogerstanimoto',
     'russellrao', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'}
-        Distance measure, defaults to 'euclidean'. These are the distances
+        Distance measure, defaults to ``euclidean``. These are the distances
         supported by scipy package.
 
 
@@ -39,8 +39,8 @@ class LocallyAdjustedRbfSpectralEmbedding(BaseEstimator):
         lobpcg eigenvectors.  If int, random_state is the seed used by the
         random number generator; If RandomState instance, random_state is the
         random number generator; If None, the random number generator is the
-        RandomState instance used by `np.random`. Used when ``solver`` ==
-        'amg'.
+        RandomState instance used by ``np.random``. Used when ``solver`` ==
+        ``amg``.
 
     eigen_solver : {None, 'arpack', 'lobpcg', or 'amg'}
         The eigenvalue decomposition strategy to use. AMG requires pyamg

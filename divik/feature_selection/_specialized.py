@@ -13,61 +13,61 @@ from ._stat_selector_mixin import NoSelector, SelectorMixin
 class HighAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
     """Feature selector that removes low-mean and low-variance features
 
-        Exercises ``GMMSelector`` to filter out the low-abundance noise features
-        and select high-variance informative features.
+    Exercises ``GMMSelector`` to filter out the low-abundance noise features
+    and select high-variance informative features.
 
-        This feature selection algorithm looks only at the features (X), not the
-        desired outputs (y), and can thus be used for unsupervised learning.
+    This feature selection algorithm looks only at the features (X), not the
+    desired outputs (y), and can thus be used for unsupervised learning.
 
-        Parameters
-        ----------
-        use_log: bool, optional, default: False
-            Whether to use the logarithm of feature characteristic instead of the
-            characteristic itself. This may improve feature filtering performance,
-            depending on the distribution of features, however all the
-            characteristics (mean, variance) have to be positive for that -
-            filtering will fail otherwise. This is useful for specific cases in
-            biology where the distribution of data may actually require this option
-            for any efficient filtering.
+    Parameters
+    ----------
+    use_log: bool, optional, default: False
+        Whether to use the logarithm of feature characteristic instead of the
+        characteristic itself. This may improve feature filtering performance,
+        depending on the distribution of features, however all the
+        characteristics (mean, variance) have to be positive for that -
+        filtering will fail otherwise. This is useful for specific cases in
+        biology where the distribution of data may actually require this option
+        for any efficient filtering.
 
-        min_features: int, optional, default: 1
-            How many features must be preserved.
+    min_features: int, optional, default: 1
+        How many features must be preserved.
 
-        min_features_rate: float, optional, default: 0.0
-            Similar to ``min_features`` but relative to the input data features
-            number.
+    min_features_rate: float, optional, default: 0.0
+        Similar to ``min_features`` but relative to the input data features
+        number.
 
-        max_components: int, optional, default: 10
-            The maximum number of components used in the GMM decomposition.
+    max_components: int, optional, default: 10
+        The maximum number of components used in the GMM decomposition.
 
-        Attributes
-        ----------
-        abundance_selector_: GMMSelector
-            Selector used to filter out the noise component.
+    Attributes
+    ----------
+    abundance_selector_: GMMSelector
+        Selector used to filter out the noise component.
 
-        variance_selector_: GMMSelector
-            Selector used to filter out the non-informative features.
+    variance_selector_: GMMSelector
+        Selector used to filter out the non-informative features.
 
-        selected_: array, shape (n_features,)
-            Vector of binary selections of the informative features.
+    selected_: array, shape (n_features,)
+        Vector of binary selections of the informative features.
 
-        Examples
-        --------
-    import divik._utils    >>> import numpy as np
-        >>> import divik.feature_selection as fs
-        >>> divik._utils.seed(42)
-        >>> # Data in this case must be carefully crafted
-        >>> labels = np.concatenate([30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
-        >>> data = np.vstack(100 * [labels * 10.])
-        >>> data += np.random.randn(*data.shape)
-        >>> sub = data[:, :-40]
-        >>> sub += 5 * np.random.randn(*sub.shape)
-        >>> # Label 0 has low abundance but high variance
-        >>> # Label 3 has low variance but high abundance
-        >>> # Label 1 and 2 has not-lowest abundance and high variance
-        >>> selector = fs.HighAbundanceAndVarianceSelector().fit(data)
-        >>> selector.transform(labels.reshape(1,-1))
-        array([[1 1 1 1 1 ...2 2 2]])
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import divik.feature_selection as fs
+    >>> np.random.seed(42)
+    >>> # Data in this case must be carefully crafted
+    >>> labels = np.concatenate([30 * [0] + 20 * [1] + 30 * [2] + 40 * [3]])
+    >>> data = np.vstack(100 * [labels * 10.])
+    >>> data += np.random.randn(*data.shape)
+    >>> sub = data[:, :-40]
+    >>> sub += 5 * np.random.randn(*sub.shape)
+    >>> # Label 0 has low abundance but high variance
+    >>> # Label 3 has low variance but high abundance
+    >>> # Label 1 and 2 has not-lowest abundance and high variance
+    >>> selector = fs.HighAbundanceAndVarianceSelector().fit(data)
+    >>> selector.transform(labels.reshape(1,-1))
+    array([[1 1 1 1 1 ...2 2 2]])
 
     """
 
@@ -227,7 +227,10 @@ class OutlierAbundanceAndVarianceSelector(BaseEstimator, SelectorMixin):
 
 
 def make_specialized_selector(name, n_features, **kwargs):
-    """Create a selector by name (gmm, outlier or auto)"""
+    """Create a selector by name (``gmm``, ``outlier``, ``none`` or ``auto``)
+
+    ``auto`` switches to ``gmm`` if there is more than 250 features, ``outlier`` below.
+    """
     if name == "auto":
         name = "gmm" if n_features > 250 else "outlier"
     filter_cls = {

@@ -1,3 +1,5 @@
+"""Unsupervised high-throughput data analysis methods"""
+
 try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:

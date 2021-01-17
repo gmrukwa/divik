@@ -43,6 +43,7 @@ else:
 
 
 def parse_args():
+    """Parse gin config files and parameter overrides from command line"""
     import argparse
 
     import gin

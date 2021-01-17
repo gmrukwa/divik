@@ -1,3 +1,5 @@
+"""Reusable utilities used for building divik library"""
+
 from ._gin_compat import (
     configurable,
     dump_gin_args,

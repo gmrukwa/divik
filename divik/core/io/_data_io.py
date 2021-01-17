@@ -42,6 +42,7 @@ def _load_mat(path: str) -> np.ndarray:
 
 
 def load_data(path: str) -> u.Data:
+    """Load 2D tabular data from file"""
     logging.info("Loading data: " + path)
     normalized = path.lower()
     if normalized.endswith(".csv"):
@@ -60,6 +61,7 @@ def load_data(path: str) -> u.Data:
 
 
 def try_load_data(path):
+    """Load 2D tabular data from file with logging"""
     try:
         data = load_data(path)
         logging.debug("Data loaded successfully.")
@@ -71,6 +73,7 @@ def try_load_data(path):
 
 
 def try_load_xy(path):
+    """Load integer spatial coordinates with logging from file"""
     if path is not None:
         try:
             xy = load_data(path).astype(int)
@@ -85,4 +88,5 @@ def try_load_xy(path):
 
 
 def save_csv(array: np.ndarray, fname: str):
+    """Save array to csv"""
     pd.DataFrame(array).to_csv(fname, header=False, index=False)

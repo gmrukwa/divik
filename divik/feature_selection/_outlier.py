@@ -103,7 +103,11 @@ def medcouple(y, axis=0):
 
 
 def huberta_outliers(v):
-    """
+    """Outlier detection method based on medcouple statistic.
+
+    References
+    ----------
+
     M. Huberta, E.Vandervierenb (2008) An adjusted boxplot for skewed
     distributions, Computational Statistics and Data Analysis 52 (2008)
     5186–5201

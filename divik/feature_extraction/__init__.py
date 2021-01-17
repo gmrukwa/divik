@@ -1,3 +1,5 @@
+"""Unsupervised feature extraction methods"""
+
 from ._pca import KneePCA
 from ._spectral import LocallyAdjustedRbfSpectralEmbedding
 

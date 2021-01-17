@@ -18,6 +18,7 @@ from ._types import Data
 
 
 def normalize_rows(data: Data) -> Data:
+    """Translate and scale rows to zero mean and vector length equal one"""
     normalized = data - data.mean(axis=1)[:, np.newaxis]
     norms = np.sum(np.abs(normalized) ** 2, axis=-1, keepdims=True) ** (1.0 / 2)
     normalized /= norms
@@ -25,6 +26,7 @@ def normalize_rows(data: Data) -> Data:
 
 
 def visualize(label, xy, shape=None):
+    """Create RGB map of labels over with given coordinates"""
     x, y = xy.T
     if shape is None:
         shape = np.max(y) + 1, np.max(x) + 1
@@ -38,6 +40,7 @@ def visualize(label, xy, shape=None):
 
 @contextmanager
 def context_if(condition, context, *args, **kwargs):
+    """Create context with given params only if the condition is ``True``"""
     if condition:
         with context(*args, **kwargs) as c:
             yield c

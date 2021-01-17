@@ -16,12 +16,12 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
     """
     Transformer mixin that performs feature selection given a support mask
 
-    This mixin provides a feature selector implementation with `transform` and
-    `inverse_transform` functionality given that `selected_` is specified
-    during `fit`.
+    This mixin provides a feature selector implementation with ``transform`` and
+    ``inverse_transform`` functionality given that ``selected_`` is specified
+    during ``fit``.
 
-    Additionally, provides a `_to_characteristics` and `_to_raw` implementations
-    given `stat`, optionally `use_log` and `preserve_high`.
+    Additionally, provides a ``_to_characteristics`` and ``_to_raw`` implementations
+    given ``stat``, optionally ``use_log`` and ``preserve_high``.
     """
 
     def _to_characteristics(self, X):

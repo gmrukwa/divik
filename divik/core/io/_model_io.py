@@ -14,10 +14,42 @@ _SAVERS = set()
 
 
 def saver(fn):
+    """Register the function as handler for saving model and related summaries
+
+    The saver function should be reusable for different models exhibiting the
+    required variables. Rather prefer checking the required attributes than the
+    model class.
+
+    Examples
+    --------
+    
+    >>> from divik.core.io import saver
+    >>> @saver
+    ... def my_saver(model, destination, **kwargs):
+    ...     if not hasattr(model, 'my_custom_field_'):
+    ...         return
+    ...     if not 'my_param' in kwargs:
+    ...         return
+    ...     # custom saving logic comes here
+
+    You can also make this function configurable:
+
+    >>> import gin
+    >>> from divik.core.io import saver
+    >>> @saver
+    ... @gin.configurable(allowlist=['my_param'])
+    ... def configurable_saver(model, destination, my_param=None, **kwargs):
+    ...     if not hasattr(model, 'my_custom_field_'):
+    ...         return
+    ...     if my_param is None:
+    ...         return
+    ...     # custom saving logic comes here
+    """
     _SAVERS.add(fn)
 
 
 def save(model, destination, **kwargs):
+    """Save model and related summaries into specified destination directory"""
     fname_fn = partial(os.path.join, destination)
     for save_fn in _SAVERS:
         save_fn(model, fname_fn, **kwargs)

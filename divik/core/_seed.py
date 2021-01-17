@@ -7,7 +7,7 @@ import numpy as np
 
 @contextmanager
 def seed(seed_: int = 0):
-    """Crete seeded scope."""
+    """Context manager that creates a seeded scope."""
     state = np.random.get_state()
     np.random.seed(seed_)
     yield

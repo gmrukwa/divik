@@ -116,6 +116,7 @@ def _make_shared_array() -> SharedArray:
 
 @contextmanager
 def share(array: np.ndarray):
+    """Share a numpy array between ``multiprocessing.Pool`` processes"""
     shared = _make_shared_array()
     try:
         yield shared.store(array)
@@ -126,6 +127,7 @@ def share(array: np.ndarray):
 
 
 def get_n_jobs(n_jobs):
+    """Determine the actual number of possible jobs"""
     n_cpu = os.cpu_count() or 1
     n_jobs = 1 if n_jobs is None else n_jobs
     if n_jobs <= 0:
@@ -155,6 +157,19 @@ class DummyPool:
 
 @contextmanager
 def maybe_pool(processes: int = None, *args, **kwargs):
+    """Create ``multiprocessing.Pool`` if multiple CPUs are allowed
+
+    Examples
+    --------
+
+    >>> from divik.core import maybe_pool
+    >>> with maybe_pool(processes=1) as pool:
+    ...     # Runs in sequential
+    ...     pool.map(id, range(10000))
+    >>> with maybe_pool(processes=-1) as pool:
+    ...     # Runs with all cores
+    ...     pool.map(id, range(10000))
+    """
     n_jobs = get_n_jobs(processes)
     if n_jobs == 1 or n_jobs == 0:
         yield DummyPool(n_jobs, *args, **kwargs)

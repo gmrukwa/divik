@@ -40,7 +40,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
     Parameters
     -----------
     whiten : bool, optional (default False)
-        When True (False by default) the `pca_.components_` vectors are
+        When True (False by default) the ``pca_.components_`` vectors are
         multiplied by the square root of n_samples and then divided by the
         singular values to ensure uncorrelated outputs with unit
         component-wise variances.
@@ -51,7 +51,7 @@ class KneePCA(BaseEstimator, TransformerMixin):
         making their data respect some hard-wired assumptions.
 
     refit : bool, optional (default False)
-        When True (False by default) the `pca_` is re-fit with the smaller
+        When ``True`` (``False`` by default) the ``pca_`` is re-fit with the smaller
         number of components. This could reduce memory footprint, but
         requires training fitting PCA.
 
@@ -74,8 +74,8 @@ class KneePCA(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         X : array-like, shape (n_samples, n_features)
-            Training vector, where n_samples is the number of samples
-            and n_features is the number of features.
+            Training vector, where ``n_samples`` is the number of samples
+            and ``n_features`` is the number of features.
 
         Y: Ignored.
 
@@ -116,8 +116,8 @@ class KneePCA(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         X : array-like, shape (n_samples, n_features)
-            New data, where n_samples is the number of samples
-            and n_features is the number of features.
+            New data, where ``n_samples`` is the number of samples
+            and ``n_features`` is the number of features.
 
         Returns
         -------
@@ -145,8 +145,8 @@ class KneePCA(BaseEstimator, TransformerMixin):
         Parameters
         ----------
         X : array-like, shape (n_samples, n_components)
-            New data, where n_samples is the number of samples
-            and n_components is the number of components.
+            New data, where ``n_samples`` is the number of samples
+            and ``n_components`` is the number of components.
 
         Returns
         -------
