@@ -47,10 +47,11 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         The distance metric between points, centroids and for GAP index
         estimation. One of the distances supported by scipy package.
 
-    minimal_size: int, optional, default: None
+    minimal_size: int or float, optional, default: None
         The minimum size of the region (the number of observations) to be
-        considered for any further divisions. When left None, defaults to
-        0.1% of the training dataset size.
+        considered for any further divisions. If provided number is between
+        0 and 1, it is considered a rate of training dataset size. When left
+        None, defaults to 0.1% of the training dataset size.
 
     rejection_size: int, optional, default: None
         Size under which split will be rejected - if a cluster appears in the
@@ -291,9 +292,12 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             warn_const = fast.kmeans.normalize_rows or full.kmeans.normalize_rows
         report = DivikReporter(progress, warn_const=warn_const)
         select_all = np.ones(shape=(X.shape[0],), dtype=bool)
-        minimal_size = (
-            int(X.shape[0] * 0.001) if self.minimal_size is None else self.minimal_size
-        )
+        if self.minimal_size is None:
+            minimal_size = int(X.shape[0] * 0.001)
+        elif 0 < self.minimal_size < 1:
+            minimal_size = int(X.shape[0] * self.minimal_size)
+        else:
+            minimal_size = self.minimal_size
         rejection_size = self._get_rejection_size(X)
         return divik(
             X,
