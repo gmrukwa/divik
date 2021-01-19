@@ -1,20 +1,50 @@
 import divik.cluster
-DunnDiviK.gap_trials = 10
-DunnDiviK.leaf_size = 0.01
-DunnDiviK.distance = 'correlation'
-DunnDiviK.minimal_size = 200
-DunnDiviK.rejection_size = 20
-DunnDiviK.minimal_features_percentage = 0.05
-DunnDiviK.fast_kmeans_iter = 100
-DunnDiviK.k_max = 10
-DunnDiviK.sample_size = 1000
-DunnDiviK.normalize_rows = True
-DunnDiviK.use_logfilters = True
-DunnDiviK.filter_type = 'auto'
-DunnDiviK.n_jobs = -1
-DunnDiviK.random_seed = 42
-DunnDiviK.verbose = True
+
+KMeans.n_clusters = 1
+KMeans.distance = "correlation"
+KMeans.init = "kdtree_percentile"
+KMeans.leaf_size = 0.01
+KMeans.percentile = 99.0
+KMeans.max_iter = 100
+KMeans.normalize_rows = True
+
+GAPSearch.kmeans = @KMeans()
+GAPSearch.max_clusters = 2
+GAPSearch.n_jobs = -1
+GAPSearch.seed = 42
+GAPSearch.n_trials = 10
+GAPSearch.sample_size = 10000
+GAPSearch.drop_unfit = True
+GAPSearch.verbose = True
+
+DunnSearch.kmeans = @KMeans()
+DunnSearch.max_clusters = 10
+DunnSearch.method = "auto"
+DunnSearch.inter = "closest"
+DunnSearch.intra = "furthest"
+DunnSearch.sample_size = 10000
+DunnSearch.seed = 42
+DunnSearch.n_jobs = -1
+DunnSearch.drop_unfit = True
+DunnSearch.verbose = True
+
+DiviK.kmeans = @DunnSearch()
+DiviK.fast_kmeans = @GAPSearch()
+DiviK.distance = "correlation"
+DiviK.minimal_size = 200
+DiviK.rejection_size = 20
+DiviK.minimal_features_percentage = 0.05
+DiviK.features_percentage = 1.0
+DiviK.normalize_rows = True
+DiviK.use_logfilters = True
+DiviK.filter_type = "gmm"
+DiviK.n_jobs = -1
+DiviK.verbose = True
 
 load_data.path = 'data.csv'
 load_xy.path = 'xy.csv'
-experiment.model = @DunnDiviK()
+experiment.model = @DiviK()
+experiment.destination = 'result'
+experiment.omit_datetime = False
+experiment.verbose = True
+experiment.exist_ok = False

@@ -70,7 +70,7 @@ def save_summary(model, fname_fn, **kwargs):
     if not hasattr(model, "labels_"):
         return
     logging.info("Saving JSON summary.")
-    n_clusters = getattr(model, "n_clusters_", np.unique(model.label_).size)
+    n_clusters = getattr(model, "n_clusters_", np.unique(model.labels_).size)
     with open(fname_fn("summary.json"), "w") as smr:
         json.dump(
             {
