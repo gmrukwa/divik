@@ -50,7 +50,10 @@ def saver(fn):
 
 def save(model, destination, **kwargs):
     """Save model and related summaries into specified destination directory"""
-    fname_fn = partial(os.path.join, destination)
+    if isinstance(destination, partial):
+        fname_fn = destination
+    else:
+        fname_fn = partial(os.path.join, destination)
     for save_fn in _SAVERS:
         save_fn(model, fname_fn, **kwargs)
 
