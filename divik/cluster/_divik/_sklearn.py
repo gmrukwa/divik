@@ -286,10 +286,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     def _divik(self, X, progress):
         full = self.kmeans
         fast = self.fast_kmeans
-        if fast is None:
-            warn_const = full.kmeans.normalize_rows
-        else:
-            warn_const = fast.kmeans.normalize_rows or full.kmeans.normalize_rows
+        warn_const = getattr(full.kmeans, "normalize_rows", False)
+        if fast is not None and not warn_const:
+            warn_const = getattr(fast.kmeans, "normalize_rows", False)
         report = DivikReporter(progress, warn_const=warn_const)
         select_all = np.ones(shape=(X.shape[0],), dtype=bool)
         if self.minimal_size is None:

@@ -63,6 +63,7 @@ class TwoStep(BaseEstimator, ClusterMixin):
     >>> kmeans = KMeans(n_clusters=3)
     >>> ctr = TwoStep(kmeans).fit(X)
     """
+
     def __init__(self, clusterer, n_subsets: int = 10, random_state: int = 42):
         self.clusterer = clusterer
         self.n_subsets = n_subsets
@@ -90,8 +91,7 @@ class TwoStep(BaseEstimator, ClusterMixin):
         final_labels = np.array([to_final[l] for l in initial_labels])
         self.labels_ = final_labels
         self.n_clusters_ = _get_first_attr(
-            _get_final_estimator(self.estimator_),
-            ['n_clusters', 'n_clusters_'],
+            _get_final_estimator(self.estimator_), ["n_clusters", "n_clusters_"],
         )
         return self
 

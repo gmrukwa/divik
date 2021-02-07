@@ -22,8 +22,8 @@ author = "Grzegorz Mrukwa"
 
 # The full version, including alpha/beta/rc tags
 dirname = os.path.dirname(__file__)
-with open(os.path.join(dirname, '../pyproject.toml')) as f:
-    release = toml.load(f)['tool']['poetry']['version']
+with open(os.path.join(dirname, "../pyproject.toml")) as f:
+    release = toml.load(f)["tool"]["poetry"]["version"]
 
 
 # -- General configuration ---------------------------------------------------
