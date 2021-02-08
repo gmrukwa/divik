@@ -20,7 +20,7 @@ _BIG_PRIME = 54673
 
 def _dispersion(data: Data, kmeans: KMeans) -> float:
     assert data.shape[0] == kmeans.labels_.size, "kmeans not fit on this data"
-    if kmeans.normalize_rows:
+    if getattr(kmeans, "normalize_rows", False):
         data = normalize_rows(data)
     clusters = pd.DataFrame(data).groupby(kmeans.labels_)
     return float(
@@ -40,7 +40,7 @@ def _sampled_dispersion(
     logging.debug(f"Sampling with seed {seed}.")
     X = sampler.get_sample(seed)
     logging.debug(f"Sample shape {X.shape}")
-    if kmeans.normalize_rows:
+    if getattr(kmeans, "normalize_rows", False):
         logging.debug("Normalizing rows.")
         X = normalize_rows(X)
     if fit:
