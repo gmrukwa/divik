@@ -35,6 +35,7 @@ def cached_fit(cls):
         memory = joblib.Memory(location=cache_path())
         cached = memory.cache(_fit)
         output = cached(self, X, y)
+        self.set_params(**output.get_params())
         computed_fields = [f for f in dir(output) if _is_computed(f)]
         for field in computed_fields:
             setattr(self, field, getattr(output, field))
