@@ -14,6 +14,7 @@ from sklearn.utils.validation import check_is_fitted
 
 from divik.cluster._kmeans._core import KMeans
 from divik.core import configurable
+from divik.sampler import BaseSampler
 from divik.score import gap, sampled_gap
 
 _BIG_PRIME = 32801
@@ -33,6 +34,9 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
 
     min_clusters: int, default: 1
         The minimal number of clusters to form and score.
+
+    reference_sampler: BaseSampler, default: None
+        Sampler for reference dataset sampling in GAP statistic computations.
 
     n_jobs: int, default: 1
         The number of jobs to use for the computation. This works by computing
@@ -84,6 +88,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         kmeans: KMeans,
         max_clusters: int,
         min_clusters: int = 1,
+        reference_sampler: BaseSampler = None,
         n_jobs: int = 1,
         seed: int = 0,
         n_trials: int = 10,
@@ -96,6 +101,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
         self.kmeans = kmeans
         self.min_clusters = min_clusters
         self.max_clusters = max_clusters
+        self.reference_sampler = reference_sampler
         self.n_jobs = n_jobs
         self.seed = seed
         self.n_trials = n_trials
@@ -122,6 +128,7 @@ class GAPSearch(BaseEstimator, ClusterMixin, TransformerMixin):
             seed=self.seed + _BIG_PRIME * kmeans.n_clusters,
             n_trials=self.n_trials,
             return_deviation=True,
+            reference_sampler=self.reference_sampler,
         )
 
     def _fit_kmeans(self, n_clusters, data):

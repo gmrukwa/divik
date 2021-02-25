@@ -69,8 +69,11 @@ def gap(
     seed: int = 0,
     n_trials: int = 100,
     return_deviation: bool = False,
+    reference_sampler=None,
 ) -> float:
-    reference_ = UniformSampler(n_rows=None, n_samples=n_trials).fit(data)
+    if reference_sampler is None:
+        reference_sampler = UniformSampler(n_rows=None, n_samples=n_trials)
+    reference_ = reference_sampler.fit(data)
     kmeans_ = clone(kmeans)
     seeds = list(seed + np.arange(n_trials) * _BIG_PRIME)
     with reference_.parallel() as r:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "divik"
-version = "3.0.9"
+version = "3.0.10"
 description = "Divisive iK-means algorithm implementation"
 authors = ["Grzegorz Mrukwa <g.mrukwa@gmail.com>"]
 license = "Apache-2.0"

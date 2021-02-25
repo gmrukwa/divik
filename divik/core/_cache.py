@@ -1,5 +1,6 @@
-import joblib
 from functools import wraps
+
+import joblib
 
 from ._gin_compat import configurable
 
