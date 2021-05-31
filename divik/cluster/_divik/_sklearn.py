@@ -80,6 +80,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         it normalizes rows for correlation metric, does no normalization
         otherwise.
 
+    neutral: float, optional, default: None
+        Element skipped when filtering.
+
     use_logfilters: bool, optional, default: False
         Whether to compute logarithm of feature characteristic instead of the
         characteristic itself. This may improve feature filtering performance,
@@ -175,6 +178,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         minimal_features_percentage: float = 0.01,
         features_percentage: float = 0.05,
         normalize_rows: bool = None,
+        neutral: float = None,
         use_logfilters: bool = False,
         filter_type="gmm",
         n_jobs: int = None,
@@ -189,6 +193,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
         self.minimal_features_percentage = minimal_features_percentage
         self.features_percentage = features_percentage
         self.normalize_rows = normalize_rows
+        self.neutral = neutral
         self.use_logfilters = use_logfilters
         self.filter_type = filter_type
         self.n_jobs = n_jobs
@@ -281,6 +286,7 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
             use_log=self.use_logfilters,
             min_features_rate=self.minimal_features_percentage,
             p=self.features_percentage,
+            neutral=self.neutral,
         )
 
     def _divik(self, X, progress):

@@ -26,12 +26,19 @@ class StatSelectorMixin(SelectorMixin, metaclass=ABCMeta):
 
     def _to_characteristics(self, X):
         """Extract & normalize characteristics from data"""
+        try:
+            neutral = self.neutral
+        except AttributeError:
+            neutral = None
+        if neutral is not None:
+            X = X.copy()
+            X[X == neutral] = np.nan
         if self.stat == "mean":
-            vals = np.mean(X, axis=0)
+            vals = np.nanmean(X, axis=0)
         elif self.stat == "var":
-            vals = np.var(X, axis=0)
+            vals = np.nanvar(X, axis=0)
         elif self.stat == "cv":
-            vals = np.std(X, axis=0) / np.mean(X, axis=0)
+            vals = np.nanstd(X, axis=0) / np.nanmean(X, axis=0)
         elif callable(self.stat):
             vals = self.stat(X)
             if vals.size != X.shape[1]:

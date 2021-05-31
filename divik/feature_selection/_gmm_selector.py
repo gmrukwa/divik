@@ -24,8 +24,11 @@ class GMMSelector(BaseEstimator, StatSelectorMixin):
 
     Parameters
     ----------
-    stat: {'mean', 'var'}
+    stat: {'mean', 'var', 'cv'}
         Kind of statistic to be computed out of the feature.
+
+    neutral: float, optional, default: None
+        This element will be omitted from the computation of the statistic.
 
     use_log: bool, optional, default: False
         Whether to use the logarithm of feature characteristic instead of the
@@ -92,6 +95,7 @@ class GMMSelector(BaseEstimator, StatSelectorMixin):
     def __init__(
         self,
         stat: str,
+        neutral: float = None,
         use_log: bool = False,
         n_candidates: int = None,
         min_features: int = 1,
@@ -104,6 +108,7 @@ class GMMSelector(BaseEstimator, StatSelectorMixin):
             logging.error(msg)
             raise ValueError(msg)
         self.stat = stat
+        self.neutral = neutral
         self.use_log = use_log
         self.n_candidates = n_candidates
         self.min_features = min_features

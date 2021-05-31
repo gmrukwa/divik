@@ -52,6 +52,13 @@ class GapDivikTest(unittest.TestCase):
         reproduced = model.predict(X)
         npt.assert_array_equal(predictions, reproduced)
 
+    def test_predict_works_for_neutral_elements(self):
+        X, _ = make_blobs(n_samples=300, n_features=100, centers=1, random_state=42)
+        model = DiviK(full, distance="euclidean", neutral=0)
+        predictions = model.fit_predict(X)
+        reproduced = model.predict(X)
+        npt.assert_array_equal(predictions, reproduced)
+
     def test_produces_hierarchy_for_numerous_clusters(self):
         X, _ = make_blobs(n_samples=2000, n_features=100, centers=20, random_state=42)
         model = DiviK(full, distance="euclidean")

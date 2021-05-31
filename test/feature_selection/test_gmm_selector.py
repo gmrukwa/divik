@@ -44,11 +44,18 @@ class GMMSelectorTest(unittest.TestCase):
         with pytest.raises(ValueError):
             selector.fit(self.data)
 
-    def test_works_for_mean_and_var_only(self):
+    def test_works_for_selected_metrics_only(self):
         fs.GMMSelector("mean")
         fs.GMMSelector("var")
+        fs.GMMSelector("cv")
         with pytest.raises(ValueError):
             fs.GMMSelector("yolo")
+
+    def test_skips_neutral(self):
+        data = self.labels.reshape(-1, 1).astype(float)
+        m1 = fs.GMMSelector("mean", neutral=0.0).fit(data).vals_
+        m2 = data[30:].mean()
+        assert m1 == m2
 
     def test_preserves_min_features_precisely_or_rate(self):
         selector = fs.GMMSelector("mean", min_features=50).fit(self.data)
