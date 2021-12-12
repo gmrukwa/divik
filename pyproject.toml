@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "divik"
-version = "3.0.11"
+version = "3.0.12"
 description = "Divisive iK-means algorithm implementation"
 authors = ["Grzegorz Mrukwa <g.mrukwa@gmail.com>"]
 license = "Apache-2.0"
@@ -44,7 +44,7 @@ scikit-learn = ">=0.19.0"
 tqdm = ">=4.11.2"
 joblib = "^1.0.0"
 polyaxon = {version = "^1.5.0", optional = true}
-gin-config = {version = "^0.4.0", optional = true}
+gin-config = {version = "^0.5.0", optional = true}
 
 [tool.poetry.extras]
 gin = ["gin-config"]
@@ -54,7 +54,7 @@ all = ["gin-config", "polyaxon"]
 [tool.poetry.dev-dependencies]
 parameterized = "^0.8.1"
 polyaxon = "^1.5.0"
-gin-config = "^0.4.0"
+gin-config = "^0.5.0"
 isort = "^5.7.0"
 Sphinx = "^3.4.3"
 sphinx-markdown-builder = "^0.5.4"

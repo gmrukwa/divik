@@ -5,8 +5,6 @@ import sys
 try:
     import gin
 
-    import divik.core._gin_bugfix
-
     _HAS_GIN = True
 except ImportError:
     _HAS_GIN = False
