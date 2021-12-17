@@ -37,8 +37,10 @@
 #include "fetch_thresholds.h"
 #include "main.h"
 #include "fetch_thresholds_terminate.h"
+#include "gaussian_mixture_simple_terminate.h"
 #include "fetch_thresholds_emxAPI.h"
 #include "fetch_thresholds_initialize.h"
+#include "gaussian_mixture_simple_initialize.h"
 
 static emxArray_real_T *PyArrayObject_to_emxArray(PyArrayObject *vals)
 {
@@ -54,6 +56,75 @@ static PyArrayObject *emxArray_to_PyArrayObject(emxArray_real_T *vals)
   PyArrayObject *result = (PyArrayObject *)PyArray_SimpleNew(1, iv0, NPY_DOUBLE);
   memcpy(PyArray_DATA(result), vals->data, PyArray_NBYTES(result));
   return result;
+}
+
+static PyObject *method_find_gaussian_mixtures(PyObject *self, PyObject *args) {
+
+    PyObject *x=NULL;
+    PyArrayObject *x_arr=NULL;
+
+    PyObject *counts=NULL;
+    PyArrayObject *counts_arr=NULL;
+    
+    PyArrayObject *pp=NULL;
+    PyArrayObject *mu=NULL;
+    PyArrayObject *sig=NULL;
+    float l_lik = 0.0;
+    float TIC = 0.0;
+    unsigned long KS = 0;
+    emxArray_real_T *native_x;
+    emxArray_real_T *native_counts;
+    emxArray_real_T *native_mu;
+    emxArray_real_T *native_pp;
+    emxArray_real_T *native_sig;
+
+    /* Parse arguments */
+    // https://docs.python.org/3/c-api/arg.html
+    if(!PyArg_ParseTuple(args, "OOk", &x, &counts, &KS)) {
+
+        return NULL;
+    }
+
+    x_arr = (PyArrayObject *)PyArray_FROM_OTF(x, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (x_arr == NULL) {
+        return NULL;
+    }
+
+    counts_arr = (PyArrayObject *)PyArray_FROM_OTF(counts, NPY_DOUBLE, NPY_ARRAY_IN_ARRAY);
+    if (counts_arr == NULL) {
+        return NULL;
+    }
+
+
+    /* Initialize the application.
+      You do not need to do this more than one time. */
+    gaussian_mixture_simple_initialize();
+
+    emxInitArray_real_T(&native_pp, 1);
+    emxInitArray_real_T(&native_mu, 1);
+    emxInitArray_real_T(&native_sig, 1);
+
+    native_counts = PyArrayObject_to_emxArray(counts_arr);
+    native_x = PyArrayObject_to_emxArray(x_arr);
+    Py_DECREF(counts_arr);
+    Py_DECREF(x_arr);
+
+    gaussian_mixture_simple(native_x, native_counts, (double)KS, native_pp, native_mu, native_sig, &TIC, &l_lik);
+
+    emxDestroyArray_real_T(native_x);
+    emxDestroyArray_real_T(native_counts);
+
+    mu = emxArray_to_PyArrayObject(native_mu);
+    emxDestroyArray_real_T(native_mu);
+    sig = emxArray_to_PyArrayObject(native_sig);
+    emxDestroyArray_real_T(native_sig);
+    pp = emxArray_to_PyArrayObject(native_pp);
+    emxDestroyArray_real_T(native_pp);
+    
+    /* Terminate the application.
+      You do not need to do this more than one time. */
+    gaussian_mixture_simple_terminate();
+    return Py_BuildValue("{s:O,s:O,s:O,s:f,s:f}", "weights", (PyObject*)pp, "mu", (PyObject*)mu, "sigma", (PyObject*)sig, "TIC", TIC, "l_lik", l_lik);
 }
 
 static PyObject *method_find_thresholds(PyObject *self, PyObject *args) {
@@ -98,14 +169,13 @@ static PyObject *method_find_thresholds(PyObject *self, PyObject *args) {
 
 static PyMethodDef GamredNativeMethods[] = {
     {"find_thresholds", method_find_thresholds, METH_VARARGS, "Python interface for the MATLAB fetch_thresholds function"},
-    {NULL, NULL, 0, NULL}
+    {"find_gaussian_mixtures", method_find_gaussian_mixtures, METH_VARARGS, "Python interface for the MATLAB find_gaussian_mixtures function"}
 };
-
 
 static struct PyModuleDef gamred_native_module = {
     PyModuleDef_HEAD_INIT,
     "gamred_native",
-    "Python interface for the MATLAB fetch_thresholds function",
+    "Python interface for the MATLAB fetch_thresholds & find_gaussian_mixtures functions",
     -1,
     GamredNativeMethods
 };

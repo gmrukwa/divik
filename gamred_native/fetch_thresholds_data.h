@@ -19,7 +19,7 @@
 /* Variable Declarations */
 extern omp_nest_lock_t emlrtNestLockGlobal;
 extern boolean_T isInitialized_fetch_thresholds;
-
+extern boolean_T isInitialized_gaussian_mixture_simple;
 #endif
 
 /* End of code generation (fetch_thresholds_data.h) */

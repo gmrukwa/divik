@@ -14,5 +14,5 @@
 /* Variable Definitions */
 omp_nest_lock_t emlrtNestLockGlobal;
 boolean_T isInitialized_fetch_thresholds = false;
-
+boolean_T isInitialized_gaussian_mixture_simple = false;
 /* End of code generation (fetch_thresholds_data.c) */
