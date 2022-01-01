@@ -108,9 +108,6 @@ jobs:
           echo "CC=/usr/local/opt/llvm/bin/clang" >> $GITHUB_ENV
           echo "CXX=/usr/local/opt/llvm/bin/clang++" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
-      - name: Install poetry for python version 3.6
-        if: ${{ matrix.python-version == '3.6' }}
-        run: poetry add pandas==0.25.3 h5py==3.1.0
       - name: Build Python package
         run: |
           poetry install
