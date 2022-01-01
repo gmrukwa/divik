@@ -82,7 +82,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [ '3.6', '3.7', '3.8' ]
+        python-version: [ '3.6', '3.7', '3.8', '3.9' ]
         os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
       fail-fast: false
     name: Python ${{ matrix.python-version }} ${{ matrix.os }} wheel
@@ -121,7 +121,7 @@ jobs:
   push_aarch64_wheels:
     strategy:
       matrix:
-        pyver: [cp37-cp37m, cp38-cp38, cp39-cp39]
+        pyver: [ cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39 ]
       fail-fast: false
     name: ${{ matrix.pyver }} ubuntu-latest aarch64 wheel
     runs-on: ubuntu-latest
@@ -139,6 +139,9 @@ jobs:
             quay.io/pypa/manylinux2014_aarch64 \
             bash -exc '${{ env.py }} -m venv .env && \
             source .env/bin/activate && \
+            yum install -y epel-release && \
+            yum repolist && \
+            yum install -y hdf5-devel  && \
             pip install --upgrade pip && \
             pip install poetry poetry-core==1.0.0 && \
             poetry install && \
