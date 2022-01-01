@@ -82,7 +82,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [ '3.6', '3.7', '3.8' ]
+        python-version: [ '3.6', '3.7', '3.8', '3.9' ]
         os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
       fail-fast: false
     name: Python ${{ matrix.python-version }} ${{ matrix.os }} wheel
@@ -114,3 +114,37 @@ jobs:
           poetry build -f wheel
       - name: Publish Python package
         run: poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+
+  push_aarch64_wheels:
+    strategy:
+      matrix:
+        pyver: [ cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39 ]
+      fail-fast: false
+    name: ${{ matrix.pyver }} ubuntu-latest aarch64 wheel
+    runs-on: ubuntu-latest
+    env:
+      py: /opt/python/${{ matrix.pyver }}/bin/python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+      - name: Build Python package
+        run: |
+            docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            quay.io/pypa/manylinux2014_aarch64 \
+            bash -exc '${{ env.py }} -m venv .env && \
+            source .env/bin/activate && \
+            yum install -y epel-release && \
+            yum repolist && \
+            yum install -y hdf5-devel  && \
+            pip install --upgrade pip && \
+            pip install poetry poetry-core==1.0.0 && \
+            poetry install && \
+            poetry build -f wheel && \
+            deactivate'
+      - name: Publish Python package
+        run: |
+            pip install poetry
+            poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}

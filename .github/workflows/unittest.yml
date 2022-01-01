@@ -15,12 +15,71 @@ jobs:
         env:
           ENABLE_SLOW_TESTS: True
 
+  aarch64_tests:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pyver: [ cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39 ]
+      fail-fast: false
+    name: Python ${{ matrix.pyver }} ubuntu-latest aarch64 tests
+    env:
+      py: /opt/python/${{ matrix.pyver }}/bin/python
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+      - name: Build and test library
+        run: |
+            docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            quay.io/pypa/manylinux2014_aarch64 \
+            bash -exc '${{ env.py }} -m venv .env && \
+            source .env/bin/activate && \
+            yum install -y epel-release && \
+            yum repolist && \
+            yum install -y hdf5-devel  && \
+            pip install --upgrade pip && \
+            pip install poetry poetry-core==1.0.0 && \
+            poetry install && \
+            poetry run pytest && \
+            deactivate'
+
+  ubuntu_tests:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ '3.6', '3.7', '3.8', '3.9' ]
+      fail-fast: false
+    name: Python ${{ matrix.python-version }} Ubuntu tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Setup poetry
+        uses: abatilo/actions-poetry@v2.1.0
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+          poetry install
+      - name: Test library
+        run: poetry run pytest
+        env:
+          ENABLE_SLOW_TESTS: True
+
   windows_tests:
 
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [ '3.6', '3.7', '3.8' ]
+        python-version: [ '3.6', '3.7', '3.8', '3.9' ]
       fail-fast: false
     name: Python ${{ matrix.python-version }} Windows tests
 
@@ -28,7 +87,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Setup poetry
@@ -45,7 +104,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: [ '3.6', '3.7', '3.8' ]
+        python-version: [ '3.6', '3.7', '3.8', '3.9' ]
       fail-fast: false
     name: Python ${{ matrix.python-version }} MacOS tests
 
@@ -53,7 +112,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
       - name: Setup Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install OpenMP

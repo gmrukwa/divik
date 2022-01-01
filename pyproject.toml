@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "divik"
-version = "3.0.12"
+version = "3.1.0"
 description = "Divisive iK-means algorithm implementation"
 authors = ["Grzegorz Mrukwa <g.mrukwa@gmail.com>"]
 license = "Apache-2.0"
@@ -18,6 +18,7 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
     'Topic :: Scientific/Engineering :: Artificial Intelligence',
     'Topic :: Scientific/Engineering :: Bio-Informatics',
     'Topic :: Scientific/Engineering :: Information Analysis',
@@ -29,7 +30,7 @@ include = [
 build = "build.py"
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">=3.6.1,<4.0"
 dask = {extras = ["dataframe"], version = ">=2.14.0"}
 dask-distance = "^0.2.0"
 h5py = ">=2.8.0"
