@@ -1,4 +1,4 @@
-FROM python:3.7-slim AS base
+FROM python:3.9-slim AS base
 ENV PYTHONUNBUFFERED TRUE
 RUN mkdir -p /root/.config/matplotlib &&\
   echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc

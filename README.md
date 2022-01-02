@@ -51,7 +51,7 @@ docker pull gmrukwa/divik
 
 Prerequisites for installation of base package:
 
-- Python 3.6 / 3.7 / 3.8
+- Python 3.7 / 3.8 / 3.9
 - compiler capable of compiling the native C code and OpenMP support
 
 #### Installation of OpenMP for Ubuntu / Debian
