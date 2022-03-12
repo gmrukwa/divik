@@ -116,6 +116,9 @@ jobs:
         run: poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
 
   push_aarch64_wheels:
+    
+    if: github.event_name != 'schedule'
+    
     strategy:
       matrix:
         pyver: [ cp37-cp37m, cp38-cp38, cp39-cp39 ]
