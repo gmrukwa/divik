@@ -63,6 +63,7 @@ sphinx-rtd-theme = "^0.5.1"
 numpydoc = "^1.1.0"
 pytest = "^6.2.1"
 black = "^19.10b0"
+jupyterlab = "^3.5.3"
 
 [tool.poetry.scripts]
 fit-clusters = "divik._cli.fit_clusters:main"
