@@ -70,6 +70,18 @@ OpenMP is available as part of LLVM. You may need to install it with conda:
 conda install -c conda-forge "compilers>=1.0.4,!=1.1.0" llvm-openmp
 ```
 
+#### Installation of dependencied on Mac
+
+You may see messages that some dependencies are invalid for the platform.
+It is a [known bug](https://github.com/actions/setup-python/issues/469),
+with [a workaround](https://github.com/actions/setup-python/issues/469#issuecomment-1192522949).
+
+Use:
+
+```bash
+SYSTEM_VERSION_COMPAT=0 pip install divik
+```
+
 #### DiviK Installation
 
 Having prerequisites installed, one can install latest base version of the
