@@ -26,7 +26,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Setup poetry
-        uses: abatilo/actions-poetry@v2.1.0
+        uses: abatilo/actions-poetry@v2.2.0
       - name: Authenticate to Docker Hub
         run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USER --password-stdin
         env:
@@ -65,7 +65,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Setup poetry
-        uses: abatilo/actions-poetry@v2.1.0
+        uses: abatilo/actions-poetry@v2.2.0
       - name: Build Python package
         run: |
           poetry install
@@ -143,7 +143,7 @@ jobs:
             yum repolist && \
             yum install -y hdf5-devel  && \
             pip install --upgrade pip && \
-            pip install poetry poetry-core==1.0.0 && \
+            pip install poetry poetry-core && \
             poetry install && \
             poetry build -f wheel && \
             deactivate'

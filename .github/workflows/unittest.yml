@@ -41,7 +41,7 @@ jobs:
             yum repolist && \
             yum install -y hdf5-devel  && \
             pip install --upgrade pip && \
-            pip install poetry poetry-core==1.0.0 && \
+            pip install poetry poetry-core && \
             poetry install && \
             poetry run pytest && \
             deactivate'
@@ -63,7 +63,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Setup poetry
-        uses: abatilo/actions-poetry@v2.1.0
+        uses: abatilo/actions-poetry@v2.2.0
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -91,7 +91,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Setup poetry
-        uses: abatilo/actions-poetry@v2.1.0
+        uses: abatilo/actions-poetry@v2.2.0
       - name: Install dependencies
         run: poetry install
       - name: Test library
@@ -118,7 +118,7 @@ jobs:
       - name: Install OpenMP
         run: brew install libomp
       - name: Setup poetry
-        uses: abatilo/actions-poetry@v2.1.0
+        uses: abatilo/actions-poetry@v2.2.0
       - name: Install native lib
         run: |
           echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH

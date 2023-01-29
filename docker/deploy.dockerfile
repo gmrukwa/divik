@@ -10,13 +10,13 @@ RUN apt-get update &&\
 
 FROM base as builder
 SHELL ["/bin/bash", "-c"]
-RUN mkdir -p /install/lib/python3.7/site-packages
-ENV PYTHONPATH .:/install/lib/python3.7/site-packages
+RUN mkdir -p /install/lib/python3.9/site-packages
+ENV PYTHONPATH .:/install/lib/python3.9/site-packages
 RUN apt-get update &&\
     apt-get install -y gcc curl &&\
     rm -rf /var/lib/apt/lists/*
 ENV POETRY_HOME="/opt/poetry"
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+RUN curl -sSL https://install.python-poetry.org | python -
 ENV PATH="${POETRY_HOME}/bin:${PATH}"
 
 

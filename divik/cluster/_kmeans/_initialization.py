@@ -13,6 +13,8 @@ from sklearn.linear_model import LinearRegression
 
 from divik.core import Centroids, Data
 
+EPS = 1e-10
+
 
 class Initialization(object, metaclass=ABCMeta):
     """Initializes k-means algorithm"""
@@ -29,11 +31,17 @@ class Initialization(object, metaclass=ABCMeta):
 
 
 def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
+    if data.shape[0] < data.shape[1]:
+        logging.debug("Data feature-heavy, init from avg.")
+        return dist.cdist(data, data.mean(axis=0, keepdims=True)).ravel()
     features = data.T
     assumed_ys = features[0]
     modelled_xs = np.hstack([np.ones((data.shape[0], 1)), features[1:].T])
     lr = LinearRegression().fit(modelled_xs, assumed_ys, sample_weight=sample_weight)
     residuals = np.abs(lr.predict(modelled_xs) - assumed_ys)
+    if residuals.max() < EPS:
+        logging.debug("Linear model overfitting, init from avg.")
+        return dist.cdist(data, data.mean(axis=0, keepdims=True)).ravel()
     return residuals
 
 

@@ -1,5 +1,4 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/gmrukwa/divik/badge)](https://www.codefactor.io/repository/github/gmrukwa/divik)
-[![BCH compliance](https://bettercodehub.com/edge/badge/gmrukwa/divik?branch=master)](https://bettercodehub.com/)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4cf5d42d0a0076c38445/maintainability)](https://codeclimate.com/github/gmrukwa/divik/maintainability)
 ![](https://github.com/gmrukwa/divik/workflows/Build%20and%20push%20deployment%20images/badge.svg)
 ![](https://github.com/gmrukwa/divik/workflows/Run%20unit%20tests/badge.svg)
@@ -69,6 +68,18 @@ OpenMP is available as part of LLVM. You may need to install it with conda:
 
 ```bash
 conda install -c conda-forge "compilers>=1.0.4,!=1.1.0" llvm-openmp
+```
+
+#### Installation of dependencied on Mac
+
+You may see messages that some dependencies are invalid for the platform.
+It is a [known bug](https://github.com/actions/setup-python/issues/469),
+with [a workaround](https://github.com/actions/setup-python/issues/469#issuecomment-1192522949).
+
+Use:
+
+```bash
+SYSTEM_VERSION_COMPAT=0 pip install divik
 ```
 
 #### DiviK Installation

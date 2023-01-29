@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "divik"
-version = "3.2.1"
+version = "3.2.2"
 description = "Divisive iK-means algorithm implementation"
 authors = ["Grzegorz Mrukwa <g.mrukwa@gmail.com>"]
 license = "Apache-2.0"
@@ -33,7 +33,7 @@ python = ">=3.7.1,<4.0"
 dask = {extras = ["dataframe"], version = ">=2.14.0"}
 dask-distance = "^0.2.0"
 h5py = ">=2.8.0"
-importlib-metadata = {version = "^1.0", python = "<3.8"}
+importlib-metadata = {version = "^6.0", python = "<3.8"}
 kneed = ">=0.5.1"
 matplotlib = "^3.3.3"
 numpy = ">=0.12.1"
@@ -63,6 +63,7 @@ sphinx-rtd-theme = "^0.5.1"
 numpydoc = "^1.1.0"
 pytest = "^6.2.1"
 black = "^19.10b0"
+jupyterlab = "^3.5.3"
 
 [tool.poetry.scripts]
 fit-clusters = "divik._cli.fit_clusters:main"
@@ -71,5 +72,6 @@ fit-clusters = "divik._cli.fit_clusters:main"
 requires = [
     "poetry-core>=1.0.0",
     "numpy>=0.12.1",
+    "setuptools",
 ]
 build-backend = "poetry.core.masonry.api"
