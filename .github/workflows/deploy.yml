@@ -143,7 +143,7 @@ jobs:
             yum repolist && \
             yum install -y hdf5-devel  && \
             pip install --upgrade pip && \
-            pip install poetry poetry-core==1.0.0 && \
+            pip install poetry poetry-core && \
             poetry install && \
             poetry build -f wheel && \
             deactivate'
