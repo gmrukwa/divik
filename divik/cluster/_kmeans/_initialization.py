@@ -32,6 +32,7 @@ class Initialization(object, metaclass=ABCMeta):
 
 def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
     if data.shape[0] < data.shape[1]:
+        logging.debug("Data feature-heavy, init from avg.")
         return dist.cdist(data, data.mean(axis=0, keepdims=True)).ravel()
     features = data.T
     assumed_ys = features[0]
@@ -39,6 +40,7 @@ def _find_residuals(data: Data, sample_weight=None) -> np.ndarray:
     lr = LinearRegression().fit(modelled_xs, assumed_ys, sample_weight=sample_weight)
     residuals = np.abs(lr.predict(modelled_xs) - assumed_ys)
     if residuals.max() < EPS:
+        logging.debug("Linear model overfitting, init from avg.")
         return dist.cdist(data, data.mean(axis=0, keepdims=True)).ravel()
     return residuals
 
