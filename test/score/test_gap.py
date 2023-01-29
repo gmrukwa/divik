@@ -38,3 +38,9 @@ class TestGap(unittest.TestCase):
         gap, std = sc.gap(self.X, self.kmeans_3, return_deviation=True)
         assert gap is not None
         assert std is not None
+
+    def test_works_with_sklearn(self):
+        from sklearn.cluster import KMeans
+        kmeans = KMeans(n_clusters=2, random_state=42, max_iter=2).fit(self.X)
+        score = sc.gap(self.X, kmeans)
+        assert not np.isnan(score)

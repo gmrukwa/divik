@@ -36,7 +36,9 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     Parameters
     ----------
     kmeans: AutoKMeans
-        A self-tuning KMeans estimator for the purpose of clustering
+        A self-tuning KMeans estimator for the purpose of clustering.
+        Two implementations are provided in `divik.cluster` package:
+        `DunnSearch` and `GAPSearch`.
 
     fast_kmeans: GAPSearch, optional, default: None
         A self-tuning KMeans estimator for the purpose of stop condition
@@ -150,11 +152,26 @@ class DiviK(BaseEstimator, ClusterMixin, TransformerMixin):
     Examples
     --------
 
-    >>> from divik.cluster import DiviK
+    >>> from divik.cluster import DiviK, DunnSearch, KMeans
     >>> from sklearn.datasets import make_blobs
-    >>> X, _ = make_blobs(n_samples=200, n_features=100, centers=20,
-    ...                   random_state=42)
-    >>> divik = DiviK(distance='euclidean').fit(X)
+    >>> X, _ = make_blobs(n_samples=1_000,
+    ...     n_features=2,
+    ...     centers=7,
+    ...     random_state=42,
+    ... )
+    >>> divik = DiviK(
+    ...     kmeans=DunnSearch(  # we want to use Dunn's method for finding the optimal number of clusters
+    ...         kmeans=KMeans(
+    ...             n_clusters=2,  # it is required, like in scikit-learn, but you can provide any number here,
+    ...                            # DunnSearch will override it anyway
+    ...         ),
+    ...         max_clusters=5,  # for the sake of the example I'll keep it low
+    ...     ),
+    ...     minimal_size=100,  # for the sake of the example, I won't split clusters with less than 100 elements
+    ...     filter_type='none',  # we have 2 features in sample data, feature selection would be pointless
+    ... ).fit(X)
+    >>> divik.n_clusters_
+    22
     >>> divik.labels_
     array([1, 1, 1, 0, ..., 0, 0], dtype=int32)
     >>> divik.predict([[0, ..., 0], [12, ..., 3]])

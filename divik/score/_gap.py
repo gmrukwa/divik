@@ -18,6 +18,13 @@ KMeans = "divik.KMeans"
 _BIG_PRIME = 54673
 
 
+def _get_distance(kmeans: KMeans) -> str:
+    try:
+        return kmeans.distance
+    except AttributeError:
+        return "euclidean"
+
+
 def _dispersion(data: Data, kmeans: KMeans) -> float:
     assert data.shape[0] == kmeans.labels_.size, "kmeans not fit on this data"
     if getattr(kmeans, "normalize_rows", False):
@@ -26,7 +33,7 @@ def _dispersion(data: Data, kmeans: KMeans) -> float:
     return float(
         np.mean(
             [
-                np.mean(dist.pdist(cluster_members.values, kmeans.distance))
+                np.mean(dist.pdist(cluster_members.values, _get_distance(kmeans)))
                 for _, cluster_members in clusters
                 if cluster_members.shape[0] != 1
             ]
@@ -54,7 +61,7 @@ def _sampled_dispersion(
     return float(
         np.mean(
             [
-                np.mean(dist.pdist(cluster_members.values, kmeans.distance))
+                np.mean(dist.pdist(cluster_members.values, _get_distance(kmeans)))
                 for _, cluster_members in clusters
                 if cluster_members.shape[0] != 1
             ]

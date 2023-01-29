@@ -54,6 +54,13 @@ class TestDunn(unittest.TestCase):
         dunn_ = dunn(DummyKMeans(), data, inter="closest", intra="furthest")
         assert round(abs(dunn_ - 0.5), 7) == 0
 
+    def test_works_with_sklearn(self):
+        from sklearn.cluster import KMeans
+        X, _ = make_blobs(n_samples=10000, n_features=2, centers=3, random_state=0)
+        kmeans = KMeans(n_clusters=2, random_state=42, max_iter=2).fit(X)
+        score = dunn(kmeans, X)
+        assert not np.isnan(score)
+
 
 class TestSamplingDunn(unittest.TestCase):
     def setUp(self):

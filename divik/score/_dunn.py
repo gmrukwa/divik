@@ -17,8 +17,15 @@ KMeans = "divik.cluster.KMeans"
 _BIG_PRIME = 49277
 
 
+def _get_distance(kmeans: KMeans) -> str:
+    try:
+        return kmeans.distance
+    except AttributeError:
+        return "euclidean"
+
+
 def _inter_centroid(kmeans: KMeans, data: Data, labels=None):
-    d = dist.pdist(kmeans.cluster_centers_, kmeans.distance)
+    d = dist.pdist(kmeans.cluster_centers_, _get_distance(kmeans))
     return np.min(d[d != 0])
 
 
@@ -29,7 +36,7 @@ def _inter_closest(kmeans: KMeans, data: Data, labels=None):
     for label in np.arange(kmeans.n_clusters - 1):
         grp = label == labels
         non_grp = label < labels
-        dst = dist.cdist(data[grp], data[non_grp], metric=kmeans.distance)
+        dst = dist.cdist(data[grp], data[non_grp], metric=_get_distance(kmeans))
         d = np.minimum(d, dst.min())
     return d
 
@@ -40,7 +47,7 @@ def _intra_avg(kmeans: KMeans, data: Data, labels=None):
     clusters = pd.DataFrame(data).groupby(labels).apply(np.asarray)
     return np.max(
         [
-            np.mean(dist.cdist(cluster, centroid.reshape(1, -1), kmeans.distance))
+            np.mean(dist.cdist(cluster, centroid.reshape(1, -1), _get_distance(kmeans)))
             for cluster, centroid in zip(clusters, kmeans.cluster_centers_)
         ]
     )
@@ -49,7 +56,7 @@ def _intra_avg(kmeans: KMeans, data: Data, labels=None):
 def _intra_furthest(kmeans: KMeans, data: Data, labels=None):
     def max_distance(group):
         group = np.asarray(group)
-        d = dist.pdist(group, metric=kmeans.distance)
+        d = dist.pdist(group, metric=_get_distance(kmeans))
         # 0 is intracluster distance for cluster with one observation
         return np.max(d, initial=0.0)
 
