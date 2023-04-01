@@ -5,6 +5,18 @@ from glob import glob
 import numpy
 from setuptools import Extension
 
+################################################
+# Hack for https://github.com/python-poetry/poetry/issues/6154#issue-1336927568
+
+import subprocess
+
+try:
+    import numpy
+except ImportError:
+    subprocess.run(["pip", "install", "numpy"])
+
+################################################
+
 LINUX_OPTS = {
     "extra_link_args": [
         "-fopenmp",
