@@ -18,6 +18,7 @@ RUN apt-get update &&\
 ENV POETRY_HOME="/opt/poetry"
 RUN curl -sSL https://install.python-poetry.org | python -
 ENV PATH="${POETRY_HOME}/bin:${PATH}"
+RUN poetry config virtualenvs.create false
 
 
 FROM builder AS deps_builder
