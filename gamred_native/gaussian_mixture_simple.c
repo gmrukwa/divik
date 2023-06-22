@@ -7,10 +7,15 @@
  */
 
 /* Include files */
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "gaussian_mixture_simple.h"
 #include "dyn_pr_split_w.h"
 #include "fetch_thresholds.h"
+#include "fetch_thresholds_data.h"
 #include "fetch_thresholds_emxutil.h"
+#include "gaussian_mixture_simple_initialize.h"
 #include "g_mix_est_fast_lik.h"
 #include "histcounts.h"
 #include "mean.h"
@@ -57,7 +62,11 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
   double d;
   double wwec_tmp;
   bool exitg1;
+
   emxInit_real_T(&b_x, 1);
+  if (isInitialized_gaussian_mixture_simple == false) {
+    gaussian_mixture_simple_initialize();
+  }
 
   /*  FUNCTION:  */
   /*  gaussian_mixture */
@@ -80,6 +89,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
   /*  Andrzej Polanski */
   /*  email: andrzej.polanski@polsl.pl */
   /* 'gaussian_mixture_simple:29' TIC=sum(x.*counts); */
+  
   i = b_x->size[0];
   b_x->size[0] = x->size[0];
   emxEnsureCapacity_real_T(b_x, i);
@@ -99,9 +109,9 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
   }
 
   emxFree_real_T(&b_x);
-
+  
   /* 'gaussian_mixture_simple:30' if KS==1 */
-  if (KS == 1.0) {
+  if (KS == 1) {
     /* 'gaussian_mixture_simple:31' mu_est=nanmean(x); */
     if (x->size[0] == 0) {
       y = rtNaN;
@@ -122,7 +132,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
         y /= (double)idx;
       }
     }
-
+    
     i = mu_est->size[0];
     mu_est->size[0] = 1;
     emxEnsureCapacity_real_T(mu_est, i);
@@ -143,6 +153,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
     /* 'gaussian_mixture_simple:34' l_lik=NaN; */
     *l_lik = rtNaN;
   } else {
+
     emxInit_real_T(&y_out, 2);
     emxInit_real_T(&edges, 2);
 
@@ -167,7 +178,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
       i = 1;
       i1 = edges->size[1];
     }
-
+    
     emxInit_real_T(&b_edges, 2);
     i2 = b_edges->size[0] * b_edges->size[1];
     b_edges->size[0] = 2;
@@ -176,12 +187,12 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
     for (i2 = 0; i2 < loop_ub; i2++) {
       b_edges->data[2 * i2] = edges->data[i2];
     }
-
+    
     loop_ub = i1 - i;
     for (i1 = 0; i1 < loop_ub; i1++) {
       b_edges->data[2 * i1 + 1] = edges->data[i + i1];
     }
-
+    
     emxFree_real_T(&edges);
     emxInit_real_T(&mz_out, 2);
     emxInit_real_T(&aux_mx, 2);
@@ -196,6 +207,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
     /* 'dyn_pr_split_w_aux:8' N=length(data); */
     /*  aux_mx */
     /* 'dyn_pr_split_w_aux:11' aux_mx=zeros(N,N); */
+    
     i = aux_mx->size[0] * aux_mx->size[1];
     aux_mx->size[0] = mz_out->size[1];
     aux_mx->size[1] = mz_out->size[1];
@@ -205,11 +217,12 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
     for (i = 0; i < loop_ub; i++) {
       aux_mx->data[i] = 0.0;
     }
-
+    
     /* 'dyn_pr_split_w_aux:12' for kk=1:N-1 */
     i = mz_out->size[1];
     emxInit_real_T(&b_mz_out, 2);
     emxInit_real_T(&b_y_out, 2);
+    
     for (idx = 0; idx <= i - 2; idx++) {
       /* 'dyn_pr_split_w_aux:13' for jj=kk+1:N */
       i1 = mz_out->size[1] - idx;
@@ -259,6 +272,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
     emxInit_real_T(&Q, 2);
 
     /* 'gaussian_mixture_simple:42' [Q,opt_part]=dyn_pr_split_w(mz_out,y_out,KS-1,aux_mx); */
+
     dyn_pr_split_w(mz_out, y_out, KS - 1.0, aux_mx, Q, pp_ini);
 
     /* 'gaussian_mixture_simple:43' part_cl=[1 opt_part Nb+1]; */
@@ -489,6 +503,7 @@ void gaussian_mixture_simple(const emxArray_real_T *x, const emxArray_real_T
     emxFree_real_T(&mu_ini);
     emxFree_real_T(&pp_ini);
   }
+
 }
 
 /* End of code generation (gaussian_mixture_simple.c) */
