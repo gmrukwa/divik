@@ -29,6 +29,7 @@ include = [
 
 [tool.poetry.build]
 script = "build.py"
+generate-setup-file = true 
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<4.0"
