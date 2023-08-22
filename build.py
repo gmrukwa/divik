@@ -2,8 +2,23 @@ import os
 import sys
 from glob import glob
 
-import numpy
 from setuptools import Extension
+
+################################################
+# Hack for https://github.com/python-poetry/poetry/issues/6154#issue-1336927568
+
+import subprocess
+
+try:
+    import numpy
+except ImportError:
+    subprocess.run(["pip", "install", "oldest-supported-numpy"])
+
+
+import numpy
+
+
+################################################
 
 LINUX_OPTS = {
     "extra_link_args": [
@@ -54,7 +69,8 @@ def build(setup_kwargs):
                     sources=glob("gamred_native/*.c"),
                     include_dirs=["gamred_native", numpy.get_include()],
                     define_macros=[
-                        ("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"),
+                        ("NPY_NO_DEPRECATED_API", None),
+                        ("NPY_1_7_API_VERSION", None),
                     ],
                     **OPTS,
                 ),

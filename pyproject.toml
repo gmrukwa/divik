@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "divik"
-version = "3.2.2"
+version = "3.2.3"
 description = "Divisive iK-means algorithm implementation"
 authors = ["Grzegorz Mrukwa <g.mrukwa@gmail.com>"]
 license = "Apache-2.0"
@@ -26,7 +26,10 @@ classifiers = [
 include = [
     "gamred_native",
 ]
-build = "build.py"
+
+[tool.poetry.build]
+script = "build.py"
+generate-setup-file = true 
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<4.0"
@@ -71,7 +74,7 @@ fit-clusters = "divik._cli.fit_clusters:main"
 [build-system]
 requires = [
     "poetry-core>=1.0.0",
-    "numpy>=0.12.1",
+    "oldest-supported-numpy",
     "setuptools",
 ]
 build-backend = "poetry.core.masonry.api"
