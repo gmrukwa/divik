@@ -154,7 +154,8 @@ jobs:
             yum repolist && \
             yum install -y hdf5-devel  && \
             pip install --upgrade pip && \
-            pip install poetry poetry-core oldest-supported-numpy && \
+            pip install poetry poetry-core && \
+            poetry run pip install oldest-supported-numpy && \
             poetry install && \
             poetry build -f wheel && \
             deactivate'
