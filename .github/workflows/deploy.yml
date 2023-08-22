@@ -95,6 +95,17 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install LLVM
+        run: brew install llvm
+        if: matrix.os == 'macos-latest'
+      - name: Install OpenMP
+        run: brew install libomp
+        if: matrix.os == 'macos-latest'
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+        if: matrix.os == 'ubuntu-latest'
       - name: Setup poetry
         run: |
           pip install poetry poetry-core
