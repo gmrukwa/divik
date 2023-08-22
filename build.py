@@ -13,7 +13,7 @@ import subprocess
 try:
     import numpy
 except ImportError:
-    subprocess.run(["pip", "install", "numpy"])
+    subprocess.run(["pip", "install", "oldest-supported-numpy"])
 
 ################################################
 

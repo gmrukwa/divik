@@ -74,7 +74,7 @@ fit-clusters = "divik._cli.fit_clusters:main"
 [build-system]
 requires = [
     "poetry-core>=1.0.0",
-    "numpy>=0.12.1",
+    "oldest-supported-numpy",
     "setuptools",
 ]
 build-backend = "poetry.core.masonry.api"
