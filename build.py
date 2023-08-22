@@ -2,7 +2,6 @@ import os
 import sys
 from glob import glob
 
-import numpy
 from setuptools import Extension
 
 ################################################
@@ -14,6 +13,10 @@ try:
     import numpy
 except ImportError:
     subprocess.run(["pip", "install", "oldest-supported-numpy"])
+
+
+import numpy
+
 
 ################################################
 
