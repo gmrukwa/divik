@@ -42,7 +42,7 @@ jobs:
             yum install -y hdf5-devel  && \
             pip install --upgrade pip && \
             pip install poetry poetry-core && \
-            poetry install && \
+            poetry install -vvv && \
             poetry run pytest && \
             deactivate'
 
@@ -68,7 +68,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgomp1
-          poetry install
+          poetry install -vvv
       - name: Test library
         run: poetry run pytest
         env:
@@ -93,7 +93,7 @@ jobs:
       - name: Setup poetry
         uses: abatilo/actions-poetry@v2.2.0
       - name: Install dependencies
-        run: poetry install
+        run: poetry install -vvv
       - name: Test library
         run: poetry run pytest
         env:
@@ -126,7 +126,7 @@ jobs:
           echo "CPLUS_INCLUDE_PATH=/usr/local/opt/llvm/include:$CPLUS_INCLUDE_PATH" >> $GITHUB_ENV
           echo "LIBRARY_PATH=/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$LIBRARY_PATH" >> $GITHUB_ENV
           echo "DYLD_LIBRARY_PATH=/usr/local/opt/llvm/lib:/usr/local/opt/libomp/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-          poetry install
+          poetry install -vvv
         env:
           CC: /usr/local/opt/llvm/bin/clang
           CXX: /usr/local/opt/llvm/bin/clang++
