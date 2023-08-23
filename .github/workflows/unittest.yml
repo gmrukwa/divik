@@ -1,6 +1,6 @@
 name: Run unit tests
 
-on: push
+on: [push, workflow_dispatch]
 
 jobs:
   docker_tests:
