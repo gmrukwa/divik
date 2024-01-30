@@ -10,10 +10,16 @@ from skimage import feature as ft
 
 from ._matlab_alike import n_quantiles
 
+# scikit-image: greymatrix was renamed to graymatrix in 0.19.
+if hasattr(ft, 'graycomatrix'):
+    _ft_grycomatrix = ft.graycomatrix
+else:
+    _ft_grycomatrix = ft.greycomatrix
+
 _DISCRETIZATION_LEVELS = 8
 _quantile_thresholds = partial(n_quantiles, N=_DISCRETIZATION_LEVELS - 1)
 _greycomatrix_backend = partial(
-    ft.greycomatrix,
+    _ft_grycomatrix,
     distances=[1, np.sqrt(2), 1, np.sqrt(2)],
     angles=np.radians([0.0, -45.0, -90.0, -135.0]),
     symmetric=False,
